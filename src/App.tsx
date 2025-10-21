@@ -58,7 +58,7 @@ const App = observer(() => {
     };
 
     authenticate();
-  }, [user]);
+  }, [user, tg?.initData]);
 
   if (loading) {
     return <LoadingIndicator />;

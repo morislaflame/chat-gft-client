@@ -1,12 +1,16 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check } from "@/http/userAPI";
-import { type UserInfo } from "@/types/types";
+import { fetchMyInfo, telegramAuth, check, getBalance, getReferrals, getReferralLink, getRewards, deductBalance, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
+import { type Referral, type Reward, type UserInfo } from "@/types/types";
 
 export default class UserStore {
     _user: UserInfo | null = null;
     _isAuth = false;
     _users: UserInfo[] = [];
     _loading = false;
+    _balance = 0;
+    _referrals: Referral[] = [];
+    _referralLink = '';
+    _rewards: Reward[] = [];
     isTooManyRequests = false;
     isServerError = false;
     serverErrorMessage = '';
@@ -38,6 +42,22 @@ export default class UserStore {
     setServerError(flag: boolean, message: string = '') {
         this.isServerError = flag;
         this.serverErrorMessage = message;
+    }
+
+    setBalance(balance: number) {
+        this._balance = balance;
+    }
+
+    setReferrals(referrals: Referral[]) {
+        this._referrals = referrals;
+    }
+
+    setReferralLink(link: string) {
+        this._referralLink = link;
+    }
+
+    setRewards(rewards: Reward[]) {
+        this._rewards = rewards;
     }
 
     async logout() {
@@ -86,10 +106,124 @@ export default class UserStore {
             const data = await fetchMyInfo();
             runInAction(() => {
                 this.setUser(data as UserInfo);
+                if (data.balance !== undefined) {
+                    this.setBalance(data.balance);
+                }
             });
             
         } catch (error) {
             console.error("Error during fetching my info:", error);
+        }
+    }
+
+    async loadBalance() {
+        try {
+            const balance = await getBalance();
+            runInAction(() => {
+                this.setBalance(balance);
+            });
+        } catch (error) {
+            console.error("Error loading balance:", error);
+        }
+    }
+
+    async loadReferrals() {
+        try {
+            const referrals = await getReferrals();
+            runInAction(() => {
+                this.setReferrals(referrals);
+            });
+        } catch (error) {
+            console.error("Error loading referrals:", error);
+        }
+    }
+
+    async loadReferralLink() {
+        try {
+            const link = await getReferralLink();
+            runInAction(() => {
+                this.setReferralLink(link);
+            });
+        } catch (error) {
+            console.error("Error loading referral link:", error);
+        }
+    }
+
+    async loadRewards() {
+        try {
+            const rewards = await getRewards();
+            runInAction(() => {
+                this.setRewards(rewards);
+            });
+        } catch (error) {
+            console.error("Error loading rewards:", error);
+        }
+    }
+
+    async deductBalance(amount: number) {
+        try {
+            const result = await deductBalance(amount);
+            if (result.success) {
+                runInAction(() => {
+                    this.setBalance(result.newBalance);
+                });
+            }
+            return result;
+        } catch (error) {
+            console.error("Error deducting balance:", error);
+            return { success: false, newBalance: this._balance };
+        }
+    }
+
+    async loadLanguage() {
+        try {
+            const language = await getLanguage();
+            if (this._user) {
+                runInAction(() => {
+                    this.setUser({ ...this._user!, language: language as 'en' | 'ru' });
+                });
+            }
+        } catch (error) {
+            console.error("Error loading language:", error);
+        }
+    }
+
+    async updateLanguage(language: 'en' | 'ru') {
+        try {
+            await setLanguage(language);
+            if (this._user) {
+                runInAction(() => {
+                    this.setUser({ ...this._user!, language });
+                });
+            }
+        } catch (error) {
+            console.error("Error updating language:", error);
+        }
+    }
+
+    async loadOnboarding() {
+        try {
+            const completed = await getOnboarding();
+            if (this._user) {
+                runInAction(() => {
+                    this.setUser({ ...this._user!, onboardingCompleted: completed });
+                });
+            }
+        } catch (error) {
+            console.error("Error loading onboarding:", error);
+        }
+    }
+
+    async updateOnboarding(completed: boolean) {
+        try {
+            await setOnboarding(completed);
+            if (this._user) {
+                runInAction(() => {
+                    this.setUser({ ...this._user!, onboardingCompleted: completed });
+                });
+            }
+        } catch (error) {
+            console.error("Error updating onboarding:", error);
         }
     }
 
@@ -107,6 +241,22 @@ export default class UserStore {
 
     get loading() {
         return this._loading;
+    }
+
+    get balance() {
+        return this._balance;
+    }
+
+    get referrals() {
+        return this._referrals;
+    }
+
+    get referralLink() {
+        return this._referralLink;
+    }
+
+    get rewards() {
+        return this._rewards;
     }
     
 }

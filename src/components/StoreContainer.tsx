@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import EmptyPage from './EmptyPage';
 
 const StoreContainer: React.FC = observer(() => {
     const { shop, user } = useContext(Context) as IStoreContext;
@@ -19,6 +20,32 @@ const StoreContainer: React.FC = observer(() => {
             alert('Error processing purchase. Please try again.');
         }
     };
+    // Проверяем, что packages существует и является массивом
+    if (!shop.packages || !Array.isArray(shop.packages)) {
+        return (
+            <EmptyPage
+                icon="fas fa-store"
+                title="Store Unavailable"
+                description="The store is currently unavailable. Please try again later."
+                actionText="Refresh"
+                onAction={() => shop.loadPackages()}
+            />
+        );
+    }
+
+    // Проверяем, что массив не пустой
+    if (shop.packages.length === 0) {
+        return (
+            <EmptyPage
+                icon="fas fa-store"
+                title="Store Coming Soon"
+                description="The store is currently empty. New packages will be available soon!"
+                actionText="Refresh"
+                onAction={() => shop.loadPackages()}
+            />
+        );
+    }
+
     return (
         <div className="pt-24 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">
             <div className="max-w-2xl mx-auto w-full">

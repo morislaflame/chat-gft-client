@@ -42,8 +42,9 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     return (
-        <div className="pt-24 px-4 overflow-y-auto chat-scrollbar h-screen overflow-x-hidden">
+        <div className="h-full flex flex-col">
             {/* AI Introduction */}
+            <div className="flex-1 p-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
                 <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md">
                     <div className="flex items-center mb-2">
@@ -111,9 +112,10 @@ const ChatContainer: React.FC = observer(() => {
                     ></div>
                 </div>
             </div>
+            </div>
 
             {/* Message Input */}
-            <div className="fixed bottom-0 left-0 right-0 bg-primary-900 border-t border-primary-700 p-4">
+            <div className="bg-primary-900 border-t border-primary-700 p-4">
                 <form onSubmit={handleSubmit} className="flex space-x-2">
                     <input
                         type="text"

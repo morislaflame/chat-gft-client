@@ -2,12 +2,12 @@ import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Quest } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import EmptyPage from './EmptyPage';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest } = useContext(Context) as IStoreContext;
 
     useEffect(() => {
-        // Load quests when component mounts
         quest.loadQuests();
     }, [quest]);
 
@@ -45,6 +45,30 @@ const QuestsContainer: React.FC = observer(() => {
                 return 'from-purple-500 to-violet-600';
         }
     };
+
+    if (!quest.quests || !Array.isArray(quest.quests)) {
+        return (
+            <EmptyPage
+                icon="fas fa-tasks"
+                title="No Quests Available"
+                description="There are no quests available at the moment. Check back later for new challenges!"
+                actionText="Refresh"
+                onAction={() => quest.loadQuests()}
+            />
+        );
+    }
+
+    if (quest.quests.length === 0) {
+        return (
+            <EmptyPage
+                icon="fas fa-tasks"
+                title="No Quests Yet"
+                description="You don't have any quests yet. Complete your profile or wait for new quests to appear!"
+                actionText="Refresh"
+                onAction={() => quest.loadQuests()}
+            />
+        );
+    }
 
     return (
         <div className="pt-24 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">

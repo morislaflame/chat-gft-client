@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import EmptyPage from './EmptyPage';
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
@@ -22,6 +23,22 @@ const FriendsContainer: React.FC = observer(() => {
             window.Telegram.WebApp.openTelegramLink(user.referralLink);
         }
     };
+    // Проверяем, что referrals существует и является массивом
+    if (!user.referrals || !Array.isArray(user.referrals)) {
+        return (
+            <EmptyPage
+                icon="fas fa-user-friends"
+                title="Friends System Unavailable"
+                description="The friends system is currently unavailable. Please try again later."
+                actionText="Refresh"
+                onAction={() => {
+                    user.loadReferrals();
+                    user.loadReferralLink();
+                }}
+            />
+        );
+    }
+
     return (
         <div className="pt-36 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">
             <div className="max-w-xl mx-auto w-full space-y-4">

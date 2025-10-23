@@ -203,3 +203,13 @@ html, body {
 .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+.hide-scrollbar {
+    -ms-overflow-style: none; 
+    scrollbar-width: none;  
+}
+  
+.ios-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+}

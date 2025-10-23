@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import EmptyPage from './EmptyPage';
 
 const RewardsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
@@ -20,6 +21,32 @@ const RewardsContainer: React.FC = observer(() => {
         ];
         return gradients[index % gradients.length];
     };
+
+    // Проверяем, что rewards существует и является массивом
+    if (!user.rewards || !Array.isArray(user.rewards)) {
+        return (
+            <EmptyPage
+                icon="fas fa-gift"
+                title="Rewards Unavailable"
+                description="Your rewards are currently unavailable. Please try again later."
+                actionText="Refresh"
+                onAction={() => user.loadRewards()}
+            />
+        );
+    }
+
+    // Проверяем, что массив не пустой
+    if (user.rewards.length === 0) {
+        return (
+            <EmptyPage
+                icon="fas fa-gift"
+                title="No Rewards Yet"
+                description="You don't have any rewards yet. Complete quests to earn amazing rewards!"
+                actionText="Refresh"
+                onAction={() => user.loadRewards()}
+            />
+        );
+    }
 
     return (
         <div className="pt-24 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">

@@ -1,17 +1,43 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import Navigation from './Navigation';
+import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 
-interface HeaderProps {
-    onStarsClick: () => void;
-    onLanguageToggle: () => void;
-    language: 'en' | 'ru';
-}
 
-const Header: React.FC<HeaderProps> = observer(({ onStarsClick, onLanguageToggle, language }) => {
-    const { user: userStore } = useContext(Context) as IStoreContext;
+const Header: React.FC = observer(() => {
+    const { user } = useContext(Context) as IStoreContext;
+    const location = useLocation();
+    const [activeTab, setActiveTab] = useState('chat');
+    
+    useEffect(() => {
+        switch (location.pathname) {
+            case MAIN_ROUTE:
+                setActiveTab('chat');
+                break;
+            case QUESTS_ROUTE:
+                setActiveTab('quests');
+                break;
+            case FRIENDS_ROUTE:
+                setActiveTab('friends');
+                break;
+            case REWARDS_ROUTE:
+                setActiveTab('rewards');
+                break;
+            case STORE_ROUTE:
+                setActiveTab('store');
+                break;
+            default:
+                setActiveTab('chat');
+        }
+    }, [location.pathname]);
+    
+    const handleStarsClick = () => {
+        setActiveTab('store');
+    }
 
-    // Balance is loaded in MainPage, no need to load it here
+
     return (
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300">
             {/* App Header */}
@@ -24,14 +50,14 @@ const Header: React.FC<HeaderProps> = observer(({ onStarsClick, onLanguageToggle
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-primary-800"></div>
                     </div>
                     <div>
-                        <div className="font-bold">
-                            {userStore.user?.firstName || userStore.user?.username || 'Dark Lord'}
+                        <div className="font-bold text-gray-300 text-sm mb-1">
+                            {user.user?.firstName || user.user?.username || 'Dark Lord'}
                         </div>
                         <div className="flex items-center space-x-2 text-xs">
                             <div className="w-16 h-1.5 bg-primary-700 rounded-full overflow-hidden">
                                 <div 
                                     className="h-full bg-gradient-to-r from-red-400 to-red-600 energy-fill" 
-                                    style={{ width: `${userStore.user?.energy || 0}%` }}
+                                    style={{ width: `${user.user?.energy || 0}%` }}
                                 >
                                 </div>
                             </div>
@@ -44,24 +70,28 @@ const Header: React.FC<HeaderProps> = observer(({ onStarsClick, onLanguageToggle
                     </button>
                     <div className="flex items-center space-x-2">
                         <button 
-                            onClick={onStarsClick}
+                            onClick={handleStarsClick}
                             className="bg-primary-700 p-1.5 rounded-full hover:bg-primary-600 transition relative"
                         >
                             <i className="fa-solid fa-bolt text-purple-400 text-lg"></i>
                         <div className="absolute -top-1 -right-1 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
-                            {userStore.balance}
+                            {user.balance}
                         </div>
                         </button>
                         <button 
-                            onClick={onLanguageToggle}
+                            onClick={() => {}}
                             className="bg-primary-700 px-2 py-1 rounded-full hover:bg-primary-600 transition flex items-center space-x-1"
                         >
                             <i className="fas fa-globe text-gray-300 text-sm"></i>
-                            <span className="text-xs">{language.toUpperCase()}</span>
+                            <span className="text-xs">{user.user?.language?.toUpperCase() || 'EN'}</span>
                         </button>
                     </div>
                 </div>
             </div>
+            <Navigation
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+            />
         </div>
     );
 });

@@ -4,6 +4,8 @@ import { observer } from 'mobx-react-lite';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import Header from './components/Header';
+import AppLoader from './components/AppLoader';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
@@ -19,6 +21,10 @@ const App = observer(() => {
     setBackgroundColor
   } = useTelegramApp();
 
+
+const handleStart = () => {
+    setLoading(false);
+};
 
   useEffect(() => {
     if (isAvailable) {
@@ -61,13 +67,18 @@ const App = observer(() => {
   }, [user, tg?.initData]);
 
   if (loading) {
-    return <LoadingIndicator />;
-  }
+    return (
+        <AppLoader
+            onStart={handleStart}
+        />
+    );
+}
 
 
   return (
       <BrowserRouter>
         <div>
+        <Header/>
             <Suspense fallback={<LoadingIndicator />}>
               <AppRouter />
             </Suspense>

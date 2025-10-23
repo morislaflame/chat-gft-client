@@ -1,16 +1,23 @@
 import React from 'react';
+import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useState } from 'react';
+import { useContext } from 'react';
 
 interface AppLoaderProps {
     onStart: () => void;
-    onLanguageSelect: (language: 'en' | 'ru') => void;
-    showLanguageSelector: boolean;
 }
 
 const AppLoader: React.FC<AppLoaderProps> = ({ 
     onStart, 
-    onLanguageSelect, 
-    showLanguageSelector 
 }) => {
+
+    const { user } = useContext(Context) as IStoreContext;
+    const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+
+    const handleLanguageSelect = (selectedLanguage: 'en' | 'ru') => {
+        user.updateLanguage(selectedLanguage);
+        setShowLanguageSelector(false);
+    }
     return (
         <div className="fixed inset-0 bg-black z-[9999] opacity-100 transition-opacity duration-300 flex items-end justify-center overflow-hidden">
             <img 
@@ -31,13 +38,13 @@ const AppLoader: React.FC<AppLoaderProps> = ({
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         <button
-                            onClick={() => onLanguageSelect('en')}
+                            onClick={() => handleLanguageSelect('en')}
                             className="px-3 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 border border-white/10"
                         >
                             English
                         </button>
                         <button
-                            onClick={() => onLanguageSelect('ru')}
+                            onClick={() => handleLanguageSelect('ru')}
                             className="px-3 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 border border-white/10"
                         >
                             Русский

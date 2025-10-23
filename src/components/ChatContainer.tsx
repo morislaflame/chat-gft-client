@@ -16,21 +16,10 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleSendMessage = async (message: string) => {
-        // Check balance first
-        if (user.balance < 1) {
-            alert('Insufficient balance. Please purchase more stars.');
-            return;
-        }
-
-        // Deduct stars
-        const deductResult = await user.deductBalance(1);
-        if (!deductResult.success) {
-            alert('Error processing payment. Please try again.');
-            return;
-        }
-
-        // Send message using chat store
-        await chat.sendMessage(message);
+        // Send message using chat store (balance check and deduction happens inside)
+        await chat.sendMessage(message, (newBalance: number) => {
+            user.setBalance(newBalance);
+        });
     };
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);

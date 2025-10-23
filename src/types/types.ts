@@ -25,6 +25,7 @@ export interface ApiMessageResponse {
     messageCount: number;
     isCongratulation: boolean;
     messagesUntilCongratulation: number;
+    newBalance: number;
     timestamp: string;
 }
 
@@ -35,6 +36,18 @@ export interface ApiHistoryItem {
     responseText: string;
     isCongratulation: boolean;
     createdAt: string;
+}
+
+export interface ForceProgress {
+    messagesUntilGift: number;
+    totalMessagesForGift: number;
+    currentProgress: number;
+    messageCount: number;
+}
+
+export interface ApiHistoryResponse {
+    history: ApiHistoryItem[];
+    forceProgress: ForceProgress;
 }
 
 export interface Quest {

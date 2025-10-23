@@ -1,12 +1,12 @@
 import { $authHost } from "./index";
-import type { ApiMessageResponse, ApiHistoryItem } from '@/types/types';
+import type { ApiMessageResponse, ApiHistoryResponse } from '@/types/types';
 
 export const sendMessage = async (message: string): Promise<ApiMessageResponse> => {
     const { data } = await $authHost.post('api/message/', { message });
     return data;
 };
 
-export const getChatHistory = async (): Promise<ApiHistoryItem[]> => {
+export const getChatHistory = async (): Promise<ApiHistoryResponse> => {
     const { data } = await $authHost.get('api/message/history');
-    return data.history || [];
+    return data;
 };

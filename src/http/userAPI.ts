@@ -59,10 +59,7 @@ export const getBalance = async (): Promise<number> => {
     return data.balance;
 };
 
-export const deductBalance = async (amount: number): Promise<{ success: boolean; newBalance: number }> => {
-    const { data } = await $authHost.post('api/user/me/deduct', { amount });
-    return data;
-};
+// deductBalance function removed - balance deduction is now handled in message processing
 
 export const getLanguage = async (): Promise<string> => {
     const { data } = await $authHost.get('api/user/me/language');

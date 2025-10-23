@@ -1,11 +1,12 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem } from "@/types/types";
+import type { Message, ApiMessageResponse, ApiHistoryItem, ForceProgress } from "@/types/types";
 
 export default class ChatStore {
     _messages: Message[] = [];
     _isTyping = false;
     _forceProgress = 0;
+    _forceProgressData: ForceProgress | null = null;
     _loading = false;
     _error = '';
 
@@ -29,6 +30,13 @@ export default class ChatStore {
         this._forceProgress = progress;
     }
 
+    setForceProgressData(data: ForceProgress | null) {
+        this._forceProgressData = data;
+        if (data) {
+            this._forceProgress = data.currentProgress;
+        }
+    }
+
     setLoading(loading: boolean) {
         this._loading = loading;
     }
@@ -37,7 +45,7 @@ export default class ChatStore {
         this._error = error;
     }
 
-    async sendMessage(messageText: string) {
+    async sendMessage(messageText: string, onBalanceUpdate?: (newBalance: number) => void) {
         const userMessage: Message = {
             id: Date.now().toString(),
             text: messageText,
@@ -58,10 +66,23 @@ export default class ChatStore {
                 timestamp: new Date()
             };
             this.addMessage(aiMessage);
+            
+            // Обновляем баланс пользователя из ответа сервера
+            if (response.newBalance !== undefined && onBalanceUpdate) {
+                onBalanceUpdate(response.newBalance);
+            }
+            
+            // Обновляем прогресс Force
             this.setForceProgress(Math.min(this._forceProgress + 10, 100));
         } catch (error) {
             console.error('Error sending message:', error);
-            this.setError('Error: Unable to send message. Please try again.');
+            // Проверяем, если это ошибка недостаточного баланса
+            const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+            if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient balance')) {
+                this.setError('Insufficient balance. Please purchase more stars.');
+            } else {
+                this.setError('Error: Unable to send message. Please try again.');
+            }
         } finally {
             this.setIsTyping(false);
         }
@@ -72,15 +93,38 @@ export default class ChatStore {
         this.setError('');
 
         try {
-            const historyData: ApiHistoryItem[] = await getChatHistory();
+            const response = await getChatHistory();
+            const historyData = response.history;
+            const forceProgressData = response.forceProgress;
             // Преобразуем данные из API в формат Message[]
-            const messages: Message[] = historyData.map((item: ApiHistoryItem) => ({
-                id: item.id?.toString() || Date.now().toString(),
-                text: item.responseText || item.messageText || '',
-                isUser: item.messageText ? true : false,
-                timestamp: new Date(item.createdAt || Date.now())
-            }));
+            // Каждый элемент истории содержит и сообщение пользователя, и ответ AI
+            const messages: Message[] = [];
+            
+            historyData.forEach((item: ApiHistoryItem, index: number) => {
+                // Добавляем сообщение пользователя
+                if (item.messageText) {
+                    messages.push({
+                        id: `${item.id}-user-${index}`,
+                        text: item.messageText,
+                        isUser: true,
+                        timestamp: new Date(item.createdAt || Date.now())
+                    });
+                }
+                
+                // Добавляем ответ AI
+                if (item.responseText) {
+                    messages.push({
+                        id: `${item.id}-ai-${index}`,
+                        text: item.responseText,
+                        isUser: false,
+                        timestamp: new Date(item.createdAt || Date.now())
+                    });
+                }
+            });
+            
+            
             this.setMessages(messages);
+            this.setForceProgressData(forceProgressData);
         } catch (error) {
             console.error('Error loading chat history:', error);
             this.setError('Error loading chat history');
@@ -104,6 +148,10 @@ export default class ChatStore {
 
     get forceProgress() {
         return this._forceProgress;
+    }
+
+    get forceProgressData() {
+        return this._forceProgressData;
     }
 
     get loading() {

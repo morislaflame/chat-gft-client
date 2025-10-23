@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getBalance, getReferrals, getReferralLink, getRewards, deductBalance, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getBalance, getReferrals, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 
 export default class UserStore {
@@ -160,20 +160,6 @@ export default class UserStore {
         }
     }
 
-    async deductBalance(amount: number) {
-        try {
-            const result = await deductBalance(amount);
-            if (result.success) {
-                runInAction(() => {
-                    this.setBalance(result.newBalance);
-                });
-            }
-            return result;
-        } catch (error) {
-            console.error("Error deducting balance:", error);
-            return { success: false, newBalance: this._balance };
-        }
-    }
 
     async loadLanguage() {
         try {

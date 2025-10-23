@@ -1,3 +1,9 @@
+export interface Bonus {
+    amount?: number;
+    type?: string;
+    [key: string]: any;
+}
+
 export interface UserInfo {
     id: number;
     username: string;
@@ -8,7 +14,17 @@ export interface UserInfo {
     onboardingCompleted?: boolean;
     firstName?: string;
     lastName?: string;
+    refCode?: string;
+    referralCount?: number;
+    lastBonuses?: Bonus[];
 }
+
+export interface Product {
+    id: number;
+    name: string;
+    energy: number;
+    starsPrice: number;
+  }
 
 export interface Message {
     id: string;
@@ -83,3 +99,49 @@ export interface StarsPackage {
     bonus?: number;
     popular?: boolean;
 }
+
+export type TaskType = 'DAILY' | 'ONE_TIME' | 'SPECIAL';
+
+export type RewardType = 'energy';
+
+export interface UserTaskInfo {
+    progress: number;
+    completed: boolean;
+    completedAt: string | null;
+  }
+
+  export interface TaskUser extends UserInfo {
+    user_task?: UserTaskInfo;
+  }
+
+
+  export interface Task {
+    id: number;
+    type: TaskType;
+    reward: number;
+    rewardType: RewardType;
+    description: string;
+    targetCount: number;
+    code: string;
+    metadata: Record<string, string>;
+    // Если задачи получены с join-данными, то сюда попадёт массив пользователей с информацией о выполнении задания
+    users?: TaskUser[];
+    userProgress?: UserTaskProgress;
+  }
+  
+  export interface UserTaskProgress {
+    progress: number;
+    isCompletedForCurrent: boolean;
+    
+    
+  }
+  
+  export interface TasksResponse {
+    success: boolean;
+    message: string;
+    completed: boolean;
+    reward?: {
+      amount: number;
+      type: RewardType;
+    };
+  }

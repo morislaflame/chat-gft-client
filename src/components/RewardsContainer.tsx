@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from './EmptyPage';
+import LoadingIndicator from './LoadingIndicator';
 
 const RewardsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
@@ -21,6 +22,11 @@ const RewardsContainer: React.FC = observer(() => {
         ];
         return gradients[index % gradients.length];
     };
+
+    // Показываем лоадинг пока загружаются награды
+    if (user.loading) {
+        return <LoadingIndicator />;
+    }
 
     // Проверяем, что rewards существует и является массивом
     if (!user.rewards || !Array.isArray(user.rewards)) {

@@ -4,12 +4,14 @@ import UserStore from "@/store/UserStore";
 import ChatStore from "@/store/ChatStore";
 import QuestStore from "@/store/QuestStore";
 import ShopStore from "@/store/ShopStore";
+import ProductStore from "@/store/ProductStore";
 // Определяем интерфейс для нашего контекста
 export interface IStoreContext {
   user: UserStore;
   chat: ChatStore;
   quest: QuestStore;
   shop: ShopStore;
+  product: ProductStore;
 }
 
 let storeInstance: IStoreContext | null = null;
@@ -36,6 +38,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     chat: ChatStore;
     quest: QuestStore;
     shop: ShopStore;
+    product: ProductStore;
   } | null>(null);
 
   useEffect(() => {
@@ -45,11 +48,13 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         { default: ChatStore },
         { default: QuestStore },
         { default: ShopStore },
+        { default: ProductStore },
       ] = await Promise.all([
         import("@/store/UserStore"),
         import("@/store/ChatStore"),
         import("@/store/QuestStore"),
         import("@/store/ShopStore"),
+        import("@/store/ProductStore"),
       ]);
 
       setStores({
@@ -57,6 +62,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         chat: new ChatStore(),
         quest: new QuestStore(),
         shop: new ShopStore(),
+        product: new ProductStore(),
       });
     };
 

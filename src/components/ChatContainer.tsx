@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import LoadingIndicator from './LoadingIndicator';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -40,6 +41,11 @@ const ChatContainer: React.FC = observer(() => {
             setInputValue('');
         }
     };
+
+    // Показываем лоадинг пока загружается история чата
+    if (chat.loading) {
+        return <LoadingIndicator />;
+    }
 
     return (
         <div className="h-full flex flex-col">

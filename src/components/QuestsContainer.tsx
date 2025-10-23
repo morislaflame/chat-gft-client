@@ -1,57 +1,78 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import type { Quest } from '@/types/types';
+import type { Task } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from './EmptyPage';
+import LoadingIndicator from './LoadingIndicator';
 
 const QuestsContainer: React.FC = observer(() => {
-    const { quest } = useContext(Context) as IStoreContext;
+    const { quest, user } = useContext(Context) as IStoreContext;
 
     useEffect(() => {
         quest.loadQuests();
     }, [quest]);
 
-    const handleQuestComplete = async (questId: string) => {
-        await quest.completeQuest(questId);
-    };
-
-    const handleQuestClick = (quest: Quest) => {
-        if (quest.url) {
-            window.open(quest.url, '_blank');
+    const handleTaskAction = useCallback(async (task: Task) => {
+        try {
+            // Получаем реферальный код пользователя
+            const userRefCode = user.user?.refCode || user.user?.username;
+            
+            // Вызываем обработчик задания с передачей реферального кода
+            const result = await quest.handleTaskAction(task, userRefCode);
+            
+            // Если задание было успешно выполнено, обновляем данные
+            if (result.success) {
+                // Обновляем список заданий для отображения статуса выполнения
+                await quest.loadQuests();
+                // Можно также обновить данные пользователя
+                // await user.fetchMyInfo();
+            }
+        } catch (error) {
+            console.error('Error completing task:', error);
         }
-    };
-    const getQuestIcon = (type: string) => {
-        switch (type) {
-            case 'daily':
+    }, [quest, user]);
+
+    const getTaskIcon = (code: string) => {
+        switch (code) {
+            case 'DAILY_LOGIN':
                 return 'fas fa-calendar-day';
-            case 'subscribe':
+            case 'TELEGRAM_SUB':
                 return 'fas fa-bullhorn';
-            case 'join':
-                return 'fas fa-users';
+            case 'REF_USERS':
+                return 'fas fa-user-friends';
+            case 'CHAT_BOOST':
+                return 'fas fa-rocket';
+            case 'STORY_SHARE':
+                return 'fas fa-share';
             default:
                 return 'fas fa-star';
         }
     };
 
-    const getQuestGradient = (type: string) => {
+    const getTaskGradient = (type: string) => {
         switch (type) {
-            case 'daily':
+            case 'DAILY':
                 return 'from-amber-500 to-orange-600';
-            case 'subscribe':
+            case 'ONE_TIME':
                 return 'from-blue-500 to-indigo-600';
-            case 'join':
+            case 'SPECIAL':
                 return 'from-emerald-500 to-teal-600';
             default:
                 return 'from-purple-500 to-violet-600';
         }
     };
 
+    // Показываем лоадинг пока загружаются квесты
+    if (quest.loading) {
+        return <LoadingIndicator />;
+    }
+
     if (!quest.quests || !Array.isArray(quest.quests)) {
         return (
             <EmptyPage
                 icon="fas fa-tasks"
-                title="No Quests Available"
-                description="There are no quests available at the moment. Check back later for new challenges!"
+                title="No Tasks Available"
+                description="There are no tasks available at the moment. Check back later for new challenges!"
                 actionText="Refresh"
                 onAction={() => quest.loadQuests()}
             />
@@ -62,8 +83,8 @@ const QuestsContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-tasks"
-                title="No Quests Yet"
-                description="You don't have any quests yet. Complete your profile or wait for new quests to appear!"
+                title="No Tasks Yet"
+                description="You don't have any tasks yet. Complete your profile or wait for new tasks to appear!"
                 actionText="Refresh"
                 onAction={() => quest.loadQuests()}
             />
@@ -71,48 +92,57 @@ const QuestsContainer: React.FC = observer(() => {
     }
 
     return (
-        <div className="pt-24 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">
+        <div className="p-4 overflow-y-auto flex w-full">
             <div className="max-w-2xl mx-auto w-full space-y-3 mt-3">
-                <div className="text-center mb-2">
+                <div className="text-center mb-4">
                     <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary-800 border border-primary-700 text-[11px] uppercase tracking-wider text-gray-400">
                         Quests
                     </div>
                 </div>
 
-                {quest.quests.map((quest) => (
-                    <div
-                        key={quest.id}
-                        className={`bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between quest-item hover:bg-primary-700/50 transition ${
-                            quest.url ? 'cursor-pointer' : ''
-                        }`}
-                        onClick={() => quest.url && handleQuestClick(quest)}
-                        title={quest.url ? 'Open link' : ''}
-                    >
-                        <div className="flex items-center space-x-3">
-                            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getQuestGradient(quest.type)} flex items-center justify-center`}>
-                                <i className={`${getQuestIcon(quest.type)} text-white text-sm`}></i>
-                            </div>
-                            <div>
-                                <div className="text-sm font-semibold">{quest.title}</div>
-                                <div className="text-xs text-gray-400">Reward: +{quest.reward} energy</div>
-                            </div>
-                        </div>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleQuestComplete(quest.id);
-                            }}
-                            disabled={quest.completed}
-                            className={`px-3 py-1.5 text-xs rounded-full transition ${
-                                quest.completed
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-secondary-500 hover:bg-secondary-400'
-                            }`}
+                {quest.quests.map((task) => {
+                    const isCompleted = task.userProgress?.isCompletedForCurrent || false;
+                    const progress = task.userProgress?.progress || 0;
+                    const targetCount = task.targetCount;
+                    
+                    return (
+                        <div
+                            key={task.id}
+                            className="bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between quest-item hover:bg-primary-700/50 transition"
                         >
-                            {quest.completed ? 'Completed' : 'Check'}
-                        </button>
-                    </div>
-                ))}
+                            <div className="flex items-center space-x-3">
+                                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getTaskGradient(task.type)} flex items-center justify-center`}>
+                                    <i className={`${getTaskIcon(task.code)} text-white text-sm`}></i>
+                                </div>
+                                <div className="flex-1  flex flex-col gap-1">
+                                    <div className="text-sm font-semibold">{task.description}</div>
+                                    <div className="text-xs text-gray-400">
+                                        Reward: +{task.reward} {task.rewardType}
+                                    </div>
+                                    {targetCount > 1 && (
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            Progress: {progress}/{targetCount}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleTaskAction(task);
+                                }}
+                                disabled={isCompleted || quest.loading}
+                                className={`px-3 py-1.5 text-xs rounded-full transition ${
+                                    isCompleted
+                                        ? 'bg-green-500 text-white'
+                                        : 'bg-secondary-500 hover:bg-secondary-400'
+                                } ${quest.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {quest.loading ? 'Loading...' : isCompleted ? 'Completed' : 'Complete'}
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -37,6 +37,13 @@ interface TelegramWebApp {
         start: (params: { refresh_rate?: number }) => void;
         stop: () => void;
       };
+      shareToStory: (media_url: string, params: {
+        text: string;
+        widget_link: {
+         url: string;
+         name: string;
+        }
+     }) => void;
     };
   }
   

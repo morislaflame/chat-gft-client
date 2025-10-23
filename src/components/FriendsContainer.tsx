@@ -1,47 +1,54 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTelegramApp } from '@/utils/useTelegramApp';
+import type { Bonus } from '@/types/types';
 import EmptyPage from './EmptyPage';
+import LoadingIndicator from './LoadingIndicator';
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
+    const { shareUrl } = useTelegramApp();
 
     useEffect(() => {
-        // Load referrals and referral link when component mounts
-        user.loadReferrals();
-        user.loadReferralLink();
+        // Load user data when component mounts
+        user.fetchMyInfo();
     }, [user]);
 
     const handleCopyReferral = () => {
-        navigator.clipboard.writeText(user.referralLink);
+        const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
+        navigator.clipboard.writeText(referralLink);
         // Show toast notification
     };
 
     const handleShareReferral = () => {
-        // Implement Telegram sharing
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.openTelegramLink(user.referralLink);
-        }
+        const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
+        shareUrl(referralLink, 'Join me in this amazing app!');
     };
-    // Проверяем, что referrals существует и является массивом
-    if (!user.referrals || !Array.isArray(user.referrals)) {
+
+    // Показываем лоадинг пока загружаются данные пользователя
+    if (user.loading) {
+        return <LoadingIndicator />;
+    }
+
+    // Проверяем, что user.user существует
+    if (!user.user) {
         return (
             <EmptyPage
                 icon="fas fa-user-friends"
-                title="Friends System Unavailable"
-                description="The friends system is currently unavailable. Please try again later."
+                title="User Data Unavailable"
+                description="User data is currently unavailable. Please try again later."
                 actionText="Refresh"
                 onAction={() => {
-                    user.loadReferrals();
-                    user.loadReferralLink();
+                    user.fetchMyInfo();
                 }}
             />
         );
     }
 
     return (
-        <div className="pt-36 pb-32 px-4 overflow-y-auto chat-scrollbar h-screen">
-            <div className="max-w-xl mx-auto w-full space-y-4">
+        <div className="p-4 overflow-y-auto flex w-full">
+            <div className="max-w-xl mx-auto w-full space-y-4 mt-3">
                 {/* Referral Stats */}
                 <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4">
                     <div className="flex items-center justify-between">
@@ -55,18 +62,18 @@ const FriendsContainer: React.FC = observer(() => {
                             </div>
                         </div>
                         <div className="px-3 py-1 rounded-full bg-primary-700 text-xs text-gray-300 text-center min-w-[2.5rem] flex items-center justify-center">
-                            {user.referrals.length}
+                            {user.user.referralCount || 0}
                         </div>
                     </div>
 
-                    {/* Referral Link */}
+                    {/* Referral Code */}
                     <div className="mt-4 space-y-2">
-                        <div className="text-xs text-gray-400">Your referral link:</div>
+                        <div className="text-xs text-gray-400">Your referral code:</div>
                         <div className="flex space-x-2">
                             <input
                                 type="text"
                                 readOnly
-                                value={user.referralLink}
+                                value={user.user.refCode || 'Loading...'}
                                 className="w-full bg-primary-800 border border-primary-700 rounded-md px-3 py-2 text-sm"
                             />
                         </div>
@@ -75,7 +82,7 @@ const FriendsContainer: React.FC = observer(() => {
                                 onClick={handleCopyReferral}
                                 className="flex-1 px-3 py-2 text-xs rounded-md bg-secondary-500 hover:bg-secondary-400"
                             >
-                                Copy
+                                Copy Link
                             </button>
                             <button
                                 onClick={handleShareReferral}
@@ -89,19 +96,19 @@ const FriendsContainer: React.FC = observer(() => {
                         </div>
                     </div>
 
-                    {/* Last referral rewards list */}
+                    {/* Last referral bonuses */}
                     <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3">
-                        <div className="text-xs text-gray-400 mb-2">Last referral rewards</div>
+                        <div className="text-xs text-gray-400 mb-2">Last referral bonuses</div>
                         <div className="space-y-2">
-                            {user.referrals.length > 0 ? (
-                                user.referrals.map((referral) => (
-                                    <div key={referral.id} className="flex items-center justify-between text-xs">
-                                        <span className="text-gray-300">@{referral.username}</span>
-                                        <span className="text-green-400">+{referral.reward} energy</span>
+                            {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (
+                                user.user.lastBonuses.map((bonus: Bonus, index: number) => (
+                                    <div key={index} className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-300">Bonus #{index + 1}</span>
+                                        <span className="text-green-400">+{bonus.amount || 'Unknown'} energy</span>
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-xs text-gray-500">No referrals yet</div>
+                                <div className="text-xs text-gray-500">No bonuses yet</div>
                             )}
                         </div>
                     </div>

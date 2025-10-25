@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getBalance, getReferrals, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferrals, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 
 export default class UserStore {
@@ -7,7 +7,7 @@ export default class UserStore {
     _isAuth = false;
     _users: UserInfo[] = [];
     _loading = false;
-    _balance = 0;
+    _energy = 0;
     _referrals: Referral[] = [];
     _referralLink = '';
     _rewards: Reward[] = [];
@@ -44,8 +44,8 @@ export default class UserStore {
         this.serverErrorMessage = message;
     }
 
-    setBalance(balance: number) {
-        this._balance = balance;
+    setEnergy(energy: number) {
+        this._energy = energy;
     }
 
     setReferrals(referrals: Referral[]) {
@@ -106,8 +106,8 @@ export default class UserStore {
             const data = await fetchMyInfo();
             runInAction(() => {
                 this.setUser(data as UserInfo);
-                if (data.balance !== undefined) {
-                    this.setBalance(data.balance);
+                if (data.energy !== undefined) {
+                    this.setEnergy(data.energy);
                 }
             });
             
@@ -116,14 +116,14 @@ export default class UserStore {
         }
     }
 
-    async loadBalance() {
+    async loadEnergy() {
         try {
-            const balance = await getBalance();
+            const energy = await getEnergy();
             runInAction(() => {
-                this.setBalance(balance);
+                this.setEnergy(energy);
             });
         } catch (error) {
-            console.error("Error loading balance:", error);
+            console.error("Error loading energy:", error);
         }
     }
 
@@ -229,8 +229,8 @@ export default class UserStore {
         return this._loading;
     }
 
-    get balance() {
-        return this._balance;
+    get energy() {
+        return this._energy;
     }
 
     get referrals() {

@@ -41,7 +41,7 @@ export interface ApiMessageResponse {
     messageCount: number;
     isCongratulation: boolean;
     messagesUntilCongratulation: number;
-    newBalance: number;
+    newEnergy: number;
     timestamp: string;
 }
 

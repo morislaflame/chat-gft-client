@@ -67,7 +67,7 @@ export default class ShopStore {
         } catch (error) {
             console.error('Error deducting stars:', error);
             this.setError('Error processing payment. Please try again.');
-            return { success: false, newBalance: 0 };
+            return { success: false, newEnergy: 0 };
         }
     }
 

@@ -16,10 +16,10 @@ const StoreContainer: React.FC = observer(() => {
     const handlePurchase = async (productId: number) => {
         try {
             await product.buyProduct(productId);
-            alert('Purchase initiated! Please complete the payment in the popup.');
         } catch (error) {
             console.error('Error initiating purchase:', error);
-            alert('Error processing purchase. Please try again.');
+            // Ошибка уже обработана в ProductStore, 
+            // здесь только логируем для отладки
         }
     };
     // Показываем лоадинг пока загружаются продукты
@@ -63,31 +63,42 @@ const StoreContainer: React.FC = observer(() => {
                 </div>
 
                 {/* Products */}
-                {product.products.map((prod) => (
-                    <div
-                        key={prod.id}
-                        className="bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between hover:bg-primary-700/50 transition"
-                    >
-                        <div className="flex items-center space-x-3">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-                                <i className="text-white text-sm"></i>
-                            </div>
-                            <div className="flex-1 flex flex-col gap-1">
-                                <div className="text-sm font-semibold">{prod.name}</div>
-                                <div className="text-xs text-gray-400">
-                                    Energy: {prod.energy} 
+                {product.products.map((prod) => {
+                    const isProductLoading = product.isProductLoading(prod.id);
+                    
+                    return (
+                        <div
+                            key={prod.id}
+                            className="bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between hover:bg-primary-700/50 transition"
+                        >
+                            <div className="flex items-center space-x-3">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                                    <i className="text-white text-sm"></i>
+                                </div>
+                                <div className="flex-1 flex flex-col gap-1">
+                                    <div className="text-sm font-semibold">{prod.name}</div>
+                                    <div className="text-xs text-gray-400">
+                                        Energy: {prod.energy} 
+                                    </div>
                                 </div>
                             </div>
+                            <button
+                                onClick={() => handlePurchase(prod.id)}
+                                disabled={isProductLoading}
+                                className={`px-3 py-1.5 text-xs rounded-full bg-secondary-500 hover:bg-secondary-400 text-white transition flex gap-2 items-center justify-center min-w-[20%] ${
+                                    isProductLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                            >
+                                {isProductLoading ? 'Loading...' : (
+                                    <>
+                                        {prod.starsPrice}
+                                        <img src={starsIcon} alt="stars" className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
                         </div>
-                        <button
-                            onClick={() => handlePurchase(prod.id)}
-                            className="px-3 py-1.5 text-xs rounded-full bg-secondary-500 hover:bg-secondary-400 text-white transition flex gap-2 items-center justify-center min-w-[20%]"
-                        >
-                            {prod.starsPrice}
-                            <img src={starsIcon} alt="stars" className="w-4 h-4" />
-                        </button>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Payment Info */}
                 <div className="mt-6 bg-primary-800 border border-primary-700 rounded-xl p-4">

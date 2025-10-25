@@ -17,9 +17,8 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleSendMessage = async (message: string) => {
-        // Send message using chat store (balance check and deduction happens inside)
-        await chat.sendMessage(message, (newBalance: number) => {
-            user.setBalance(newBalance);
+        await chat.sendMessage(message, (newEnergy: number) => {
+            user.setEnergy(newEnergy);
         });
     };
     const [inputValue, setInputValue] = useState('');

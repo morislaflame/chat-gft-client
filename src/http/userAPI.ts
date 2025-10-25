@@ -54,12 +54,11 @@ export const getReferralLink = async (): Promise<string> => {
     return data.link;
 };
 
-export const getBalance = async (): Promise<number> => {
-    const { data } = await $authHost.get('api/user/me/balance');
-    return data.balance;
+export const getEnergy = async (): Promise<number> => {
+    const { data } = await $authHost.get('api/user/me/energy');
+    return data.energy;
 };
 
-// deductBalance function removed - balance deduction is now handled in message processing
 
 export const getLanguage = async (): Promise<string> => {
     const { data } = await $authHost.get('api/user/me/language');

@@ -10,7 +10,7 @@ export const purchaseStars = async (packageId: string): Promise<void> => {
     await $authHost.post('api/payment/create-stars-link', { packageId });
 };
 
-export const deductStars = async (amount: number): Promise<{ success: boolean; newBalance: number }> => {
+export const deductStars = async (amount: number): Promise<{ success: boolean; newEnergy: number }> => {
     const { data } = await $authHost.post('api/user/me/deduct', { amount });
     return data;
 };

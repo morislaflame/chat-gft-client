@@ -75,7 +75,7 @@ const Header: React.FC = observer(() => {
                         >
                             <i className="fa-solid fa-bolt text-purple-400 text-lg"></i>
                         <div className="absolute -top-1 -right-1 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
-                            {user.balance}
+                            {user.energy}
                         </div>
                         </button>
                         <button 

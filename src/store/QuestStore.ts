@@ -8,6 +8,7 @@ import {
 } from "@/http/questAPI";
 import type { Task } from "@/types/types";
 import { getTaskHandler } from "@/utils/taskHandlers";
+import { getStore } from "./StoreProvider";
 
 // Получаем доступ к телеграм объекту
 const tg = window.Telegram?.WebApp;
@@ -16,6 +17,7 @@ export default class QuestStore {
     _tasks: Task[] = [];
     _loading = false;
     _error = '';
+    _taskLoadingStates: Map<number, boolean> = new Map();
 
     constructor() {
         makeAutoObservable(this);
@@ -39,6 +41,18 @@ export default class QuestStore {
         this._error = error;
     }
 
+    setTaskLoading(taskId: number, loading: boolean) {
+        if (loading) {
+            this._taskLoadingStates.set(taskId, true);
+        } else {
+            this._taskLoadingStates.delete(taskId);
+        }
+    }
+
+    isTaskLoading(taskId: number): boolean {
+        return this._taskLoadingStates.has(taskId);
+    }
+
     // Получение списка заданий с информацией о прогрессе для текущего пользователя
     async loadQuests() {
         try {
@@ -59,17 +73,41 @@ export default class QuestStore {
     // Обновленный метод для выполнения задания с учетом типа
     async handleTaskAction(task: Task, userRefCode?: string) {
         try {
-            this.setLoading(true);
+            this.setTaskLoading(task.id, true);
             const taskHandler = getTaskHandler(task);
             const result = await taskHandler(task, this, userRefCode);
+            
+            // Если задача была успешно выполнена, обновляем данные задачи
+            if (result.success) {
+                // Обновляем конкретную задачу в списке
+                await this.updateTaskProgress(task.id);
+                
+            }
             
             // Возвращаем результат обработки, включая возможное перенаправление
             return result;
         } catch (error) {
             console.error("Error handling task:", error);
-            return { success: false };
+            return { success: false, message: "Error handling task" };
         } finally {
-            runInAction(() => this.setLoading(false));
+            runInAction(() => this.setTaskLoading(task.id, false));
+        }
+    }
+
+    // Метод для обновления прогресса конкретной задачи
+    async updateTaskProgress(taskId: number) {
+        try {
+            const data = await getMyTasks();
+            const updatedTask = data.find(task => task.id === taskId);
+            if (updatedTask) {
+                runInAction(() => {
+                    this.updateTask(taskId, updatedTask);
+                });
+            }
+            // Обновляем баланс пользователя после выполнения задачи
+            getStore().user.fetchMyInfo();
+        } catch (error) {
+            console.error('Error updating task progress:', error);
         }
     }
 
@@ -82,40 +120,40 @@ export default class QuestStore {
     // Проверка подписки на Telegram канал
     async checkChannelSubscription(taskId: number) {
         try {
-            this.setLoading(true);
+            this.setTaskLoading(taskId, true);
             const result = await checkChannelSubscription(taskId);
             return result;
         } catch (error) {
             console.error("Error checking channel subscription:", error);
             throw error;
         } finally {
-            runInAction(() => this.setLoading(false));
+            runInAction(() => this.setTaskLoading(taskId, false));
         }
     }
 
     async checkReferralUsersTask(taskId: number) {
         try {
-            this.setLoading(true);
+            this.setTaskLoading(taskId, true);
             const result = await checkReferralUsersTask(taskId);
             return result;
         } catch (error) {
             console.error("Error checking referral users task:", error);
             throw error;
         } finally {
-            runInAction(() => this.setLoading(false));
+            runInAction(() => this.setTaskLoading(taskId, false));
         }
     }
 
     async checkChatBoostTask(taskId: number) {
         try {
-            this.setLoading(true);
+            this.setTaskLoading(taskId, true);
             const result = await checkChatBoostTask(taskId); 
             return result;
         } catch (error) {
             console.error("Error checking chat boost task:", error);
             throw error;
         } finally {
-            runInAction(() => this.setLoading(false));
+            runInAction(() => this.setTaskLoading(taskId, false));
         }
     }
 

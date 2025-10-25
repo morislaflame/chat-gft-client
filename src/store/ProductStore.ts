@@ -11,6 +11,7 @@ console.log("tg =>", tg);
 export default class ProductStore {
   private _products: Product[] = [];
   private _loading = false;
+  private _productLoadingStates: Map<number, boolean> = new Map();
 
   constructor() {
     makeAutoObservable(this);
@@ -21,6 +22,18 @@ export default class ProductStore {
   }
   setLoading(loading: boolean) {
     this._loading = loading;
+  }
+
+  setProductLoading(productId: number, loading: boolean) {
+    if (loading) {
+      this._productLoadingStates.set(productId, true);
+    } else {
+      this._productLoadingStates.delete(productId);
+    }
+  }
+
+  isProductLoading(productId: number): boolean {
+    return this._productLoadingStates.has(productId);
   }
 
   // Загрузить товары
@@ -42,7 +55,7 @@ export default class ProductStore {
 
   // Купить товар (через Mini App)
   async buyProduct(productId: number) {
-    this.setLoading(true);
+    this.setProductLoading(productId, true);
     try {
       // 1) Запрос на сервер: получаем invoiceLink
       const invoiceLink = await generateInvoice(productId);
@@ -63,7 +76,7 @@ export default class ProductStore {
       console.error("Error generating invoice or opening invoice:", error);
     } finally {
       runInAction(() => {
-        this._loading = false;
+        this.setProductLoading(productId, false);
       });
     }
   }

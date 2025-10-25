@@ -14,19 +14,10 @@ const QuestsContainer: React.FC = observer(() => {
 
     const handleTaskAction = useCallback(async (task: Task) => {
         try {
-            // Получаем реферальный код пользователя
             const userRefCode = user.user?.refCode || user.user?.username;
             
-            // Вызываем обработчик задания с передачей реферального кода
-            const result = await quest.handleTaskAction(task, userRefCode);
+            await quest.handleTaskAction(task, userRefCode);
             
-            // Если задание было успешно выполнено, обновляем данные
-            if (result.success) {
-                // Обновляем список заданий для отображения статуса выполнения
-                await quest.loadQuests();
-                // Можно также обновить данные пользователя
-                // await user.fetchMyInfo();
-            }
         } catch (error) {
             console.error('Error completing task:', error);
         }
@@ -104,6 +95,7 @@ const QuestsContainer: React.FC = observer(() => {
                     const isCompleted = task.userProgress?.isCompletedForCurrent || false;
                     const progress = task.userProgress?.progress || 0;
                     const targetCount = task.targetCount;
+                    const isTaskLoading = quest.isTaskLoading(task.id);
                     
                     return (
                         <div
@@ -131,14 +123,14 @@ const QuestsContainer: React.FC = observer(() => {
                                     e.stopPropagation();
                                     handleTaskAction(task);
                                 }}
-                                disabled={isCompleted || quest.loading}
+                                disabled={isCompleted || isTaskLoading}
                                 className={`px-3 py-1.5 text-xs rounded-full transition ${
                                     isCompleted
                                         ? 'bg-green-500 text-white'
                                         : 'bg-secondary-500 hover:bg-secondary-400'
-                                } ${quest.loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                } ${isTaskLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {quest.loading ? 'Loading...' : isCompleted ? 'Completed' : 'Complete'}
+                                {isTaskLoading ? 'Loading...' : isCompleted ? 'Completed' : 'Complete'}
                             </button>
                         </div>
                     );

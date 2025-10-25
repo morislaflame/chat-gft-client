@@ -12,7 +12,7 @@ const MainPage: React.FC = observer(() => {
         const loadUserData = async () => {
             try {
                 await user.fetchMyInfo();
-                await user.loadBalance();
+                await user.loadEnergy();
                 await user.loadLanguage();
             } catch (error) {
                 console.error('Error loading user data:', error);

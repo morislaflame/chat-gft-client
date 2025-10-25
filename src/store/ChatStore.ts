@@ -45,7 +45,7 @@ export default class ChatStore {
         this._error = error;
     }
 
-    async sendMessage(messageText: string, onBalanceUpdate?: (newBalance: number) => void) {
+    async sendMessage(messageText: string, onEnergyUpdate?: (newEnergy: number) => void) {
         const userMessage: Message = {
             id: Date.now().toString(),
             text: messageText,
@@ -68,8 +68,8 @@ export default class ChatStore {
             this.addMessage(aiMessage);
             
             // Обновляем баланс пользователя из ответа сервера
-            if (response.newBalance !== undefined && onBalanceUpdate) {
-                onBalanceUpdate(response.newBalance);
+            if (response.newEnergy !== undefined && onEnergyUpdate) {
+                onEnergyUpdate(response.newEnergy);
             }
             
             // Обновляем прогресс Force
@@ -78,8 +78,8 @@ export default class ChatStore {
             console.error('Error sending message:', error);
             // Проверяем, если это ошибка недостаточного баланса
             const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-            if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient balance')) {
-                this.setError('Insufficient balance. Please purchase more stars.');
+            if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient energy')) {
+                this.setError('Insufficient energy. Please purchase more stars.');
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
             }

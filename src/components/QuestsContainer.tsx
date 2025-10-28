@@ -83,14 +83,7 @@ const QuestsContainer: React.FC = observer(() => {
     }
 
     return (
-        <div className="p-4 overflow-y-auto flex w-full">
-            <div className="max-w-2xl mx-auto w-full space-y-3 mt-3">
-                <div className="text-center mb-4">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary-800 border border-primary-700 text-[11px] uppercase tracking-wider text-gray-400">
-                        Quests
-                    </div>
-                </div>
-
+        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2">
                 {quest.quests.map((task) => {
                     const isCompleted = task.userProgress?.isCompletedForCurrent || false;
                     const progress = task.userProgress?.progress || 0;
@@ -135,7 +128,6 @@ const QuestsContainer: React.FC = observer(() => {
                         </div>
                     );
                 })}
-            </div>
         </div>
     );
 });

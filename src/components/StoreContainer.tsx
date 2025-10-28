@@ -54,13 +54,7 @@ const StoreContainer: React.FC = observer(() => {
     }
 
     return (
-        <div className="p-4 overflow-y-auto flex w-full">
-            <div className="max-w-2xl mx-auto w-full space-y-3 mt-3">
-                <div className="text-center mb-4">
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary-800 border border-primary-700 text-[11px] uppercase tracking-wider text-gray-400">
-                        Store
-                    </div>
-                </div>
+        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2">
 
                 {/* Products */}
                 {product.products.map((prod) => {
@@ -106,7 +100,6 @@ const StoreContainer: React.FC = observer(() => {
                         <i className="fas fa-shield-alt mr-2"></i>
                         Secure payment powered by Telegram Stars
                     </div>
-                </div>
             </div>
         </div>
     );

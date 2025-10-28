@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import Navigation from './Navigation';
@@ -9,6 +9,7 @@ import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } f
 const Header: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
     const location = useLocation();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('chat');
     
     useEffect(() => {
@@ -35,6 +36,12 @@ const Header: React.FC = observer(() => {
     
     const handleStarsClick = () => {
         setActiveTab('store');
+        navigate(STORE_ROUTE);
+    }
+
+    const handleGemsClick = () => {
+        setActiveTab('rewards');
+        navigate(REWARDS_ROUTE);
     }
 
 
@@ -64,28 +71,32 @@ const Header: React.FC = observer(() => {
                         </div>
                     </div>
                 </div>
-                <div className="flex space-x-4">
-                    <button className="bg-primary-700 p-1.5 rounded-full hover:bg-primary-600 transition">
+                <div className="flex space-x-2">
+                    <button 
+                        onClick={handleGemsClick}
+                        className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative"
+                    >
                         <i className="fa-solid fa-gem text-amber-400 text-lg"></i>
+                        <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
+                            {user.user?.balance || 0}
+                        </div>
                     </button>
-                    <div className="flex items-center space-x-2">
                         <button 
                             onClick={handleStarsClick}
-                            className="bg-primary-700 p-1.5 rounded-full hover:bg-primary-600 transition relative"
+                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative"
                         >
                             <i className="fa-solid fa-bolt text-purple-400 text-lg"></i>
-                        <div className="absolute -top-1 -right-1 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
+                        <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
                             {user.energy}
                         </div>
                         </button>
                         <button 
                             onClick={() => {}}
-                            className="bg-primary-700 px-2 py-1 rounded-full hover:bg-primary-600 transition flex items-center space-x-1"
+                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center space-x-1"
                         >
                             <i className="fas fa-globe text-gray-300 text-sm"></i>
                             <span className="text-xs">{user.user?.language?.toUpperCase() || 'EN'}</span>
                         </button>
-                    </div>
                 </div>
             </div>
             <Navigation

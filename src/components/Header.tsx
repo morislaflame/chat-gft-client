@@ -94,7 +94,7 @@ const Header: React.FC = observer(() => {
                             onClick={() => {}}
                             className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center space-x-1"
                         >
-                            <i className="fas fa-globe text-gray-300 text-sm"></i>
+                            <i className="fas fa-globe text-gray-300 text-sm "></i>
                             <span className="text-xs">{user.user?.language?.toUpperCase() || 'EN'}</span>
                         </button>
                 </div>

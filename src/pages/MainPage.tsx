@@ -25,7 +25,6 @@ const MainPage: React.FC = observer(() => {
 
     return (
         <PageWrapper>
-        <h1 className="text-2xl font-bold">MainPage</h1>
             <ChatContainer />
         </PageWrapper>
     );

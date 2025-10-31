@@ -22,12 +22,20 @@ jobs:
       
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/chat-gft-deploy
-            cd frontend-source/chat-gft-client
-            git pull origin main
-            cd ~/chat-gft-deploy
-            ./deploy-safe.sh frontend
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash << 'EOF'
+          # Настраиваем git для использования SSH (если еще не настроено)
+          cd ~/chat-gft-deploy/frontend-source/chat-gft-client
+          git remote set-url origin git@github.com:morislaflame/chat-gft-client.git 2>/dev/null || true
+          
+          # Обновляем код
+          git pull origin main || {
+            echo "⚠️  Git pull failed, trying to update..."
+            git fetch origin main
+            git reset --hard origin/main
+          }
+          
+          cd ~/chat-gft-deploy
+          ./deploy-safe.sh frontend
           EOF
       
       - name: Health check

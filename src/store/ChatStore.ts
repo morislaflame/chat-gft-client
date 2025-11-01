@@ -1,12 +1,13 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, ForceProgress } from "@/types/types";
+import type { Message, ApiMessageResponse, ApiHistoryItem, ProgressData } from "@/types/types";
 
 export default class ChatStore {
     _messages: Message[] = [];
     _isTyping = false;
     _forceProgress = 0;
-    _forceProgressData: ForceProgress | null = null;
+    _forceProgressData: ProgressData | null = null;
+    _suggestions: string[] = [];
     _loading = false;
     _error = '';
 
@@ -30,11 +31,16 @@ export default class ChatStore {
         this._forceProgress = progress;
     }
 
-    setForceProgressData(data: ForceProgress | null) {
+    setForceProgressData(data: ProgressData | null) {
         this._forceProgressData = data;
         if (data) {
-            this._forceProgress = data.currentProgress;
+            // Вычисляем процент прогресса (от 0 до 100)
+            this._forceProgress = (data.current / 10) * 100;
         }
+    }
+
+    setSuggestions(suggestions: string[]) {
+        this._suggestions = suggestions;
     }
 
     setLoading(loading: boolean) {
@@ -72,8 +78,22 @@ export default class ChatStore {
                 onEnergyUpdate(response.newEnergy);
             }
             
-            // Обновляем прогресс Force
-            this.setForceProgress(Math.min(this._forceProgress + 10, 100));
+            // Обновляем прогресс из ответа
+            if (response.progress) {
+                this.setForceProgressData({
+                    current: response.progress.current,
+                    level: response.progress.level,
+                    untilReward: response.progress.untilReward,
+                });
+            }
+            
+            // Обновляем подсказки из ответа
+            if (response.suggestions && response.suggestions.length > 0) {
+                this.setSuggestions(response.suggestions);
+            } else {
+                // Если подсказок нет, очищаем их
+                this.setSuggestions([]);
+            }
         } catch (error) {
             console.error('Error sending message:', error);
             // Проверяем, если это ошибка недостаточного баланса
@@ -95,7 +115,8 @@ export default class ChatStore {
         try {
             const response = await getChatHistory();
             const historyData = response.history;
-            const forceProgressData = response.forceProgress;
+            const progressData = response.progress;
+            
             // Преобразуем данные из API в формат Message[]
             // Каждый элемент истории содержит и сообщение пользователя, и ответ AI
             const messages: Message[] = [];
@@ -124,7 +145,13 @@ export default class ChatStore {
             
             
             this.setMessages(messages);
-            this.setForceProgressData(forceProgressData);
+            
+            // Устанавливаем прогресс из ответа
+            if (progressData) {
+                this.setForceProgressData(progressData);
+            } else {
+                this.setForceProgressData(null);
+            }
         } catch (error) {
             console.error('Error loading chat history:', error);
             this.setError('Error loading chat history');
@@ -136,6 +163,7 @@ export default class ChatStore {
     clearMessages() {
         this.setMessages([]);
         this.setForceProgress(0);
+        this.setSuggestions([]);
     }
 
     get messages() {
@@ -152,6 +180,10 @@ export default class ChatStore {
 
     get forceProgressData() {
         return this._forceProgressData;
+    }
+
+    get suggestions() {
+        return this._suggestions;
     }
 
     get loading() {

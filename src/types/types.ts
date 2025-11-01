@@ -42,6 +42,13 @@ export interface ApiMessageResponse {
     isCongratulation: boolean;
     messagesUntilCongratulation: number;
     newEnergy: number;
+    suggestions?: string[];
+    isRelevant?: boolean;
+    progress?: {
+        current: number;
+        untilReward: number;
+        level: number;
+    };
     timestamp: string;
 }
 
@@ -54,6 +61,13 @@ export interface ApiHistoryItem {
     createdAt: string;
 }
 
+export interface ProgressData {
+    current: number;
+    level: number;
+    untilReward: number;
+    lastProgressAt?: string | null;
+}
+
 export interface ForceProgress {
     messagesUntilGift: number;
     totalMessagesForGift: number;
@@ -63,7 +77,8 @@ export interface ForceProgress {
 
 export interface ApiHistoryResponse {
     history: ApiHistoryItem[];
-    forceProgress: ForceProgress;
+    forceProgress?: ForceProgress;
+    progress?: ProgressData;
 }
 
 export interface Quest {

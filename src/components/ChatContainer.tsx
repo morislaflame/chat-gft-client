@@ -2,9 +2,15 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from './LoadingIndicator';
+import Suggestions from './Suggestions';
+import { cleanAiResponse } from '@/utils/textUtils';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
+    const [inputValue, setInputValue] = useState('');
+    const [suggestionsExpanded, setSuggestionsExpanded] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Load chat history when component mounts
@@ -20,10 +26,8 @@ const ChatContainer: React.FC = observer(() => {
         await chat.sendMessage(message, (newEnergy: number) => {
             user.setEnergy(newEnergy);
         });
+        user.fetchMyInfo();
     };
-    const [inputValue, setInputValue] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -41,13 +45,27 @@ const ChatContainer: React.FC = observer(() => {
         }
     };
 
+    const handleSelectSuggestion = (text: string) => {
+        setInputValue(text);
+        // Фокусируемся на инпут после выбора подсказки
+        const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (input) {
+            input.focus();
+        }
+    };
+
     // Показываем лоадинг пока загружается история чата
     if (chat.loading) {
         return <LoadingIndicator />;
     }
 
+    // Вычисляем процент прогресса
+    const progressPercent = chat.forceProgressData 
+        ? (chat.forceProgressData.current / 10) * 100 
+        : 0;
+
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
             <div className="flex-1 p-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
@@ -78,7 +96,9 @@ const ChatContainer: React.FC = observer(() => {
                                 ? 'bg-secondary-500 ml-auto max-w-xs' 
                                 : 'bg-primary-800 rounded-tl-none'
                         }`}>
-                            <div className="text-sm">{message.text}</div>
+                            <div className="text-sm">
+                                {message.isUser ? message.text : cleanAiResponse(message.text)}
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -102,22 +122,48 @@ const ChatContainer: React.FC = observer(() => {
             </div>
 
             {/* Force Progress */}
-            <div className="max-w-md mx-auto mb-6">
+            <div className="mb-6">
                 <div className="flex justify-between text-xs mb-1">
                     <span>Force Progress</span>
                     <span className="text-amber-400 font-medium flex items-center">
                         <i className="fas fa-gift mr-1"></i>
-                        Gift at 100%
+                        {chat.forceProgressData 
+                            ? `${chat.forceProgressData.untilReward} until reward`
+                            : 'Gift at 100%'}
                     </span>
                 </div>
                 <div className="w-full h-3 bg-primary-700 rounded-full overflow-hidden relative">
                     <div 
                         className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
-                        style={{ width: `${chat.forceProgress}%` }}
+                        style={{ width: `${progressPercent}%` }}
                     ></div>
                 </div>
+                
+                {/* Лента подсказок под прогрессбаром */}
+                {chat.suggestions && chat.suggestions.length > 0 && (
+                    <div className="mt-4 flex w-full overflow-x-hidden">
+                        <Suggestions 
+                            suggestions={chat.suggestions} 
+                            onSelectSuggestion={handleSelectSuggestion}
+                            showButton={false}
+                            showList={true}
+                            isExpanded={suggestionsExpanded}
+                            onToggle={() => setSuggestionsExpanded(!suggestionsExpanded)}
+                        />
+                    </div>
+                )}
             </div>
             </div>
+
+            {/* Кнопка Suggestions (fixed справа внизу) */}
+            <Suggestions 
+                suggestions={chat.suggestions} 
+                onSelectSuggestion={handleSelectSuggestion}
+                showButton={true}
+                showList={false}
+                isExpanded={suggestionsExpanded}
+                onToggle={() => setSuggestionsExpanded(!suggestionsExpanded)}
+            />
 
             {/* Message Input */}
             <div className="bg-primary-900 border-t border-primary-700 p-4">

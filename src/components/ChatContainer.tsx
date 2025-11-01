@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
+import { AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from './LoadingIndicator';
 import Suggestions from './Suggestions';
+import SuggestionButton from './SuggestionButton';
 import { cleanAiResponse } from '@/utils/textUtils';
 
 const ChatContainer: React.FC = observer(() => {
@@ -122,52 +124,51 @@ const ChatContainer: React.FC = observer(() => {
             </div>
 
             {/* Force Progress */}
-            <div className="mb-6">
-                <div className="flex justify-between text-xs mb-1">
-                    <span>Force Progress</span>
-                    <span className="text-amber-400 font-medium flex items-center">
-                        <i className="fas fa-gift mr-1"></i>
-                        {chat.forceProgressData 
-                            ? `${chat.forceProgressData.untilReward} until reward`
-                            : 'Gift at 100%'}
-                    </span>
+            
+            </div>
+
+            {/* Message Input */}
+            <div className="bg-primary-900 border-t border-primary-700 p-4 pb-6 flex flex-col gap-2">
+                <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="flex-1 ">
+                        <div className="flex justify-between text-xs mb-1">
+                            <span>Force Progress</span>
+                            <span className="text-amber-400 font-medium flex items-center">
+                                <i className="fas fa-gift mr-1"></i>
+                                {chat.forceProgressData 
+                                    ? `${chat.forceProgressData.untilReward} until reward`
+                                    : 'Gift at 100%'}
+                            </span>
+                        </div>
+                    <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
+                        <div 
+                            className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
+                            style={{ width: `${progressPercent}%` }}
+                        ></div>
+                    </div>
+                    </div>
+                    {/* Кнопка Suggestions справа от прогрессбара */}
+                    <AnimatePresence>
+                        {chat.suggestions && chat.suggestions.length > 0 && (
+                            <SuggestionButton 
+                                onClick={() => setSuggestionsExpanded(!suggestionsExpanded)}
+                                suggestionsCount={chat.suggestions.length}
+                            />
+                        )}
+                    </AnimatePresence>
                 </div>
-                <div className="w-full h-3 bg-primary-700 rounded-full overflow-hidden relative">
-                    <div 
-                        className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
-                        style={{ width: `${progressPercent}%` }}
-                    ></div>
-                </div>
-                
-                {/* Лента подсказок под прогрессбаром */}
-                {chat.suggestions && chat.suggestions.length > 0 && (
-                    <div className="mt-4 flex w-full overflow-x-hidden">
+            </div>
+                    <div className="mb-2 w-full overflow-x-hidden">
                         <Suggestions 
                             suggestions={chat.suggestions} 
                             onSelectSuggestion={handleSelectSuggestion}
-                            showButton={false}
-                            showList={true}
                             isExpanded={suggestionsExpanded}
                             onToggle={() => setSuggestionsExpanded(!suggestionsExpanded)}
                         />
                     </div>
-                )}
-            </div>
-            </div>
-
-            {/* Кнопка Suggestions (fixed справа внизу) */}
-            <Suggestions 
-                suggestions={chat.suggestions} 
-                onSelectSuggestion={handleSelectSuggestion}
-                showButton={true}
-                showList={false}
-                isExpanded={suggestionsExpanded}
-                onToggle={() => setSuggestionsExpanded(!suggestionsExpanded)}
-            />
-
-            {/* Message Input */}
-            <div className="bg-primary-900 border-t border-primary-700 p-4">
-                <form onSubmit={handleSubmit} className="flex space-x-2">
+                
+                <form onSubmit={handleSubmit} className="flex space-x-2 ">
                     <input
                         type="text"
                         value={inputValue}

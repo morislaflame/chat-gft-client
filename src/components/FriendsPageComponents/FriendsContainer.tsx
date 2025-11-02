@@ -3,8 +3,8 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import type { Bonus } from '@/types/types';
-import EmptyPage from './EmptyPage';
-import LoadingIndicator from './LoadingIndicator';
+import EmptyPage from '../CoreComponents/EmptyPage';
+import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;

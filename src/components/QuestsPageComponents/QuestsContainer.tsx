@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Task } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import EmptyPage from './EmptyPage';
-import LoadingIndicator from './LoadingIndicator';
+import EmptyPage from '../CoreComponents/EmptyPage';
+import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest, user } = useContext(Context) as IStoreContext;

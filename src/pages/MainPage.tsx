@@ -1,8 +1,8 @@
 import React, { useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import ChatContainer from '@/components/ChatContainer';
-import PageWrapper from '@/components/PageWrapper';
+import ChatContainer from '@/components/MainPageComponents/ChatContainer';
+import PageWrapper from '@/components/CoreComponents/PageWrapper';
 
 const MainPage: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;

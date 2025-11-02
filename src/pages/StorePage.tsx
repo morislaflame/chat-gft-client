@@ -1,6 +1,6 @@
 import React from 'react';
-import StoreContainer from '@/components/StoreContainer';
-import PageWrapper from '@/components/PageWrapper';
+import StoreContainer from '@/components/StorePageComponents/StoreContainer';
+import PageWrapper from '@/components/CoreComponents/PageWrapper';
 
 const StorePage: React.FC = () => {
     return (

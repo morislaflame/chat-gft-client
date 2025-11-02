@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import EmptyPage from './EmptyPage';
-import LoadingIndicator from './LoadingIndicator';
+import EmptyPage from '../CoreComponents/EmptyPage';
+import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Lottie from 'lottie-react';
 import type { Reward } from '@/http/rewardAPI';
 

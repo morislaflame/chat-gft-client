@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
-import LoadingIndicator from "../components/LoadingIndicator";
+import LoadingIndicator from "../components/CoreComponents/LoadingIndicator";
 import UserStore from "@/store/UserStore";
 import ChatStore from "@/store/ChatStore";
 import QuestStore from "@/store/QuestStore";

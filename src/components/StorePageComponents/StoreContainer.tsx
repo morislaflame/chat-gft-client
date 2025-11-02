@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import EmptyPage from './EmptyPage';
-import LoadingIndicator from './LoadingIndicator';
+import EmptyPage from '../CoreComponents/EmptyPage';
+import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import starsIcon from '@/assets/stars.svg';
 
 const StoreContainer: React.FC = observer(() => {

@@ -3,9 +3,9 @@ import { BrowserRouter } from "react-router-dom";
 import { observer } from 'mobx-react-lite';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import LoadingIndicator from '@/components/LoadingIndicator';
-import Header from './components/Header';
-import AppLoader from './components/AppLoader';
+import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
+import Header from './components/CoreComponents/Header';
+import AppLoader from './components/CoreComponents/AppLoader';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 

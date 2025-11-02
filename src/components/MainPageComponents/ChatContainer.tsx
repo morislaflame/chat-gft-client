@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import LoadingIndicator from './LoadingIndicator';
+import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Suggestions from './Suggestions';
 import SuggestionButton from './SuggestionButton';
 import FormattedText from './FormattedText';

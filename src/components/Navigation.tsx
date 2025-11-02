@@ -42,9 +42,6 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
                         }`}>
                             {tab.label}
                         </div>
-                        <div className={`tab-active-indicator mt-1 ${
-                            activeTab === tab.id ? 'bg-secondary-400' : ''
-                        }`}></div>
                     </button>
                 ))}
             </div>

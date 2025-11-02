@@ -10,8 +10,8 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) =
         <div 
             className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden hide-scrollbar ios-scroll ${className}`}
             style={{ 
-                height: 'calc(100vh - 129px)',
-                marginTop: `129px`,
+                height: 'calc(100vh - 122px)',
+                marginTop: `122px`,
             }}
         >
             {children}

@@ -1,16 +1,13 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import Suggestions from './Suggestions';
-import SuggestionButton from './SuggestionButton';
 import FormattedText from './FormattedText';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const [inputValue, setInputValue] = useState('');
-    const [suggestionsExpanded, setSuggestionsExpanded] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +63,7 @@ const ChatContainer: React.FC = observer(() => {
     return (
         <div className="h-full flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
-            <div className="flex-1 p-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
+            <div className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
                 <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md">
                     <div className="flex items-center mb-2">
@@ -83,28 +80,66 @@ const ChatContainer: React.FC = observer(() => {
 
             {/* Chat Messages Container */}
             <div ref={chatContainerRef} className="space-y-6">
-                {Array.isArray(chat.messages) && chat.messages.map((message) => (
-                    <div key={message.id} className="message-container flex items-start mb-6">
-                        {!message.isUser && (
-                            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2">
-                                <i className="fas fa-mask text-xs"></i>
-                            </div>
-                        )}
-                        <div className={`rounded-xl px-4 py-3 ${
-                            message.isUser 
-                                ? 'bg-secondary-500 ml-auto max-w-xs' 
-                                : 'bg-primary-800 rounded-tl-none'
-                        }`}>
-                            <div className="text-sm">
-                                {message.isUser ? (
-                                    <span className="whitespace-pre-wrap">{message.text}</span>
-                                ) : (
-                                    <FormattedText text={message.text} />
-                                )}
+                {Array.isArray(chat.messages) && chat.messages.map((message, index) => {
+                    const isLastAIMessage = !message.isUser && index === chat.messages.length - 1;
+                    const showSuggestions = isLastAIMessage && chat.suggestions && chat.suggestions.length > 0 && !chat.isTyping;
+                    
+                    return (
+                        <div key={message.id} className="message-container flex items-start mb-6">
+                            {!message.isUser && (
+                                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2">
+                                    <i className="fas fa-mask text-xs"></i>
+                                </div>
+                            )}
+                            <div className={`flex-1 ${message.isUser ? 'flex justify-end' : ''}`}>
+                                <div className={`rounded-xl px-4 py-3 ${
+                                    message.isUser 
+                                        ? 'bg-secondary-500 max-w-xs' 
+                                        : 'bg-primary-800 rounded-tl-none'
+                                }`}>
+                                    <div className="text-sm">
+                                        {message.isUser ? (
+                                            <span className="whitespace-pre-wrap">{message.text}</span>
+                                        ) : (
+                                            <>
+                                            <FormattedText text={message.text} />
+                                            <AnimatePresence>
+                                                {showSuggestions && (
+                                                    <motion.div 
+                                                        initial={{ opacity: 0, y: 10 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: 10 }}
+                                                        transition={{ duration: 0.2 }}
+                                                        className="mt-3 grid grid-cols-2 gap-2"
+                                                    >
+                                                        {chat.suggestions.map((suggestion, suggestionIndex) => (
+                                                            <motion.button
+                                                                key={suggestionIndex}
+                                                                onClick={() => handleSelectSuggestion(suggestion)}
+                                                                className="bg-primary-700 hover:bg-primary-600 rounded-lg px-2 py-1 text-xs text-center transition-colors border border-primary-600 hover:border-red-500 text-white"
+                                                                whileHover={{ scale: 1.02 }}
+                                                                whileTap={{ scale: 0.98 }}
+                                                                initial={{ opacity: 0, y: 5 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                transition={{ delay: suggestionIndex * 0.05 }}
+                                                            >
+                                                                {suggestion}
+                                                            </motion.button>
+                                                        ))}
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {/* Подсказки под сообщением от AI */}
+                                
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 {/* Typing Indicator */}
                 {chat.isTyping && (
@@ -129,47 +164,30 @@ const ChatContainer: React.FC = observer(() => {
             </div>
 
             {/* Message Input */}
-            <div className="bg-primary-900 border-t border-primary-700 p-4 pb-6 flex flex-col gap-2">
+            <div className="bg-primary-900 border-t border-primary-700 p-4 pb-6 flex flex-col gap-4">
                 <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="flex-1 ">
-                        <div className="flex justify-between text-xs mb-1">
-                            <span>Force Progress</span>
-                            <span className="text-amber-400 font-medium flex items-center">
-                                <i className="fas fa-gift mr-1"></i>
-                                {chat.forceProgressData 
-                                    ? `${chat.forceProgressData.untilReward} until reward`
-                                    : 'Gift at 100%'}
-                            </span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                                <span>Force Progress</span>
+                                <span className="text-amber-400 font-medium flex items-center">
+                                    <i className="fas fa-gift mr-1"></i>
+                                    {chat.forceProgressData 
+                                        ? `${chat.forceProgressData.untilReward} until reward`
+                                        : 'Gift at 100%'}
+                                </span>
+                            </div>
+                            <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
+                                    style={{ width: `${progressPercent}%` }}
+                                ></div>
+                            </div>
                         </div>
-                    <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
-                        <div 
-                            className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
-                            style={{ width: `${progressPercent}%` }}
-                        ></div>
                     </div>
-                    </div>
-                    {/* Кнопка Suggestions справа от прогрессбара */}
-                    <AnimatePresence>
-                        {chat.suggestions && chat.suggestions.length > 0 && (
-                            <SuggestionButton 
-                                onClick={() => setSuggestionsExpanded(!suggestionsExpanded)}
-                                suggestionsCount={chat.suggestions.length}
-                            />
-                        )}
-                    </AnimatePresence>
                 </div>
-            </div>
-                    <div className="mb-2 w-full overflow-x-hidden">
-                        <Suggestions 
-                            suggestions={chat.suggestions} 
-                            onSelectSuggestion={handleSelectSuggestion}
-                            isExpanded={suggestionsExpanded}
-                            onToggle={() => setSuggestionsExpanded(!suggestionsExpanded)}
-                        />
-                    </div>
                 
-                <form onSubmit={handleSubmit} className="flex space-x-2 ">
+                <form onSubmit={handleSubmit} className="flex space-x-2">
                     <input
                         type="text"
                         value={inputValue}

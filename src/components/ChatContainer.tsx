@@ -5,7 +5,7 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from './LoadingIndicator';
 import Suggestions from './Suggestions';
 import SuggestionButton from './SuggestionButton';
-// import { cleanAiResponse } from '@/utils/textUtils';
+import FormattedText from './FormattedText';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -96,7 +96,11 @@ const ChatContainer: React.FC = observer(() => {
                                 : 'bg-primary-800 rounded-tl-none'
                         }`}>
                             <div className="text-sm">
-                                {message.isUser ? message.text : message.text}
+                                {message.isUser ? (
+                                    <span className="whitespace-pre-wrap">{message.text}</span>
+                                ) : (
+                                    <FormattedText text={message.text} />
+                                )}
                             </div>
                         </div>
                     </div>

@@ -116,7 +116,7 @@ const ChatContainer: React.FC = observer(() => {
                                                             <motion.button
                                                                 key={suggestionIndex}
                                                                 onClick={() => handleSelectSuggestion(suggestion)}
-                                                                className="bg-primary-700 hover:bg-primary-600 rounded-lg px-2 py-1 text-xs text-center transition-colors border border-primary-600 hover:border-red-500 text-white"
+                                                                className="bg-primary-700 hover:bg-primary-600 rounded-lg px-2 py-1.5 text-xs text-center transition-colors border border-primary-600 hover:border-red-500 text-white"
                                                                 whileHover={{ scale: 1.02 }}
                                                                 whileTap={{ scale: 0.98 }}
                                                                 initial={{ opacity: 0, y: 5 }}

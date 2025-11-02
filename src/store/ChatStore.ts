@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory } from "@/http/chatAPI";
 import type { Message, ApiMessageResponse, ApiHistoryItem, ProgressData } from "@/types/types";
+import type UserStore from "@/store/UserStore";
 
 export default class ChatStore {
     _messages: Message[] = [];
@@ -10,9 +11,15 @@ export default class ChatStore {
     _suggestions: string[] = [];
     _loading = false;
     _error = '';
+    _userStore: UserStore | null = null;
 
-    constructor() {
+    constructor(userStore?: UserStore) {
         makeAutoObservable(this);
+        this._userStore = userStore || null;
+    }
+
+    setUserStore(userStore: UserStore) {
+        this._userStore = userStore;
     }
 
     setMessages(messages: Message[]) {
@@ -73,9 +80,20 @@ export default class ChatStore {
             };
             this.addMessage(aiMessage);
             
+            // Обновляем энергию и баланс пользователя из ответа сервера
+            if (response.newEnergy !== undefined) {
+                if (this._userStore) {
+                    this._userStore.setEnergy(response.newEnergy);
+                }
+                // Поддерживаем старый API через колбэк для обратной совместимости
+                if (onEnergyUpdate) {
+                    onEnergyUpdate(response.newEnergy);
+                }
+            }
+            
             // Обновляем баланс пользователя из ответа сервера
-            if (response.newEnergy !== undefined && onEnergyUpdate) {
-                onEnergyUpdate(response.newEnergy);
+            if (response.newBalance !== undefined && this._userStore) {
+                this._userStore.setBalance(response.newBalance);
             }
             
             // Обновляем прогресс из ответа

@@ -75,6 +75,13 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     loadStores();
   }, []);
 
+  useEffect(() => {
+    // После создания stores, устанавливаем UserStore в ChatStore
+    if (stores) {
+      stores.chat.setUserStore(stores.user);
+    }
+  }, [stores]);
+
   if (!stores) {
     return <LoadingIndicator />; // Use custom loading indicator
   }

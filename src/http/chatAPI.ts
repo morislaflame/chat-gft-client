@@ -6,7 +6,11 @@ export const sendMessage = async (message: string): Promise<ApiMessageResponse> 
     return data;
 };
 
-export const getChatHistory = async (): Promise<ApiHistoryResponse> => {
-    const { data } = await $authHost.get('api/message/history');
+export const getChatHistory = async (limit?: number, cursor?: number | null): Promise<ApiHistoryResponse> => {
+    const params: { limit?: number; cursor?: number } = {};
+    if (limit !== undefined) params.limit = limit;
+    if (cursor !== undefined && cursor !== null) params.cursor = cursor;
+    
+    const { data } = await $authHost.get('api/message/history', { params });
     return data;
 };

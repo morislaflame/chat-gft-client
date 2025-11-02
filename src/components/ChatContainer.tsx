@@ -25,10 +25,7 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleSendMessage = async (message: string) => {
-        await chat.sendMessage(message, (newEnergy: number) => {
-            user.setEnergy(newEnergy);
-        });
-        user.fetchMyInfo();
+        await chat.sendMessage(message);
     };
 
     const scrollToBottom = () => {

@@ -42,6 +42,7 @@ export interface ApiMessageResponse {
     isCongratulation: boolean;
     messagesUntilCongratulation: number;
     newEnergy: number;
+    newBalance?: number;
     suggestions?: string[];
     isRelevant?: boolean;
     progress?: {
@@ -79,6 +80,8 @@ export interface ApiHistoryResponse {
     history: ApiHistoryItem[];
     forceProgress?: ForceProgress;
     progress?: ProgressData;
+    hasMore?: boolean;
+    nextCursor?: number | null;
 }
 
 export interface Quest {

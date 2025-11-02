@@ -46,6 +46,17 @@ export default class UserStore {
 
     setEnergy(energy: number) {
         this._energy = energy;
+        // Также обновляем энергию в объекте пользователя, если он существует
+        if (this._user) {
+            this._user = { ...this._user, energy };
+        }
+    }
+
+    setBalance(balance: number) {
+        // Обновляем баланс в объекте пользователя, если он существует
+        if (this._user) {
+            this._user = { ...this._user, balance };
+        }
     }
 
     setReferrals(referrals: Referral[]) {

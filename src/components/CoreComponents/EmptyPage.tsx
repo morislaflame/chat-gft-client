@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from './Button';
 
 interface EmptyPageProps {
     icon: string;
@@ -31,12 +32,13 @@ const EmptyPage: React.FC<EmptyPageProps> = ({
                 </p>
                 
                 {actionText && onAction && (
-                    <button
+                    <Button
                         onClick={onAction}
-                        className="bg-secondary-500 hover:bg-secondary-400 text-white px-6 py-2 rounded-lg transition-colors"
+                        variant="secondary"
+                        size="lg"
                     >
                         {actionText}
-                    </button>
+                    </Button>
                 )}
             </div>
         </div>

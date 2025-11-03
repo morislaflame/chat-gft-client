@@ -4,6 +4,7 @@ import type { Task } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
+import Button from '../CoreComponents/Button';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest, user } = useContext(Context) as IStoreContext;
@@ -111,20 +112,18 @@ const QuestsContainer: React.FC = observer(() => {
                                     )}
                                 </div>
                             </div>
-                            <button
+                            <Button
                                 onClick={(e) => {
-                                    e.stopPropagation();
+                                    e?.stopPropagation();
                                     handleTaskAction(task);
                                 }}
                                 disabled={isCompleted || isTaskLoading}
-                                className={`px-3 py-1.5 text-xs rounded-full transition ${
-                                    isCompleted
-                                        ? 'bg-green-500 text-white'
-                                        : 'bg-secondary-500 hover:bg-secondary-400'
-                                } ${isTaskLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                variant={isCompleted ? 'success' : 'secondary'}
+                                size="sm"
+                                className="rounded-full"
                             >
                                 {isTaskLoading ? 'Loading...' : isCompleted ? 'Completed' : 'Complete'}
-                            </button>
+                            </Button>
                         </div>
                     );
                 })}

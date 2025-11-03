@@ -1,5 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import type { Bonus } from '@/types/types';
@@ -9,16 +10,25 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
     const { shareUrl } = useTelegramApp();
+    const [isCopied, setIsCopied] = useState(false);
 
     useEffect(() => {
         // Load user data when component mounts
         user.fetchMyInfo();
     }, [user]);
 
-    const handleCopyReferral = () => {
+    const handleCopyReferral = async () => {
         const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
-        navigator.clipboard.writeText(referralLink);
-        // Show toast notification
+        try {
+            await navigator.clipboard.writeText(referralLink);
+            setIsCopied(true);
+            // Возвращаем к исходному состоянию через 2 секунды
+            setTimeout(() => {
+                setIsCopied(false);
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy:', error);
+        }
     };
 
     const handleShareReferral = () => {
@@ -78,18 +88,26 @@ const FriendsContainer: React.FC = observer(() => {
                             />
                         </div>
                         <div className="flex space-x-2">
-                            <button
+                            <motion.button
                                 onClick={handleCopyReferral}
-                                className="flex-1 px-3 py-2 text-xs rounded-md bg-secondary-500 hover:bg-secondary-400"
+                                whileTap={{ scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
+                                className={`flex-1 px-3 py-2 text-xs rounded-md text-white font-medium transition-colors cursor-pointer ${
+                                    isCopied 
+                                        ? 'bg-green-500 hover:bg-green-500' 
+                                        : 'bg-secondary-500 hover:bg-secondary-400'
+                                }`}
                             >
-                                Copy Link
-                            </button>
-                            <button
+                                {isCopied ? 'Copied!' : 'Copy Link'}
+                            </motion.button>
+                            <motion.button
                                 onClick={handleShareReferral}
-                                className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600"
+                                whileTap={{ scale: 0.9 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
                             >
                                 Share
-                            </button>
+                            </motion.button>
                         </div>
                         <div className="mt-2 text-xs text-gray-400">
                             Share this link with friends to earn rewards!

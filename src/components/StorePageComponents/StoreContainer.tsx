@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
+import Button from '../CoreComponents/Button';
 import starsIcon from '@/assets/stars.svg';
 
 const StoreContainer: React.FC = observer(() => {
@@ -76,12 +77,12 @@ const StoreContainer: React.FC = observer(() => {
                                     </div>
                                 </div>
                             </div>
-                            <button
+                            <Button
                                 onClick={() => handlePurchase(prod.id)}
                                 disabled={isProductLoading}
-                                className={`px-3 py-1.5 text-xs rounded-full bg-secondary-500 hover:bg-secondary-400 text-white transition flex gap-2 items-center justify-center min-w-[20%] ${
-                                    isProductLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                                variant="secondary"
+                                size="sm"
+                                className="min-w-[20%] rounded-full flex gap-2 items-center justify-center"
                             >
                                 {isProductLoading ? 'Loading...' : (
                                     <>
@@ -89,7 +90,7 @@ const StoreContainer: React.FC = observer(() => {
                                         <img src={starsIcon} alt="stars" className="w-4 h-4" />
                                     </>
                                 )}
-                            </button>
+                            </Button>
                         </div>
                     );
                 })}

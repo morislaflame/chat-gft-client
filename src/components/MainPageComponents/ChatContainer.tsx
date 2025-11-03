@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import FormattedText from './FormattedText';
+import Button from '../CoreComponents/Button';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -195,12 +196,13 @@ const ChatContainer: React.FC = observer(() => {
                         placeholder="Type your message..."
                         className="flex-1 bg-primary-800 border border-primary-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
                     />
-                    <button
+                    <Button
                         type="submit"
-                        className="bg-secondary-500 hover:bg-secondary-400 text-white px-4 py-2 rounded-lg transition"
-                    >
-                        <i className="fas fa-paper-plane"></i>
-                    </button>
+                        variant="secondary"
+                        size="md"
+                        icon="fas fa-paper-plane"
+                        className="px-4 py-2"
+                    />
                 </form>
             </div>
         </div>

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
+import Button from '../CoreComponents/Button';
 import Lottie from 'lottie-react';
 import type { Reward } from '@/http/rewardAPI';
 
@@ -176,31 +177,16 @@ const RewardsContainer: React.FC = observer(() => {
                             
                             {/* Purchase button or status */}
                             {activeTab === 'available' && (
-                                <button
+                                <Button
                                     onClick={() => handlePurchase(rewardItem.id)}
                                     disabled={isPurchasing || !canAfford}
-                                    className={`w-full px-1 py-2 text-sm rounded-lg transition flex items-center justify-center gap-2 ${
-                                        canAfford && !isPurchasing
-                                            ? 'bg-secondary-500 hover:bg-secondary-400 text-white'
-                                            : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    }`}
+                                    variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+                                    size="sm"
+                                    className="w-full"
+                                    icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
                                 >
-                                    {isPurchasing ? (
-                                        <>
-                                            <i className="fas fa-spinner fa-spin"></i>
-                                            Purchasing...
-                                        </>
-                                    ) : canAfford ? (
-                                        <>
-                                            {rewardItem.price} gems
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="fas fa-lock"></i>
-                                            {rewardItem.price} gems
-                                        </>
-                                    )}
-                                </button>
+                                    {isPurchasing ? 'Purchasing...' : `${rewardItem.price} gems`}
+                                </Button>
                             )}
                             
                             {activeTab === 'purchased' && (

@@ -6,11 +6,12 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
 import AppLoader from './components/CoreComponents/AppLoader';
+import DailyRewardModal from "./components/modals/DailyRewardModal";
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
 const App = observer(() => {
-  const { user } = useContext(Context) as IStoreContext;
+  const { user, dailyReward } = useContext(Context) as IStoreContext;
   const [loading, setLoading] = useState(true);
   const {
     disableVerticalSwipes,
@@ -66,6 +67,19 @@ const handleStart = () => {
     authenticate();
   }, [user, tg?.initData]);
 
+  useEffect(() => {
+    if (!loading && user.isAuth) {
+      const checkDailyRewardFn = async () => {
+        try {
+          await dailyReward.checkDailyReward();
+        } catch (error) {
+          console.error("Error checking daily reward:", error);
+        }
+      };
+      checkDailyRewardFn();
+    }
+  }, [loading, user.isAuth, dailyReward]);
+
   if (loading) {
     return (
         <AppLoader
@@ -82,6 +96,7 @@ const handleStart = () => {
             <Suspense fallback={<LoadingIndicator />}>
               <AppRouter />
             </Suspense>
+            <DailyRewardModal />
         </div>
       </BrowserRouter>
   )

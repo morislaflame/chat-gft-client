@@ -120,7 +120,7 @@ export interface StarsPackage {
 
 export type TaskType = 'DAILY' | 'ONE_TIME' | 'SPECIAL';
 
-export type RewardType = 'energy';
+export type RewardType = 'energy' | 'tokens';
 
 export interface UserTaskInfo {
     progress: number;
@@ -161,5 +161,36 @@ export interface UserTaskInfo {
     reward?: {
       amount: number;
       type: RewardType;
+    };
+  }
+
+  
+export interface DailyRewardCheckResponse {
+    available: boolean;
+    dailyRewardDay: number;
+    lastDailyRewardClaimAt: string | null;
+    nextDay: number;
+    rewardInfo: {
+      day: number;
+      reward: number;
+      rewardType: RewardType;
+      description: string;
+    } | null;
+  }
+
+  export interface DailyRewardClaimResponse {
+    message: string;
+    reward: {
+      id: number;
+      day: number;
+      reward: number;
+      rewardType: RewardType;
+      description: string;
+    };
+    user: {
+      dailyRewardDay: number;
+      lastDailyRewardClaimAt: string;
+      balance: number;
+      energy: number;
     };
   }

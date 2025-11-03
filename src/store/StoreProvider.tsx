@@ -6,6 +6,7 @@ import QuestStore from "@/store/QuestStore";
 import ShopStore from "@/store/ShopStore";
 import ProductStore from "@/store/ProductStore";
 import RewardStore from "@/store/RewardStore";
+import DailyRewardStore from "@/store/DailyRewardStore";
 // Определяем интерфейс для нашего контекста
 export interface IStoreContext {
   user: UserStore;
@@ -14,6 +15,7 @@ export interface IStoreContext {
   shop: ShopStore;
   product: ProductStore;
   reward: RewardStore;
+  dailyReward: DailyRewardStore;
 }
 
 let storeInstance: IStoreContext | null = null;
@@ -42,7 +44,8 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     shop: ShopStore;
     product: ProductStore;
     reward: RewardStore;
-  } | null>(null);
+    dailyReward: DailyRewardStore;
+    } | null>(null);
 
   useEffect(() => {
     const loadStores = async () => {
@@ -53,6 +56,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         { default: ShopStore },
         { default: ProductStore },
         { default: RewardStore },
+        { default: DailyRewardStore },
       ] = await Promise.all([
         import("@/store/UserStore"),
         import("@/store/ChatStore"),
@@ -60,6 +64,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         import("@/store/ShopStore"),
         import("@/store/ProductStore"),
         import("@/store/RewardStore"),
+        import("@/store/DailyRewardStore"),
       ]);
 
       setStores({
@@ -69,6 +74,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         shop: new ShopStore(),
         product: new ProductStore(),
         reward: new RewardStore(),
+        dailyReward: new DailyRewardStore(),
       });
     };
 
@@ -76,9 +82,10 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
   }, []);
 
   useEffect(() => {
-    // После создания stores, устанавливаем UserStore в ChatStore
+    // После создания stores, устанавливаем UserStore в ChatStore и DailyRewardStore
     if (stores) {
       stores.chat.setUserStore(stores.user);
+      stores.dailyReward.setUserStore(stores.user);
     }
   }, [stores]);
 

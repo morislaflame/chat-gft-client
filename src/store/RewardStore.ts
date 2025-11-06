@@ -1,12 +1,14 @@
 import { makeAutoObservable } from 'mobx';
-import { rewardAPI, type Reward, type UserReward } from '@/http/rewardAPI';
+import { rewardAPI, type Reward, type UserReward, type WithdrawalRequest } from '@/http/rewardAPI';
 
 class RewardStore {
   availableRewards: Reward[] = [];
   myPurchases: UserReward[] = [];
+  withdrawalRequests: WithdrawalRequest[] = [];
   loading = false;
   error: string | null = null;
   purchasingRewards = new Set<number>();
+  creatingWithdrawal = new Set<number>();
 
   constructor() {
     makeAutoObservable(this);
@@ -75,6 +77,60 @@ class RewardStore {
     return this.purchasingRewards.has(rewardId);
   }
 
+  // Загрузить запросы на вывод
+  async fetchWithdrawalRequests() {
+    try {
+      this.withdrawalRequests = await rewardAPI.getMyWithdrawalRequests();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : 'Failed to load withdrawal requests';
+      this.error = errorMessage || 'Failed to load withdrawal requests';
+      console.error('Error fetching withdrawal requests:', error);
+    }
+  }
+
+  // Создать запрос на вывод
+  async createWithdrawalRequest(userRewardId: number): Promise<boolean> {
+    this.creatingWithdrawal.add(userRewardId);
+    this.error = null;
+    
+    try {
+      await rewardAPI.createWithdrawalRequest(userRewardId);
+      // Обновляем список запросов
+      await this.fetchWithdrawalRequests();
+      return true;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : 'Failed to create withdrawal request';
+      this.error = errorMessage || 'Failed to create withdrawal request';
+      console.error('Error creating withdrawal request:', error);
+      return false;
+    } finally {
+      this.creatingWithdrawal.delete(userRewardId);
+    }
+  }
+
+  // Проверить, создается ли запрос на вывод
+  isCreatingWithdrawal(userRewardId: number): boolean {
+    return this.creatingWithdrawal.has(userRewardId);
+  }
+
+  // Получить статус вывода для конкретной награды
+  getWithdrawalStatus(userRewardId: number): 'pending' | 'completed' | 'rejected' | null {
+    const request = this.withdrawalRequests.find(req => req.userRewardId === userRewardId);
+    return request ? request.status : null;
+  }
+
+  // Проверить, можно ли создать запрос на вывод (нет активных запросов)
+  canWithdraw(userRewardId: number): boolean {
+    const request = this.withdrawalRequests.find(req => req.userRewardId === userRewardId);
+    if (!request) return true;
+    // Можно создать новый запрос только если предыдущий был отклонен
+    return request.status === 'rejected';
+  }
+
   // Очистить ошибки
   clearError() {
     this.error = null;
@@ -84,9 +140,11 @@ class RewardStore {
   reset() {
     this.availableRewards = [];
     this.myPurchases = [];
+    this.withdrawalRequests = [];
     this.loading = false;
     this.error = null;
     this.purchasingRewards.clear();
+    this.creatingWithdrawal.clear();
   }
 }
 

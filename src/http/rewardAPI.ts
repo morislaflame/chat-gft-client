@@ -39,6 +39,18 @@ export interface PurchaseResponse {
   newBalance: number;
 }
 
+export interface WithdrawalRequest {
+  id: number;
+  userId: number;
+  userRewardId: number;
+  status: 'pending' | 'completed' | 'rejected';
+  completedAt?: string;
+  completedBy?: number;
+  createdAt: string;
+  updatedAt: string;
+  userReward: UserReward;
+}
+
 export const rewardAPI = {
   // Получить доступные награды для покупки
   getAvailableRewards: async (): Promise<Reward[]> => {
@@ -55,6 +67,18 @@ export const rewardAPI = {
   // Получить купленные награды пользователя
   getMyPurchases: async (): Promise<UserReward[]> => {
     const { data } = await $authHost.get('/api/reward/my-purchases');
+    return data;
+  },
+
+  // Создать запрос на вывод награды
+  createWithdrawalRequest: async (userRewardId: number): Promise<WithdrawalRequest> => {
+    const { data } = await $authHost.post('/api/withdrawal/create', { userRewardId });
+    return data;
+  },
+
+  // Получить запросы на вывод пользователя
+  getMyWithdrawalRequests: async (): Promise<WithdrawalRequest[]> => {
+    const { data } = await $authHost.get('/api/withdrawal/my-requests');
     return data;
   }
 };

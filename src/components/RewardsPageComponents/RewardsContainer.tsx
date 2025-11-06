@@ -4,25 +4,31 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
-import Lottie from 'lottie-react';
-import type { Reward } from '@/http/rewardAPI';
+import type { Reward, UserReward } from '@/http/rewardAPI';
+import WithdrawalModal from '../modals/WithdrawalModal';
+import { renderRewardMedia } from '@/utils/rewardUtils';
 
 const RewardsContainer: React.FC = observer(() => {
     const { reward, user } = useContext(Context) as IStoreContext;
     const [activeTab, setActiveTab] = useState<'available' | 'purchased'>('available');
     const [animations, setAnimations] = useState<{  [url: string]: Record<string, unknown> }>({});
     const loadedUrls = useRef<Set<string>>(new Set());
+    const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
+    const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
 
     useEffect(() => {
         // Load rewards when component mounts
         reward.fetchAvailableRewards();
         reward.fetchMyPurchases();
+        reward.fetchWithdrawalRequests();
     }, [reward]);
 
     // Загружаем анимации для наград
     useEffect(() => {
         const loadAnimations = async () => {
-            const rewards = activeTab === 'available' ? reward.availableRewards : reward.myPurchases.map(p => p.reward);
+            const rewards = activeTab === 'available' 
+                ? reward.availableRewards 
+                : reward.myPurchases.map(p => p.reward);
             const newAnimations: {  [url: string]: Record<string, unknown> } = {};
             
             for (const rewardItem of rewards) {
@@ -52,44 +58,83 @@ const RewardsContainer: React.FC = observer(() => {
         }
     };
 
-    const renderRewardMedia = (rewardItem: Reward) => {
-        const mediaFile = rewardItem.mediaFile;
-        if (mediaFile) {
-            const { url, mimeType } = mediaFile;
-            if (mimeType === 'application/json' && animations[url]) {
-                return (
-                    <div className="w-20 h-20 flex items-center justify-center">
-                        <Lottie
-                            animationData={animations[url]}
-                            loop={false}
-                            autoplay={true}
-                            style={{ width: 80, height: 80 }}
-                        />
-                    </div>
-                );
-            } else if (mimeType.startsWith('image/')) {
-                return (
-                    <img
-                        src={url}
-                        alt={rewardItem.name}
-                        className="w-20 h-20 object-cover rounded-lg"
-                    />
-                );
-            }
+    const handleWithdrawClick = (userReward: UserReward) => {
+        setSelectedUserReward(userReward);
+        setWithdrawalModalOpen(true);
+    };
+
+    const handleWithdrawConfirm = async () => {
+        if (!selectedUserReward) return;
+        
+        const success = await reward.createWithdrawalRequest(selectedUserReward.id);
+        if (success) {
+            setWithdrawalModalOpen(false);
+            setSelectedUserReward(null);
+            // Обновляем список покупок и запросов
+            await reward.fetchMyPurchases();
+            await reward.fetchWithdrawalRequests();
         }
+    };
+
+    const getWithdrawalButton = (userReward: UserReward) => {
+        const status = reward.getWithdrawalStatus(userReward.id);
+        const isCreating = reward.isCreatingWithdrawal(userReward.id);
+        
+        if (status === 'completed') {
+            return (
+                <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <i className="fas fa-check-circle"></i>
+                    Выведен
+                </div>
+            );
+        }
+        
+        if (status === 'pending') {
+            return (
+                <div className="w-full px-4 py-3 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <i className="fas fa-clock"></i>
+                    Ожидает
+                </div>
+            );
+        }
+        
+        if (status === 'rejected') {
+            return (
+                <Button
+                    onClick={() => handleWithdrawClick(userReward)}
+                    disabled={isCreating}
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
+                >
+                    {isCreating ? 'Отправка...' : 'Повторить запрос'}
+                </Button>
+            );
+        }
+        
+        // Нет запроса - показываем кнопку "Вывести"
         return (
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
-                <i className="fas fa-gift text-white text-2xl"></i>
-            </div>
+            <Button
+                onClick={() => handleWithdrawClick(userReward)}
+                disabled={isCreating}
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-download'}
+            >
+                {isCreating ? 'Отправка...' : 'Вывести'}
+            </Button>
         );
     };
+
 
     // Показываем лоадинг пока загружаются награды
     if (reward.loading) {
         return <LoadingIndicator />;
     }
 
-    const currentRewards = activeTab === 'available' ? reward.availableRewards : reward.myPurchases.map(p => p.reward);
+    const currentRewards = activeTab === 'available' ? reward.availableRewards : reward.myPurchases;
 
     return (
         <div className="p-4 overflow-y-auto flex w-full flex-col gap-4">
@@ -147,19 +192,29 @@ const RewardsContainer: React.FC = observer(() => {
             ) : (
                 /* Rewards grid */
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                {currentRewards.map((rewardItem) => {
+                {currentRewards.map((item) => {
+                    // Для available tab item это Reward, для purchased - UserReward
+                    const rewardItem = activeTab === 'available' 
+                        ? item as Reward 
+                        : (item as UserReward).reward;
+                    const userReward = activeTab === 'purchased' ? item as UserReward : null;
+                    
                     const isPurchasing = reward.isRewardPurchasing(rewardItem.id);
                     const userBalance = user.user?.balance || 0;
                     const canAfford = userBalance >= rewardItem.price;
                     
                     return (
                         <div
-                            key={rewardItem.id}
+                            key={activeTab === 'available' ? rewardItem.id : userReward!.id}
                             className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition"
                         >
                             {/* Media/Animation at the top */}
                             <div className="mb-2">
-                                {renderRewardMedia(rewardItem)}
+                                {renderRewardMedia({
+                                    reward: rewardItem,
+                                    animationData: rewardItem.mediaFile?.url ? animations[rewardItem.mediaFile.url] : null,
+                                    size: 'sm'
+                                })}
                             </div>
                             
                             {/* Reward info */}
@@ -185,15 +240,16 @@ const RewardsContainer: React.FC = observer(() => {
                                     className="w-full"
                                     icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
                                 >
-                                    {isPurchasing ? 'Purchasing...' : `${rewardItem.price} gems`}
+                                    {isPurchasing ? 'Purchasing...' : (
+                                        <span className="flex items-center gap-1">
+                                            {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
+                                        </span>
+                                    )}
                                 </Button>
                             )}
                             
-                            {activeTab === 'purchased' && (
-                                <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg">
-                                    <i className="fas fa-check-circle"></i>
-                                    Purchased
-                                </div>
+                            {activeTab === 'purchased' && userReward && (
+                                getWithdrawalButton(userReward)
                             )}
                         </div>
                     );
@@ -203,11 +259,24 @@ const RewardsContainer: React.FC = observer(() => {
 
             {/* Balance info */}
             <div className="mt-4 bg-primary-800 border border-primary-700 rounded-xl p-3">
-                <div className="text-sm text-gray-400 text-center">
-                    <i className="fas fa-wallet mr-2"></i>
-                    Your Balance: {user.user?.balance || 0} gems
+                <div className="text-sm text-gray-400 text-center flex items-center justify-center gap-1">
+                    <i className="fas fa-wallet"></i>
+                    <span>Your Balance: {user.user?.balance || 0}</span>
+                    <i className="fa-solid fa-gem text-white"></i>
                 </div>
             </div>
+
+            {/* Withdrawal Modal */}
+            <WithdrawalModal
+                isOpen={withdrawalModalOpen}
+                onClose={() => {
+                    setWithdrawalModalOpen(false);
+                    setSelectedUserReward(null);
+                }}
+                userReward={selectedUserReward}
+                onConfirm={handleWithdrawConfirm}
+                loading={selectedUserReward ? reward.isCreatingWithdrawal(selectedUserReward.id) : false}
+            />
         </div>
     );
 });

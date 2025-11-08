@@ -5,6 +5,7 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
+import TaskCompletionModal from '../modals/TaskCompletionModal';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest, user } = useContext(Context) as IStoreContext;
@@ -127,6 +128,13 @@ const QuestsContainer: React.FC = observer(() => {
                         </div>
                     );
                 })}
+
+            {/* Task Completion Modal */}
+            <TaskCompletionModal
+                isOpen={!!quest.completedTask}
+                onClose={() => quest.clearCompletedTask()}
+                task={quest.completedTask}
+            />
         </div>
     );
 });

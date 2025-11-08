@@ -9,6 +9,8 @@ class RewardStore {
   error: string | null = null;
   purchasingRewards = new Set<number>();
   creatingWithdrawal = new Set<number>();
+  purchasedReward: Reward | null = null;
+  purchasePrice: number | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -54,7 +56,14 @@ class RewardStore {
     this.error = null;
     
     try {
-      await rewardAPI.purchaseReward(rewardId);
+      // const response = await rewardAPI.purchaseReward(rewardId);
+      
+      // Находим купленную награду
+      const purchasedReward = this.availableRewards.find(r => r.id === rewardId);
+      if (purchasedReward) {
+        this.purchasedReward = purchasedReward;
+        this.purchasePrice = purchasedReward.price;
+      }
       
       // Обновляем список купленных наград
       await this.fetchMyPurchases();
@@ -70,6 +79,11 @@ class RewardStore {
     } finally {
       this.purchasingRewards.delete(rewardId);
     }
+  }
+
+  clearPurchasedReward() {
+    this.purchasedReward = null;
+    this.purchasePrice = null;
   }
 
   // Проверить, загружается ли покупка награды

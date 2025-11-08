@@ -18,6 +18,7 @@ export default class QuestStore {
     _loading = false;
     _error = '';
     _taskLoadingStates: Map<number, boolean> = new Map();
+    _completedTask: Task | null = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -79,9 +80,22 @@ export default class QuestStore {
             
             // Если задача была успешно выполнена, обновляем данные задачи
             if (result.success) {
+                // Сохраняем старое состояние задачи
+                const wasCompletedBefore = task.userProgress?.isCompletedForCurrent || false;
+                
                 // Обновляем конкретную задачу в списке
                 await this.updateTaskProgress(task.id);
                 
+                // Проверяем, была ли задача завершена после обновления
+                const updatedTask = this._tasks.find(t => t.id === task.id);
+                const isCompletedNow = updatedTask?.userProgress?.isCompletedForCurrent || false;
+                
+                // Показываем модалку только если задача была только что завершена
+                if (!wasCompletedBefore && isCompletedNow && updatedTask) {
+                    runInAction(() => {
+                        this._completedTask = updatedTask;
+                    });
+                }
             }
             
             // Возвращаем результат обработки, включая возможное перенаправление
@@ -92,6 +106,14 @@ export default class QuestStore {
         } finally {
             runInAction(() => this.setTaskLoading(task.id, false));
         }
+    }
+
+    clearCompletedTask() {
+        this._completedTask = null;
+    }
+
+    get completedTask() {
+        return this._completedTask;
     }
 
     // Метод для обновления прогресса конкретной задачи

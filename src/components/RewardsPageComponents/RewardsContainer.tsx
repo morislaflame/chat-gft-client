@@ -6,6 +6,7 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 import WithdrawalModal from '../modals/WithdrawalModal';
+import RewardPurchaseModal from '../modals/RewardPurchaseModal';
 import { renderRewardMedia } from '@/utils/rewardUtils';
 
 const RewardsContainer: React.FC = observer(() => {
@@ -276,6 +277,14 @@ const RewardsContainer: React.FC = observer(() => {
                 userReward={selectedUserReward}
                 onConfirm={handleWithdrawConfirm}
                 loading={selectedUserReward ? reward.isCreatingWithdrawal(selectedUserReward.id) : false}
+            />
+
+            {/* Reward Purchase Modal */}
+            <RewardPurchaseModal
+                isOpen={!!reward.purchasedReward}
+                onClose={() => reward.clearPurchasedReward()}
+                reward={reward.purchasedReward}
+                pricePaid={reward.purchasePrice || undefined}
             />
         </div>
     );

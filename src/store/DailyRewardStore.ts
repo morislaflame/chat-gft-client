@@ -3,6 +3,8 @@ import { makeAutoObservable, runInAction } from "mobx";
 import {
   checkDailyReward,
   claimDailyReward,
+  getAllDailyRewards,
+  type DailyReward,
 } from "@/http/dailyRewardAPI";
 import type { DailyRewardCheckResponse, DailyRewardClaimResponse, RewardType } from "@/types/types";
 import type UserStore from "@/store/UserStore";
@@ -20,6 +22,7 @@ export default class DailyRewardStore {
     description: string;
   } | null = null;
 
+  private _allRewards: DailyReward[] = [];
   private _loading = false;
   private _userStore: UserStore | null = null;
 
@@ -30,6 +33,18 @@ export default class DailyRewardStore {
 
   setUserStore(userStore: UserStore) {
     this._userStore = userStore;
+  }
+
+  // Загрузить все ежедневные награды
+  async fetchAllRewards() {
+    try {
+      const rewards = await getAllDailyRewards();
+      runInAction(() => {
+        this._allRewards = rewards;
+      });
+    } catch (error) {
+      console.error("Error fetching all daily rewards:", error);
+    }
   }
 
   // Проверка ежедневной награды
@@ -107,5 +122,8 @@ export default class DailyRewardStore {
   }
   get loading() {
     return this._loading;
+  }
+  get allRewards() {
+    return this._allRewards;
   }
 }

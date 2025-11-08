@@ -60,7 +60,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = ({
               delay: 0.1,
               bounce: 0.4
             }}
-            className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
+            className="w-20 h-20 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
           >
             <i className="fas fa-gift text-white text-4xl"></i>
           </motion.div>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useCallback } from 'react';
+import React, { useContext, useEffect, useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Task } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -6,13 +6,21 @@ import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
 import TaskCompletionModal from '../modals/TaskCompletionModal';
+import DailyRewardProgress from './DailyRewardProgress';
+import DailyRewardDayModal from '../modals/DailyRewardDayModal';
+import type { DailyReward } from '@/http/dailyRewardAPI';
 
 const QuestsContainer: React.FC = observer(() => {
-    const { quest, user } = useContext(Context) as IStoreContext;
+    const { quest, user, dailyReward } = useContext(Context) as IStoreContext;
+    const [selectedDay, setSelectedDay] = useState<number | null>(null);
+    const [selectedReward, setSelectedReward] = useState<DailyReward | null>(null);
+    const [dayModalOpen, setDayModalOpen] = useState(false);
 
     useEffect(() => {
         quest.loadQuests();
-    }, [quest]);
+        dailyReward.fetchAllRewards();
+        dailyReward.checkDailyReward();
+    }, [quest, dailyReward]);
 
     const handleTaskAction = useCallback(async (task: Task) => {
         try {
@@ -24,6 +32,17 @@ const QuestsContainer: React.FC = observer(() => {
             console.error('Error completing task:', error);
         }
     }, [quest, user]);
+
+    const handleDayClick = useCallback((day: number, reward: DailyReward | null) => {
+        setSelectedDay(day);
+        setSelectedReward(reward);
+        setDayModalOpen(true);
+    }, []);
+
+    const isDayClaimed = (day: number): boolean => {
+        if (!dailyReward.lastDailyRewardClaimAt) return false;
+        return day <= dailyReward.dailyRewardDay;
+    };
 
     const getTaskIcon = (code: string) => {
         switch (code) {
@@ -86,6 +105,9 @@ const QuestsContainer: React.FC = observer(() => {
 
     return (
         <div className="p-4 overflow-y-auto flex w-full flex-col gap-2">
+            {/* Daily Reward Progress */}
+            
+
                 {quest.quests.map((task) => {
                     const isCompleted = task.userProgress?.isCompletedForCurrent || false;
                     const progress = task.userProgress?.progress || 0;
@@ -129,11 +151,30 @@ const QuestsContainer: React.FC = observer(() => {
                     );
                 })}
 
+            <DailyRewardProgress
+                dailyRewardDay={dailyReward.dailyRewardDay}
+                lastDailyRewardClaimAt={dailyReward.lastDailyRewardClaimAt}
+                allRewards={dailyReward.allRewards}
+                onDayClick={handleDayClick}
+            />
             {/* Task Completion Modal */}
             <TaskCompletionModal
                 isOpen={!!quest.completedTask}
                 onClose={() => quest.clearCompletedTask()}
                 task={quest.completedTask}
+            />
+
+            {/* Daily Reward Day Modal */}
+            <DailyRewardDayModal
+                isOpen={dayModalOpen}
+                onClose={() => {
+                    setDayModalOpen(false);
+                    setSelectedDay(null);
+                    setSelectedReward(null);
+                }}
+                day={selectedDay}
+                reward={selectedReward}
+                isClaimed={selectedDay ? isDayClaimed(selectedDay) : false}
             />
         </div>
     );

@@ -2,58 +2,26 @@ import React from 'react';
 import { motion } from 'motion/react';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
-import type { Task } from '@/types/types';
+import type { DailyReward } from '@/http/dailyRewardAPI';
 
-interface TaskCompletionModalProps {
+interface DailyRewardDayModalProps {
   isOpen: boolean;
   onClose: () => void;
-  task: Task | null;
-  reward?: {
-    amount: number;
-    type: 'energy' | 'tokens';
-  };
+  day: number | null;
+  reward: DailyReward | null;
+  isClaimed: boolean;
 }
 
-const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
+const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
   isOpen,
   onClose,
-  task,
-  reward
+  day,
+  reward,
+  isClaimed
 }) => {
-  if (!task) return null;
+  if (!day || !reward) return null;
 
-  const isEnergy = reward?.type === 'energy' || task.rewardType === 'energy';
-  const rewardAmount = reward?.amount || task.reward;
-
-  const getTaskIcon = (code: string) => {
-    switch (code) {
-      case 'DAILY_LOGIN':
-        return 'fas fa-calendar-day';
-      case 'TELEGRAM_SUB':
-        return 'fas fa-bullhorn';
-      case 'REF_USERS':
-        return 'fas fa-user-friends';
-      case 'CHAT_BOOST':
-        return 'fas fa-rocket';
-      case 'STORY_SHARE':
-        return 'fas fa-share';
-      default:
-        return 'fas fa-star';
-    }
-  };
-
-  const getTaskGradient = (type: string) => {
-    switch (type) {
-      case 'DAILY':
-        return 'from-amber-500 to-orange-600';
-      case 'ONE_TIME':
-        return 'from-blue-500 to-indigo-600';
-      case 'SPECIAL':
-        return 'from-emerald-500 to-teal-600';
-      default:
-        return 'from-purple-500 to-violet-600';
-    }
-  };
+  const isEnergy = reward.rewardType === 'energy';
 
   return (
     <Modal
@@ -73,17 +41,23 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
               delay: 0.1,
               bounce: 0.4
             }}
-            className={`w-20 h-20 mx-auto mb-2 rounded-full bg-gradient-to-br ${getTaskGradient(task.type)} flex items-center justify-center shadow-lg`}
+            className={`w-20 h-20 mx-auto mb-2 rounded-full bg-gradient-to-br ${
+              isClaimed ? 'from-green-500 to-emerald-600' : 'from-yellow-500 to-orange-600'
+            } flex items-center justify-center shadow-lg`}
           >
-            <i className={`${getTaskIcon(task.code)} text-white text-4xl`}></i>
+            {isClaimed ? (
+              <i className="fas fa-check-circle text-white text-4xl"></i>
+            ) : (
+              <i className="fas fa-calendar-day text-white text-4xl"></i>
+            )}
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            Задача выполнена!
+            День {day}
           </h2>
-          <p className="text-gray-400 text-sm">
-            {task.description}
-          </p>
+          {/* <p className="text-gray-400 text-sm">
+            {reward.description}
+          </p> */}
         </div>
 
         {/* Reward Info */}
@@ -94,18 +68,30 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
           className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
         >
           <div className="text-center">
-            <div className="text-sm text-gray-400 mb-2">Вы получили:</div>
+            <div className="text-sm text-gray-400 mb-2">Награда:</div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-3xl font-bold text-white">
-                +{rewardAmount}
+                +{reward.reward}
               </span>
               <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
             </div>
-            <div className="text-xs text-gray-400">
-              {isEnergy ? 'Энергия' : 'Гемы'}
-            </div>
           </div>
         </motion.div>
+
+        {/* Status Info */}
+        {isClaimed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 mb-4"
+          >
+            <div className="flex items-center justify-center gap-2 text-sm text-green-400">
+              <i className="fas fa-check-circle"></i>
+              <span>Награда получена</span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Close Button */}
         <motion.div
@@ -120,7 +106,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
             className="w-full"
             icon="fas fa-check"
           >
-            Отлично!
+            Понятно
           </Button>
         </motion.div>
       </div>
@@ -128,4 +114,4 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
   );
 };
 
-export default TaskCompletionModal;
+export default DailyRewardDayModal;

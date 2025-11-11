@@ -22,7 +22,8 @@ const RewardsContainer: React.FC = observer(() => {
         reward.fetchAvailableRewards();
         reward.fetchMyPurchases();
         reward.fetchWithdrawalRequests();
-    }, [reward]);
+        user.fetchMyInfo();
+    }, [reward, user]);
 
     // Загружаем анимации для наград
     useEffect(() => {
@@ -51,6 +52,7 @@ const RewardsContainer: React.FC = observer(() => {
         };
         loadAnimations();
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
+    
     const handlePurchase = async (rewardId: number) => {
         const success = await reward.purchaseReward(rewardId);
         if (success) {

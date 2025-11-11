@@ -35,7 +35,6 @@ class RewardStore {
 
   // Загрузить купленные награды
   async fetchMyPurchases() {
-    this.loading = true;
     this.error = null;
     try {
       this.myPurchases = await rewardAPI.getMyPurchases();
@@ -45,9 +44,7 @@ class RewardStore {
         : 'Failed to load purchases';
       this.error = errorMessage || 'Failed to load purchases';
       console.error('Error fetching my purchases:', error);
-    } finally {
-      this.loading = false;
-    }
+    } 
   }
 
   // Купить награду
@@ -56,13 +53,14 @@ class RewardStore {
     this.error = null;
     
     try {
-      // const response = await rewardAPI.purchaseReward(rewardId);
+      // Вызываем API для покупки награды
+      const purchaseResponse = await rewardAPI.purchaseReward(rewardId);
       
       // Находим купленную награду
       const purchasedReward = this.availableRewards.find(r => r.id === rewardId);
       if (purchasedReward) {
         this.purchasedReward = purchasedReward;
-        this.purchasePrice = purchasedReward.price;
+        this.purchasePrice = purchaseResponse.userReward.purchasePrice || purchasedReward.price;
       }
       
       // Обновляем список купленных наград

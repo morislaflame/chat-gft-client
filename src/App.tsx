@@ -7,6 +7,8 @@ import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
 import AppLoader from './components/CoreComponents/AppLoader';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
+import StageRewardModal from "./components/modals/StageRewardModal";
+import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
@@ -97,6 +99,8 @@ const handleStart = () => {
               <AppRouter />
             </Suspense>
             <DailyRewardModal />
+            <StageRewardModal />
+            <InsufficientEnergyModal />
         </div>
       </BrowserRouter>
   )

@@ -9,12 +9,16 @@ import Button from '../CoreComponents/Button';
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const [inputValue, setInputValue] = useState('');
+    const [isMissionExpanded, setIsMissionExpanded] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const hasScrolledToBottomRef = useRef(false);
 
     useEffect(() => {
         // Load chat history when component mounts
         chat.loadChatHistory();
+        // Also load status independently to ensure it's loaded even if history is empty
+        chat.loadStatus();
     }, [chat]);
 
     const introTexts = {
@@ -26,13 +30,29 @@ const ChatContainer: React.FC = observer(() => {
         await chat.sendMessage(message);
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollToBottom = (instant = false) => {
+        // Используем контейнер сообщений для более надежного скролла
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+        // Также используем messagesEndRef как fallback
+        messagesEndRef.current?.scrollIntoView({ behavior: instant ? 'auto' : 'smooth' });
     };
 
     useEffect(() => {
         scrollToBottom();
     }, [chat.messages, chat.isTyping]);
+
+    // Скроллим вниз сразу после загрузки истории (instant scroll для первой загрузки)
+    useEffect(() => {
+        if (!chat.loading && chat.messages.length > 0 && !hasScrolledToBottomRef.current) {
+            // Небольшая задержка, чтобы DOM успел обновиться
+            setTimeout(() => {
+                scrollToBottom(true); // Instant scroll для первой загрузки
+                hasScrolledToBottomRef.current = true;
+            }, 100);
+        }
+    }, [chat.loading, chat.messages.length]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,15 +76,14 @@ const ChatContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
-    // Вычисляем процент прогресса
-    const progressPercent = chat.forceProgressData 
-        ? (chat.forceProgressData.current / 10) * 100 
-        : 0;
+    // Вычисляем процент прогресса на основе текущего этапа
+    // Этап 1 = 0%, этап 2 = 33.33%, этап 3 = 66.66%
+    const progressPercent = chat.forceProgress;
 
     return (
         <div className="h-full flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
-            <div className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
+            <div ref={chatContainerRef} className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
                 <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md">
                     <div className="flex items-center mb-2">
@@ -80,7 +99,7 @@ const ChatContainer: React.FC = observer(() => {
             </div>
 
             {/* Chat Messages Container */}
-            <div ref={chatContainerRef} className="space-y-6">
+            <div className="space-y-6">
                 {Array.isArray(chat.messages) && chat.messages.map((message, index) => {
                     const isLastAIMessage = !message.isUser && index === chat.messages.length - 1;
                     const showSuggestions = isLastAIMessage && chat.suggestions && chat.suggestions.length > 0 && !chat.isTyping;
@@ -169,14 +188,23 @@ const ChatContainer: React.FC = observer(() => {
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1">
+                            <div className="flex justify-between text-xs mb-2">
                                 <span>Force Progress</span>
-                                <span className="text-amber-400 font-medium flex items-center">
-                                    <i className="fas fa-gift mr-1"></i>
-                                    {chat.forceProgressData 
-                                        ? `${chat.forceProgressData.untilReward} until reward`
-                                        : 'Gift at 100%'}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-amber-400 font-medium flex items-center">
+                                        <i className="fas fa-gift mr-1"></i>
+                                        Stage {chat.currentStage}
+                                    </span>
+                                    {chat.mission && (
+                                        <button
+                                            onClick={() => setIsMissionExpanded(!isMissionExpanded)}
+                                            className="text-amber-400 hover:text-amber-300 transition-colors"
+                                            aria-label="Toggle mission"
+                                        >
+                                            <i className={`fas ${isMissionExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
                                 <div 
@@ -184,6 +212,25 @@ const ChatContainer: React.FC = observer(() => {
                                     style={{ width: `${progressPercent}%` }}
                                 ></div>
                             </div>
+                            {/* Current Mission - Collapsible */}
+                            <AnimatePresence>
+                                {chat.mission && isMissionExpanded && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="mt-4 border-t border-primary-700 pt-3">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-xs text-gray-100">Миссия:</span>
+                                                <span className="flex-1 text-xs text-gray-400">{chat.mission}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>

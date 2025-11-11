@@ -44,13 +44,17 @@ export interface ApiMessageResponse {
     newEnergy: number;
     newBalance?: number;
     suggestions?: string[];
-    isRelevant?: boolean;
-    progress?: {
-        current: number;
-        untilReward: number;
-        level: number;
-    };
+    missionCompleted?: boolean;
+    stage?: number;
+    completedStage?: number; // Номер завершенного этапа
+    mission?: string;
     timestamp: string;
+}
+
+export interface ApiStatusResponse {
+    stage: number;
+    mission: string | null;
+    status: string;
 }
 
 export interface ApiHistoryItem {
@@ -67,6 +71,12 @@ export interface ProgressData {
     level: number;
     untilReward: number;
     lastProgressAt?: string | null;
+}
+
+export interface StageRewardData {
+    stageNumber: number;
+    rewardAmount: number;
+    isOpen: boolean;
 }
 
 export interface ForceProgress {

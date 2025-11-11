@@ -1,17 +1,20 @@
 import { makeAutoObservable } from "mobx";
-import { sendMessage as apiSendMessage, getChatHistory } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, ProgressData } from "@/types/types";
+import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
+import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData } from "@/types/types";
 import type UserStore from "@/store/UserStore";
 
 export default class ChatStore {
     _messages: Message[] = [];
     _isTyping = false;
     _forceProgress = 0;
-    _forceProgressData: ProgressData | null = null;
+    _currentStage = 1;
+    _mission: string | null = null;
     _suggestions: string[] = [];
     _loading = false;
     _error = '';
     _userStore: UserStore | null = null;
+    _stageReward: StageRewardData | null = null;
+    _insufficientEnergy = false;
 
     constructor(userStore?: UserStore) {
         makeAutoObservable(this);
@@ -38,12 +41,33 @@ export default class ChatStore {
         this._forceProgress = progress;
     }
 
-    setForceProgressData(data: ProgressData | null) {
-        this._forceProgressData = data;
-        if (data) {
-            // Вычисляем процент прогресса (от 0 до 100)
-            this._forceProgress = (data.current / 10) * 100;
+    setCurrentStage(stage: number) {
+        this._currentStage = stage;
+        // Вычисляем процент прогресса на основе этапа
+        // Этап 1 = 0%, этап 2 = 33.33%, этап 3 = 66.66%
+        this._forceProgress = ((stage - 1) / 3) * 100;
+    }
+
+    setMission(mission: string | null) {
+        this._mission = mission;
+    }
+
+    setStageReward(reward: StageRewardData | null) {
+        this._stageReward = reward;
+    }
+
+    closeStageReward() {
+        if (this._stageReward) {
+            this._stageReward = { ...this._stageReward, isOpen: false };
         }
+    }
+
+    setInsufficientEnergy(value: boolean) {
+        this._insufficientEnergy = value;
+    }
+
+    closeInsufficientEnergy() {
+        this._insufficientEnergy = false;
     }
 
     setSuggestions(suggestions: string[]) {
@@ -70,6 +94,9 @@ export default class ChatStore {
         this.setIsTyping(true);
         this.setError('');
 
+        // Сохраняем баланс до отправки сообщения для вычисления награды
+        const previousBalance = this._userStore?.user?.balance || 0;
+
         try {
             const response: ApiMessageResponse = await apiSendMessage(messageText);
             const aiMessage: Message = {
@@ -91,18 +118,33 @@ export default class ChatStore {
                 }
             }
             
-            // Обновляем баланс пользователя из ответа сервера
-            if (response.newBalance !== undefined && this._userStore) {
-                this._userStore.setBalance(response.newBalance);
+            // Обновляем прогресс из ответа
+            if (response.stage !== undefined) {
+                this.setCurrentStage(response.stage);
             }
             
-            // Обновляем прогресс из ответа
-            if (response.progress) {
-                this.setForceProgressData({
-                    current: response.progress.current,
-                    level: response.progress.level,
-                    untilReward: response.progress.untilReward,
-                });
+            if (response.mission !== undefined) {
+                this.setMission(response.mission);
+            }
+            
+            // Обновляем баланс пользователя из ответа сервера ПОСЛЕ обновления прогресса
+            // чтобы правильно вычислить награду
+            if (response.newBalance !== undefined && this._userStore) {
+                // Если миссия завершена (missionCompleted), вычисляем сумму награды
+                if (response.missionCompleted) {
+                    const rewardAmount = response.newBalance - previousBalance;
+                    
+                    // Используем completedStage из ответа (если есть), иначе вычисляем предыдущий этап
+                    const stageNumber = response.completedStage || (response.stage ? (response.stage === 1 ? 3 : response.stage - 1) : 1);
+                    
+                    this.setStageReward({
+                        stageNumber: stageNumber,
+                        rewardAmount: rewardAmount,
+                        isOpen: true
+                    });
+                }
+                
+                this._userStore.setBalance(response.newBalance);
             }
             
             // Обновляем подсказки из ответа
@@ -118,6 +160,7 @@ export default class ChatStore {
             const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
             if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient energy')) {
                 this.setError('Insufficient energy. Please purchase more stars.');
+                this.setInsufficientEnergy(true);
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
             }
@@ -133,7 +176,6 @@ export default class ChatStore {
         try {
             const response = await getChatHistory();
             const historyData = response.history;
-            const progressData = response.progress;
             
             // Преобразуем данные из API в формат Message[]
             // Каждый элемент истории содержит и сообщение пользователя, и ответ AI
@@ -164,12 +206,8 @@ export default class ChatStore {
             
             this.setMessages(messages);
             
-            // Устанавливаем прогресс из ответа
-            if (progressData) {
-                this.setForceProgressData(progressData);
-            } else {
-                this.setForceProgressData(null);
-            }
+            // Загружаем статус этапа после загрузки истории
+            await this.loadStatus();
         } catch (error) {
             console.error('Error loading chat history:', error);
             this.setError('Error loading chat history');
@@ -178,9 +216,24 @@ export default class ChatStore {
         }
     }
 
+    async loadStatus() {
+        try {
+            const statusData = await getStatus();
+            this.setCurrentStage(statusData.stage);
+            this.setMission(statusData.mission);
+        } catch (error) {
+            console.error('Error loading status:', error);
+            // Устанавливаем дефолтные значения при ошибке
+            this.setCurrentStage(1);
+            this.setMission(null);
+        }
+    }
+
     clearMessages() {
         this.setMessages([]);
         this.setForceProgress(0);
+        this.setCurrentStage(1);
+        this.setMission(null);
         this.setSuggestions([]);
     }
 
@@ -196,8 +249,12 @@ export default class ChatStore {
         return this._forceProgress;
     }
 
-    get forceProgressData() {
-        return this._forceProgressData;
+    get currentStage() {
+        return this._currentStage;
+    }
+
+    get mission() {
+        return this._mission;
     }
 
     get suggestions() {
@@ -210,5 +267,13 @@ export default class ChatStore {
 
     get error() {
         return this._error;
+    }
+
+    get stageReward() {
+        return this._stageReward;
+    }
+
+    get insufficientEnergy() {
+        return this._insufficientEnergy;
     }
 }

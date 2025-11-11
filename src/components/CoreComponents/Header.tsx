@@ -51,7 +51,7 @@ const Header: React.FC = observer(() => {
             <div className="bg-primary-800 py-3 px-4 flex items-center justify-between border-b border-primary-700">
                 <div className="flex items-center space-x-3">
                     <div className="relative">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer">
                             <span className="font-bold text-xl">DV</span>
                         </div>
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-primary-800"></div>
@@ -74,7 +74,7 @@ const Header: React.FC = observer(() => {
                 <div className="flex space-x-2">
                     <button 
                         onClick={handleGemsClick}
-                        className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative"
+                        className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                     >
                         <i className="fa-solid fa-gem text-amber-400 text-lg"></i>
                         <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
@@ -83,7 +83,7 @@ const Header: React.FC = observer(() => {
                     </button>
                         <button 
                             onClick={handleStarsClick}
-                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative"
+                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                         >
                             <i className="fa-solid fa-bolt text-purple-400 text-lg"></i>
                         <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
@@ -92,7 +92,7 @@ const Header: React.FC = observer(() => {
                         </button>
                         <button 
                             onClick={() => {}}
-                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center space-x-1"
+                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center space-x-1 cursor-pointer"
                         >
                             <i className="fas fa-globe text-gray-300 text-sm "></i>
                             <span className="text-xs">{user.user?.language?.toUpperCase() || 'EN'}</span>

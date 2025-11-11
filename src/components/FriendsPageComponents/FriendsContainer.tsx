@@ -58,7 +58,7 @@ const FriendsContainer: React.FC = observer(() => {
 
     return (
         <div className="p-4 overflow-y-auto flex w-full">
-            <div className="max-w-xl mx-auto w-full space-y-4 mt-3">
+            <div className="max-w-xl mx-auto w-full space-y-4">
                 {/* Referral Stats */}
                 <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4">
                     <div className="flex items-center justify-between">

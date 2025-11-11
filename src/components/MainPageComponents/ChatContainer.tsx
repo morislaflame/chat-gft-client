@@ -190,15 +190,17 @@ const ChatContainer: React.FC = observer(() => {
                         <div className="flex-1">
                             <div className="flex justify-between text-xs mb-2">
                                 <span>Force Progress</span>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => setIsMissionExpanded(!isMissionExpanded)}
+                                >
                                     <span className="text-amber-400 font-medium flex items-center">
                                         <i className="fas fa-gift mr-1"></i>
                                         Stage {chat.currentStage}
                                     </span>
                                     {chat.mission && (
                                         <button
-                                            onClick={() => setIsMissionExpanded(!isMissionExpanded)}
-                                            className="text-amber-400 hover:text-amber-300 transition-colors"
+                                            
+                                            className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
                                             aria-label="Toggle mission"
                                         >
                                             <i className={`fas ${isMissionExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>

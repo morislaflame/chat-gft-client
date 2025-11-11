@@ -30,7 +30,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
                     <button
                         key={tab.id}
                         onClick={() => handleTabClick(tab.id, tab.route)}
-                        className={`flex flex-col items-center w-1/5 ${
+                        className={`flex flex-col items-center w-1/5 cursor-pointer ${
                             activeTab === tab.id ? '' : 'opacity-70'
                         }`}
                     >

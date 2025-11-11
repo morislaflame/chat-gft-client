@@ -147,7 +147,7 @@ const RewardsContainer: React.FC = observer(() => {
                 <div className="flex bg-primary-800 rounded-lg p-1">
                     <button
                         onClick={() => setActiveTab('available')}
-                        className={`px-3 py-1 text-sm rounded-md transition ${
+                        className={`px-3 py-1 text-sm rounded-md transition cursor-pointer ${
                             activeTab === 'available'
                                 ? 'bg-secondary-500 text-white'
                                 : 'text-gray-400 hover:text-white'
@@ -157,7 +157,7 @@ const RewardsContainer: React.FC = observer(() => {
                     </button>
                     <button
                         onClick={() => setActiveTab('purchased')}
-                        className={`px-3 py-1 text-sm rounded-md transition ${
+                        className={`px-3 py-1 text-sm rounded-md transition cursor-pointer ${
                             activeTab === 'purchased'
                                 ? 'bg-secondary-500 text-white'
                                 : 'text-gray-400 hover:text-white'

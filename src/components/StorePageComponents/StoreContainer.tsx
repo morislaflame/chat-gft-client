@@ -96,12 +96,12 @@ const StoreContainer: React.FC = observer(() => {
                 })}
 
                 {/* Payment Info */}
-                <div className="mt-6 bg-primary-800 border border-primary-700 rounded-xl p-4">
+                {/* <div className="mt-6 bg-primary-800 border border-primary-700 rounded-xl p-4">
                     <div className="text-sm text-gray-400 text-center">
                         <i className="fas fa-shield-alt mr-2"></i>
                         Secure payment powered by Telegram Stars
                     </div>
-            </div>
+                </div> */}
         </div>
     );
 });

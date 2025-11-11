@@ -142,7 +142,7 @@ const RewardsContainer: React.FC = observer(() => {
     return (
         <div className="p-4 overflow-y-auto flex w-full flex-col gap-4">
             {/* Header with tabs */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white">Rewards</h2>
                 <div className="flex bg-primary-800 rounded-lg p-1">
                     <button
@@ -261,7 +261,7 @@ const RewardsContainer: React.FC = observer(() => {
             )}
 
             {/* Balance info */}
-            <div className="mt-4 bg-primary-800 border border-primary-700 rounded-xl p-3">
+            <div className="bg-primary-800 border border-primary-700 rounded-xl p-3">
                 <div className="text-sm text-gray-400 text-center flex items-center justify-center gap-1">
                     <i className="fas fa-wallet"></i>
                     <span>Your Balance: {user.user?.balance || 0}</span>

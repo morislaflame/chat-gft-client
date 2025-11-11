@@ -16,6 +16,7 @@ export interface UserInfo {
     lastName?: string;
     refCode?: string;
     referralCount?: number;
+    referrals?: Referral[];
     lastBonuses?: Bonus[];
 }
 
@@ -114,10 +115,13 @@ export interface Reward {
 }
 
 export interface Referral {
-    id: string;
-    username: string;
-    joinedAt: Date;
-    reward: number;
+    id: number;
+    telegramId: number;
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+    joinedAt: string;
+    createdAt: string;
 }
 
 export interface StarsPackage {

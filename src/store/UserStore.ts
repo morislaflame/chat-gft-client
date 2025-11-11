@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getEnergy, getReferrals, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 
 export default class UserStore {
@@ -115,8 +115,15 @@ export default class UserStore {
     async fetchMyInfo() {
         try {
             const data = await fetchMyInfo();
+            // Также загружаем информацию о рефералах для получения referralCount и lastBonuses
+            const referralInfo = await getReferralInfo();
             runInAction(() => {
-                this.setUser(data as UserInfo);
+                this.setUser({ 
+                    ...data as UserInfo, 
+                    referrals: referralInfo.referrals || [],
+                    referralCount: referralInfo.referralCount || 0,
+                    lastBonuses: referralInfo.lastBonuses || []
+                });
                 if (data.energy !== undefined) {
                     this.setEnergy(data.energy);
                 }
@@ -138,16 +145,6 @@ export default class UserStore {
         }
     }
 
-    async loadReferrals() {
-        try {
-            const referrals = await getReferrals();
-            runInAction(() => {
-                this.setReferrals(referrals);
-            });
-        } catch (error) {
-            console.error("Error loading referrals:", error);
-        }
-    }
 
     async loadReferralLink() {
         try {

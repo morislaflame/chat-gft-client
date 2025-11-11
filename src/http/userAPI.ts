@@ -1,6 +1,6 @@
 import { $authHost, $host } from "./index";
 import { jwtDecode } from "jwt-decode";
-import type { Reward, Referral } from '@/types/types';
+import type { Reward } from '@/types/types';
 
 export const telegramAuth = async (initData: string) => {
     const { data } = await $host.post('api/user/auth/telegram', { initData });
@@ -44,7 +44,7 @@ export const getRewards = async (): Promise<Reward[]> => {
     return data;
 };
 
-export const getReferrals = async (): Promise<Referral[]> => {
+export const getReferralInfo = async () => {
     const { data } = await $authHost.get('api/user/me/referral');
     return data;
 };

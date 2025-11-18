@@ -22,9 +22,20 @@ const ChatContainer: React.FC = observer(() => {
     }, [chat]);
 
     const introTexts = {
-        en: "I am Darth Vader, your AI assistant. Ask me anything about the Force, the Empire, or the galaxy far, far away.",
-        ru: "Я Дарт Вейдер, ваш ИИ-помощник. Спрашивайте меня о Силе, Империи или галактике далеко-далеко отсюда."
+        en: {
+            greeting: "I am Darth Vader, your AI assistant. Ask me anything about the Force, the Empire, or the galaxy far, far away.",
+            mission: "Mission",
+            stage: "Stage"
+        },
+        ru: {
+            greeting: "Я Дарт Вейдер, ваш ИИ-помощник. Спрашивайте меня о Силе, Империи или галактике далеко-далеко отсюда.",
+            mission: "Миссия",
+            stage: "Этап"
+        }
     };
+
+    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
+    const t = introTexts[userLanguage];
 
     const handleSendMessage = async (message: string) => {
         await chat.sendMessage(message);
@@ -85,16 +96,22 @@ const ChatContainer: React.FC = observer(() => {
             {/* AI Introduction */}
             <div ref={chatContainerRef} className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
-                <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md">
-                    <div className="flex items-center mb-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2">
-                            <img src="/images/dart.png" alt="Darth Vader" className="w-6 h-6 rounded-full" />
+                <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
+                    
+                    {/* Mission Info */}
+                    {chat.mission && (
+                        <div className="">
+                            <div className="flex items-center gap-2 mb-2">
+                                <i className="fas fa-gift text-amber-400 text-xs"></i>
+                                <span className="text-xs font-semibold text-amber-400">
+                                    {t.stage} {chat.currentStage}
+                                </span>
+                            </div>
+                            <div className="text-xs text-gray-300">
+                                <span className="font-medium text-gray-200">{t.mission}:</span> {chat.mission}
+                            </div>
                         </div>
-                        <div className="text-sm font-semibold text-red-400">Darth Vader</div>
-                    </div>
-                    <div className="text-sm">
-                        <span className="font-medium">{introTexts[user.user?.language || 'en']}</span>
-                    </div>
+                    )}
                 </div>
             </div>
 

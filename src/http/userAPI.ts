@@ -77,3 +77,7 @@ export const getOnboarding = async (): Promise<boolean> => {
 export const setOnboarding = async (completed: boolean): Promise<void> => {
     await $authHost.post('api/user/me/onboarding', { completed });
 };
+
+export const setSelectedHistoryName = async (historyName: string): Promise<void> => {
+    await $authHost.post('api/user/me/history', { historyName });
+};

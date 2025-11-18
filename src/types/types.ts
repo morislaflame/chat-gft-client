@@ -18,6 +18,7 @@ export interface UserInfo {
     referralCount?: number;
     referrals?: Referral[];
     lastBonuses?: Bonus[];
+    selectedHistoryName?: string; // Выбранная история пользователя (по умолчанию "starwars")
 }
 
 export interface Product {

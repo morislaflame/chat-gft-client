@@ -4,13 +4,15 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import Navigation from './Navigation';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import HistorySelectionModal from '@/components/modals/HistorySelectionModal';
 
 
 const Header: React.FC = observer(() => {
-    const { user } = useContext(Context) as IStoreContext;
+    const { user, chat } = useContext(Context) as IStoreContext;
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('chat');
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     
     useEffect(() => {
         switch (location.pathname) {
@@ -44,30 +46,61 @@ const Header: React.FC = observer(() => {
         navigate(REWARDS_ROUTE);
     }
 
+    const handleAvatarClick = () => {
+        setIsHistoryModalOpen(true);
+    }
+
+    const handleHistoryModalClose = () => {
+        setIsHistoryModalOpen(false);
+        // Перезагружаем историю чата после выбора истории
+        if (location.pathname === MAIN_ROUTE) {
+            chat.loadChatHistory();
+            chat.loadStatus();
+        }
+    }
+
 
     return (
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300">
             {/* App Header */}
             <div className="bg-primary-800 py-3 px-4 flex items-center justify-between border-b border-primary-700">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 cursor-pointer"
+                onClick={handleAvatarClick}>
                     <div className="relative">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer">
-                            <span className="font-bold text-xl">DV</span>
+                        <div 
+                            className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer hover:from-red-500 hover:to-red-700 transition-all"
+                            
+                        >
+                            {/* <span className="font-bold text-xl"></span> */}
                         </div>
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-primary-800"></div>
                     </div>
                     <div>
-                        <div className="font-bold text-gray-300 text-sm mb-1">
+                        {/* <div className="font-bold text-gray-300 text-sm mb-1">
                             {user.user?.firstName || user.user?.username || 'Dark Lord'}
-                        </div>
+                        </div> */}
                         <div className="flex items-center space-x-2 text-xs">
-                            <div className="w-16 h-1.5 bg-primary-700 rounded-full overflow-hidden">
+                            {/* <div className="w-16 h-1.5 bg-primary-700 rounded-full overflow-hidden">
                                 <div 
                                     className="h-full bg-gradient-to-r from-red-400 to-red-600 energy-fill" 
                                     style={{ width: `${user.user?.energy || 0}%` }}
                                 >
                                 </div>
-                            </div>
+                            </div> */}
+                            <span className="text-gray-300 text-xs font-medium">
+                                {(() => {
+                                    const historyName = user.user?.selectedHistoryName || 'starwars';
+                                    const historyDisplayNames: Record<string, { en: string; ru: string }> = {
+                                        starwars: { en: 'Star Wars', ru: 'Звёздные Войны' },
+                                    };
+                                    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
+                                    const displayName = historyDisplayNames[historyName];
+                                    if (displayName) {
+                                        return displayName[userLanguage];
+                                    }
+                                    return historyName.charAt(0).toUpperCase() + historyName.slice(1);
+                                })()}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -102,6 +135,12 @@ const Header: React.FC = observer(() => {
             <Navigation
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
+            />
+            
+            {/* History Selection Modal */}
+            <HistorySelectionModal
+                isOpen={isHistoryModalOpen}
+                onClose={handleHistoryModalClose}
             />
         </div>
     );

@@ -15,6 +15,7 @@ export default class ChatStore {
     _userStore: UserStore | null = null;
     _stageReward: StageRewardData | null = null;
     _insufficientEnergy = false;
+    private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
 
     constructor(userStore?: UserStore) {
         makeAutoObservable(this);
@@ -72,6 +73,33 @@ export default class ChatStore {
 
     setSuggestions(suggestions: string[]) {
         this._suggestions = suggestions;
+        // Сохраняем suggestions в localStorage
+        if (suggestions && suggestions.length > 0) {
+            try {
+                localStorage.setItem(this.SUGGESTIONS_STORAGE_KEY, JSON.stringify(suggestions));
+            } catch (error) {
+                console.error('Failed to save suggestions to localStorage:', error);
+            }
+        } else {
+            // Очищаем localStorage если suggestions пустые
+            try {
+                localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);
+            } catch (error) {
+                console.error('Failed to remove suggestions from localStorage:', error);
+            }
+        }
+    }
+
+    private loadSuggestionsFromStorage(): string[] {
+        try {
+            const stored = localStorage.getItem(this.SUGGESTIONS_STORAGE_KEY);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (error) {
+            console.error('Failed to load suggestions from localStorage:', error);
+        }
+        return [];
     }
 
     setLoading(loading: boolean) {
@@ -93,6 +121,9 @@ export default class ChatStore {
         this.addMessage(userMessage);
         this.setIsTyping(true);
         this.setError('');
+        
+        // Очищаем suggestions при отправке нового сообщения
+        this.setSuggestions([]);
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
@@ -121,6 +152,11 @@ export default class ChatStore {
             // Обновляем прогресс из ответа
             if (response.stage !== undefined) {
                 this.setCurrentStage(response.stage);
+            }
+            
+            // Обновляем процент прогресса из ответа (если есть), иначе используется вычисление на основе этапа
+            if (response.progressPercent !== undefined && response.progressPercent !== null) {
+                this.setForceProgress(response.progressPercent);
             }
             
             if (response.mission !== undefined) {
@@ -206,6 +242,15 @@ export default class ChatStore {
             
             this.setMessages(messages);
             
+            // Восстанавливаем suggestions из localStorage для последнего сообщения бота
+            const lastBotMessage = messages.filter(m => !m.isUser).pop();
+            if (lastBotMessage) {
+                const savedSuggestions = this.loadSuggestionsFromStorage();
+                if (savedSuggestions.length > 0) {
+                    this.setSuggestions(savedSuggestions);
+                }
+            }
+            
             // Загружаем статус этапа после загрузки истории
             await this.loadStatus();
         } catch (error) {
@@ -220,6 +265,10 @@ export default class ChatStore {
         try {
             const statusData = await getStatus();
             this.setCurrentStage(statusData.stage);
+            // Обновляем процент прогресса из ответа (если есть), иначе используется вычисление на основе этапа
+            if (statusData.progressPercent !== undefined && statusData.progressPercent !== null) {
+                this.setForceProgress(statusData.progressPercent);
+            }
             this.setMission(statusData.mission);
         } catch (error) {
             console.error('Error loading status:', error);
@@ -235,6 +284,12 @@ export default class ChatStore {
         this.setCurrentStage(1);
         this.setMission(null);
         this.setSuggestions([]);
+        // Очищаем suggestions из localStorage при очистке сообщений
+        try {
+            localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);
+        } catch (error) {
+            console.error('Failed to remove suggestions from localStorage:', error);
+        }
     }
 
     get messages() {

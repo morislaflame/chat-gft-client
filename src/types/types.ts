@@ -49,6 +49,7 @@ export interface ApiMessageResponse {
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
     mission?: string;
+    progressPercent?: number; // Процент прогресса по миссии (0-100)
     timestamp: string;
 }
 
@@ -56,6 +57,7 @@ export interface ApiStatusResponse {
     stage: number;
     mission: string | null;
     status: string;
+    progressPercent?: number | null; // Процент прогресса по миссии (0-100)
 }
 
 export interface ApiHistoryItem {

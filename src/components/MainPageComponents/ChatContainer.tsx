@@ -5,11 +5,13 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import FormattedText from './FormattedText';
 import Button from '../CoreComponents/Button';
+import AgentVideoModal from '../modals/AgentVideoModal';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const [inputValue, setInputValue] = useState('');
     const [isMissionExpanded, setIsMissionExpanded] = useState(false);
+    const [showVideoModal, setShowVideoModal] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
@@ -21,16 +23,26 @@ const ChatContainer: React.FC = observer(() => {
         chat.loadStatus();
     }, [chat]);
 
+    // Проверяем, нужно ли показать видео после загрузки истории
+    // Показываем видео только если история пуста (нет сообщений)
+    useEffect(() => {
+        if (!chat.loading && chat.video?.url && chat.messages.length === 0) {
+            setShowVideoModal(true);
+        }
+    }, [chat.loading, chat.video, chat.messages.length]);
+
     const introTexts = {
         en: {
             greeting: "I am Darth Vader, your AI assistant. Ask me anything about the Force, the Empire, or the galaxy far, far away.",
             mission: "Mission",
-            stage: "Stage"
+            stage: "Stage",
+            start: "Start"
         },
         ru: {
             greeting: "Я Дарт Вейдер, ваш ИИ-помощник. Спрашивайте меня о Силе, Империи или галактике далеко-далеко отсюда.",
             mission: "Миссия",
-            stage: "Этап"
+            stage: "Этап",
+            start: "Начать"
         }
     };
 
@@ -110,6 +122,21 @@ const ChatContainer: React.FC = observer(() => {
                             <div className="text-xs text-gray-300">
                                 <span className="font-medium text-gray-200">{t.mission}:</span> {chat.mission}
                             </div>
+                        </div>
+                    )}
+                    
+                    {/* Start Button - показываем только если нет сообщений */}
+                    {chat.messages.length === 0 && (
+                        <div className="mt-4">
+                            <Button
+                                onClick={() => handleSendMessage("старт")}
+                                variant="secondary"
+                                size="md"
+                                className="w-full"
+                                icon="fas fa-play"
+                            >
+                                {t.start}
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -271,6 +298,15 @@ const ChatContainer: React.FC = observer(() => {
                     />
                 </form>
             </div>
+
+            {/* Agent Video Modal */}
+            <AgentVideoModal
+                isOpen={showVideoModal}
+                video={chat.video}
+                onClose={() => {
+                    setShowVideoModal(false);
+                }}
+            />
         </div>
     );
 });

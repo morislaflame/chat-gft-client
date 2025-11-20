@@ -1,5 +1,24 @@
 import { $authHost } from "./index";
-import type { ApiMessageResponse, ApiHistoryResponse, ApiStatusResponse } from '@/types/types';
+import type { ApiMessageResponse, ApiStatusResponse, MediaFile } from '@/types/types';
+
+export interface ApiHistoryResponse {
+    history: Array<{
+        id: number;
+        userId: number;
+        messageText: string;
+        responseText: string;
+        createdAt: string;
+        isCongratulation?: boolean;
+    }>;
+    progress: {
+        current: number;
+        level: number;
+        lastProgressAt: string | null;
+    };
+    hasMore: boolean;
+    nextCursor: number | null;
+    video?: MediaFile | null;
+}
 
 export const sendMessage = async (message: string): Promise<ApiMessageResponse> => {
     const { data } = await $authHost.post('api/message/', { message });

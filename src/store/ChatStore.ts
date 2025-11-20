@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData } from "@/types/types";
+import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile } from "@/types/types";
 import type UserStore from "@/store/UserStore";
 
 export default class ChatStore {
@@ -15,6 +15,7 @@ export default class ChatStore {
     _userStore: UserStore | null = null;
     _stageReward: StageRewardData | null = null;
     _insufficientEnergy = false;
+    _video: MediaFile | null = null;
     private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
 
     constructor(userStore?: UserStore) {
@@ -69,6 +70,10 @@ export default class ChatStore {
 
     closeInsufficientEnergy() {
         this._insufficientEnergy = false;
+    }
+
+    setVideo(video: MediaFile | null) {
+        this._video = video;
     }
 
     setSuggestions(suggestions: string[]) {
@@ -242,6 +247,11 @@ export default class ChatStore {
             
             this.setMessages(messages);
             
+            // Обновляем информацию о видео
+            if (response.video !== undefined) {
+                this.setVideo(response.video);
+            }
+            
             // Восстанавливаем suggestions из localStorage для последнего сообщения бота
             const lastBotMessage = messages.filter(m => !m.isUser).pop();
             if (lastBotMessage) {
@@ -330,5 +340,9 @@ export default class ChatStore {
 
     get insufficientEnergy() {
         return this._insufficientEnergy;
+    }
+
+    get video() {
+        return this._video;
     }
 }

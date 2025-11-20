@@ -1,7 +1,7 @@
 export interface Bonus {
     amount?: number;
     type?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface UserInfo {
@@ -66,7 +66,7 @@ export interface ApiHistoryItem {
     userId: number;
     messageText: string;
     responseText: string;
-    isCongratulation: boolean;
+    isCongratulation?: boolean;
     createdAt: string;
 }
 
@@ -90,12 +90,27 @@ export interface ForceProgress {
     messageCount: number;
 }
 
+export interface MediaFile {
+    id: number;
+    fileName: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    bucket: string;
+    url: string;
+    entityType: string;
+    entityId: number | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface ApiHistoryResponse {
     history: ApiHistoryItem[];
     forceProgress?: ForceProgress;
     progress?: ProgressData;
     hasMore?: boolean;
     nextCursor?: number | null;
+    video?: MediaFile | null;
 }
 
 export interface Quest {

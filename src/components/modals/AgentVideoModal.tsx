@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import type { MediaFile } from '@/types/types';
@@ -40,14 +41,14 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
         return null;
     }
 
-    return (
+    const modalContent = (
         <AnimatePresence>
             {isOpen && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+                    className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
                 >
                     <div className="relative w-full h-full flex flex-col">
                         {/* Video Container */}
@@ -76,7 +77,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
 
                         {/* Controls */}
                         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-end">
                                 {/* <div className="text-white">
                                     {videoEnded ? (
                                         <p className="text-sm">Video completed</p>
@@ -87,7 +88,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
                                 {!videoEnded && (
                                     <button
                                         onClick={handleSkip}
-                                        className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
+                                        className="px-4 py-2 hover:bg-white/10 text-white rounded-lg transition-colors"
                                     >
                                         Skip
                                     </button>
@@ -99,6 +100,11 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
             )}
         </AnimatePresence>
     );
+
+    // Рендерим модалку через Portal в document.body
+    return typeof document !== 'undefined' 
+        ? createPortal(modalContent, document.body)
+        : null;
 });
 
 export default AgentVideoModal;

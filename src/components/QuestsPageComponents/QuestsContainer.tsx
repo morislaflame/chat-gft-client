@@ -104,7 +104,7 @@ const QuestsContainer: React.FC = observer(() => {
     }
 
     return (
-        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2 mt-14">
+        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2">
             {/* Daily Reward Progress */}
             
                 {quest.quests.map((task) => {

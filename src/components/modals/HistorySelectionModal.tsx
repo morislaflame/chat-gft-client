@@ -128,9 +128,8 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
 
                 {/* Loading State */}
                 {loading ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        <p className="mt-4 text-gray-400">{t.loading}</p>
+                    <div className="text-center py-8 flex w-full justify-center">
+                        <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 ) : (
                     /* Histories List */
@@ -140,7 +139,7 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                             return (
                                 <motion.button
                                     key={agent.id}
-                                    initial={{ opacity: 0, y: 10 }}
+                                    initial={{ opacity: 0, y: 0 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
                                     onClick={() => handleSelectHistory(agent.historyName)}

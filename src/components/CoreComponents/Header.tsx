@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
+import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import Navigation from './Navigation';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
@@ -13,6 +14,7 @@ const Header: React.FC = observer(() => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('chat');
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [isNavigationCollapsed, setIsNavigationCollapsed] = useState(false);
     
     useEffect(() => {
         switch (location.pathname) {
@@ -61,9 +63,9 @@ const Header: React.FC = observer(() => {
 
 
     return (
-        <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300">
+        <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center">
             {/* App Header */}
-            <div className="bg-primary-800 py-3 px-4 flex items-center justify-between border-b border-primary-700">
+            <div className="bg-primary-800 py-3 px-4 flex items-center justify-between border-b border-primary-700 w-full">
                 <div className="flex items-center space-x-3 cursor-pointer"
                 onClick={handleAvatarClick}>
                     <div className="relative">
@@ -132,10 +134,30 @@ const Header: React.FC = observer(() => {
                         </button>
                 </div>
             </div>
-            <Navigation
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-            />
+            <motion.div
+                animate={{ height: isNavigationCollapsed ? 0 : 'auto' }}
+                initial={false}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                style={{ overflow: 'hidden', width: '100%' }}
+            >
+                <Navigation
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                />
+            </motion.div>
+            
+            {/* Collapse/Expand Button - только на MainPage */}
+            {location.pathname === MAIN_ROUTE && (
+                <div 
+                    onClick={() => setIsNavigationCollapsed(!isNavigationCollapsed)}
+                    className="w-[64px] bg-primary-800 border-b border-primary-700 cursor-pointer hover:bg-primary-700 transition-colors"
+                    style={{borderBottomRightRadius: '12px', borderBottomLeftRadius: '12px'}}
+                >
+                    <div className="flex items-center justify-center py-1">
+                        <i className={`fas ${isNavigationCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'} text-gray-400 text-xs`}></i>
+                    </div>
+                </div>
+            )}
             
             {/* History Selection Modal */}
             <HistorySelectionModal

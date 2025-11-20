@@ -140,7 +140,7 @@ const RewardsContainer: React.FC = observer(() => {
     const currentRewards = activeTab === 'available' ? reward.availableRewards : reward.myPurchases;
 
     return (
-        <div className="p-4 overflow-y-auto flex w-full flex-col gap-4">
+        <div className="p-4 overflow-y-auto flex w-full flex-col gap-4 mt-14">
             {/* Header with tabs */}
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white">Rewards</h2>

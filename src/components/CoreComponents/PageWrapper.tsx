@@ -11,8 +11,8 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) =
         <motion.div 
             className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden hide-scrollbar ios-scroll ${className}`}
             style={{ 
-                height: 'calc(100vh - 122px)',
-                marginTop: `122px`,
+                height: 'calc(100vh - 64px)',
+                marginTop: `64px`,
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

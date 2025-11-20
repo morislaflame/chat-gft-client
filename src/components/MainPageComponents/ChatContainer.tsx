@@ -86,12 +86,7 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleSelectSuggestion = (text: string) => {
-        setInputValue(text);
-        // Фокусируемся на инпут после выбора подсказки
-        const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-        if (input) {
-            input.focus();
-        }
+        handleSendMessage(text.trim());
     };
 
     // Показываем лоадинг пока загружается история чата
@@ -108,7 +103,7 @@ const ChatContainer: React.FC = observer(() => {
             {/* AI Introduction */}
             <div ref={chatContainerRef} className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
             <div className="flex justify-center mb-6">
-                <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
+                <div className="mt-4 bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
                     
                     {/* Mission Info */}
                     {chat.mission && (

@@ -99,7 +99,9 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
   }, [stores]);
 
   if (!stores) {
-    return <LoadingIndicator />; // Use custom loading indicator
+    return <div className="flex items-center justify-center h-screen w-screen">
+      <LoadingIndicator />
+    </div>; // Use custom loading indicator
   }
 
   // Сохраняем экземпляр хранилища для доступа из других модулей

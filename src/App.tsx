@@ -91,7 +91,9 @@ const App = observer(() => {
 
   if (loading) {
     return (
+      <div className="flex items-center justify-center h-screen w-screen">
         <LoadingIndicator />
+      </div>
     );
 }
 
@@ -100,7 +102,11 @@ const App = observer(() => {
       <BrowserRouter>
         <div>
         <Header/>
-            <Suspense fallback={<LoadingIndicator />}>
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-screen w-screen">
+                <LoadingIndicator />
+              </div>
+            }>
               <AppRouter />
             </Suspense>
             <DailyRewardModal />

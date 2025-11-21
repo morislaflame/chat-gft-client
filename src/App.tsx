@@ -5,16 +5,17 @@ import { useTelegramApp } from '@/utils/useTelegramApp';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
-import AppLoader from './components/CoreComponents/AppLoader';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
+import Onboarding from './components/modals/Onboarding';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
 const App = observer(() => {
   const { user, dailyReward } = useContext(Context) as IStoreContext;
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const {
     disableVerticalSwipes,
     lockOrientation,
@@ -23,11 +24,6 @@ const App = observer(() => {
     setHeaderColor,
     setBackgroundColor
   } = useTelegramApp();
-
-
-const handleStart = () => {
-    setLoading(false);
-};
 
   useEffect(() => {
     if (isAvailable) {
@@ -46,18 +42,16 @@ const handleStart = () => {
   useEffect(() => {
     const authenticate = async () => {
       const initData = tg?.initData;
-      console.log("Init Data:", initData); // Для отладки
+      console.log("Init Data:", initData);
 
       if (initData) {
         try {
-          // Выполняем аутентификацию через Telegram
           await user.telegramLogin(initData);
         } catch (error) {
           console.error("Telegram authentication error:", error);
         }
       } else {
         try {
-          // Выполняем проверку состояния аутентификации
           await user.checkAuth();
         } catch (error) {
           console.error("Check authentication error:", error);
@@ -82,11 +76,22 @@ const handleStart = () => {
     }
   }, [loading, user.isAuth, dailyReward]);
 
+  // Проверяем onboardingSeen после загрузки данных пользователя
+  useEffect(() => {
+    if (user.user?.onboardingSeen === false) {
+      setShowOnboarding(true);
+    } else {
+      setShowOnboarding(false);
+    }
+  }, [user.user?.onboardingSeen]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
+
   if (loading) {
     return (
-        <AppLoader
-            onStart={handleStart}
-        />
+        <LoadingIndicator />
     );
 }
 
@@ -101,6 +106,9 @@ const handleStart = () => {
             <DailyRewardModal />
             <StageRewardModal />
             <InsufficientEnergyModal />
+            {showOnboarding && (
+              <Onboarding onComplete={handleOnboardingComplete} />
+            )}
         </div>
       </BrowserRouter>
   )

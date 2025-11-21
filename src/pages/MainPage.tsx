@@ -1,26 +1,9 @@
-import React, { useEffect, useContext } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
 import ChatContainer from '@/components/MainPageComponents/ChatContainer';
 import PageWrapper from '@/components/CoreComponents/PageWrapper';
 
 const MainPage: React.FC = observer(() => {
-    const { user } = useContext(Context) as IStoreContext;
-    
-
-    useEffect(() => {
-        const loadUserData = async () => {
-            try {
-                await user.fetchMyInfo();
-            } catch (error) {
-                console.error('Error loading user data:', error);
-            }
-        };
-
-        loadUserData();
-    }, [user]);
-
-
     return (
         <PageWrapper>
             <ChatContainer />

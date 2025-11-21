@@ -12,6 +12,7 @@ export interface UserInfo {
     energy: number;
     language: 'en' | 'ru';
     onboardingCompleted?: boolean;
+    onboardingSeen?: boolean; // Поле с бэкенда для отслеживания просмотра онбординга
     firstName?: string;
     lastName?: string;
     refCode?: string;

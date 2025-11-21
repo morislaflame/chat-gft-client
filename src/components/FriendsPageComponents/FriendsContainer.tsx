@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -11,11 +11,6 @@ const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
     const { shareUrl } = useTelegramApp();
     const [isCopied, setIsCopied] = useState(false);
-
-    useEffect(() => {
-        // Load user data when component mounts
-        user.fetchMyInfo();
-    }, [user]);
 
     const handleCopyReferral = async () => {
         const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;

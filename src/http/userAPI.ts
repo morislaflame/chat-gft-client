@@ -75,11 +75,12 @@ export const getOnboarding = async (): Promise<boolean> => {
 };
 
 export const setOnboarding = async (completed: boolean): Promise<void> => {
-    await $authHost.post('api/user/me/onboarding', { completed });
+    await $authHost.post('api/user/me/onboarding', { seen: completed });
 };
 
-export const setSelectedHistoryName = async (historyName: string): Promise<void> => {
-    await $authHost.post('api/user/me/history', { historyName });
+export const setSelectedHistoryName = async (historyName: string): Promise<{ success: boolean; selectedHistoryName: string }> => {
+    const { data } = await $authHost.post('api/user/me/history', { historyName });
+    return data;
 };
 
 export const markVideoAsSeen = async (historyName: string): Promise<{ success: boolean; hasVideoSeen: boolean }> => {

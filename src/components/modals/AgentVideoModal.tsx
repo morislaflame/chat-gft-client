@@ -48,7 +48,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+                    className="fixed inset-0 z-[10001] bg-black flex items-center justify-center"
                 >
                     <div className="relative w-full h-full flex flex-col">
                         {/* Video Container */}

@@ -17,19 +17,16 @@ const ChatContainer: React.FC = observer(() => {
     const hasScrolledToBottomRef = useRef(false);
 
     useEffect(() => {
-        // Load chat history when component mounts
         chat.loadChatHistory();
-        // Also load status independently to ensure it's loaded even if history is empty
-        chat.loadStatus();
     }, [chat]);
 
     // Проверяем, нужно ли показать видео после загрузки истории
-    // Показываем видео только если история пуста (нет сообщений)
+    // Показываем видео только если история пуста (нет сообщений) и онбординг пройден
     useEffect(() => {
-        if (!chat.loading && chat.video?.url && chat.messages.length === 0) {
+        if (!chat.loading && chat.video?.url && chat.messages.length === 0 && user.user?.onboardingSeen === true) {
             setShowVideoModal(true);
         }
-    }, [chat.loading, chat.video, chat.messages.length]);
+    }, [chat.loading, chat.video, chat.messages.length, user.user?.onboardingSeen]);
 
     const introTexts = {
         en: {
@@ -109,12 +106,11 @@ const ChatContainer: React.FC = observer(() => {
                     {chat.mission && (
                         <div className="">
                             <div className="flex items-center gap-2 mb-2">
-                                <i className="fas fa-gift text-amber-400 text-xs"></i>
-                                <span className="text-xs font-semibold text-amber-400">
+                                <span className="text-md font-semibold text-amber-400">
                                     {t.stage} {chat.currentStage}
                                 </span>
                             </div>
-                            <div className="text-xs text-gray-300">
+                            <div className="text-sm text-gray-300">
                                 <span className="font-medium text-gray-200">{t.mission}:</span> {chat.mission}
                             </div>
                         </div>

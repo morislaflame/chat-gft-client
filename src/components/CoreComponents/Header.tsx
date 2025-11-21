@@ -9,7 +9,7 @@ import HistorySelectionModal from '@/components/modals/HistorySelectionModal';
 
 
 const Header: React.FC = observer(() => {
-    const { user, chat } = useContext(Context) as IStoreContext;
+    const { user } = useContext(Context) as IStoreContext;
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('chat');
@@ -54,11 +54,6 @@ const Header: React.FC = observer(() => {
 
     const handleHistoryModalClose = () => {
         setIsHistoryModalOpen(false);
-        // Перезагружаем историю чата после выбора истории
-        if (location.pathname === MAIN_ROUTE) {
-            chat.loadChatHistory();
-            chat.loadStatus();
-        }
     }
 
 
@@ -78,17 +73,7 @@ const Header: React.FC = observer(() => {
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-primary-800"></div>
                     </div>
                     <div>
-                        {/* <div className="font-bold text-gray-300 text-sm mb-1">
-                            {user.user?.firstName || user.user?.username || 'Dark Lord'}
-                        </div> */}
                         <div className="flex items-center space-x-2 text-xs">
-                            {/* <div className="w-16 h-1.5 bg-primary-700 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-gradient-to-r from-red-400 to-red-600 energy-fill" 
-                                    style={{ width: `${user.user?.energy || 0}%` }}
-                                >
-                                </div>
-                            </div> */}
                             <span className="text-gray-300 text-xs font-medium">
                                 {(() => {
                                     const historyName = user.user?.selectedHistoryName || 'starwars';

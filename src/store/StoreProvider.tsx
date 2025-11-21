@@ -7,6 +7,7 @@ import ShopStore from "@/store/ShopStore";
 import ProductStore from "@/store/ProductStore";
 import RewardStore from "@/store/RewardStore";
 import DailyRewardStore from "@/store/DailyRewardStore";
+import AgentStore from "@/store/AgentStore";
 // Определяем интерфейс для нашего контекста
 export interface IStoreContext {
   user: UserStore;
@@ -16,6 +17,7 @@ export interface IStoreContext {
   product: ProductStore;
   reward: RewardStore;
   dailyReward: DailyRewardStore;
+  agent: AgentStore;
 }
 
 let storeInstance: IStoreContext | null = null;
@@ -45,6 +47,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     product: ProductStore;
     reward: RewardStore;
     dailyReward: DailyRewardStore;
+    agent: AgentStore;
     } | null>(null);
 
   useEffect(() => {
@@ -57,6 +60,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         { default: ProductStore },
         { default: RewardStore },
         { default: DailyRewardStore },
+        { default: AgentStore },
       ] = await Promise.all([
         import("@/store/UserStore"),
         import("@/store/ChatStore"),
@@ -65,6 +69,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         import("@/store/ProductStore"),
         import("@/store/RewardStore"),
         import("@/store/DailyRewardStore"),
+        import("@/store/AgentStore"),
       ]);
 
       setStores({
@@ -75,6 +80,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         product: new ProductStore(),
         reward: new RewardStore(),
         dailyReward: new DailyRewardStore(),
+        agent: new AgentStore(),
       });
     };
 
@@ -83,9 +89,12 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
 
   useEffect(() => {
     // После создания stores, устанавливаем UserStore в ChatStore и DailyRewardStore
+    // и ChatStore в AgentStore для загрузки истории после выбора
     if (stores) {
       stores.chat.setUserStore(stores.user);
       stores.dailyReward.setUserStore(stores.user);
+      stores.agent.setUserStore(stores.user);
+      stores.agent.setChatStore(stores.chat);
     }
   }, [stores]);
 

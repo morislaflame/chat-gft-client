@@ -59,6 +59,13 @@ export default class UserStore {
         }
     }
 
+    setSelectedHistoryName(historyName: string) {
+        // Обновляем selectedHistoryName в объекте пользователя, если он существует
+        if (this._user) {
+            this._user = { ...this._user, selectedHistoryName: historyName };
+        }
+    }
+
     setReferrals(referrals: Referral[]) {
         this._referrals = referrals;
     }
@@ -88,6 +95,8 @@ export default class UserStore {
                 this.setIsAuth(true);
                 this.setServerError(false);
             });
+            // Загружаем полную информацию о пользователе после аутентификации
+            await this.fetchMyInfo();
         } catch (error) {
             console.error("Error during Telegram authentication:", error);
             this.setServerError(true, 'Server is not responding. Please try again later.');
@@ -102,6 +111,8 @@ export default class UserStore {
                 this.setIsAuth(true);
                 this.setServerError(false);
             });
+            // Загружаем полную информацию о пользователе после проверки аутентификации
+            await this.fetchMyInfo();
         } catch (error) {
             console.error("Error during auth check:", error);
             runInAction(() => {

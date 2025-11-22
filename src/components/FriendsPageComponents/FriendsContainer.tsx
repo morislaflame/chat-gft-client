@@ -109,17 +109,39 @@ const FriendsContainer: React.FC = observer(() => {
                         </div>
                     </div>
 
-                    {/* Last referral bonuses */}
+                    {/* Referral bonuses */}
                     <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3">
-                        <div className="text-xs text-gray-400 mb-2">Last referral bonuses</div>
-                        <div className="space-y-2">
+                        <div className="text-xs text-gray-400 mb-2">Referral bonuses</div>
+                        <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
                             {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (
-                                user.user.lastBonuses.map((bonus: Bonus, index: number) => (
-                                    <div key={index} className="flex items-center justify-between text-xs">
-                                        <span className="text-gray-300">Bonus #{index + 1}</span>
-                                        <span className="text-green-400">+{bonus.amount || 'Unknown'} energy</span>
-                                    </div>
-                                ))
+                                user.user.lastBonuses.map((bonus: Bonus, index: number) => {
+
+                                    const getBonusIcon = (reason?: string) => {
+                                        switch (reason) {
+                                            case 'purchase':
+                                                return 'fas fa-shopping-cart';
+                                            case 'gift':
+                                                return 'fas fa-gift';
+                                            case 'invite':
+                                                return 'fas fa-user-plus';
+                                            case 'deposit':
+                                                return 'fas fa-coins';
+                                            default:
+                                                return 'fas fa-star';
+                                        }
+                                    };
+
+                                    return (
+                                        <div key={bonus.id || index} className="flex items-center justify-between text-xs bg-primary-800 rounded-lg p-2">
+                                            <div className="flex items-center space-x-2">
+                                                <i className={`${getBonusIcon(bonus.reason)} text-purple-400`}></i>
+                                            </div>
+                                            <span className="text-green-400 font-semibold">
+                                                +{bonus.amount || 'Unknown'}
+                                            </span>
+                                        </div>
+                                    );
+                                })
                             ) : (
                                 <div className="text-xs text-gray-500">No bonuses yet</div>
                             )}

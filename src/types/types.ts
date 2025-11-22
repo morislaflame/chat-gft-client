@@ -1,6 +1,10 @@
 export interface Bonus {
+    id?: number;
     amount?: number;
-    type?: string;
+    reason?: string; // 'deposit', 'gift', 'invite', 'purchase'
+    createdAt?: string;
+    sourceUserId?: number;
+    referrerUserId?: number;
     [key: string]: unknown;
 }
 

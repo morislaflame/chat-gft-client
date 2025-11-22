@@ -57,7 +57,6 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
                                 ref={videoRef}
                                 src={video.url}
                                 autoPlay
-                                muted
                                 onEnded={handleVideoEnd}
                                 onError={(e) => {
                                     console.error('Video error:', e);

@@ -98,7 +98,7 @@ const ChatContainer: React.FC = observer(() => {
     const isMobile = document.body.classList.contains('telegram-mobile');
 
     return (
-        <div className="h-full flex flex-col overflow-x-hidden max-w-full">
+        <div className="h-full relative flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
             <div 
                 ref={chatContainerRef} 
@@ -196,8 +196,6 @@ const ChatContainer: React.FC = observer(() => {
                                     </div>
                                 </div>
                                 
-                                {/* Подсказки под сообщением от AI */}
-                                
                             </div>
                         </div>
                     );
@@ -218,21 +216,19 @@ const ChatContainer: React.FC = observer(() => {
                         </div>
                     </div>
                 )}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} className='mb-[138px]'/>
             </div>
 
-            {/* Force Progress */}
-            
             </div>
 
             {/* Message Input */}
-            <div className="bg-primary-900 border-t border-primary-700 p-4 pb-6 flex flex-col gap-4">
-                <div className="flex flex-col gap-4">
+            <div className="absolute bottom-0 right-0 w-full p-4 flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
                             <div className="flex justify-between text-xs mb-2">
-                                <span>Force Progress</span>
-                                <div className="flex items-center gap-2 cursor-pointer"
+                                <span className='backdrop-blur-sm rounded-full p-2'>Mission Progress</span>
+                                <div className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
                                 onClick={() => setIsMissionExpanded(!isMissionExpanded)}
                                 >
                                     <span className="text-amber-400 font-medium flex items-center">
@@ -266,7 +262,7 @@ const ChatContainer: React.FC = observer(() => {
                                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="mt-4 border-t border-primary-700 pt-3">
+                                        <div className="mt-4 bg-primary-800 p-2 rounded-lg">
                                             <div className="flex items-start gap-2">
                                                 <span className="text-xs text-gray-100">Миссия:</span>
                                                 <span className="flex-1 text-xs text-gray-400">{chat.mission}</span>
@@ -285,7 +281,7 @@ const ChatContainer: React.FC = observer(() => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         placeholder="Type your message..."
-                        className="flex-1 bg-primary-800 border border-primary-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
+                        className="flex-1 backdrop-blur-sm rounded-full border border-primary-700 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
                     />
                     <Button
                         type="submit"

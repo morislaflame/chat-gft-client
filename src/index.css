@@ -38,20 +38,28 @@
 }
 
 html, body {
-    min-width: 100vw;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
     overflow-y: auto;
-    background-color: #121826;
 }
 
 #root {
     padding: 0;
     margin: 0;
-    height: auto;
+    width: 100vw;
+    height: 100vh;
 }
+
+
+/* body.telegram-mobile #root {
+    height: calc(100vh - var(--tg-safe-area-inset-top, 45px) - var(--tg-content-safe-area-inset-top, 45px));
+    padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
+}
+/*
+
 
 /* Custom animations and styles from the original HTML */
 @keyframes fadeIn {
@@ -67,6 +75,15 @@ html, body {
 @keyframes slideOutLeft {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(-100%); opacity: 0; }
+}
+
+
+body.telegram-mobile .header {
+    margin-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
+}
+
+body.telegram-mobile .telegram-padding {
+    padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
 }
 
 .message-animation {

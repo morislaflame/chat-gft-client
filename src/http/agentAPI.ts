@@ -7,6 +7,8 @@ export interface Agent {
     description?: string | null;
     createdAt: string;
     video?: MediaFile | null;
+    avatar?: MediaFile | null;
+    preview?: MediaFile | null;
 }
 
 export const getPublicAgents = async (): Promise<Agent[]> => {

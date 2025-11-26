@@ -10,6 +10,17 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if (window.Telegram) {
+        window.Telegram.WebApp.expand();
+        window.Telegram.WebApp.disableVerticalSwipes();
+        if (window.Telegram.WebApp.platform === 'ios' || window.Telegram.WebApp.platform === 'android') {
+          window.Telegram.WebApp.requestFullscreen()
+          window.Telegram.WebApp.lockOrientation()
+          document.body.classList.add('telegram-mobile');
+        }
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

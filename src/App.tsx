@@ -5,6 +5,7 @@ import { useTelegramApp } from '@/utils/useTelegramApp';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
+import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
@@ -28,8 +29,8 @@ const App = observer(() => {
   useEffect(() => {
     if (isAvailable) {
       disableVerticalSwipes();
-      setHeaderColor('#191919');
-      setBackgroundColor('#191919');
+      setHeaderColor('#121826');
+      setBackgroundColor('#121826');
       lockOrientation();
 
       ready();
@@ -100,7 +101,6 @@ const App = observer(() => {
 
   return (
       <BrowserRouter>
-        <div>
         <Header/>
             <Suspense fallback={
               <div className="flex items-center justify-center h-screen w-screen">
@@ -109,13 +109,13 @@ const App = observer(() => {
             }>
               <AppRouter />
             </Suspense>
+            <BottomNavigation />
             <DailyRewardModal />
             <StageRewardModal />
             <InsufficientEnergyModal />
             {showOnboarding && (
               <Onboarding onComplete={handleOnboardingComplete} />
             )}
-        </div>
       </BrowserRouter>
   )
 });

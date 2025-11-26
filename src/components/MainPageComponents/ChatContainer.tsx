@@ -95,12 +95,19 @@ const ChatContainer: React.FC = observer(() => {
     // Этап 1 = 0%, этап 2 = 33.33%, этап 3 = 66.66%
     const progressPercent = chat.forceProgress;
 
+    const isMobile = document.body.classList.contains('telegram-mobile');
+
     return (
         <div className="h-full flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
-            <div ref={chatContainerRef} className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden">
+            <div 
+                ref={chatContainerRef} 
+                className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden"
+                
+            >
             <div className="flex justify-center mb-6">
-                <div className="mt-4 bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
+                <div className="mt-4 bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full"
+                style={{ marginTop: isMobile ? '156px' : '56px' }}>
                     
                     {/* Mission Info */}
                     {chat.mission && (

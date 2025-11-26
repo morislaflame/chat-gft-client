@@ -6,6 +6,7 @@ import useMeasure from 'react-use-measure';
 import type { Agent } from '@/http/agentAPI';
 import HistoryCard from './HistoryCard';
 import NavigationControls from './NavigationControls';
+import { AgentPreview } from '@/utils/agentUtils';
 
 interface HistorySelectionScreenProps {
     histories: Agent[];
@@ -117,6 +118,16 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                         >
                             {histories.map((agent) => (
                                 <div key={agent.id} ref={ref}>
+                                    {/* Preview - над карточкой */}
+                                    {agent.preview && (
+                                        <div className="mb-4">
+                                            <AgentPreview
+                                                preview={agent.preview}
+                                                size="full"
+                                            />
+                                        </div>
+                                    )}
+                                    {/* Card */}
                                     <HistoryCard
                                         title={getHistoryDisplayName(agent.historyName)}
                                         description={agent.description || 'Start your adventure in this amazing story!'}

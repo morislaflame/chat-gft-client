@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 
 interface NavigationProps {
@@ -8,8 +7,6 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
-    const navigate = useNavigate();
-    
     const tabs = [
         { id: 'chat', icon: 'fas fa-comments', label: 'Chat', route: MAIN_ROUTE },
         { id: 'quests', icon: 'fas fa-tasks', label: 'Quests', route: QUESTS_ROUTE },
@@ -18,18 +15,17 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
         { id: 'store', icon: 'fas fa-store', label: 'Store', route: STORE_ROUTE }
     ];
 
-    const handleTabClick = (tabId: string, route: string) => {
+    const handleTabClick = (tabId: string) => {
         onTabChange(tabId);
-        navigate(route);
     };
 
     return (
-        <div className="bg-primary-800 px-1 py-2 border-b border-primary-700 w-full">
+        <div className="bg-primary-800 px-1 border-t border-primary-700 w-full py-4 pb-8 rounded-t-[24px]">
             <div className="flex justify-around">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
-                        onClick={() => handleTabClick(tab.id, tab.route)}
+                        onClick={() => handleTabClick(tab.id)}
                         className={`flex flex-col items-center w-1/5 cursor-pointer ${
                             activeTab === tab.id ? '' : 'opacity-70'
                         }`}

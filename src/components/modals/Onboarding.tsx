@@ -69,7 +69,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden"
+            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding"
         >
             {/* Background Image */}
             <motion.div

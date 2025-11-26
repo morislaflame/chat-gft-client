@@ -54,8 +54,11 @@ const StoreContainer: React.FC = observer(() => {
         );
     }
 
+    const isMobile = document.body.classList.contains('telegram-mobile');
+
     return (
-        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2">
+        <div className="p-4 overflow-y-auto flex w-full flex-col gap-2"
+        style={{ marginTop: isMobile ? '156px' : '56px' }}>
 
                 {/* Products */}
                 {product.products.map((prod) => {

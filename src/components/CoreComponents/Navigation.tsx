@@ -20,7 +20,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
     };
 
     return (
-        <div className="bg-primary-800 px-1 border-t border-primary-700 w-full py-4 pb-8 rounded-t-[24px]">
+        <div className="bg-primary-800 px-1 border-t border-primary-700 w-full py-4 pb-8 ">
             <div className="flex justify-around">
                 {tabs.map((tab) => (
                     <button

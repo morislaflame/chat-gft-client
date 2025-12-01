@@ -18,6 +18,8 @@ export interface ApiHistoryResponse {
     hasMore: boolean;
     nextCursor: number | null;
     video?: MediaFile | null;
+    avatar?: MediaFile | null;
+    background?: MediaFile | null;
 }
 
 export const sendMessage = async (message: string): Promise<ApiMessageResponse> => {

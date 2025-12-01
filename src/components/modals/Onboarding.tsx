@@ -12,11 +12,12 @@ import type { MediaFile } from '@/types/types';
 
 interface OnboardingProps {
     onComplete: () => void;
+    initialStep?: 'welcome' | 'select';
 }
 
-const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete }) => {
+const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialStep = 'welcome' }) => {
     const { user, agent } = useContext(Context) as IStoreContext;
-    const [step, setStep] = useState<'welcome' | 'select'>('welcome');
+    const [step, setStep] = useState<'welcome' | 'select'>(initialStep);
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(1);
     const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
@@ -27,6 +28,13 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete }) => {
             agent.fetchPublicAgents();
         }
     }, [step, agent]);
+
+    // Если начальный шаг - выбор истории, загружаем агентов сразу
+    useEffect(() => {
+        if (initialStep === 'select') {
+            agent.fetchPublicAgents();
+        }
+    }, [initialStep, agent]);
 
     const handleSetActiveIndex = (newIndex: number) => {
         if (newIndex < 0 || newIndex >= agent.agents.length) return;
@@ -91,7 +99,6 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete }) => {
             <div className="relative z-10 flex flex-col h-full">
                 {step === 'welcome' ? (
                     <WelcomeScreen
-                        welcomeText={texts.welcome}
                         joinAdventureText={texts.joinAdventure}
                         onJoinAdventure={() => setStep('select')}
                     />

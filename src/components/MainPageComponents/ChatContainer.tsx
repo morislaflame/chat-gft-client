@@ -96,14 +96,22 @@ const ChatContainer: React.FC = observer(() => {
     const progressPercent = chat.forceProgress;
 
     const isMobile = document.body.classList.contains('telegram-mobile');
+    const backgroundUrl = chat.background?.url;
+    const avatarUrl = chat.avatar?.url;
 
     return (
         <div className="h-full relative flex flex-col overflow-x-hidden max-w-full">
             {/* AI Introduction */}
             <div 
                 ref={chatContainerRef} 
-                className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden"
-                
+                className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
+                style={backgroundUrl ? {
+                    backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed'
+                } : {}}
             >
             <div className="flex justify-center mb-6">
                 <div className="mt-4 bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full"
@@ -149,8 +157,12 @@ const ChatContainer: React.FC = observer(() => {
                     return (
                         <div key={message.id} className="message-container flex items-start mb-6">
                             {!message.isUser && (
-                                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2">
-                                    <i className="fas fa-mask text-xs"></i>
+                                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2 overflow-hidden p-1">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <i className="fas fa-mask text-xs"></i>
+                                    )}
                                 </div>
                             )}
                             <div className={`flex-1 ${message.isUser ? 'flex justify-end' : ''}`}>
@@ -204,8 +216,12 @@ const ChatContainer: React.FC = observer(() => {
                 {/* Typing Indicator */}
                 {chat.isTyping && (
                     <div className="message-container flex items-start mb-6">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2">
-                            <i className="fas fa-mask text-xs"></i>
+                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2 overflow-hidden">
+                            {avatarUrl ? (
+                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <i className="fas fa-mask text-xs"></i>
+                            )}
                         </div>
                         <div className="bg-primary-800 rounded-xl rounded-tl-none px-4 py-3">
                             <div className="flex space-x-1">
@@ -300,7 +316,7 @@ const ChatContainer: React.FC = observer(() => {
                 onClose={() => {
                     setShowVideoModal(false);
                 }}
-            />
+              />
         </div>
     );
 });

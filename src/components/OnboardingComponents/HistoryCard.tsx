@@ -21,7 +21,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 }) => {
     return (
         <motion.div
-            className="flex flex-col gap-4 p-6 rounded-[40px] backdrop-blur-sm select-none"
+            className="flex flex-col gap-4 p-6 rounded-[40px] backdrop-blur-sm select-none w-full"
             style={{
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
@@ -46,7 +46,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 size="lg"
                 className="w-full"
                 disabled={isSaving}
-                icon="fas fa-check"
+                // icon="fas fa-check"
             >
                 {isSaving ? (
                     <div className="flex items-center justify-center gap-2">

@@ -56,7 +56,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     });
 
     return (
-        <div className="flex flex-col justify-between h-full p-6 pb-8 gap-6">
+        <div className="flex flex-col justify-between h-full p-4 pb-8 gap-4">
             {/* Title */}
             <motion.h2
                 initial={{ opacity: 0 }}
@@ -68,7 +68,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
 
             {/* History Selection Panel */}
             {loading ? (
-                <div className="flex justify-center items-center">
+                <div className="flex justify-center items-center flex-1">
                     <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : histories.length > 0 ? (
@@ -117,10 +117,10 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                             custom={direction}
                         >
                             {histories.map((agent) => (
-                                <div key={agent.id} ref={ref}>
+                                <div key={agent.id} ref={ref} className='flex flex-col w-full justify-center items-center'>
                                     {/* Preview - над карточкой */}
                                     {agent.preview && (
-                                        <div className="mb-4">
+                                        <div className="mb-4 w-[80%]">
                                             <AgentPreview
                                                 preview={agent.preview}
                                                 size="full"

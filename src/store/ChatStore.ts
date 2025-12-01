@@ -16,6 +16,8 @@ export default class ChatStore {
     _stageReward: StageRewardData | null = null;
     _insufficientEnergy = false;
     _video: MediaFile | null = null;
+    _avatar: MediaFile | null = null;
+    _background: MediaFile | null = null;
     private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
 
     constructor(userStore?: UserStore) {
@@ -74,6 +76,14 @@ export default class ChatStore {
 
     setVideo(video: MediaFile | null) {
         this._video = video;
+    }
+
+    setAvatar(avatar: MediaFile | null) {
+        this._avatar = avatar;
+    }
+
+    setBackground(background: MediaFile | null) {
+        this._background = background;
     }
 
     setSuggestions(suggestions: string[]) {
@@ -247,9 +257,15 @@ export default class ChatStore {
             
             this.setMessages(messages);
             
-            // Обновляем информацию о видео
+            // Обновляем информацию о медиафайлах агента
             if (response.video !== undefined) {
                 this.setVideo(response.video);
+            }
+            if (response.avatar !== undefined) {
+                this.setAvatar(response.avatar);
+            }
+            if (response.background !== undefined) {
+                this.setBackground(response.background);
             }
             
             // Восстанавливаем suggestions из localStorage для последнего сообщения бота
@@ -344,5 +360,13 @@ export default class ChatStore {
 
     get video() {
         return this._video;
+    }
+
+    get avatar() {
+        return this._avatar;
+    }
+
+    get background() {
+        return this._background;
     }
 }

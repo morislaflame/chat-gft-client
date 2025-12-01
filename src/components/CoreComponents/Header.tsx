@@ -1,15 +1,16 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { STORE_ROUTE, REWARDS_ROUTE } from '@/utils/consts';
-import HistorySelectionModal from '@/components/modals/HistorySelectionModal';
 
 
 const Header: React.FC = observer(() => {
-    const { user } = useContext(Context) as IStoreContext;
+    const { user, chat } = useContext(Context) as IStoreContext;
     const navigate = useNavigate();
-    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    
+    // Получаем аватар текущей истории
+    const avatarUrl = chat.avatar?.url;
     
     const handleStarsClick = () => {
         navigate(STORE_ROUTE);
@@ -20,13 +21,13 @@ const Header: React.FC = observer(() => {
     }
 
     const handleAvatarClick = () => {
-        setIsHistoryModalOpen(true);
+        // Открываем онбординг на этапе выбора истории
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const openHistorySelection = (window as any).openHistorySelection;
+        if (openHistorySelection) {
+            openHistorySelection();
+        }
     }
-
-    const handleHistoryModalClose = () => {
-        setIsHistoryModalOpen(false);
-    }
-
 
     return (
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
@@ -36,10 +37,17 @@ const Header: React.FC = observer(() => {
                 onClick={handleAvatarClick}>
                     <div className="relative">
                         <div 
-                            className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer hover:from-red-500 hover:to-red-700 transition-all"
-                            
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer hover:from-red-500 hover:to-red-700 transition-all overflow-hidden p-1"
                         >
-                            {/* <span className="font-bold text-xl"></span> */}
+                            {avatarUrl ? (
+                                <img 
+                                    src={avatarUrl} 
+                                    alt="History avatar" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <i className="fas fa-mask text-xs text-white"></i>
+                            )}
                         </div>
                     </div>
                     <div>
@@ -89,12 +97,6 @@ const Header: React.FC = observer(() => {
                         </button> */}
                 </div>
             </div>
-            
-            {/* History Selection Modal */}
-            <HistorySelectionModal
-                isOpen={isHistoryModalOpen}
-                onClose={handleHistoryModalClose}
-            />
         </div>
     );
 });

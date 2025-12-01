@@ -17,6 +17,7 @@ const App = observer(() => {
   const { user, dailyReward } = useContext(Context) as IStoreContext;
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingInitialStep, setOnboardingInitialStep] = useState<'welcome' | 'select'>('welcome');
   const {
     disableVerticalSwipes,
     lockOrientation,
@@ -88,7 +89,24 @@ const App = observer(() => {
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
+    setOnboardingInitialStep('welcome'); // Сбрасываем на welcome для следующего раза
   };
+
+  // Функция для открытия онбординга на этапе выбора истории
+  const openHistorySelection = () => {
+    setOnboardingInitialStep('select');
+    setShowOnboarding(true);
+  };
+
+  // Экспортируем функцию через window для доступа из Header
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).openHistorySelection = openHistorySelection;
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).openHistorySelection;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -114,7 +132,7 @@ const App = observer(() => {
             <StageRewardModal />
             <InsufficientEnergyModal />
             {showOnboarding && (
-              <Onboarding onComplete={handleOnboardingComplete} />
+              <Onboarding onComplete={handleOnboardingComplete} initialStep={onboardingInitialStep} />
             )}
       </BrowserRouter>
   )

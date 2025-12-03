@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslate } from '@/utils/useTranslate';
 import { TransitionPanel } from '@/components/ui/transitionPanel';
 import { useSwipe } from '@/utils/useSwipe';
 import useMeasure from 'react-use-measure';
@@ -35,6 +36,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     onSetActiveIndex,
     onSelectHistory
 }) => {
+    const { t } = useTranslate();
     const [ref, bounds] = useMeasure();
 
     const handleSwipeLeft = () => {
@@ -63,7 +65,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                 animate={{ opacity: 1 }}
                 className="text-2xl font-bold text-white text-center"
             >
-                Выберите историю
+                {t('selectHistory')}
             </motion.h2>
 
             {/* History Selection Panel */}
@@ -120,7 +122,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                 <div key={agent.id} ref={ref} className='flex flex-col w-full justify-center items-center'>
                                     {/* Preview - над карточкой */}
                                     {agent.preview && (
-                                        <div className="mb-4 w-[80%]">
+                                        <div className="w-[80%]">
                                             <AgentPreview
                                                 preview={agent.preview}
                                                 size="full"
@@ -130,7 +132,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                     {/* Card */}
                                     <HistoryCard
                                         title={getHistoryDisplayName(agent.historyName)}
-                                        description={agent.description || 'Start your adventure in this amazing story!'}
+                                        description={agent.description || t('startYourAdventure')}
                                         selectText={selectText}
                                         loadingText={loadingText}
                                         isSaving={saving}

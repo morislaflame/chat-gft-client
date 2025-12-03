@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
@@ -8,6 +9,7 @@ import starsIcon from '@/assets/stars.svg';
 
 const StoreContainer: React.FC = observer(() => {
     const { product } = useContext(Context) as IStoreContext;
+    const { t } = useTranslate();
 
     useEffect(() => {
         // Load products when component mounts
@@ -33,9 +35,9 @@ const StoreContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-store"
-                title="Store Unavailable"
-                description="The store is currently unavailable. Please try again later."
-                actionText="Refresh"
+                title={t('storeUnavailable')}
+                description={t('storeUnavailableDesc')}
+                actionText={t('refresh')}
                 onAction={() => product.fetchProducts()}
             />
         );
@@ -46,9 +48,9 @@ const StoreContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-store"
-                title="Store Coming Soon"
-                description="The store is currently empty. New products will be available soon!"
-                actionText="Refresh"
+                title={t('storeComingSoon')}
+                description={t('storeComingSoonDesc')}
+                actionText={t('refresh')}
                 onAction={() => product.fetchProducts()}
             />
         );
@@ -76,7 +78,7 @@ const StoreContainer: React.FC = observer(() => {
                                 <div className="flex-1 flex flex-col gap-1">
                                     <div className="text-sm font-semibold">{prod.name}</div>
                                     <div className="text-xs text-gray-400">
-                                        Energy: {prod.energy} 
+                                        {t('energy')}: {prod.energy} 
                                     </div>
                                 </div>
                             </div>
@@ -87,7 +89,7 @@ const StoreContainer: React.FC = observer(() => {
                                 size="sm"
                                 className="min-w-[20%] rounded-full flex gap-2 items-center justify-center"
                             >
-                                {isProductLoading ? 'Loading...' : (
+                                {isProductLoading ? t('loading') : (
                                     <>
                                         {prod.starsPrice}
                                         <img src={starsIcon} alt="stars" className="w-4 h-4" />

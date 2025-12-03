@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import onboardingImage from '@/assets/Onboarding.jpg';
 import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
-import { getOnboardingTexts, getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
+import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
 
 interface OnboardingProps {
@@ -16,7 +17,8 @@ interface OnboardingProps {
 }
 
 const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialStep = 'welcome' }) => {
-    const { user, agent } = useContext(Context) as IStoreContext;
+    const { agent } = useContext(Context) as IStoreContext;
+    const { t, language } = useTranslate();
     const [step, setStep] = useState<'welcome' | 'select'>(initialStep);
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(1);
@@ -68,9 +70,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
         onComplete();
     };
 
-    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
-    const texts = getOnboardingTexts(userLanguage);
-    const getHistoryName = (historyName: string) => getHistoryDisplayName(historyName, userLanguage);
+    const getHistoryName = (historyName: string) => getHistoryDisplayName(historyName, language);
 
     const onboardingContent = (
         <motion.div
@@ -99,7 +99,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
             <div className="relative z-10 flex flex-col h-full">
                 {step === 'welcome' ? (
                     <WelcomeScreen
-                        joinAdventureText={texts.joinAdventure}
+                        joinAdventureText={t('joinAdventure')}
                         onJoinAdventure={() => setStep('select')}
                     />
                 ) : (
@@ -109,9 +109,9 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
                         saving={agent.saving}
                         activeIndex={activeIndex}
                         direction={direction}
-                        selectText={texts.select}
-                        loadingText={texts.loading}
-                        noHistoriesText={texts.noHistories}
+                        selectText={t('select')}
+                        loadingText={t('loading')}
+                        noHistoriesText={t('noHistoriesAvailable')}
                         getHistoryDisplayName={getHistoryName}
                         onSetActiveIndex={handleSetActiveIndex}
                         onSelectHistory={handleSelectHistory}

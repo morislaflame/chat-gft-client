@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Task } from '@/types/types';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
+import { getTaskText } from '@/utils/translations';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
@@ -12,6 +14,7 @@ import type { DailyReward } from '@/http/dailyRewardAPI';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest, user, dailyReward } = useContext(Context) as IStoreContext;
+    const { t, language } = useTranslate();
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [selectedReward, setSelectedReward] = useState<DailyReward | null>(null);
     const [dayModalOpen, setDayModalOpen] = useState(false);
@@ -83,9 +86,9 @@ const QuestsContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-tasks"
-                title="No Tasks Available"
-                description="There are no tasks available at the moment. Check back later for new challenges!"
-                actionText="Refresh"
+                title={t('noTasksAvailable')}
+                description={t('noTasksAvailableDesc')}
+                actionText={t('refresh')}
                 onAction={() => quest.loadQuests()}
             />
         );
@@ -95,9 +98,9 @@ const QuestsContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-tasks"
-                title="No Tasks Yet"
-                description="You don't have any tasks yet. Complete your profile or wait for new tasks to appear!"
-                actionText="Refresh"
+                title={t('noTasksYet')}
+                description={t('noTasksYetDesc')}
+                actionText={t('refresh')}
                 onAction={() => quest.loadQuests()}
             />
         );
@@ -126,13 +129,13 @@ const QuestsContainer: React.FC = observer(() => {
                                     <i className={`${getTaskIcon(task.code)} text-white text-sm`}></i>
                                 </div>
                                 <div className="flex-1  flex flex-col gap-1">
-                                    <div className="text-sm font-semibold">{task.description}</div>
+                                    <div className="text-sm font-semibold">{getTaskText(task, language)}</div>
                                     <div className="text-xs text-gray-400">
-                                        Reward: +{task.reward} {task.rewardType}
+                                        {t('reward')}: +{task.reward} {task.rewardType}
                                     </div>
                                     {targetCount > 1 && (
                                         <div className="text-xs text-gray-500 mt-1">
-                                            Progress: {progress}/{targetCount}
+                                            {t('progress')}: {progress}/{targetCount}
                                         </div>
                                     )}
                                 </div>
@@ -147,7 +150,7 @@ const QuestsContainer: React.FC = observer(() => {
                                 size="sm"
                                 className="rounded-full"
                             >
-                                {isTaskLoading ? 'Loading...' : isCompleted ? 'Completed' : 'Complete'}
+                                {isTaskLoading ? t('loading') : isCompleted ? t('completed') : t('complete')}
                             </Button>
                         </div>
                     );

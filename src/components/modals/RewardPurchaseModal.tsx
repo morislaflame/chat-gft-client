@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
 import type { Reward } from '@/http/rewardAPI';
@@ -12,11 +14,12 @@ interface RewardPurchaseModalProps {
   pricePaid?: number;
 }
 
-const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = ({
+const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
   isOpen,
   onClose,
   reward,
 }) => {
+  const { t } = useTranslate();
   const [animationData, setAnimationData] = useState<Record<string, unknown> | null>(null);
 
   // Загружаем анимацию при изменении reward
@@ -66,7 +69,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = ({
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            Покупка успешна!
+            {t('purchaseSuccessful')}
           </h2>
         </div>
 
@@ -137,12 +140,12 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = ({
             className="w-full"
             icon="fas fa-check"
           >
-            Отлично!
+            {t('great')}
           </Button>
         </motion.div>
       </div>
     </Modal>
   );
-};
+});
 
 export default RewardPurchaseModal;

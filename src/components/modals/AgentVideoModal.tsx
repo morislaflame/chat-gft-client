@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react-lite';
+import { useTranslate } from '@/utils/useTranslate';
 import type { MediaFile } from '@/types/types';
 
 interface AgentVideoModalProps {
@@ -11,6 +12,7 @@ interface AgentVideoModalProps {
 }
 
 const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, video, onClose }) => {
+    const { t } = useTranslate();
     const [videoEnded, setVideoEnded] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -89,7 +91,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
                                         onClick={handleSkip}
                                         className="px-4 py-2 hover:bg-white/10 text-white rounded-lg transition-colors"
                                     >
-                                        Skip
+                                        {t('skip')}
                                     </button>
                                 )}
                             </div>

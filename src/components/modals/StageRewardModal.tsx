@@ -2,10 +2,12 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 
 const StageRewardModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
+  const { t, language } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
 
@@ -16,28 +18,10 @@ const StageRewardModal: React.FC = observer(() => {
   if (!stageReward) return null;
 
   const stageNames = {
-    en: ['First Stage', 'Second Stage', 'Third Stage'],
-    ru: ['Первый этап', 'Второй этап', 'Третий этап']
+    en: [t('firstStage'), t('secondStage'), t('thirdStage')],
+    ru: [t('firstStage'), t('secondStage'), t('thirdStage')]
   };
 
-  const stageTexts = {
-    en: {
-      title: 'Stage Completed!',
-      description: 'You have completed',
-      reward: 'Reward',
-      continue: 'Continue'
-    },
-    ru: {
-      title: 'Этап пройден!',
-      description: 'Вы завершили',
-      reward: 'Награда',
-      continue: 'Продолжить'
-    }
-  };
-
-  // Получаем язык пользователя (по умолчанию английский)
-  const language = 'en'; // Можно получить из user store если нужно
-  const texts = stageTexts[language as keyof typeof stageTexts];
   const stageName = stageNames[language as keyof typeof stageNames][stageReward.stageNumber - 1];
 
   return (
@@ -64,10 +48,10 @@ const StageRewardModal: React.FC = observer(() => {
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            {texts.title}
+            {t('stageCompleted')}
           </h2>
           <p className="text-gray-400 text-sm">
-            {texts.description} {stageName}
+            {t('youHaveCompleted')} {stageName}
           </p>
         </div>
 
@@ -96,7 +80,7 @@ const StageRewardModal: React.FC = observer(() => {
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
             <i className="fa-solid fa-check text-white"></i>
-            {texts.continue}
+            {t('continue')}
           </span>
         </motion.button>
       </div>

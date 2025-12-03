@@ -2,10 +2,12 @@ import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 
 const DailyRewardModal: React.FC = observer(() => {
   const { dailyReward } = useContext(Context) as IStoreContext;
+  const { t, language } = useTranslate();
   const isOpen = dailyReward.available && dailyReward.rewardInfo !== null;
 
   const handleClose = () => {
@@ -50,10 +52,10 @@ const DailyRewardModal: React.FC = observer(() => {
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            Daily Reward
+            {t('dailyReward')}
           </h2>
           <p className="text-gray-400 text-sm">
-            Day {rewardInfo.day} of 7
+            {language === 'ru' ? `День ${rewardInfo.day} из 7` : `Day ${rewardInfo.day} of 7`}
           </p>
         </div>
 
@@ -75,9 +77,9 @@ const DailyRewardModal: React.FC = observer(() => {
         {/* Progress indicator */}
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-gray-400">Progress</span>
+            <span className="text-xs text-gray-400">{t('progress')}</span>
             <span className="text-xs text-gray-400">
-              {rewardInfo.day}/7 days
+              {rewardInfo.day}/7 {t('days')}
             </span>
           </div>
           <div className="w-full bg-primary-700 rounded-full h-2">
@@ -102,12 +104,12 @@ const DailyRewardModal: React.FC = observer(() => {
           {dailyReward.loading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Claiming...
+              {t('claiming')}
             </span>
           ) : (
             <span className="relative z-10 flex items-center justify-center gap-2">
               <i className="fa-solid fa-gift text-white"></i>
-              Claim Reward
+              {t('claimReward')}
             </span>
           )}
           {/* <motion.div

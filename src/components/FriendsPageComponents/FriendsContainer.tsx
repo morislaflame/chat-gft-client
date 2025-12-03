@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTelegramApp } from '@/utils/useTelegramApp';
+import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
@@ -10,6 +11,7 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
     const { shareUrl } = useTelegramApp();
+    const { t } = useTranslate();
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopyReferral = async () => {
@@ -41,9 +43,9 @@ const FriendsContainer: React.FC = observer(() => {
         return (
             <EmptyPage
                 icon="fas fa-user-friends"
-                title="User Data Unavailable"
-                description="User data is currently unavailable. Please try again later."
-                actionText="Refresh"
+                title={t('userDataUnavailable')}
+                description={t('userDataUnavailableDesc')}
+                actionText={t('refresh')}
                 onAction={() => {
                     user.fetchMyInfo();
                 }}
@@ -65,8 +67,8 @@ const FriendsContainer: React.FC = observer(() => {
                                 <i className="fas fa-user-friends text-white"></i>
                             </div>
                             <div>
-                                <div className="text-sm font-semibold">Referral Program</div>
-                                <div className="text-xs text-gray-400">Invite friends and earn rewards</div>
+                                <div className="text-sm font-semibold">{t('referralProgram')}</div>
+                                <div className="text-xs text-gray-400">{t('inviteFriendsEarnRewards')}</div>
                             </div>
                         </div>
                         <div className="px-3 py-1 rounded-full bg-primary-700 text-xs text-gray-300 text-center min-w-[2.5rem] flex items-center justify-center">
@@ -76,7 +78,7 @@ const FriendsContainer: React.FC = observer(() => {
 
                     {/* Referral Code */}
                     <div className="mt-4 space-y-2">
-                        <div className="text-xs text-gray-400">Your referral code:</div>
+                        <div className="text-xs text-gray-400">{t('yourReferralCode')}</div>
                         <div className="flex space-x-2">
                             <input
                                 type="text"
@@ -96,7 +98,7 @@ const FriendsContainer: React.FC = observer(() => {
                                         : 'bg-secondary-500 hover:bg-secondary-400'
                                 }`}
                             >
-                                {isCopied ? 'Copied!' : 'Copy Link'}
+                                {isCopied ? t('copied') : t('copyLink')}
                             </motion.button>
                             <motion.button
                                 onClick={handleShareReferral}
@@ -104,17 +106,17 @@ const FriendsContainer: React.FC = observer(() => {
                                 transition={{ duration: 0.2 }}
                                 className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
                             >
-                                Share
+                                {t('share')}
                             </motion.button>
                         </div>
                         <div className="mt-2 text-xs text-gray-400">
-                            Share this link with friends to earn rewards!
+                            {t('shareLinkWithFriends')}
                         </div>
                     </div>
 
                     {/* Referral bonuses */}
                     <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3">
-                        <div className="text-xs text-gray-400 mb-2">Referral bonuses</div>
+                        <div className="text-xs text-gray-400 mb-2">{t('referralBonuses')}</div>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
                             {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (
                                 user.user.lastBonuses.map((bonus: Bonus, index: number) => {
@@ -146,7 +148,7 @@ const FriendsContainer: React.FC = observer(() => {
                                     );
                                 })
                             ) : (
-                                <div className="text-xs text-gray-500">No bonuses yet</div>
+                                <div className="text-xs text-gray-500">{t('noBonusesYet')}</div>
                             )}
                         </div>
                     </div>

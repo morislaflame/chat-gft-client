@@ -3,11 +3,13 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import { STORE_ROUTE } from '@/utils/consts';
 
 const InsufficientEnergyModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
+  const { t } = useTranslate();
   const navigate = useNavigate();
   const isOpen = chat.insufficientEnergy;
 
@@ -19,25 +21,6 @@ const InsufficientEnergyModal: React.FC = observer(() => {
     chat.closeInsufficientEnergy();
     navigate(STORE_ROUTE);
   };
-
-  const texts = {
-    en: {
-      title: 'Insufficient Energy',
-      description: 'You don\'t have enough energy to send a message. Purchase more stars to continue chatting.',
-      goToStore: 'Go to Store',
-      cancel: 'Cancel'
-    },
-    ru: {
-      title: 'Недостаточно энергии',
-      description: 'У вас недостаточно энергии для отправки сообщения. Купите больше звезд, чтобы продолжить общение.',
-      goToStore: 'Перейти в магазин',
-      cancel: 'Отмена'
-    }
-  };
-
-  // Получаем язык пользователя (по умолчанию английский)
-  const language = 'en'; // Можно получить из user store если нужно
-  const t = texts[language as keyof typeof texts];
 
   return (
     <Modal
@@ -63,10 +46,10 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            {t.title}
+            {t('insufficientEnergy')}
           </h2>
           <p className="text-gray-400 text-sm">
-            {t.description}
+            {t('insufficientEnergyDesc')}
           </p>
         </div>
 
@@ -81,7 +64,7 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               <i className="fa-solid fa-store text-white"></i>
-              {t.goToStore}
+              {t('goToStore')}
             </span>
           </motion.button>
 
@@ -92,7 +75,7 @@ const InsufficientEnergyModal: React.FC = observer(() => {
             onClick={handleClose}
             className="w-full bg-primary-700 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
           >
-            {t.cancel}
+            {t('cancel')}
           </motion.button>
         </div>
       </div>

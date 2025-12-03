@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import FormattedText from './FormattedText';
 import Button from '../CoreComponents/Button';
@@ -9,6 +10,7 @@ import AgentVideoModal from '../modals/AgentVideoModal';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
+    const { t } = useTranslate();
     const [inputValue, setInputValue] = useState('');
     const [isMissionExpanded, setIsMissionExpanded] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
@@ -27,24 +29,6 @@ const ChatContainer: React.FC = observer(() => {
             setShowVideoModal(true);
         }
     }, [chat.loading, chat.video, chat.messages.length, user.user?.onboardingSeen]);
-
-    const introTexts = {
-        en: {
-            greeting: "I am Darth Vader, your AI assistant. Ask me anything about the Force, the Empire, or the galaxy far, far away.",
-            mission: "Mission",
-            stage: "Stage",
-            start: "Start"
-        },
-        ru: {
-            greeting: "Я Дарт Вейдер, ваш ИИ-помощник. Спрашивайте меня о Силе, Империи или галактике далеко-далеко отсюда.",
-            mission: "Миссия",
-            stage: "Этап",
-            start: "Начать"
-        }
-    };
-
-    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
-    const t = introTexts[userLanguage];
 
     const handleSendMessage = async (message: string) => {
         await chat.sendMessage(message);
@@ -122,11 +106,11 @@ const ChatContainer: React.FC = observer(() => {
                         <div className="">
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-md font-semibold text-amber-400">
-                                    {t.stage} {chat.currentStage}
+                                    {t('stage')} {chat.currentStage}
                                 </span>
                             </div>
                             <div className="text-sm text-gray-300">
-                                <span className="font-medium text-gray-200">{t.mission}:</span> {chat.mission}
+                                <span className="font-medium text-gray-200">{t('mission')}:</span> {chat.mission}
                             </div>
                         </div>
                     )}
@@ -141,7 +125,7 @@ const ChatContainer: React.FC = observer(() => {
                                 className="w-full"
                                 icon="fas fa-play"
                             >
-                                {t.start}
+                                {t('start')}
                             </Button>
                         </div>
                     )}
@@ -243,13 +227,13 @@ const ChatContainer: React.FC = observer(() => {
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
                             <div className="flex justify-between text-xs mb-2">
-                                <span className='backdrop-blur-sm rounded-full p-2'>Mission Progress</span>
+                                <span className='backdrop-blur-sm rounded-full p-2'>{t('mission_progress')}</span>
                                 <div className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
                                 onClick={() => setIsMissionExpanded(!isMissionExpanded)}
                                 >
                                     <span className="text-amber-400 font-medium flex items-center">
                                         <i className="fas fa-gift mr-1"></i>
-                                        Stage {chat.currentStage}
+                                        {t('stage')} {chat.currentStage}
                                     </span>
                                     {chat.mission && (
                                         <button
@@ -280,7 +264,7 @@ const ChatContainer: React.FC = observer(() => {
                                     >
                                         <div className="mt-4 bg-primary-800 p-2 rounded-lg">
                                             <div className="flex items-start gap-2">
-                                                <span className="text-xs text-gray-100">Миссия:</span>
+                                                <span className="text-xs text-gray-100">{t('mission')}:</span>
                                                 <span className="flex-1 text-xs text-gray-400">{chat.mission}</span>
                                             </div>
                                         </div>
@@ -296,7 +280,7 @@ const ChatContainer: React.FC = observer(() => {
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Type your message..."
+                        placeholder={t('greeting')}
                         className="flex-1 backdrop-blur-sm rounded-full border border-primary-700 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
                     />
                     <Button

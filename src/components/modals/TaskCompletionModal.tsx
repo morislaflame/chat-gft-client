@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { observer } from 'mobx-react-lite';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
+import { useTranslate } from '@/utils/useTranslate';
+import { getTaskText } from '@/utils/translations';
 import type { Task } from '@/types/types';
 
 interface TaskCompletionModalProps {
@@ -14,12 +17,14 @@ interface TaskCompletionModalProps {
   };
 }
 
-const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
+const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
   isOpen,
   onClose,
   task,
   reward
 }) => {
+  const { t, language } = useTranslate();
+  
   if (!task) return null;
 
   const isEnergy = reward?.type === 'energy' || task.rewardType === 'energy';
@@ -79,10 +84,10 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            Задача выполнена!
+            {t('taskCompleted')}
           </h2>
           <p className="text-gray-400 text-sm">
-            {task.description}
+            {getTaskText(task, language)}
           </p>
         </div>
 
@@ -94,7 +99,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
           className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
         >
           <div className="text-center">
-            <div className="text-sm text-gray-400 mb-2">Вы получили:</div>
+            <div className="text-sm text-gray-400 mb-2">{t('taskRewardReceived')}</div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-3xl font-bold text-white">
                 +{rewardAmount}
@@ -102,7 +107,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
               <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
             </div>
             <div className="text-xs text-gray-400">
-              {isEnergy ? 'Энергия' : 'Гемы'}
+              {isEnergy ? t('energy') : t('gems')}
             </div>
           </div>
         </motion.div>
@@ -120,12 +125,12 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = ({
             className="w-full"
             icon="fas fa-check"
           >
-            Отлично!
+            {t('great')}
           </Button>
         </motion.div>
       </div>
     </Modal>
   );
-};
+});
 
 export default TaskCompletionModal;

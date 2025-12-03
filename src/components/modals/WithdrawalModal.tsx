@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
 import type { UserReward } from '@/http/rewardAPI';
@@ -21,6 +22,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
   onConfirm,
   loading
 }) => {
+  const { t } = useTranslate();
   const [animationData, setAnimationData] = useState<Record<string, unknown> | null>(null);
 
   // Загружаем анимацию при изменении userReward
@@ -58,7 +60,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
         {/* Header */}
         <div className="text-center mb-4">
           <h2 className="text-xl font-bold text-white mb-4">
-            Запрос на вывод приза
+            {t('withdrawalRequest')}
           </h2>
           
           {/* Reward Media */}
@@ -98,7 +100,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
               </div>
             )}
             <div className="text-xs text-gray-400 flex items-center justify-center gap-1">
-              Куплено за {userReward.purchasePrice} <i className="fa-solid fa-gem text-white"></i>
+              {t('purchasedFor')} {userReward.purchasePrice} <i className="fa-solid fa-gem text-white"></i>
             </div>
           </div>
         </motion.div>
@@ -113,8 +115,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
           <div className="flex items-start gap-2">
             <i className="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
             <p className="text-xs text-blue-300">
-              После подтверждения ваш запрос будет отправлен администратору. 
-              Вы получите уведомление, когда приз будет выдан.
+              {t('withdrawalInfo')}
             </p>
           </div>
         </motion.div>
@@ -128,7 +129,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
             size="md"
             className="flex-1"
           >
-            Отмена
+            {t('cancel')}
           </Button>
           <Button
             onClick={onConfirm}
@@ -138,7 +139,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
             className="flex-1"
             icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
           >
-            {loading ? 'Отправка...' : 'Подтвердить'}
+            {loading ? t('sending') : t('confirm')}
           </Button>
         </div>
       </div>

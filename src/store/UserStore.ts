@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getLanguage, setLanguage, getOnboarding, setOnboarding } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 
 export default class UserStore {
@@ -14,8 +14,14 @@ export default class UserStore {
     isTooManyRequests = false;
     isServerError = false;
     serverErrorMessage = '';
+    _language: 'ru' | 'en' = 'ru';
 
     constructor() {
+        // Инициализируем язык из localStorage при создании store
+        const savedLanguage = localStorage.getItem('language') as 'ru' | 'en' | null;
+        if (savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en')) {
+            this._language = savedLanguage;
+        }
         makeAutoObservable(this);
     }
 
@@ -78,6 +84,33 @@ export default class UserStore {
         this._rewards = rewards;
     }
 
+    setLanguage(lang: 'ru' | 'en') {
+        this._language = lang;
+        localStorage.setItem('language', lang);
+        // Обновляем язык в объекте пользователя, если он существует
+        if (this._user) {
+            this._user = { ...this._user, language: lang };
+        }
+    }
+
+    async changeLanguage(lang: 'ru' | 'en') {
+        try {
+            runInAction(() => {
+                this.setLanguage(lang);
+            });
+        } catch (error) {
+            console.error("Error changing language:", error);
+        }
+    }
+
+    // Получаем язык из Telegram language_code и конвертируем в наш формат
+    private normalizeLanguage(languageCode: string | null | undefined): 'ru' | 'en' {
+        if (!languageCode) return 'en';
+        // Конвертируем язык Telegram в наш формат (ru или en)
+        const lang = languageCode.toLowerCase().split('-')[0];
+        return lang === 'ru' ? 'ru' : 'en';
+    }
+
     async logout() {
         try {
             this.setIsAuth(false);
@@ -90,8 +123,21 @@ export default class UserStore {
     async telegramLogin(initData: string) {
         try {
             const data = await telegramAuth(initData);
+            
+            // Получаем язык из Telegram или используем сохраненный
+            const savedLanguage = localStorage.getItem('language') as 'ru' | 'en' | null;
+            const userLanguage: 'ru' | 'en' = savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en') 
+                ? savedLanguage 
+                : this.normalizeLanguage((data as UserInfo).language);
+            
+            // Если языка нет в localStorage, сохраняем язык из Telegram
+            if (!savedLanguage) {
+                localStorage.setItem('language', userLanguage);
+            }
+            
             runInAction(() => {
-                this.setUser(data as UserInfo);
+                this.setLanguage(userLanguage);
+                this.setUser({ ...(data as UserInfo), language: userLanguage });
                 this.setIsAuth(true);
                 this.setServerError(false);
             });
@@ -128,9 +174,19 @@ export default class UserStore {
             const data = await fetchMyInfo();
             // Также загружаем информацию о рефералах для получения referralCount и lastBonuses
             const referralInfo = await getReferralInfo();
+            
+            // Используем язык из данных пользователя или из localStorage
+            const userLanguage = (data as UserInfo).language || this._language;
+            const savedLanguage = localStorage.getItem('language') as 'ru' | 'en' | null;
+            const finalLanguage = savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en') 
+                ? savedLanguage 
+                : this.normalizeLanguage(userLanguage);
+            
             runInAction(() => {
+                this.setLanguage(finalLanguage);
                 this.setUser({ 
                     ...data as UserInfo, 
+                    language: finalLanguage,
                     referrals: referralInfo.referrals || [],
                     referralCount: referralInfo.referralCount || 0,
                     lastBonuses: referralInfo.lastBonuses || []
@@ -179,32 +235,6 @@ export default class UserStore {
         }
     }
 
-
-    async loadLanguage() {
-        try {
-            const language = await getLanguage();
-            if (this._user) {
-                runInAction(() => {
-                    this.setUser({ ...this._user!, language: language as 'en' | 'ru' });
-                });
-            }
-        } catch (error) {
-            console.error("Error loading language:", error);
-        }
-    }
-
-    async updateLanguage(language: 'en' | 'ru') {
-        try {
-            await setLanguage(language);
-            if (this._user) {
-                runInAction(() => {
-                    this.setUser({ ...this._user!, language });
-                });
-            }
-        } catch (error) {
-            console.error("Error updating language:", error);
-        }
-    }
 
     async loadOnboarding() {
         try {
@@ -264,4 +294,7 @@ export default class UserStore {
         return this._rewards;
     }
     
+    get language() {
+        return this._language;
+    }
 }

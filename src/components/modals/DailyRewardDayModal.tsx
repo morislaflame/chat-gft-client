@@ -1,5 +1,7 @@
 import React from 'react';
+import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
 import type { DailyReward } from '@/http/dailyRewardAPI';
@@ -12,13 +14,15 @@ interface DailyRewardDayModalProps {
   isClaimed: boolean;
 }
 
-const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
+const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
   isOpen,
   onClose,
   day,
   reward,
   isClaimed
 }) => {
+  const { t } = useTranslate();
+  
   if (!day || !reward) return null;
 
   const isEnergy = reward.rewardType === 'energy';
@@ -53,7 +57,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
           </motion.div>
           
           <h2 className="text-2xl font-bold text-white mb-2">
-            День {day}
+            {t('day')} {day}
           </h2>
           {/* <p className="text-gray-400 text-sm">
             {reward.description}
@@ -68,7 +72,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
           className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
         >
           <div className="text-center">
-            <div className="text-sm text-gray-400 mb-2">Награда:</div>
+            <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div>
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-3xl font-bold text-white">
                 +{reward.reward}
@@ -88,7 +92,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
           >
             <div className="flex items-center justify-center gap-2 text-sm text-green-400">
               <i className="fas fa-check-circle"></i>
-              <span>Награда получена</span>
+              <span>{t('rewardReceived')}</span>
             </div>
           </motion.div>
         )}
@@ -106,12 +110,12 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = ({
             className="w-full"
             icon="fas fa-check"
           >
-            Понятно
+            {t('gotIt')}
           </Button>
         </motion.div>
       </div>
     </Modal>
   );
-};
+});
 
 export default DailyRewardDayModal;

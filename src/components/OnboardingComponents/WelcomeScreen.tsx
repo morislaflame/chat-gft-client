@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import Button from '@/components/CoreComponents/Button';
 
 interface WelcomeScreenProps {
@@ -14,22 +15,17 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     onJoinAdventure
 }) => {
     const { user } = useContext(Context) as IStoreContext;
+    const { t } = useTranslate();
     
-    // Получаем имя пользователя: username, firstName или "Странник"
+    // Получаем имя пользователя: username, firstName или "Странник"/"Wanderer"
     const getUserName = () => {
         const userData = user.user;
         if (userData?.username) return userData.username;
         if (userData?.firstName) return userData.firstName;
-        return 'Странник';
+        return t('wanderer');
     };
     
     const userName = getUserName();
-    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
-    
-    const greeting = userName;
-    const description = userLanguage === 'ru' 
-        ? 'Tы стоишь на пороге новой истории. Каждая твоя реплика меняет судьбу.'
-        : 'You stand on the threshold of a new story. Every word you say changes destiny.';
     
     return (
         <div className="flex flex-col justify-between h-full p-6 pb-8">
@@ -42,10 +38,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                     className="text-center"
                 >
                     <h1 className="text-4xl font-bold text-white mb-4">
-                        Welcome, {greeting}!
+                        {t('welcome')} {userName}!
                     </h1>
                     <p className="text-lg text-white/90">
-                        {description}
+                        {t('welcomeDescription')}
                     </p>
                 </motion.div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '../CoreComponents/Button';
@@ -11,6 +12,7 @@ import { renderRewardMedia } from '@/utils/rewardUtils';
 
 const RewardsContainer: React.FC = observer(() => {
     const { reward, user } = useContext(Context) as IStoreContext;
+    const { t } = useTranslate();
     const [activeTab, setActiveTab] = useState<'available' | 'purchased'>('available');
     const [animations, setAnimations] = useState<{  [url: string]: Record<string, unknown> }>({});
     const loadedUrls = useRef<Set<string>>(new Set());
@@ -87,7 +89,7 @@ const RewardsContainer: React.FC = observer(() => {
             return (
                 <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
                     <i className="fas fa-check-circle"></i>
-                    Выведен
+                    {t('withdrawn')}
                 </div>
             );
         }
@@ -96,7 +98,7 @@ const RewardsContainer: React.FC = observer(() => {
             return (
                 <div className="w-full px-4 py-3 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                     <i className="fas fa-clock"></i>
-                    Ожидает
+                    {t('pending')}
                 </div>
             );
         }
@@ -111,7 +113,7 @@ const RewardsContainer: React.FC = observer(() => {
                     className="w-full"
                     icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
                 >
-                    {isCreating ? 'Отправка...' : 'Повторить запрос'}
+                    {isCreating ? t('sending') : t('retryRequest')}
                 </Button>
             );
         }
@@ -126,7 +128,7 @@ const RewardsContainer: React.FC = observer(() => {
                 className="w-full"
                 icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-download'}
             >
-                {isCreating ? 'Отправка...' : 'Вывести'}
+                {isCreating ? t('sending') : t('withdraw')}
             </Button>
         );
     };
@@ -142,11 +144,11 @@ const RewardsContainer: React.FC = observer(() => {
     const isMobile = document.body.classList.contains('telegram-mobile');
 
     return (
-        <div className="p-4 overflow-y-auto flex w-full flex-col gap-4"
+        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4"
         style={{ marginTop: isMobile ? '156px' : '56px' }}>
             {/* Header with tabs */}
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">Rewards</h2>
+                <h2 className="text-xl font-bold text-white">{t('rewards')}</h2>
                 <div className="flex bg-primary-800 rounded-lg p-1">
                     <button
                         onClick={() => setActiveTab('available')}
@@ -156,7 +158,7 @@ const RewardsContainer: React.FC = observer(() => {
                                 : 'text-gray-400 hover:text-white'
                         }`}
                     >
-                        Available
+                        {t('available')}
                     </button>
                     <button
                         onClick={() => setActiveTab('purchased')}
@@ -166,7 +168,7 @@ const RewardsContainer: React.FC = observer(() => {
                                 : 'text-gray-400 hover:text-white'
                         }`}
                     >
-                        My Purchases
+                        {t('myPurchases')}
                     </button>
                 </div>
             </div>
@@ -183,12 +185,12 @@ const RewardsContainer: React.FC = observer(() => {
                 <div className="flex-1 flex items-center justify-center">
                     <EmptyPage
                         icon="fas fa-gift"
-                        title={activeTab === 'available' ? "No Rewards Available" : "No Purchases Yet"}
+                        title={activeTab === 'available' ? t('noRewardsAvailable') : t('noPurchasesYet')}
                         description={activeTab === 'available' 
-                            ? "There are no rewards available for purchase at the moment." 
-                            : "You haven't purchased any rewards yet. Check out the available rewards!"
+                            ? t('noRewardsAvailableDesc')
+                            : t('noPurchasesYetDesc')
                         }
-                        actionText="Refresh"
+                        actionText={t('refresh')}
                         onAction={() => {
                             reward.fetchAvailableRewards();
                             reward.fetchMyPurchases();
@@ -246,7 +248,7 @@ const RewardsContainer: React.FC = observer(() => {
                                     className="w-full"
                                     icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
                                 >
-                                    {isPurchasing ? 'Purchasing...' : (
+                                    {isPurchasing ? t('purchasing') : (
                                         <span className="flex items-center gap-1">
                                             {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
                                         </span>
@@ -267,7 +269,7 @@ const RewardsContainer: React.FC = observer(() => {
             <div className="bg-primary-800 border border-primary-700 rounded-xl p-3">
                 <div className="text-sm text-gray-400 text-center flex items-center justify-center gap-1">
                     <i className="fas fa-wallet"></i>
-                    <span>Your Balance: {user.user?.balance || 0}</span>
+                    <span>{t('yourBalance')} {user.user?.balance || 0}</span>
                     <i className="fa-solid fa-gem text-white"></i>
                 </div>
             </div>

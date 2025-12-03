@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { STORE_ROUTE, REWARDS_ROUTE } from '@/utils/consts';
+import { useTranslate } from '@/utils/useTranslate';
 
 
 const Header: React.FC = observer(() => {
     const { user, chat } = useContext(Context) as IStoreContext;
     const navigate = useNavigate();
+    const { t, language } = useTranslate();
     
     // Получаем аватар текущей истории
     const avatarUrl = chat.avatar?.url;
@@ -27,6 +29,11 @@ const Header: React.FC = observer(() => {
         if (openHistorySelection) {
             openHistorySelection();
         }
+    }
+
+    const handleLanguageClick = () => {
+        const newLanguage = language === 'ru' ? 'en' : 'ru';
+        user.changeLanguage(newLanguage);
     }
 
     return (
@@ -55,14 +62,6 @@ const Header: React.FC = observer(() => {
                             <span className="text-white text-xs font-medium">
                                 {(() => {
                                     const historyName = user.user?.selectedHistoryName || 'starwars';
-                                    const historyDisplayNames: Record<string, { en: string; ru: string }> = {
-                                        starwars: { en: 'Star Wars', ru: 'Звёздные Войны' },
-                                    };
-                                    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
-                                    const displayName = historyDisplayNames[historyName];
-                                    if (displayName) {
-                                        return displayName[userLanguage];
-                                    }
                                     return historyName.charAt(0).toUpperCase() + historyName.slice(1);
                                 })()}
                             </span>
@@ -88,13 +87,13 @@ const Header: React.FC = observer(() => {
                             {user.energy}
                         </div>
                         </button>
-                        {/* <button 
-                            onClick={() => {}}
-                            className="bg-primary-700 h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center space-x-1 cursor-pointer"
+                        <button 
+                            onClick={handleLanguageClick}
+                            className="backdrop-blur-sm rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center cursor-pointer"
+                            title={t('language')}
                         >
-                            <i className="fas fa-globe text-gray-300 text-sm "></i>
-                            <span className="text-xs">{user.user?.language?.toUpperCase() || 'EN'}</span>
-                        </button> */}
+                            <span className="text-xs text-white font-medium">{language.toUpperCase()}</span>
+                        </button>
                 </div>
             </div>
         </div>

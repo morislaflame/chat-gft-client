@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 
 interface HistorySelectionModalProps {
@@ -11,6 +12,7 @@ interface HistorySelectionModalProps {
 
 const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ isOpen, onClose }) => {
     const { user, agent } = useContext(Context) as IStoreContext;
+    const { t, language } = useTranslate();
 
     useEffect(() => {
         if (isOpen) {
@@ -45,28 +47,6 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
         return historyName.charAt(0).toUpperCase() + historyName.slice(1);
     };
 
-    const userLanguage = (user.user?.language || 'en') as 'en' | 'ru';
-
-    const texts = {
-        en: {
-            title: 'Select History',
-            description: 'Choose the story you want to participate in',
-            current: 'Current',
-            loading: 'Loading...',
-            error: 'Error loading histories',
-            retry: 'Retry',
-        },
-        ru: {
-            title: 'Выбрать историю',
-            description: 'Выберите историю, в которой хотите участвовать',
-            current: 'Текущая',
-            loading: 'Загрузка...',
-            error: 'Ошибка загрузки историй',
-            retry: 'Повторить',
-        },
-    };
-
-    const t = texts[userLanguage];
 
     return (
         <Modal
@@ -79,10 +59,10 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                 {/* Header */}
                 <div className="text-center mb-6">
                     <h2 className="text-2xl font-bold text-white mb-2">
-                        {t.title}
+                        {t('selectHistory')}
                     </h2>
                     <p className="text-gray-400 text-sm">
-                        {t.description}
+                        {t('selectHistoryDesc')}
                     </p>
                 </div>
 
@@ -94,7 +74,7 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                             onClick={() => agent.fetchPublicAgents()}
                             className="ml-2 underline hover:text-red-300"
                         >
-                            {t.retry}
+                            {t('retry')}
                         </button>
                     </div>
                 )}
@@ -127,7 +107,7 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="font-semibold text-white">
-                                                    {getHistoryDisplayName(agentItem.historyName, userLanguage)}
+                                                    {getHistoryDisplayName(agentItem.historyName, language)}
                                                 </span>
                                                 {/* {isSelected && (
                                                     <span className="text-xs px-2 py-0.5 bg-red-500/30 text-red-300 rounded">
@@ -162,7 +142,7 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                     onClick={onClose}
                     className="w-full mt-6 bg-primary-700 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
                 >
-                    Close
+                    {t('close')}
                 </motion.button>
             </div>
         </Modal>

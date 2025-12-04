@@ -14,8 +14,8 @@ type TranslationType = {
     },
     // ChatContainer
     greeting: {
-      ru: 'Я Дарт Вейдер, ваш ИИ-помощник. Спрашивайте меня о Силе, Империи или галактике далеко-далеко отсюда.',
-      en: 'I am Darth Vader, your AI assistant. Ask me anything about the Force, the Empire, or the galaxy far, far away.'
+      ru: 'Свой вариант истории',
+      en: 'Your version of the story'
     },
     mission: {
       ru: 'Миссия',
@@ -392,6 +392,23 @@ type TranslationType = {
     wanderer: {
         ru: 'Странник',
         en: 'Wanderer'
+    },
+    // Navigation
+    chat: {
+        ru: 'Чат',
+        en: 'Chat'
+    },
+    quests: {
+        ru: 'Квесты',
+        en: 'Quests'
+    },
+    friends: {
+        ru: 'Друзья',
+        en: 'Friends'
+    },
+    store: {
+        ru: 'Магазин',
+        en: 'Store'
     }
   };
   

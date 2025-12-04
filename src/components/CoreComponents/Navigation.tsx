@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslate } from '@/utils/useTranslate';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 
 interface NavigationProps {
@@ -7,12 +8,14 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+    const { t } = useTranslate();
+    
     const tabs = [
-        { id: 'chat', icon: 'fas fa-comments', label: 'Chat', route: MAIN_ROUTE },
-        { id: 'quests', icon: 'fas fa-tasks', label: 'Quests', route: QUESTS_ROUTE },
-        { id: 'friends', icon: 'fas fa-user-friends', label: 'Friends', route: FRIENDS_ROUTE },
-        { id: 'rewards', icon: 'fas fa-gift', label: 'Rewards', route: REWARDS_ROUTE },
-        { id: 'store', icon: 'fas fa-store', label: 'Store', route: STORE_ROUTE }
+        { id: 'chat', icon: 'fas fa-comments', label: t('chat'), route: MAIN_ROUTE },
+        { id: 'quests', icon: 'fas fa-tasks', label: t('quests'), route: QUESTS_ROUTE },
+        { id: 'friends', icon: 'fas fa-user-friends', label: t('friends'), route: FRIENDS_ROUTE },
+        { id: 'rewards', icon: 'fas fa-gift', label: t('rewards'), route: REWARDS_ROUTE },
+        { id: 'store', icon: 'fas fa-store', label: t('store'), route: STORE_ROUTE }
     ];
 
     const handleTabClick = (tabId: string) => {

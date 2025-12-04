@@ -216,7 +216,7 @@ const ChatContainer: React.FC = observer(() => {
                         </div>
                     </div>
                 )}
-                <div ref={messagesEndRef} className='mb-[138px]'/>
+                <div ref={messagesEndRef} className='mb-[128px]'/>
             </div>
 
             </div>
@@ -251,6 +251,9 @@ const ChatContainer: React.FC = observer(() => {
                                     className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
                                     style={{ width: `${progressPercent}%` }}
                                 ></div>
+                                {/* <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-xs font-medium text-white">{t('mission_progress')}</span>
+                                </div> */}
                             </div>
                             {/* Current Mission - Collapsible */}
                             <AnimatePresence>

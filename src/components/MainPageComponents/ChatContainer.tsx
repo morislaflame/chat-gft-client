@@ -226,8 +226,8 @@ const ChatContainer: React.FC = observer(() => {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-2">
-                                <span className='backdrop-blur-sm rounded-full p-2'>{t('mission_progress')}</span>
+                            <div className="flex justify-end text-xs mb-2">
+                                {/* <span className='backdrop-blur-sm rounded-full p-2'>{t('mission_progress')}</span> */}
                                 <div className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
                                 onClick={() => setIsMissionExpanded(!isMissionExpanded)}
                                 >

@@ -14,7 +14,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
         { id: 'chat', icon: 'fas fa-comments', label: t('chat'), route: MAIN_ROUTE },
         { id: 'quests', icon: 'fas fa-tasks', label: t('quests'), route: QUESTS_ROUTE },
         { id: 'friends', icon: 'fas fa-user-friends', label: t('friends'), route: FRIENDS_ROUTE },
-        { id: 'rewards', icon: 'fas fa-gift', label: t('rewards'), route: REWARDS_ROUTE },
+        { id: 'rewards', icon: 'fas fa-gift', label: t('loot'), route: REWARDS_ROUTE },
         { id: 'store', icon: 'fas fa-store', label: t('store'), route: STORE_ROUTE }
     ];
 

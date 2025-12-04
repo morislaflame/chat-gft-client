@@ -20,8 +20,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     // Получаем имя пользователя: username, firstName или "Странник"/"Wanderer"
     const getUserName = () => {
         const userData = user.user;
-        if (userData?.username) return userData.username;
         if (userData?.firstName) return userData.firstName;
+        if (userData?.username) return userData.username;
         return t('wanderer');
     };
     

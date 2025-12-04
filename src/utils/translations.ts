@@ -409,6 +409,10 @@ type TranslationType = {
     store: {
         ru: 'Магазин',
         en: 'Store'
+    },
+    loot: {
+        ru: 'Лут',
+        en: 'Rewards'
     }
   };
   

@@ -39,7 +39,7 @@ const Header: React.FC = observer(() => {
     return (
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
             {/* App Header */}
-            <div className=" py-1 px-4 flex items-center justify-between w-full">
+            <div className=" py-1 px-4 flex items-center justify-between gap-4 w-full">
                 <div className="flex items-center space-x-3 cursor-pointer backdrop-blur-sm rounded-full p-2"
                 onClick={handleAvatarClick}>
                     <div className="relative">

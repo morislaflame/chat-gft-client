@@ -5,6 +5,7 @@ export interface Agent {
     id: number;
     historyName: string;
     description?: string | null;
+    orderIndex: number;
     createdAt: string;
     video?: MediaFile | null;
     avatar?: MediaFile | null;

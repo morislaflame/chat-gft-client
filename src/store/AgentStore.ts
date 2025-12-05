@@ -47,8 +47,16 @@ export default class AgentStore {
         this.setError('');
         try {
             const agents = await getPublicAgents();
+            // Сортируем агентов по orderIndex
+            const sortedAgents = [...agents].sort((a, b) => {
+                if (a.orderIndex !== b.orderIndex) {
+                    return a.orderIndex - b.orderIndex;
+                }
+                // Если orderIndex одинаковый, сортируем по дате создания
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            });
             runInAction(() => {
-                this.setAgents(agents);
+                this.setAgents(sortedAgents);
             });
         } catch (error) {
             console.error("Error fetching public agents:", error);

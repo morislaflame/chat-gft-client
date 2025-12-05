@@ -25,18 +25,10 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
     const [showVideoModal, setShowVideoModal] = useState(false);
 
-    useEffect(() => {
-        if (step === 'select') {
-            agent.fetchPublicAgents();
-        }
-    }, [step, agent]);
-
     // Если начальный шаг - выбор истории, загружаем агентов сразу
     useEffect(() => {
-        if (initialStep === 'select') {
-            agent.fetchPublicAgents();
-        }
-    }, [initialStep, agent]);
+        agent.fetchPublicAgents();
+    }, [agent]);
 
     const handleSetActiveIndex = (newIndex: number) => {
         if (newIndex < 0 || newIndex >= agent.agents.length) return;

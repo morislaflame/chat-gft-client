@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile } from "@/types/types";
+import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile, Mission } from "@/types/types";
 import type UserStore from "@/store/UserStore";
 
 export default class ChatStore {
@@ -18,6 +18,7 @@ export default class ChatStore {
     _video: MediaFile | null = null;
     _avatar: MediaFile | null = null;
     _background: MediaFile | null = null;
+    _missions: Mission[] = [];
     private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
 
     constructor(userStore?: UserStore) {
@@ -84,6 +85,15 @@ export default class ChatStore {
 
     setBackground(background: MediaFile | null) {
         this._background = background;
+    }
+
+    setMissions(missions: Mission[]) {
+        this._missions = missions;
+    }
+
+    getMissionVideoByOrderIndex(orderIndex: number): MediaFile | null {
+        const mission = this._missions.find(m => m.orderIndex === orderIndex);
+        return mission?.video || null;
     }
 
     setSuggestions(suggestions: string[]) {
@@ -205,6 +215,9 @@ export default class ChatStore {
                 // Если подсказок нет, очищаем их
                 this.setSuggestions([]);
             }
+            
+            // Возвращаем response для использования в компонентах
+            return response;
         } catch (error) {
             console.error('Error sending message:', error);
             // Проверяем, если это ошибка недостаточного баланса
@@ -215,6 +228,7 @@ export default class ChatStore {
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
             }
+            return null;
         } finally {
             this.setIsTyping(false);
         }
@@ -296,6 +310,10 @@ export default class ChatStore {
                 this.setForceProgress(statusData.progressPercent);
             }
             this.setMission(statusData.mission);
+            // Сохраняем миссии с видео
+            if (statusData.missions) {
+                this.setMissions(statusData.missions);
+            }
         } catch (error) {
             console.error('Error loading status:', error);
             // Устанавливаем дефолтные значения при ошибке
@@ -368,5 +386,9 @@ export default class ChatStore {
 
     get background() {
         return this._background;
+    }
+
+    get missions() {
+        return this._missions;
     }
 }

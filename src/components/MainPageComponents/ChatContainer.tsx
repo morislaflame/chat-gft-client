@@ -7,6 +7,8 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import FormattedText from './FormattedText';
 import Button from '../CoreComponents/Button';
 import AgentVideoModal from '../modals/AgentVideoModal';
+import MissionVideoModal from '../modals/MissionVideoModal';
+import type { MediaFile } from '@/types/types';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -14,6 +16,9 @@ const ChatContainer: React.FC = observer(() => {
     const [inputValue, setInputValue] = useState('');
     const [isMissionExpanded, setIsMissionExpanded] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
+    const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
+    const [currentMissionVideo, setCurrentMissionVideo] = useState<{ video: MediaFile; mission: string | null } | null>(null);
+    const [lastMissionCompleted, setLastMissionCompleted] = useState<{ mission: string; stage: number } | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
@@ -31,7 +36,80 @@ const ChatContainer: React.FC = observer(() => {
     }, [chat.loading, chat.video, chat.messages.length, user.user?.onboardingSeen]);
 
     const handleSendMessage = async (message: string) => {
-        await chat.sendMessage(message);
+        const response = await chat.sendMessage(message);
+        // Проверяем, завершена ли миссия
+        if (response && response.missionCompleted && response.mission) {
+            setLastMissionCompleted({
+                mission: response.mission,
+                stage: response.stage || chat.currentStage
+            });
+        }
+    };
+
+    const handleStartClick = () => {
+        // Получаем видео для текущей миссии (orderIndex = currentStage, так как оба начинаются с 1)
+        const missionOrderIndex = chat.currentStage;
+        const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
+        
+        console.log('handleStartClick:', {
+            currentStage: chat.currentStage,
+            missionOrderIndex,
+            missions: chat.missions,
+            missionVideo
+        });
+        
+        if (missionVideo) {
+            setCurrentMissionVideo({
+                video: missionVideo,
+                mission: chat.mission
+            });
+            setShowMissionVideoModal(true);
+        } else {
+            // Если видео нет, просто отправляем сообщение
+            console.log('No mission video found, sending start message directly');
+            handleSendMessage("старт");
+        }
+    };
+
+    const handleStartNewMissionClick = () => {
+        // Получаем видео для новой миссии (orderIndex = lastMissionCompleted.stage, так как оба начинаются с 1)
+        if (lastMissionCompleted) {
+            const missionOrderIndex = lastMissionCompleted.stage;
+            const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
+            
+            console.log('handleStartNewMissionClick:', {
+                stage: lastMissionCompleted.stage,
+                missionOrderIndex,
+                missions: chat.missions,
+                missionVideo
+            });
+            
+            if (missionVideo) {
+                setCurrentMissionVideo({
+                    video: missionVideo,
+                    mission: lastMissionCompleted.mission
+                });
+                setShowMissionVideoModal(true);
+            } else {
+                // Если видео нет, просто отправляем сообщение
+                console.log('No mission video found for new mission, sending start message directly');
+                handleSendMessage("старт");
+                setLastMissionCompleted(null);
+            }
+        }
+    };
+
+    const handleMissionVideoClose = () => {
+        setShowMissionVideoModal(false);
+        // После закрытия видео отправляем сообщение "старт"
+        if (currentMissionVideo) {
+            handleSendMessage("старт");
+            setCurrentMissionVideo(null);
+        }
+        // Очищаем lastMissionCompleted после показа видео новой миссии
+        if (lastMissionCompleted) {
+            setLastMissionCompleted(null);
+        }
     };
 
     const scrollToBottom = (instant = false) => {
@@ -119,7 +197,7 @@ const ChatContainer: React.FC = observer(() => {
                     {chat.messages.length === 0 && (
                         <div className="mt-4">
                             <Button
-                                onClick={() => handleSendMessage("старт")}
+                                onClick={handleStartClick}
                                 variant="secondary"
                                 size="md"
                                 className="w-full"
@@ -216,8 +294,48 @@ const ChatContainer: React.FC = observer(() => {
                         </div>
                     </div>
                 )}
+                <AnimatePresence>
+                {lastMissionCompleted && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="flex justify-center mb-6"
+                    >
+                        <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
+                            {/* Mission Info */}
+                            <div className="">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-md font-semibold text-amber-400">
+                                        {t('stage')} {lastMissionCompleted.stage}
+                                    </span>
+                                </div>
+                                <div className="text-sm text-gray-300">
+                                    <span className="font-medium text-gray-200">{t('mission')}:</span> {lastMissionCompleted.mission}
+                                </div>
+                            </div>
+                            
+                            {/* Start Button */}
+                            <div className="mt-4">
+                                <Button
+                                    onClick={handleStartNewMissionClick}
+                                    variant="secondary"
+                                    size="md"
+                                    className="w-full"
+                                    icon="fas fa-play"
+                                >
+                                    {t('start')}
+                                </Button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
                 <div ref={messagesEndRef} className='mb-[128px]'/>
             </div>
+
+            {/* New Mission Block - показываем после завершения миссии */}
+            
 
             </div>
 
@@ -303,7 +421,14 @@ const ChatContainer: React.FC = observer(() => {
                 onClose={() => {
                     setShowVideoModal(false);
                 }}
-              />
+            />
+
+            {/* Mission Video Modal */}
+            <MissionVideoModal
+                isOpen={showMissionVideoModal}
+                video={currentMissionVideo?.video || null}
+                onClose={handleMissionVideoClose}
+            />
         </div>
     );
 });

@@ -59,11 +59,22 @@ export interface ApiMessageResponse {
     timestamp: string;
 }
 
+export interface Mission {
+    id: number;
+    agentId: number;
+    title: string;
+    description?: string | null;
+    orderIndex: number;
+    video?: MediaFile | null;
+}
+
 export interface ApiStatusResponse {
     stage: number;
     mission: string | null;
     status: string;
     progressPercent?: number | null; // Процент прогресса по миссии (0-100)
+    agentId?: number | null;
+    missions?: Mission[];
 }
 
 export interface ApiHistoryItem {

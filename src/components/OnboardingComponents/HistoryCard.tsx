@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import Button from '@/components/CoreComponents/Button';
+import { AgentPreview } from '@/utils/agentUtils';
+import type { MediaFile } from '@/types/types';
 
 interface HistoryCardProps {
     title: string;
@@ -8,6 +10,7 @@ interface HistoryCardProps {
     selectText: string;
     loadingText: string;
     isSaving: boolean;
+    preview?: MediaFile | null;
     onSelect: () => void;
 }
 
@@ -17,11 +20,12 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
     selectText,
     loadingText,
     isSaving,
+    preview,
     onSelect
 }) => {
     return (
         <motion.div
-            className="flex flex-col gap-4 p-4 rounded-[40px] backdrop-blur-sm select-none w-full"
+            className="flex flex-col gap-4 p-4 rounded-[40px] backdrop-blur-sm select-none w-full items-center justify-center"
             style={{
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
@@ -29,6 +33,16 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
                 msUserSelect: 'none'
             }}
         >
+            {/* Preview - внутри карточки */}
+            {preview && (
+                <div className="w-[80%]">
+                    <AgentPreview
+                        preview={preview}
+                        size="full"
+                    />
+                </div>
+            )}
+            
             {/* History Description */}
             <div className="text-center">
                 <h3 className="text-2xl font-bold text-white mb-2">

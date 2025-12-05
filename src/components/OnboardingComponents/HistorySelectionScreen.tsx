@@ -7,7 +7,6 @@ import useMeasure from 'react-use-measure';
 import type { Agent } from '@/http/agentAPI';
 import HistoryCard from './HistoryCard';
 import NavigationControls from './NavigationControls';
-import { AgentPreview } from '@/utils/agentUtils';
 
 interface HistorySelectionScreenProps {
     histories: Agent[];
@@ -120,22 +119,13 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                         >
                             {histories.map((agent) => (
                                 <div key={agent.id} ref={ref} className='flex flex-col w-full justify-center items-center'>
-                                    {/* Preview - над карточкой */}
-                                    {agent.preview && (
-                                        <div className="w-[80%]">
-                                            <AgentPreview
-                                                preview={agent.preview}
-                                                size="full"
-                                            />
-                                        </div>
-                                    )}
-                                    {/* Card */}
                                     <HistoryCard
                                         title={getHistoryDisplayName(agent.historyName)}
                                         description={agent.description || t('startYourAdventure')}
                                         selectText={selectText}
                                         loadingText={loadingText}
                                         isSaving={saving}
+                                        preview={agent.preview}
                                         onSelect={() => onSelectHistory(agent.historyName)}
                                     />
                                 </div>

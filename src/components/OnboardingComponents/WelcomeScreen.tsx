@@ -28,14 +28,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     const userName = getUserName();
     
     return (
-        <div className="flex flex-col justify-between h-full p-6 pb-8">
+        <div className="flex flex-col justify-between h-full p-6 pb-8 ">
             {/* Welcome Text */}
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center ">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="text-center"
+                    className="text-center "
                 >
                     <h1 className="text-4xl font-bold text-white mb-4">
                         {t('welcome')} {userName}!

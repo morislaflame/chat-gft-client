@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
-import onboardingImage from '@/assets/Onboarding.jpg';
+import onboardingImage from '@/assets/Onboarding.webp';
 import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';

@@ -30,7 +30,7 @@ const FriendsContainer: React.FC = observer(() => {
 
     const handleShareReferral = () => {
         const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
-        shareUrl(referralLink, 'Join me in this amazing app!');
+        shareUrl(referralLink, t('join'));
     };
 
     // Показываем лоадинг пока загружаются данные пользователя
@@ -136,14 +136,48 @@ const FriendsContainer: React.FC = observer(() => {
                                         }
                                     };
 
+                                    const getBonusTypeIcon = (bonusType?: string) => {
+                                        switch (bonusType) {
+                                            case 'energy':
+                                                return <i className="fa-solid fa-bolt text-purple-400"></i>;
+                                            case 'balance':
+                                                return <i className="fa-solid fa-gem text-amber-400"></i>;
+                                            default:
+                                                return null;
+                                        }
+                                    };
+
+                                    const getSourceUserName = (sourceUser?: Bonus['sourceUser']) => {
+                                        if (!sourceUser) return '';
+                                        if (sourceUser.firstName) {
+                                            return sourceUser.lastName 
+                                                ? `${sourceUser.firstName} ${sourceUser.lastName}`
+                                                : sourceUser.firstName;
+                                        }
+                                        return sourceUser.username || `ID: ${sourceUser.telegramId}`;
+                                    };
+
                                     return (
-                                        <div key={bonus.id || index} className="flex items-center justify-between text-xs bg-primary-800 rounded-lg p-2">
-                                            <div className="flex items-center space-x-2">
-                                                <i className={`${getBonusIcon(bonus.reason)} text-purple-400`}></i>
+                                        <div key={bonus.id || index} className="bg-primary-800 rounded-lg p-2 space-y-1">
+                                            <div className="flex items-center justify-between text-xs">
+                                                <div className='flex gap-2 items-center'>
+                                                    <div className="flex items-center">
+                                                        <i className={`${getBonusIcon(bonus.reason)} text-purple-400`}></i>
+                                                    </div>
+                                                    {bonus.sourceUser && (
+                                                        <div className="text-xs">
+                                                            {getSourceUserName(bonus.sourceUser)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                    <span className="text-green-400 font-semibold">
+                                                        +{bonus.amount || 'Unknown'}
+                                                    </span>
+                                                    {bonus.bonusType && getBonusTypeIcon(bonus.bonusType)}
+                                                </div>
                                             </div>
-                                            <span className="text-green-400 font-semibold">
-                                                +{bonus.amount || 'Unknown'}
-                                            </span>
+                                            
                                         </div>
                                     );
                                 })

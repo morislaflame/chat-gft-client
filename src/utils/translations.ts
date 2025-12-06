@@ -62,6 +62,10 @@ type TranslationType = {
       ru: 'Реферальные бонусы',
       en: 'Referral bonuses'
     },
+    from: {
+      ru: 'От',
+      en: 'From'
+    },
     noBonusesYet: {
       ru: 'Пока нет бонусов',
       en: 'No bonuses yet'
@@ -413,6 +417,10 @@ type TranslationType = {
     loot: {
         ru: 'Лут',
         en: 'Rewards'
+    },
+    join: {
+        ru: 'Присоединяйся — пиши свою историю ✍️✨ и собирай NFT-награды 🎁💎',
+        en: 'Join — write your story ✍️✨ and collect NFT rewards 🎁💎'
     }
   };
   

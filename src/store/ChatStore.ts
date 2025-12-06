@@ -327,7 +327,7 @@ export default class ChatStore {
         this.setForceProgress(0);
         this.setCurrentStage(1);
         this.setMission(null);
-        this.setSuggestions([]);
+        this.setSuggestions([]); 
         // Очищаем suggestions из localStorage при очистке сообщений
         try {
             localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);

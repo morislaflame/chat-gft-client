@@ -4,7 +4,8 @@ import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
-import onboardingImage from '@/assets/Onboarding.webp';
+import onboardingImageWebp from '@/assets/Onboarding.webp';
+import onboardingImageJpg from '@/assets/Onboarding.jpg';
 import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
@@ -75,7 +76,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
             <motion.div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{
-                    backgroundImage: `url(${onboardingImage})`
+                    backgroundImage: `url(${step === 'welcome' ? onboardingImageWebp : onboardingImageJpg})`
                 }}
                 animate={{
                     scale: [1, 1.05, 1],

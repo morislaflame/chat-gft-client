@@ -2,9 +2,17 @@ export interface Bonus {
     id?: number;
     amount?: number;
     reason?: string; // 'deposit', 'gift', 'invite', 'purchase'
+    bonusType?: 'energy' | 'balance'; // Тип бонуса: энергия или баланс
     createdAt?: string;
     sourceUserId?: number;
     referrerUserId?: number;
+    sourceUser?: {
+        id: number;
+        telegramId: number;
+        username?: string;
+        firstName?: string;
+        lastName?: string;
+    };
     [key: string]: unknown;
 }
 

@@ -154,7 +154,7 @@ const FriendsContainer: React.FC = observer(() => {
                                                 ? `${sourceUser.firstName} ${sourceUser.lastName}`
                                                 : sourceUser.firstName;
                                         }
-                                        return sourceUser.username || `ID: ${sourceUser.telegramId}`;
+                                        return sourceUser.username || `ID: ${sourceUser.telegramId}`; 
                                     };
 
                                     return (

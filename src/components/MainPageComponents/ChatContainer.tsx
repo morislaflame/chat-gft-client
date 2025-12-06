@@ -166,7 +166,7 @@ const ChatContainer: React.FC = observer(() => {
             {/* AI Introduction */}
             <div 
                 ref={chatContainerRef} 
-                className="flex-1 px-4 overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
+                className="flex-1 px-4 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
                 style={backgroundUrl ? {
                     backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
                     backgroundSize: 'cover',

@@ -15,6 +15,8 @@ export default class UserStore {
     isServerError = false;
     serverErrorMessage = '';
     _language: 'ru' | 'en' = 'ru';
+    _showOnboarding = false;
+    _onboardingInitialStep: 'welcome' | 'select' = 'welcome';
 
     constructor() {
         // Инициализируем язык из localStorage при создании store
@@ -194,6 +196,11 @@ export default class UserStore {
                 if (data.energy !== undefined) {
                     this.setEnergy(data.energy);
                 }
+                // Проверяем, нужно ли показать онбординг после загрузки данных пользователя
+                if (!this._user?.onboardingSeen) {
+                    this._showOnboarding = true;
+                    this._onboardingInitialStep = 'welcome';
+                }
             });
             
         } catch (error) {
@@ -254,7 +261,7 @@ export default class UserStore {
             await setOnboarding(completed);
             if (this._user) {
                 runInAction(() => {
-                    this.setUser({ ...this._user!, onboardingCompleted: completed });
+                    this.setUser({ ...this._user!, onboardingSeen: completed });
                 });
             }
         } catch (error) {
@@ -296,5 +303,50 @@ export default class UserStore {
     
     get language() {
         return this._language;
+    }
+
+    // Онбординг
+    get shouldShowOnboarding() {
+        // Показываем онбординг если пользователь авторизован, но онбординг не просмотрен
+        return this._isAuth && this._user !== null && !this._user.onboardingSeen;
+    }
+
+    get showOnboarding() {
+        return this._showOnboarding;
+    }
+
+    get onboardingInitialStep() {
+        return this._onboardingInitialStep;
+    }
+
+    setShowOnboarding(show: boolean) {
+        this._showOnboarding = show;
+    }
+
+    setOnboardingInitialStep(step: 'welcome' | 'select') {
+        this._onboardingInitialStep = step;
+    }
+
+    openHistorySelection() {
+        this._onboardingInitialStep = 'select';
+        this._showOnboarding = true;
+    }
+
+    async completeOnboarding() {
+        try {
+            // Обновляем onboardingSeen на сервере и в локальном состоянии
+            // await this.updateOnboarding(true);
+            runInAction(() => {
+                this._showOnboarding = false;
+                this._onboardingInitialStep = 'welcome';
+            });
+        } catch (error) {
+            console.error("Error completing onboarding:", error);
+            // Даже при ошибке скрываем онбординг, чтобы пользователь мог продолжить
+            runInAction(() => {
+                this._showOnboarding = false;
+                this._onboardingInitialStep = 'welcome';
+            });
+        }
     }
 }

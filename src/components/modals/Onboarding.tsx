@@ -66,11 +66,8 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     const getHistoryName = (historyName: string) => getHistoryDisplayName(historyName, language);
 
     const onboardingContent = (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding"
+        <div
+            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary"
         >
             {/* Background Image */}
             <motion.div
@@ -111,7 +108,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
                     />
                 )}
             </div>
-        </motion.div>
+        </div>
     );
 
     return (

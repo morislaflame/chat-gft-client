@@ -16,8 +16,6 @@ const AppRouter = lazy(() => import("@/router/AppRouter"));
 const App = observer(() => {
   const { user, dailyReward } = useContext(Context) as IStoreContext;
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingInitialStep, setOnboardingInitialStep] = useState<'welcome' | 'select'>('welcome');
   const {
     disableVerticalSwipes,
     lockOrientation,
@@ -78,35 +76,21 @@ const App = observer(() => {
     }
   }, [loading, user.isAuth, dailyReward]);
 
-  // Проверяем onboardingSeen после загрузки данных пользователя
-  useEffect(() => {
-    if (user.user?.onboardingSeen === false) {
-      setShowOnboarding(true);
-    } else {
-      setShowOnboarding(false);
-    }
-  }, [user.user?.onboardingSeen]);
-
-  const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
-    setOnboardingInitialStep('welcome'); // Сбрасываем на welcome для следующего раза
-  };
-
-  // Функция для открытия онбординга на этапе выбора истории
-  const openHistorySelection = () => {
-    setOnboardingInitialStep('select');
-    setShowOnboarding(true);
+  const handleOnboardingComplete = async () => {
+    await user.completeOnboarding();
   };
 
   // Экспортируем функцию через window для доступа из Header
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).openHistorySelection = openHistorySelection;
+    (window as any).openHistorySelection = () => {
+      user.openHistorySelection();
+    };
     return () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).openHistorySelection;
     };
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (
@@ -114,26 +98,32 @@ const App = observer(() => {
         <LoadingIndicator />
       </div>
     );
-}
+  }
 
+  // Если нужно показать онбординг, показываем только его (без Header и основного контента)
+  if (user.shouldShowOnboarding && user.showOnboarding) {
+    return (
+      <BrowserRouter>
+        <Onboarding onComplete={handleOnboardingComplete} initialStep={user.onboardingInitialStep} />
+      </BrowserRouter>
+    );
+  }
 
+  // Основной контент показывается только если онбординг не нужен
   return (
       <BrowserRouter>
         <Header/>
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-screen w-screen">
-                <LoadingIndicator />
-              </div>
-            }>
-              <AppRouter />
-            </Suspense>
-            <BottomNavigation />
-            <DailyRewardModal />
-            <StageRewardModal />
-            <InsufficientEnergyModal />
-            {showOnboarding && (
-              <Onboarding onComplete={handleOnboardingComplete} initialStep={onboardingInitialStep} />
-            )}
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-screen w-screen">
+            <LoadingIndicator />
+          </div>
+        }>
+          <AppRouter />
+        </Suspense>
+        <BottomNavigation />
+        <DailyRewardModal />
+        <StageRewardModal />
+        <InsufficientEnergyModal />
       </BrowserRouter>
   )
 });

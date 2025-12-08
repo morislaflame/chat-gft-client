@@ -162,7 +162,7 @@ const ChatContainer: React.FC = observer(() => {
     const avatarUrl = chat.avatar?.url;
 
     return (
-        <div className="h-full relative flex flex-col overflow-x-hidden max-w-full">
+        <div className="h-full relative flex flex-col overflow-x-hidden w-full">
             {/* AI Introduction */}
             <div 
                 ref={chatContainerRef} 

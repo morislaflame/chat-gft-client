@@ -12,7 +12,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) =
 
     return (
         <motion.div 
-            className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden hide-scrollbar ios-scroll ${className}`}
+            className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden w-full hide-scrollbar ios-scroll ${className}`}
             style={{ 
                 height: `calc(100vh - ${navigationHeight}px)`,
                 // paddingTop: `${headerHeight}px`,

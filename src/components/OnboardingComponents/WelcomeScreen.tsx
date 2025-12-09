@@ -40,9 +40,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                     <h1 className="text-4xl font-bold text-white mb-4">
                         {t('welcome')} {userName}!
                     </h1>
-                    <p className="text-lg text-white/90">
-                        {t('welcomeDescription')}
-                    </p>
+                    <div className="text-lg text-white/90">
+                        <p>{t('welcomeDescription')}</p>
+                        <p>{t('welcomeDescription2')}</p>
+                    </div>
                 </motion.div>
             </div>
 

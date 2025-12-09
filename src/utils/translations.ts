@@ -386,12 +386,16 @@ type TranslationType = {
     },
     // WelcomeScreen
     welcome: {
-        ru: 'Добро пожаловать,',
+        ru: 'Приветствую,',
         en: 'Welcome,'
     },
     welcomeDescription: {
-        ru: 'Ты стоишь на пороге новой истории. Каждая твоя реплика меняет судьбу.',
-        en: 'You stand on the threshold of a new story. Every word you say changes destiny.'
+        ru: 'Каждый выбор формирует историю.',
+        en: 'Every choice shapes the story.'
+    },
+    welcomeDescription2: {
+        ru: 'Миссии приводят к NFT-подаркам.',
+        en: 'Missions lead to NFT rewards.'
     },
     wanderer: {
         ru: 'Странник',

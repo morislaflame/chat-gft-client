@@ -1,13 +1,14 @@
 import React from 'react';
 import { useTranslate } from '@/utils/useTranslate';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import { observer } from 'mobx-react-lite';
 
 interface NavigationProps {
     activeTab: string;
     onTabChange: (tab: string) => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange }) => {
     const { t } = useTranslate();
     
     const tabs = [
@@ -46,6 +47,6 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
             </div>
         </div>
     );
-};
+});
 
 export default Navigation;

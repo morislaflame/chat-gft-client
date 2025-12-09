@@ -17,6 +17,7 @@ export default class UserStore {
     _language: 'ru' | 'en' = 'ru';
     _showOnboarding = false;
     _onboardingInitialStep: 'welcome' | 'select' = 'welcome';
+    _isHistorySelectionFromHeader = false;
 
     constructor() {
         // Инициализируем язык из localStorage при создании store
@@ -328,8 +329,23 @@ export default class UserStore {
     }
 
     openHistorySelection() {
-        this._onboardingInitialStep = 'select';
-        this._showOnboarding = true;
+        runInAction(() => {
+            this._onboardingInitialStep = 'select';
+            this._showOnboarding = true;
+            this._isHistorySelectionFromHeader = true;
+        });
+    }
+
+    get isHistorySelectionFromHeader() {
+        return this._isHistorySelectionFromHeader;
+    }
+
+    closeHistorySelection() {
+        runInAction(() => {
+            this._showOnboarding = false;
+            this._isHistorySelectionFromHeader = false;
+            this._onboardingInitialStep = 'welcome';
+        });
     }
 
     async completeOnboarding() {
@@ -339,6 +355,7 @@ export default class UserStore {
             runInAction(() => {
                 this._showOnboarding = false;
                 this._onboardingInitialStep = 'welcome';
+                this._isHistorySelectionFromHeader = false;
             });
         } catch (error) {
             console.error("Error completing onboarding:", error);
@@ -346,6 +363,7 @@ export default class UserStore {
             runInAction(() => {
                 this._showOnboarding = false;
                 this._onboardingInitialStep = 'welcome';
+                this._isHistorySelectionFromHeader = false;
             });
         }
     }

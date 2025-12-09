@@ -21,6 +21,8 @@ interface HistorySelectionScreenProps {
     getHistoryDisplayName: (historyName: string) => string;
     onSetActiveIndex: (index: number) => void;
     onSelectHistory: (historyName: string) => void;
+    isFromHeader?: boolean;
+    onClose?: () => void;
 }
 
 const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
@@ -34,7 +36,9 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     noHistoriesText,
     getHistoryDisplayName,
     onSetActiveIndex,
-    onSelectHistory
+    onSelectHistory,
+    isFromHeader = false,
+    onClose
 }) => {
     const { t } = useTranslate();
     const [ref, bounds] = useMeasure();
@@ -60,16 +64,34 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
         threshold: 50
     });
 
+    const handleClose = () => {
+        hapticImpact('soft');
+        if (onClose) {
+            onClose();
+        }
+    };
+
     return (
         <div className="flex flex-col justify-between h-full p-4 pb-8 gap-4">
             {/* Title */}
-            <motion.h2
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-2xl font-bold text-white text-center"
-            >
-                {t('selectHistory')}
-            </motion.h2>
+            <div className="flex items-center justify-center relative">
+                <motion.h2
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-2xl font-bold text-white text-center"
+                >
+                    {t('selectHistory')}
+                </motion.h2>
+                {isFromHeader && onClose && (
+                    <button
+                        onClick={handleClose}
+                        className="absolute right-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                        aria-label="Close"
+                    >
+                        <i className="fas fa-times text-white text-xl"></i>
+                    </button>
+                )}
+            </div>
 
             {/* History Selection Panel */}
             {loading ? (

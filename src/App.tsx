@@ -80,6 +80,10 @@ const App = observer(() => {
     await user.completeOnboarding();
   };
 
+  const handleHistorySelectionClose = () => {
+    user.closeHistorySelection();
+  };
+
   // Экспортируем функцию через window для доступа из Header
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,10 +105,16 @@ const App = observer(() => {
   }
 
   // Если нужно показать онбординг, показываем только его (без Header и основного контента)
-  if (user.shouldShowOnboarding && user.showOnboarding) {
+  // Показываем онбординг если: обычный онбординг (shouldShowOnboarding) ИЛИ открыт из Header (showOnboarding)
+  if ((user.shouldShowOnboarding && user.showOnboarding) || (user.showOnboarding && user.isHistorySelectionFromHeader)) {
     return (
       <BrowserRouter>
-        <Onboarding onComplete={handleOnboardingComplete} initialStep={user.onboardingInitialStep} />
+        <Onboarding 
+          onComplete={handleOnboardingComplete} 
+          initialStep={user.onboardingInitialStep}
+          isFromHeader={user.isHistorySelectionFromHeader}
+          onClose={handleHistorySelectionClose}
+        />
       </BrowserRouter>
     );
   }

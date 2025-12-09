@@ -16,9 +16,11 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 interface OnboardingProps {
     onComplete: () => void;
     initialStep?: 'welcome' | 'select';
+    isFromHeader?: boolean;
+    onClose?: () => void;
 }
 
-const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialStep = 'welcome' }) => {
+const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialStep = 'welcome', isFromHeader = false, onClose }) => {
     const { agent } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
     const [step, setStep] = useState<'welcome' | 'select'>(initialStep);
@@ -109,6 +111,8 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
                         getHistoryDisplayName={getHistoryName}
                         onSetActiveIndex={handleSetActiveIndex}
                         onSelectHistory={handleSelectHistory}
+                        isFromHeader={isFromHeader}
+                        onClose={onClose}
                     />
                 )}
             </div>

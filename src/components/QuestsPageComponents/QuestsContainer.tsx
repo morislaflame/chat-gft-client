@@ -11,6 +11,7 @@ import TaskCompletionModal from '../modals/TaskCompletionModal';
 import DailyRewardProgress from './DailyRewardProgress';
 import DailyRewardDayModal from '../modals/DailyRewardDayModal';
 import type { DailyReward } from '@/http/dailyRewardAPI';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const QuestsContainer: React.FC = observer(() => {
     const { quest, user, dailyReward } = useContext(Context) as IStoreContext;
@@ -18,6 +19,7 @@ const QuestsContainer: React.FC = observer(() => {
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [selectedReward, setSelectedReward] = useState<DailyReward | null>(null);
     const [dayModalOpen, setDayModalOpen] = useState(false);
+    const { hapticImpact } = useHapticFeedback();
 
     useEffect(() => {
         quest.loadQuests();
@@ -37,6 +39,7 @@ const QuestsContainer: React.FC = observer(() => {
     }, [quest, user]);
 
     const handleDayClick = useCallback((day: number, reward: DailyReward | null) => {
+        hapticImpact('soft');
         setSelectedDay(day);
         setSelectedReward(reward);
         setDayModalOpen(true);

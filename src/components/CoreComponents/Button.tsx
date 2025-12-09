@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { motion } from 'motion/react';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 type ButtonVariant = 'primary' | 'secondary' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -27,6 +28,7 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   iconPosition = 'left',
 }) => {
+  const { hapticImpact } = useHapticFeedback();
   const variantClasses = {
     primary: 'bg-primary-700 hover:bg-primary-600 text-white',
     secondary: 'bg-secondary-500 hover:bg-secondary-400 text-white',
@@ -60,10 +62,17 @@ const Button: React.FC<ButtonProps> = ({
   // Если нет children, но есть иконка, показываем только иконку
   const hasContent = children || icon;
 
+  const handleClick = () => {
+    if (!disabled) {
+      hapticImpact('soft');
+      onClick?.();
+    }
+  };
+
   return (
     <motion.button
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       whileTap={{ scale: disabled ? 1 : 0.9 }}
       transition={{ duration: 0.2 }}

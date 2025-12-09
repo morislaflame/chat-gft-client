@@ -11,6 +11,7 @@ import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySel
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
 import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 interface OnboardingProps {
     onComplete: () => void;
@@ -25,6 +26,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     const [direction, setDirection] = useState(1);
     const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
     const [showVideoModal, setShowVideoModal] = useState(false);
+    const {hapticImpact, hapticNotification} = useHapticFeedback();
 
     // Если начальный шаг - выбор истории, загружаем агентов сразу
     useEffect(() => {
@@ -32,6 +34,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     }, [agent]);
 
     const handleSetActiveIndex = (newIndex: number) => {
+        hapticImpact('soft');
         if (newIndex < 0 || newIndex >= agent.agents.length) return;
         setDirection(newIndex > activeIndex ? 1 : -1);
         setActiveIndex(newIndex);
@@ -57,6 +60,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     };
 
     const handleVideoClose = () => {
+        hapticNotification('success');
         setShowVideoModal(false);
         setSelectedVideo(null);
         // После закрытия видео закрываем онбординг

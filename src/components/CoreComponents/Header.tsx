@@ -4,25 +4,30 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { STORE_ROUTE, REWARDS_ROUTE } from '@/utils/consts';
 import { useTranslate } from '@/utils/useTranslate';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 
 const Header: React.FC = observer(() => {
     const { user, chat } = useContext(Context) as IStoreContext;
     const navigate = useNavigate();
     const { t, language } = useTranslate();
+    const { hapticImpact } = useHapticFeedback();
     
     // Получаем аватар текущей истории
     const avatarUrl = chat.avatar?.url;
     
     const handleStarsClick = () => {
+        hapticImpact('soft');
         navigate(STORE_ROUTE);
     }
 
     const handleGemsClick = () => {
+        hapticImpact('soft');
         navigate(REWARDS_ROUTE);
     }
 
     const handleAvatarClick = () => {
+        hapticImpact('soft');
         // Открываем онбординг на этапе выбора истории
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const openHistorySelection = (window as any).openHistorySelection;
@@ -32,6 +37,7 @@ const Header: React.FC = observer(() => {
     }
 
     const handleLanguageClick = () => {
+        hapticImpact('soft');
         const newLanguage = language === 'ru' ? 'en' : 'ru';
         user.changeLanguage(newLanguage);
     }

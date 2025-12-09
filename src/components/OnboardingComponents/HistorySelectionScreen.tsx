@@ -7,6 +7,7 @@ import useMeasure from 'react-use-measure';
 import type { Agent } from '@/http/agentAPI';
 import HistoryCard from './HistoryCard';
 import NavigationControls from './NavigationControls';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 interface HistorySelectionScreenProps {
     histories: Agent[];
@@ -37,14 +38,17 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
 }) => {
     const { t } = useTranslate();
     const [ref, bounds] = useMeasure();
+    const {hapticImpact} = useHapticFeedback();
 
     const handleSwipeLeft = () => {
+        hapticImpact('soft');
         if (activeIndex < histories.length - 1) {
             onSetActiveIndex(activeIndex + 1);
         }
     };
 
     const handleSwipeRight = () => {
+        hapticImpact('soft');
         if (activeIndex > 0) {
             onSetActiveIndex(activeIndex - 1);
         }

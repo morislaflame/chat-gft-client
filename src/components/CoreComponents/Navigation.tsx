@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslate } from '@/utils/useTranslate';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 import { observer } from 'mobx-react-lite';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 interface NavigationProps {
     activeTab: string;
@@ -10,6 +11,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange }) => {
     const { t } = useTranslate();
+    const { hapticImpact } = useHapticFeedback();
     
     const tabs = [
         { id: 'chat', icon: 'fas fa-comments', label: t('chat'), route: MAIN_ROUTE },
@@ -20,6 +22,9 @@ const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange
     ];
 
     const handleTabClick = (tabId: string) => {
+        if (activeTab !== tabId) {
+            hapticImpact('soft');
+        }
         onTabChange(tabId);
     };
 

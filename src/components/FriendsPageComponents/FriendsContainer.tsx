@@ -7,17 +7,21 @@ import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
     const { shareUrl } = useTelegramApp();
     const { t } = useTranslate();
+    const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [isCopied, setIsCopied] = useState(false);
 
     const handleCopyReferral = async () => {
+        hapticImpact('soft');
         const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
         try {
             await navigator.clipboard.writeText(referralLink);
+            hapticNotification('success');
             setIsCopied(true);
             // Возвращаем к исходному состоянию через 2 секунды
             setTimeout(() => {
@@ -29,6 +33,7 @@ const FriendsContainer: React.FC = observer(() => {
     };
 
     const handleShareReferral = () => {
+        hapticImpact('soft');
         const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
         shareUrl(referralLink, t('join'));
     };
@@ -47,6 +52,7 @@ const FriendsContainer: React.FC = observer(() => {
                 description={t('userDataUnavailableDesc')}
                 actionText={t('refresh')}
                 onAction={() => {
+                    hapticImpact('soft');
                     user.fetchMyInfo();
                 }}
             />

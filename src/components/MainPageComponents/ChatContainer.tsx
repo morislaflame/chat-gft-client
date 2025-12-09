@@ -9,10 +9,12 @@ import Button from '../CoreComponents/Button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import type { MediaFile } from '@/types/types';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
+    const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [inputValue, setInputValue] = useState('');
     const [isMissionExpanded, setIsMissionExpanded] = useState(false);
     const [showVideoModal, setShowVideoModal] = useState(false);
@@ -47,6 +49,7 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleStartClick = () => {
+        hapticImpact('soft');
         // Получаем видео для текущей миссии (orderIndex = currentStage, так как оба начинаются с 1)
         const missionOrderIndex = chat.currentStage;
         const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
@@ -72,6 +75,7 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleStartNewMissionClick = () => {
+        hapticImpact('soft');
         // Получаем видео для новой миссии (orderIndex = lastMissionCompleted.stage, так как оба начинаются с 1)
         if (lastMissionCompleted) {
             const missionOrderIndex = lastMissionCompleted.stage;
@@ -100,6 +104,7 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const handleMissionVideoClose = () => {
+        hapticNotification('success');
         setShowMissionVideoModal(false);
         // После закрытия видео отправляем сообщение "старт"
         if (currentMissionVideo) {
@@ -139,12 +144,14 @@ const ChatContainer: React.FC = observer(() => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (inputValue.trim()) {
+            hapticImpact('soft');
             handleSendMessage(inputValue.trim());
             setInputValue('');
         }
     };
 
     const handleSelectSuggestion = (text: string) => {
+        hapticImpact('soft');
         handleSendMessage(text.trim());
     };
 
@@ -347,7 +354,10 @@ const ChatContainer: React.FC = observer(() => {
                             <div className="flex justify-end text-xs mb-2">
                                 {/* <span className='backdrop-blur-sm rounded-full p-2'>{t('mission_progress')}</span> */}
                                 <div className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
-                                onClick={() => setIsMissionExpanded(!isMissionExpanded)}
+                                onClick={() => {
+                                    hapticImpact('soft');
+                                    setIsMissionExpanded(!isMissionExpanded);
+                                }}
                                 >
                                     <span className="text-amber-400 font-medium flex items-center">
                                         <i className="fas fa-gift mr-1"></i>
@@ -419,6 +429,7 @@ const ChatContainer: React.FC = observer(() => {
                 isOpen={showVideoModal}
                 video={chat.video}
                 onClose={() => {
+                    hapticNotification('success');
                     setShowVideoModal(false);
                 }}
             />

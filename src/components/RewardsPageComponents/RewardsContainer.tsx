@@ -24,7 +24,7 @@ const RewardsContainer: React.FC = observer(() => {
         reward.fetchAvailableRewards();
         reward.fetchMyPurchases();
         reward.fetchWithdrawalRequests();
-        user.fetchMyInfo();
+        // user.fetchMyInfo();
     }, [reward, user]);
 
     // Загружаем анимации для наград

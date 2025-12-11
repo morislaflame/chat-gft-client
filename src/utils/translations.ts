@@ -401,6 +401,26 @@ type TranslationType = {
         ru: 'Странник',
         en: 'Wanderer'
     },
+    gameExplanationTitle: {
+        ru: 'Ты решаешь',
+        en: 'You decide your fate'
+    },
+    gameExplanation1: {
+        ru: 'Каждый выбор формирует историю',
+        en: 'Every choice shapes the story'
+    },
+    gameExplanation2: {
+        ru: 'Проходите миссии и получайте призы',
+        en: 'Complete missions and get rewards'
+    },
+    gameExplanation3: {
+        ru: 'Выбирайте NFT',
+        en: 'Choose NFTs'
+    },
+    gameExplanation4: {
+        ru: 'Зарабатывайте с друзьями',
+        en: 'Earn with friends'
+    },
     // Navigation
     chat: {
         ru: 'Чат',

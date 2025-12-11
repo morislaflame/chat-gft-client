@@ -75,19 +75,41 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
         <div
             className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary"
         >
-            {/* Background Image */}
+            {/* Background Images with smooth crossfade transition */}
             <motion.div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{
-                    backgroundImage: `url(${step === 'welcome' ? onboardingImageWebp : onboardingImageJpg})`
+                    backgroundImage: `url(${onboardingImageWebp})`
                 }}
                 animate={{
+                    opacity: step === 'welcome' ? 1 : 0,
                     scale: [1, 1.05, 1],
                 }}
                 transition={{
-                    duration: 15,
-                    repeat: Infinity,
-                    ease: "easeInOut"
+                    opacity: { duration: 0.5, ease: "easeInOut" },
+                    scale: {
+                        duration: 15,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }
+                }}
+            />
+            <motion.div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{
+                    backgroundImage: `url(${onboardingImageJpg})`
+                }}
+                animate={{
+                    opacity: step === 'select' ? 1 : 0,
+                    scale: [1, 1.05, 1],
+                }}
+                transition={{
+                    opacity: { duration: 0.5, ease: "easeInOut" },
+                    scale: {
+                        duration: 15,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }
                 }}
             />
 

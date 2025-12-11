@@ -30,9 +30,9 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const { hapticImpact } = useHapticFeedback();
   const variantClasses = {
-    primary: 'bg-primary-700 hover:bg-primary-600 text-white',
-    secondary: 'bg-secondary-500 hover:bg-secondary-400 text-white',
-    success: 'bg-green-500 hover:bg-green-500 text-white',
+    primary: 'bg-primary-700 hover:bg-primary-600 text-white shadow-lg',
+    secondary: 'bg-secondary-500 hover:bg-secondary-400 text-white shadow-lg',
+    success: 'bg-green-500 hover:bg-green-500 text-white shadow-lg ',
   };
 
   const sizeClasses = {
@@ -48,11 +48,14 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   const baseClasses = `
-    rounded-lg font-medium transition-colors cursor-pointer
+    relative rounded-lg font-medium transition-all duration-200 cursor-pointer
     disabled:opacity-50 disabled:cursor-not-allowed
+    border border-white/10
     ${variantClasses[variant]}
     ${sizeClasses[size]}
     ${className}
+    before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none
+    active:before:opacity-50
   `;
 
   const iconElement = icon ? (

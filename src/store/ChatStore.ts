@@ -19,6 +19,7 @@ export default class ChatStore {
     _avatar: MediaFile | null = null;
     _background: MediaFile | null = null;
     _missions: Mission[] = [];
+    _loadedHistoryName: string | null = null; // Отслеживаем для какой истории загружены данные
     private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
 
     constructor(userStore?: UserStore) {
@@ -234,7 +235,14 @@ export default class ChatStore {
         }
     }
 
-    async loadChatHistory() {
+    async loadChatHistory(forceReload = false) {
+        // Проверяем, не загружаем ли мы уже данные для текущей истории
+        const currentHistoryName = this._userStore?.user?.selectedHistoryName || null;
+        if (!forceReload && currentHistoryName === this._loadedHistoryName && this._messages.length > 0 && !this._loading) {
+            // Данные уже загружены для этой истории, пропускаем загрузку
+            return;
+        }
+
         this.setLoading(true);
         this.setError('');
 
@@ -293,6 +301,9 @@ export default class ChatStore {
             
             // Загружаем статус этапа после загрузки истории
             await this.loadStatus();
+            
+            // Сохраняем имя загруженной истории
+            this._loadedHistoryName = currentHistoryName;
         } catch (error) {
             console.error('Error loading chat history:', error);
             this.setError('Error loading chat history');
@@ -327,7 +338,8 @@ export default class ChatStore {
         this.setForceProgress(0);
         this.setCurrentStage(1);
         this.setMission(null);
-        this.setSuggestions([]); 
+        this.setSuggestions([]);
+        this._loadedHistoryName = null; // Сбрасываем отслеживание загруженной истории
         // Очищаем suggestions из localStorage при очистке сообщений
         try {
             localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);

@@ -350,13 +350,15 @@ export default class UserStore {
 
     async completeOnboarding() {
         try {
-            // Обновляем onboardingSeen на сервере и в локальном состоянии
-            // await this.updateOnboarding(true);
             runInAction(() => {
                 this._showOnboarding = false;
-                this._onboardingInitialStep = 'welcome';
+                // this._onboardingInitialStep = 'welcome';
                 this._isHistorySelectionFromHeader = false;
             });
+            if (this.user?.onboardingSeen === false) {
+                this.updateOnboarding(true);
+            };
+            
         } catch (error) {
             console.error("Error completing onboarding:", error);
             // Даже при ошибке скрываем онбординг, чтобы пользователь мог продолжить

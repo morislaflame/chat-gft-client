@@ -25,17 +25,11 @@ const ChatContainer: React.FC = observer(() => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
 
+    // Загружаем историю только при монтировании или при изменении выбранной истории
     useEffect(() => {
+        // Проверяем, нужно ли загружать историю (ChatStore сам проверит, не загружена ли она уже)
         chat.loadChatHistory();
-    }, [chat]);
-
-    // Проверяем, нужно ли показать видео после загрузки истории
-    // Показываем видео только если история пуста (нет сообщений) и онбординг пройден
-    useEffect(() => {
-        if (!chat.loading && chat.video?.url && chat.messages.length === 0 && user.user?.onboardingSeen === true) {
-            setShowVideoModal(true);
-        }
-    }, [chat.loading, chat.video, chat.messages.length, user.user?.onboardingSeen]);
+    }, [chat, user.user?.selectedHistoryName]);
 
     const handleSendMessage = async (message: string) => {
         const response = await chat.sendMessage(message);
@@ -53,13 +47,6 @@ const ChatContainer: React.FC = observer(() => {
         // Получаем видео для текущей миссии (orderIndex = currentStage, так как оба начинаются с 1)
         const missionOrderIndex = chat.currentStage;
         const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
-        
-        console.log('handleStartClick:', {
-            currentStage: chat.currentStage,
-            missionOrderIndex,
-            missions: chat.missions,
-            missionVideo
-        });
         
         if (missionVideo) {
             setCurrentMissionVideo({
@@ -80,13 +67,6 @@ const ChatContainer: React.FC = observer(() => {
         if (lastMissionCompleted) {
             const missionOrderIndex = lastMissionCompleted.stage;
             const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
-            
-            console.log('handleStartNewMissionClick:', {
-                stage: lastMissionCompleted.stage,
-                missionOrderIndex,
-                missions: chat.missions,
-                missionVideo
-            });
             
             if (missionVideo) {
                 setCurrentMissionVideo({
@@ -118,11 +98,6 @@ const ChatContainer: React.FC = observer(() => {
     };
 
     const scrollToBottom = (instant = false) => {
-        // Используем контейнер сообщений для более надежного скролла
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-        // Также используем messagesEndRef как fallback
         messagesEndRef.current?.scrollIntoView({ behavior: instant ? 'auto' : 'smooth' });
     };
 
@@ -130,14 +105,10 @@ const ChatContainer: React.FC = observer(() => {
         scrollToBottom();
     }, [chat.messages, chat.isTyping]);
 
-    // Скроллим вниз сразу после загрузки истории (instant scroll для первой загрузки)
     useEffect(() => {
         if (!chat.loading && chat.messages.length > 0 && !hasScrolledToBottomRef.current) {
-            // Небольшая задержка, чтобы DOM успел обновиться
-            setTimeout(() => {
-                scrollToBottom(true); // Instant scroll для первой загрузки
+                scrollToBottom();
                 hasScrolledToBottomRef.current = true;
-            }, 100);
         }
     }, [chat.loading, chat.messages.length]);
 

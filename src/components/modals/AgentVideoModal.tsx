@@ -32,7 +32,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
         // Закрываем модальное окно через небольшую задержку после окончания видео
         setTimeout(() => {
             onClose();
-        }, 1000);
+        }, 100);
     };
 
     const handleSkip = async () => {

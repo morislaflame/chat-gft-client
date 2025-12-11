@@ -25,6 +25,8 @@ export default class DailyRewardStore {
   private _allRewards: DailyReward[] = [];
   private _loading = false;
   private _userStore: UserStore | null = null;
+  private _rewardsLoaded = false; // Флаг для отслеживания загрузки всех наград
+  private _rewardChecked = false; // Флаг для отслеживания проверки награды
 
   constructor(userStore?: UserStore) {
     makeAutoObservable(this);
@@ -36,11 +38,18 @@ export default class DailyRewardStore {
   }
 
   // Загрузить все ежедневные награды
-  async fetchAllRewards() {
+  async fetchAllRewards(forceReload = false) {
+    // Проверяем, не загружены ли уже награды
+    if (!forceReload && this._rewardsLoaded && this._allRewards.length > 0) {
+      // Награды уже загружены, пропускаем загрузку
+      return;
+    }
+
     try {
       const rewards = await getAllDailyRewards();
       runInAction(() => {
         this._allRewards = rewards;
+        this._rewardsLoaded = true; // Отмечаем, что награды загружены
       });
     } catch (error) {
       console.error("Error fetching all daily rewards:", error);
@@ -48,7 +57,11 @@ export default class DailyRewardStore {
   }
 
   // Проверка ежедневной награды
-  async checkDailyReward() {
+  async checkDailyReward(forceReload = false) {
+    if (!forceReload && this._rewardChecked && !this._loading) {
+      return;
+    }
+
     this._loading = true;
     try {
       const data: DailyRewardCheckResponse = await checkDailyReward();
@@ -58,6 +71,7 @@ export default class DailyRewardStore {
         this._lastDailyRewardClaimAt = data.lastDailyRewardClaimAt;
         this._nextDay = data.nextDay;
         this._rewardInfo = data.rewardInfo; // может быть null
+        this._rewardChecked = true; // Отмечаем, что награда проверена
       });
     } catch (error) {
       console.error("Error checking daily reward:", error);
@@ -81,6 +95,8 @@ export default class DailyRewardStore {
         this._lastDailyRewardClaimAt = data.user.lastDailyRewardClaimAt;
         // rewardInfo уже не актуален, так как награду только что забрали
         this._rewardInfo = null;
+        // Сбрасываем флаг проверки, чтобы можно было проверить снова после получения награды
+        this._rewardChecked = false;
       });
 
       // Обновляем баланс и энергию пользователя из ответа сервера

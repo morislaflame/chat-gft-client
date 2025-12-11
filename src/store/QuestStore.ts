@@ -19,6 +19,7 @@ export default class QuestStore {
     _error = '';
     _taskLoadingStates: Map<number, boolean> = new Map();
     _completedTask: Task | null = null;
+    _questsLoaded = false; // Флаг для отслеживания загрузки квестов
 
     constructor() {
         makeAutoObservable(this);
@@ -55,13 +56,20 @@ export default class QuestStore {
     }
 
     // Получение списка заданий с информацией о прогрессе для текущего пользователя
-    async loadQuests() {
+    async loadQuests(forceReload = false) {
+        // Проверяем, не загружены ли уже квесты
+        if (!forceReload && this._questsLoaded && this._tasks.length > 0 && !this._loading) {
+            // Квесты уже загружены, пропускаем загрузку
+            return;
+        }
+
         try {
             this.setLoading(true);
             this.setError('');
             const data = await getMyTasks();
             runInAction(() => {
                 this.setTasks(data);
+                this._questsLoaded = true; // Отмечаем, что квесты загружены
             });
         } catch (error) {
             console.error('Error loading tasks:', error);
@@ -119,11 +127,14 @@ export default class QuestStore {
     // Метод для обновления прогресса конкретной задачи
     async updateTaskProgress(taskId: number) {
         try {
+            // Загружаем квесты с forceReload для получения актуальных данных
             const data = await getMyTasks();
             const updatedTask = data.find(task => task.id === taskId);
             if (updatedTask) {
                 runInAction(() => {
                     this.updateTask(taskId, updatedTask);
+                    // Обновляем весь список задач для синхронизации
+                    this.setTasks(data);
                 });
             }
             // Обновляем баланс пользователя после выполнения задачи

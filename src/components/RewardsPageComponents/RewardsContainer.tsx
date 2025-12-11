@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
@@ -8,16 +8,21 @@ import Button from '../CoreComponents/Button';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 import WithdrawalModal from '../modals/WithdrawalModal';
 import RewardPurchaseModal from '../modals/RewardPurchaseModal';
-import { renderRewardMedia } from '@/utils/rewardUtils';
+import RewardDetailModal from '../modals/RewardDetailModal';
+import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { useAnimationLoader } from '@/utils/useAnimationLoader';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const RewardsContainer: React.FC = observer(() => {
     const { reward, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
+    const { hapticImpact } = useHapticFeedback();
     const [activeTab, setActiveTab] = useState<'available' | 'purchased'>('available');
-    const [animations, setAnimations] = useState<{  [url: string]: Record<string, unknown> }>({});
-    const loadedUrls = useRef<Set<string>>(new Set());
     const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
     const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
+    const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+    const [selectedRewardForDetail, setSelectedRewardForDetail] = useState<UserReward | null>(null);
 
     useEffect(() => {
         // Load rewards when component mounts
@@ -27,43 +32,49 @@ const RewardsContainer: React.FC = observer(() => {
         // user.fetchMyInfo();
     }, [reward, user]);
 
-    // Загружаем анимации для наград
-    useEffect(() => {
-        const loadAnimations = async () => {
-            const rewards = activeTab === 'available' 
-                ? reward.availableRewards 
-                : reward.myPurchases.map(p => p.reward);
-            const newAnimations: {  [url: string]: Record<string, unknown> } = {};
-            
-            for (const rewardItem of rewards) {
-                const mediaFile = rewardItem.mediaFile;
-                if (mediaFile && mediaFile.mimeType === 'application/json' && !loadedUrls.current.has(mediaFile.url)) {
-                    try {
-                        const response = await fetch(mediaFile.url);
-                        const data = await response.json();
-                        newAnimations[mediaFile.url] = data;
-                        loadedUrls.current.add(mediaFile.url);
-                    } catch (error) {
-                        console.error(`Error loading animation for ${mediaFile.url}:`, error);
-                    }
-                }
-            }
-            if (Object.keys(newAnimations).length > 0) {
-                setAnimations(prev => ({ ...prev, ...newAnimations }));
-            }
-        };
-        loadAnimations();
+    // Получаем текущие награды в зависимости от активной вкладки
+    const currentRewards = useMemo(() => {
+        return activeTab === 'available' 
+            ? reward.availableRewards 
+            : reward.myPurchases.map(p => p.reward);
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
+
+    // Используем хук для загрузки анимаций
+    const [animations] = useAnimationLoader(
+        currentRewards,
+        (rewardItem) => rewardItem.mediaFile,
+        [activeTab]
+    );
     
-    const handlePurchase = async (rewardId: number) => {
+    const handlePurchase = async (rewardId: number): Promise<boolean> => {
         const success = await reward.purchaseReward(rewardId);
         if (success) {
             // Обновляем баланс пользователя
             await user.fetchMyInfo();
+            return true;
         }
+        return false;
     };
 
-    const handleWithdrawClick = (userReward: UserReward) => {
+    const handleCardClick = (rewardItem: Reward, userReward: UserReward | null) => {
+        hapticImpact('soft');
+        setSelectedReward(rewardItem);
+        setSelectedRewardForDetail(userReward);
+        setDetailModalOpen(true);
+    };
+
+    const handleWithdrawClick = async (userReward: UserReward): Promise<boolean> => {
+        const success = await reward.createWithdrawalRequest(userReward.id);
+        if (success) {
+            // Обновляем список покупок и запросов
+            await reward.fetchMyPurchases();
+            await reward.fetchWithdrawalRequests();
+            return true;
+        }
+        return false;
+    };
+
+    const handleWithdrawClickForModal = (userReward: UserReward) => {
         setSelectedUserReward(userReward);
         setWithdrawalModalOpen(true);
     };
@@ -81,9 +92,10 @@ const RewardsContainer: React.FC = observer(() => {
         }
     };
 
-    const getWithdrawalButton = (userReward: UserReward) => {
+    const getWithdrawalButton = (userReward: UserReward, onClickHandler?: (userReward: UserReward) => void) => {
         const status = reward.getWithdrawalStatus(userReward.id);
         const isCreating = reward.isCreatingWithdrawal(userReward.id);
+        const handleClick = onClickHandler || handleWithdrawClickForModal;
         
         if (status === 'completed') {
             return (
@@ -106,7 +118,7 @@ const RewardsContainer: React.FC = observer(() => {
         if (status === 'rejected') {
             return (
                 <Button
-                    onClick={() => handleWithdrawClick(userReward)}
+                    onClick={() => handleClick(userReward)}
                     disabled={isCreating}
                     variant="secondary"
                     size="sm"
@@ -121,7 +133,7 @@ const RewardsContainer: React.FC = observer(() => {
         // Нет запроса - показываем кнопку "Вывести"
         return (
             <Button
-                onClick={() => handleWithdrawClick(userReward)}
+                onClick={() => handleClick(userReward)}
                 disabled={isCreating}
                 variant="secondary"
                 size="sm"
@@ -138,8 +150,6 @@ const RewardsContainer: React.FC = observer(() => {
     if (reward.loading) {
         return <LoadingIndicator />;
     }
-
-    const currentRewards = activeTab === 'available' ? reward.availableRewards : reward.myPurchases;
 
     const isMobile = document.body.classList.contains('telegram-mobile');
 
@@ -200,29 +210,30 @@ const RewardsContainer: React.FC = observer(() => {
             ) : (
                 /* Rewards grid */
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-                {currentRewards.map((item) => {
-                    // Для available tab item это Reward, для purchased - UserReward
-                    const rewardItem = activeTab === 'available' 
-                        ? item as Reward 
-                        : (item as UserReward).reward;
-                    const userReward = activeTab === 'purchased' ? item as UserReward : null;
-                    
+                {(activeTab === 'available' 
+                    ? reward.availableRewards.map((rewardItem) => ({ rewardItem, userReward: null }))
+                    : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }))
+                ).map(({ rewardItem, userReward }) => {
                     const isPurchasing = reward.isRewardPurchasing(rewardItem.id);
                     const userBalance = user.user?.balance || 0;
                     const canAfford = userBalance >= rewardItem.price;
                     
                     return (
                         <div
-                            key={activeTab === 'available' ? rewardItem.id : userReward!.id}
-                            className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition"
+                            key={activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id)}
+                            onClick={() => handleCardClick(rewardItem, userReward)}
+                            className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
                         >
                             {/* Media/Animation at the top */}
-                            <div className="mb-2">
-                                {renderRewardMedia({
-                                    reward: rewardItem,
-                                    animationData: rewardItem.mediaFile?.url ? animations[rewardItem.mediaFile.url] : null,
-                                    size: 'sm'
-                                })}
+                            <div className="mb-2 w-20 h-20 flex items-center justify-center">
+                                <LazyMediaRenderer
+                                    mediaFile={rewardItem.mediaFile}
+                                    animations={animations}
+                                    name={rewardItem.name}
+                                    className="w-20 h-20 object-contain"
+                                    loop={false}
+                                    loadOnIntersect={true}
+                                />
                             </div>
                             
                             {/* Reward info */}
@@ -241,7 +252,9 @@ const RewardsContainer: React.FC = observer(() => {
                             {/* Purchase button or status */}
                             {activeTab === 'available' && (
                                 <Button
-                                    onClick={() => handlePurchase(rewardItem.id)}
+                                    onClick={() => {
+                                        handlePurchase(rewardItem.id);
+                                    }}
                                     disabled={isPurchasing || !canAfford}
                                     variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
                                     size="sm"
@@ -257,7 +270,9 @@ const RewardsContainer: React.FC = observer(() => {
                             )}
                             
                             {activeTab === 'purchased' && userReward && (
-                                getWithdrawalButton(userReward)
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    {getWithdrawalButton(userReward, handleWithdrawClickForModal)}
+                                </div>
                             )}
                         </div>
                     );
@@ -292,6 +307,26 @@ const RewardsContainer: React.FC = observer(() => {
                 onClose={() => reward.clearPurchasedReward()}
                 reward={reward.purchasedReward}
                 pricePaid={reward.purchasePrice || undefined}
+            />
+
+            {/* Reward Detail Modal */}
+            <RewardDetailModal
+                isOpen={detailModalOpen}
+                onClose={() => {
+                    setDetailModalOpen(false);
+                    setSelectedReward(null);
+                    setSelectedRewardForDetail(null);
+                }}
+                reward={selectedReward}
+                userReward={selectedRewardForDetail}
+                activeTab={activeTab}
+                animations={animations}
+                onPurchase={handlePurchase}
+                onWithdraw={handleWithdrawClick}
+                isPurchasing={selectedReward ? reward.isRewardPurchasing(selectedReward.id) : false}
+                canAfford={selectedReward ? (user.user?.balance || 0) >= selectedReward.price : false}
+                withdrawalStatus={selectedRewardForDetail ? reward.getWithdrawalStatus(selectedRewardForDetail.id) : null}
+                isCreatingWithdrawal={selectedRewardForDetail ? reward.isCreatingWithdrawal(selectedRewardForDetail.id) : false}
             />
         </div>
     );

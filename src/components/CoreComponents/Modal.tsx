@@ -1,4 +1,5 @@
 import React, { type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface ModalProps {
@@ -24,7 +25,7 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <>
@@ -34,12 +35,12 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 ${overlayClassName}`}
+            className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] ${overlayClassName}`}
             onClick={handleOverlayClick}
           />
           
           {/* Modal Content */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -58,6 +59,10 @@ const Modal: React.FC<ModalProps> = ({
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : null;
 };
 
 export default Modal;

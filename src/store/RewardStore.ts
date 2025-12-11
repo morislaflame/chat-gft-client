@@ -11,17 +11,27 @@ class RewardStore {
   creatingWithdrawal = new Set<number>();
   purchasedReward: Reward | null = null;
   purchasePrice: number | null = null;
+  _rewardsLoaded = false; // Флаг для отслеживания загрузки доступных наград
+  _purchasesLoaded = false; // Флаг для отслеживания загрузки покупок
+  _withdrawalsLoaded = false; // Флаг для отслеживания загрузки запросов на вывод
 
   constructor() {
     makeAutoObservable(this);
   }
 
   // Загрузить доступные награды
-  async fetchAvailableRewards() {
+  async fetchAvailableRewards(forceReload = false) {
+    // Проверяем, не загружены ли уже награды
+    if (!forceReload && this._rewardsLoaded && this.availableRewards.length > 0 && !this.loading) {
+      // Награды уже загружены, пропускаем загрузку
+      return;
+    }
+
     this.loading = true;
     this.error = null;
     try {
       this.availableRewards = await rewardAPI.getAvailableRewards();
+      this._rewardsLoaded = true; // Отмечаем, что награды загружены
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
@@ -34,10 +44,17 @@ class RewardStore {
   }
 
   // Загрузить купленные награды
-  async fetchMyPurchases() {
+  async fetchMyPurchases(forceReload = false) {
+    // Проверяем, не загружены ли уже покупки
+    if (!forceReload && this._purchasesLoaded && !this.loading) {
+      // Покупки уже загружены, пропускаем загрузку
+      return;
+    }
+
     this.error = null;
     try {
       this.myPurchases = await rewardAPI.getMyPurchases();
+      this._purchasesLoaded = true; // Отмечаем, что покупки загружены
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
@@ -90,9 +107,16 @@ class RewardStore {
   }
 
   // Загрузить запросы на вывод
-  async fetchWithdrawalRequests() {
+  async fetchWithdrawalRequests(forceReload = false) {
+    // Проверяем, не загружены ли уже запросы на вывод
+    if (!forceReload && this._withdrawalsLoaded && !this.loading) {
+      // Запросы уже загружены, пропускаем загрузку
+      return;
+    }
+
     try {
       this.withdrawalRequests = await rewardAPI.getMyWithdrawalRequests();
+      this._withdrawalsLoaded = true; // Отмечаем, что запросы загружены
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
@@ -157,6 +181,9 @@ class RewardStore {
     this.error = null;
     this.purchasingRewards.clear();
     this.creatingWithdrawal.clear();
+    this._rewardsLoaded = false;
+    this._purchasesLoaded = false;
+    this._withdrawalsLoaded = false;
   }
 }
 

@@ -7,6 +7,7 @@ export default class ShopStore {
     _loading = false;
     _error = '';
     _purchasing = false;
+    _packagesLoaded = false; // Флаг для отслеживания загрузки пакетов
 
     constructor() {
         makeAutoObservable(this);
@@ -28,13 +29,20 @@ export default class ShopStore {
         this._error = error;
     }
 
-    async loadPackages() {
+    async loadPackages(forceReload = false) {
+        // Проверяем, не загружены ли уже пакеты
+        if (!forceReload && this._packagesLoaded && this._packages.length > 0 && !this._loading) {
+            // Пакеты уже загружены, пропускаем загрузку
+            return;
+        }
+
         this.setLoading(true);
         this.setError('');
 
         try {
             const packages = await getStarsPackages();
             this.setPackages(packages);
+            this._packagesLoaded = true; // Отмечаем, что пакеты загружены
         } catch (error) {
             console.error('Error loading packages:', error);
             this.setError('Error loading packages');

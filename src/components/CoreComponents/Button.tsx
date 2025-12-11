@@ -65,10 +65,11 @@ const Button: React.FC<ButtonProps> = ({
   // Если нет children, но есть иконка, показываем только иконку
   const hasContent = children || icon;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!disabled) {
+      e.stopPropagation();
       hapticImpact('soft');
-      onClick?.();
+      onClick?.(e);
     }
   };
 

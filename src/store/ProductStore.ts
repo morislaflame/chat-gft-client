@@ -12,6 +12,7 @@ export default class ProductStore {
   private _products: Product[] = [];
   private _loading = false;
   private _productLoadingStates: Map<number, boolean> = new Map();
+  private _productsLoaded = false; // Флаг для отслеживания загрузки продуктов
 
   constructor() {
     makeAutoObservable(this);
@@ -37,12 +38,19 @@ export default class ProductStore {
   }
 
   // Загрузить товары
-  async fetchProducts() {
+  async fetchProducts(forceReload = false) {
+    // Проверяем, не загружены ли уже продукты
+    if (!forceReload && this._productsLoaded && this._products.length > 0 && !this._loading) {
+      // Продукты уже загружены, пропускаем загрузку
+      return;
+    }
+
     this.setLoading(true);
     try {
       const products = await getProducts();
       runInAction(() => {
         this._products = products;
+        this._productsLoaded = true; // Отмечаем, что продукты загружены
       });
     } catch (error) {
       console.error("Error fetching products:", error);

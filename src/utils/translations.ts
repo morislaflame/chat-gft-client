@@ -162,6 +162,10 @@ type TranslationType = {
         ru: 'Гемы',
         en: 'Gems'
     },
+    buyFor: {
+        ru: 'Купить за',
+        en: 'Buy for'
+    },
     great: {
         ru: 'Отлично!',
         en: 'Great!'

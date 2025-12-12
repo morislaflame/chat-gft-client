@@ -130,7 +130,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
         <div className="flex flex-col justify-end h-full p-6 pb-8">
             <div className="relative flex flex-col justify-center h-full">
                 <div
-                    className="relative overflow-hidden select-none flex-1 flex items-center h-full"
+                    className="relative overflow-hidden select-none flex-1 flex items-center h-full justify-center"
                     style={{
                         userSelect: 'none',
                         WebkitUserSelect: 'none',

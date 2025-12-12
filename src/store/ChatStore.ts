@@ -39,6 +39,41 @@ export default class ChatStore {
         this._messages.push(message);
     }
 
+    markMissionHasMessagesByOrder(orderIndex: number) {
+        const mission = this._missions.find((m) => m.orderIndex === orderIndex);
+        if (!mission) return;
+        const targetMissionId = mission.id;
+        this._messages = this._messages.map((m) => {
+            if (m.isMissionCard && m.missionId === targetMissionId && !m.missionHasMessages) {
+                return { ...m, missionHasMessages: true };
+            }
+            return m;
+        });
+    }
+
+    private appendMissionCardIfNeeded(mission: Mission) {
+        const existing = this._messages.some(
+            (m) => m.isMissionCard && m.missionId === mission.id
+        );
+        if (existing) return;
+
+        this._messages.push({
+            id: `mission-${mission.id}-${Date.now()}`,
+            text: '',
+            isUser: false,
+            timestamp: new Date(),
+            isMissionCard: true,
+            mission: {
+                id: mission.id,
+                title: mission.title,
+                description: mission.description,
+                orderIndex: mission.orderIndex,
+            },
+            missionId: mission.id,
+            missionHasMessages: false,
+        });
+    }
+
     setIsTyping(isTyping: boolean) {
         this._isTyping = isTyping;
     }
@@ -208,6 +243,16 @@ export default class ChatStore {
                 
                 this._userStore.setBalance(response.newBalance);
             }
+
+            // Если миссия завершена — добавляем карточку следующей миссии (если она есть и ещё не показана)
+            if (response.missionCompleted && this._missions.length > 0) {
+                const completedOrder = response.completedStage || (response.stage ? response.stage - 1 : 0);
+                const nextOrder = completedOrder + 1;
+                const nextMission = this._missions.find((m) => m.orderIndex === nextOrder);
+                if (nextMission) {
+                    this.appendMissionCardIfNeeded(nextMission);
+                }
+            }
             
             // Обновляем подсказки из ответа
             if (response.suggestions && response.suggestions.length > 0) {
@@ -236,10 +281,8 @@ export default class ChatStore {
     }
 
     async loadChatHistory(forceReload = false) {
-        // Проверяем, не загружаем ли мы уже данные для текущей истории
         const currentHistoryName = this._userStore?.user?.selectedHistoryName || null;
         if (!forceReload && currentHistoryName === this._loadedHistoryName && this._messages.length > 0 && !this._loading) {
-            // Данные уже загружены для этой истории, пропускаем загрузку
             return;
         }
 
@@ -247,49 +290,110 @@ export default class ChatStore {
         this.setError('');
 
         try {
-            const response = await getChatHistory();
-            const historyData = response.history;
-            
-            // Преобразуем данные из API в формат Message[]
-            // Каждый элемент истории содержит и сообщение пользователя, и ответ AI
-            const messages: Message[] = [];
-            
-            historyData.forEach((item: ApiHistoryItem, index: number) => {
-                // Добавляем сообщение пользователя
-                if (item.messageText) {
-                    messages.push({
-                        id: `${item.id}-user-${index}`,
-                        text: item.messageText,
-                        isUser: true,
-                        timestamp: new Date(item.createdAt || Date.now())
-                    });
-                }
-                
-                // Добавляем ответ AI
-                if (item.responseText) {
-                    messages.push({
-                        id: `${item.id}-ai-${index}`,
-                        text: item.responseText,
-                        isUser: false,
-                        timestamp: new Date(item.createdAt || Date.now())
-                    });
+            // Грузим историю и статус параллельно
+            const [historyResponse, statusData] = await Promise.all([
+                getChatHistory(),
+                getStatus(),
+            ]);
+            const historyData = historyResponse.history ?? [];
+
+            this.setCurrentStage(statusData.stage);
+            if (statusData.progressPercent !== undefined && statusData.progressPercent !== null) {
+                this.setForceProgress(statusData.progressPercent);
+            }
+            this.setMission(statusData.mission);
+            if (statusData.missions) {
+                this.setMissions(statusData.missions);
+            }
+
+            const missions = (statusData.missions || []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
+            const missionsMap = new Map<number, Mission>();
+            missions.forEach((m) => missionsMap.set(m.id, m));
+
+            // Разбиваем сообщения по missionId (историю сортируем по времени ASC)
+            const missionMessages = new Map<number, ApiHistoryItem[]>();
+            const orderedHistory = historyData.slice().sort((a, b) => {
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            });
+            orderedHistory.forEach((item) => {
+                const mid = item.missionId ?? null;
+                if (mid !== null && missionsMap.has(mid)) {
+                    if (!missionMessages.has(mid)) missionMessages.set(mid, []);
+                    missionMessages.get(mid)!.push(item);
                 }
             });
-            
-            
+
+            const messages: Message[] = [];
+
+            // Добавляем миссии по порядку, показываем следующую только если предыдущая завершена или уже есть её сообщения
+            let prevMissionCompleted = false;
+
+            missions.forEach((mission, idx) => {
+                const msgs = missionMessages.get(mission.id) || [];
+                const hasMessages = msgs.length > 0;
+                const lastMsg = hasMessages ? msgs[msgs.length - 1] : null;
+                const missionCompleted = !!(lastMsg && lastMsg.isCongratulation);
+
+                // Правила отображения:
+                // - первая миссия всегда
+                // - иначе, если есть сообщения по миссии (значит пользователь дошёл)
+                // - или если предыдущая завершена
+                const canShow =
+                    idx === 0 ||
+                    hasMessages ||
+                    prevMissionCompleted;
+
+                if (!canShow) {
+                    prevMissionCompleted = missionCompleted;
+                    return;
+                }
+
+                // Карточка миссии
+                messages.push({
+                    id: `mission-${mission.id}`,
+                    text: '',
+                    isUser: false,
+                    timestamp: new Date(msgs[0]?.createdAt || Date.now()),
+                    isMissionCard: true,
+                    mission: {
+                        id: mission.id,
+                        title: mission.title,
+                        description: mission.description,
+                        orderIndex: mission.orderIndex,
+                    },
+                    missionId: mission.id,
+                    missionHasMessages: hasMessages,
+                });
+
+                // Сообщения по миссии
+                msgs.forEach((item) => {
+                    messages.push({
+                        id: `${item.id}`,
+                        text: item.content,
+                        isUser: item.role === 'user',
+                        timestamp: new Date(item.createdAt || Date.now()),
+                        missionId: item.missionId ?? null,
+                        isCongratulation: item.isCongratulation ?? false,
+                    });
+                });
+
+                prevMissionCompleted = missionCompleted;
+            });
+
+
             this.setMessages(messages);
-            
-            // Обновляем информацию о медиафайлах агента
-            if (response.video !== undefined) {
-                this.setVideo(response.video);
+
+            // Медиа агента
+            if (historyResponse.video !== undefined) {
+                this.setVideo(historyResponse.video);
             }
-            if (response.avatar !== undefined) {
-                this.setAvatar(response.avatar);
+            if (historyResponse.avatar !== undefined) {
+                this.setAvatar(historyResponse.avatar);
             }
-            if (response.background !== undefined) {
-                this.setBackground(response.background);
+            if (historyResponse.background !== undefined) {
+                this.setBackground(historyResponse.background);
             }
-            
+
             // Восстанавливаем suggestions из localStorage для последнего сообщения бота
             const lastBotMessage = messages.filter(m => !m.isUser).pop();
             if (lastBotMessage) {
@@ -298,11 +402,7 @@ export default class ChatStore {
                     this.setSuggestions(savedSuggestions);
                 }
             }
-            
-            // Загружаем статус этапа после загрузки истории
-            await this.loadStatus();
-            
-            // Сохраняем имя загруженной истории
+
             this._loadedHistoryName = currentHistoryName;
         } catch (error) {
             console.error('Error loading chat history:', error);

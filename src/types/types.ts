@@ -47,6 +47,16 @@ export interface Message {
     isUser: boolean;
     timestamp: Date;
     isTyping?: boolean;
+    isMissionCard?: boolean;
+    mission?: {
+        id: number;
+        title: string;
+        description?: string | null;
+        orderIndex: number;
+    };
+    missionId?: number | null;
+    missionHasMessages?: boolean;
+    isCongratulation?: boolean;
 }
 
 export interface ApiMessageResponse {
@@ -87,11 +97,11 @@ export interface ApiStatusResponse {
 
 export interface ApiHistoryItem {
     id: number;
-    userId: number;
-    messageText: string;
-    responseText: string;
-    isCongratulation?: boolean;
+    role: 'user' | 'assistant';
+    content: string;
     createdAt: string;
+    missionId?: number | null;
+    isCongratulation?: boolean;
 }
 
 export interface ProgressData {
@@ -135,6 +145,8 @@ export interface ApiHistoryResponse {
     hasMore?: boolean;
     nextCursor?: number | null;
     video?: MediaFile | null;
+    avatar?: MediaFile | null;
+    background?: MediaFile | null;
 }
 
 export interface Quest {

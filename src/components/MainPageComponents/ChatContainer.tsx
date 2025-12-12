@@ -42,11 +42,10 @@ const ChatContainer: React.FC = observer(() => {
         }
     };
 
-    const handleStartClick = () => {
+    const handleStartMission = (orderIndex: number) => {
         hapticImpact('soft');
-        // Получаем видео для текущей миссии (orderIndex = currentStage, так как оба начинаются с 1)
-        const missionOrderIndex = chat.currentStage;
-        const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
+        chat.markMissionHasMessagesByOrder(orderIndex);
+        const missionVideo = chat.getMissionVideoByOrderIndex(orderIndex);
         
         if (missionVideo) {
             setCurrentMissionVideo({
@@ -55,31 +54,8 @@ const ChatContainer: React.FC = observer(() => {
             });
             setShowMissionVideoModal(true);
         } else {
-            // Если видео нет, просто отправляем сообщение
             console.log('No mission video found, sending start message directly');
             handleSendMessage("старт");
-        }
-    };
-
-    const handleStartNewMissionClick = () => {
-        hapticImpact('soft');
-        // Получаем видео для новой миссии (orderIndex = lastMissionCompleted.stage, так как оба начинаются с 1)
-        if (lastMissionCompleted) {
-            const missionOrderIndex = lastMissionCompleted.stage;
-            const missionVideo = chat.getMissionVideoByOrderIndex(missionOrderIndex);
-            
-            if (missionVideo) {
-                setCurrentMissionVideo({
-                    video: missionVideo,
-                    mission: lastMissionCompleted.mission
-                });
-                setShowMissionVideoModal(true);
-            } else {
-                // Если видео нет, просто отправляем сообщение
-                console.log('No mission video found for new mission, sending start message directly');
-                handleSendMessage("старт");
-                setLastMissionCompleted(null);
-            }
         }
     };
 
@@ -153,44 +129,52 @@ const ChatContainer: React.FC = observer(() => {
                     backgroundAttachment: 'fixed'
                 } : {}}
             >
-            <div className="flex justify-center mb-6">
-                <div className="mt-4 bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full"
-                style={{ marginTop: isMobile ? '156px' : '56px' }}>
-                    
-                    {/* Mission Info */}
-                    {chat.mission && (
-                        <div className="">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="text-md font-semibold text-amber-400">
-                                    {t('stage')} {chat.currentStage}
-                                </span>
-                            </div>
-                            <div className="text-sm text-gray-300">
-                                <span className="font-medium text-gray-200">{t('mission')}:</span> {chat.mission}
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Start Button - показываем только если нет сообщений */}
-                    {chat.messages.length === 0 && (
-                        <div className="mt-4">
-                            <Button
-                                onClick={handleStartClick}
-                                variant="secondary"
-                                size="md"
-                                className="w-full"
-                                icon="fas fa-play"
-                            >
-                                {t('start')}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
+            
 
             {/* Chat Messages Container */}
-            <div className="space-y-6">
+            <div className="space-y-6" style={{ marginTop: isMobile ? '156px' : '56px' }}>
                 {Array.isArray(chat.messages) && chat.messages.map((message, index) => {
+                    // Карточка миссии
+                    if (message.isMissionCard && message.mission) {
+                        return (
+                            <div key={message.id} className="flex justify-center mb-6">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full"
+                                >
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-md font-semibold text-amber-400 flex flex-col gap-2">
+                                            {t('stage')} {message.mission.orderIndex} 
+                                            <span className="font-medium text-gray-200 italic">{message.mission.title}</span>
+                                        </span>
+                                    </div>
+                                    <div className="text-sm text-gray-300">
+                                        
+                                    </div>
+                                    {message.mission.description && (
+                                        <div className="text-sm text-gray-400 mt-1">
+                                            {message.mission.description}
+                                        </div>
+                                    )}
+                                    {!message.missionHasMessages && (
+                                        <div className="mt-3">
+                                            <Button
+                                                onClick={() => handleStartMission(message.mission!.orderIndex)}
+                                                variant="secondary"
+                                                size="sm"
+                                                className="w-full"
+                                                icon="fas fa-play"
+                                            >
+                                                {t('start')}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </div>
+                        );
+                    }
+
                     const isLastAIMessage = !message.isUser && index === chat.messages.length - 1;
                     const showSuggestions = isLastAIMessage && chat.suggestions && chat.suggestions.length > 0 && !chat.isTyping;
                     
@@ -273,47 +257,10 @@ const ChatContainer: React.FC = observer(() => {
                     </div>
                 )}
                 <AnimatePresence>
-                {lastMissionCompleted && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="flex justify-center mb-6"
-                    >
-                        <div className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full">
-                            {/* Mission Info */}
-                            <div className="">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-md font-semibold text-amber-400">
-                                        {t('stage')} {lastMissionCompleted.stage}
-                                    </span>
-                                </div>
-                                <div className="text-sm text-gray-300">
-                                    <span className="font-medium text-gray-200">{t('mission')}:</span> {lastMissionCompleted.mission}
-                                </div>
-                            </div>
-                            
-                            {/* Start Button */}
-                            <div className="mt-4">
-                                <Button
-                                    onClick={handleStartNewMissionClick}
-                                    variant="secondary"
-                                    size="md"
-                                    className="w-full"
-                                    icon="fas fa-play"
-                                >
-                                    {t('start')}
-                                </Button>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
+                
             </AnimatePresence>
                 <div ref={messagesEndRef} className='mb-[128px]'/>
             </div>
-
-            {/* New Mission Block - показываем после завершения миссии */}
-            
 
             </div>
 

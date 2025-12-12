@@ -4,19 +4,14 @@ import type { ApiMessageResponse, ApiStatusResponse, MediaFile } from '@/types/t
 export interface ApiHistoryResponse {
     history: Array<{
         id: number;
-        userId: number;
-        messageText: string;
-        responseText: string;
+        role: 'user' | 'assistant';
+        content: string;
         createdAt: string;
+        missionId?: number | null;
         isCongratulation?: boolean;
     }>;
-    progress: {
-        current: number;
-        level: number;
-        lastProgressAt: string | null;
-    };
-    hasMore: boolean;
-    nextCursor: number | null;
+    hasMore?: boolean;
+    nextCursor?: number | null;
     video?: MediaFile | null;
     avatar?: MediaFile | null;
     background?: MediaFile | null;

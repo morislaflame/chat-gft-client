@@ -355,9 +355,9 @@ export default class UserStore {
                 // this._onboardingInitialStep = 'welcome';
                 this._isHistorySelectionFromHeader = false;
             });
-            if (this.user?.onboardingSeen === false) {
-                this.updateOnboarding(true);
-            };
+            // if (this.user?.onboardingSeen === false) {
+            //     this.updateOnboarding(true);
+            // };
             
         } catch (error) {
             console.error("Error completing onboarding:", error);

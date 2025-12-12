@@ -79,6 +79,22 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                         </div>
                 </motion.div>
             </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6"
+            >
+                <Button
+                    onClick={() => handleSetActiveIndex(1)}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                    icon="fas fa-chevron-right"
+                >
+                    {t('joinAdventure')}
+                </Button>
+            </motion.div>
         </div>,
         
         // Вторая карточка - объяснение игры (с блюром)
@@ -89,19 +105,19 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                 </h2>
                 <div className="space-y-2 text-white">
                     <div className="flex items-center gap-3">
-                        <span className="font-bold text-lg">1.</span>
+                        <span className="font-bold text-lg">•</span>
                         <p className="text-white/90 text-md">{t('gameExplanation1')}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="font-bold text-lg">2.</span>
+                        <span className="font-bold text-lg">•</span>
                         <p className="text-white/90 text-md">{t('gameExplanation2')}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="font-bold text-lg">3.</span>
+                        <span className="font-bold text-lg">•</span>
                         <p className="text-white/90 text-md">{t('gameExplanation3')}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <span className="font-bold text-lg">4.</span>
+                        <span className="font-bold text-lg">•</span>
                         <p className="text-white/90 text-md">{t('gameExplanation4')}</p>
                     </div>
                 </div>

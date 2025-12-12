@@ -35,10 +35,10 @@ const RewardsContainer: React.FC = observer(() => {
     // Получаем текущие награды в зависимости от активной вкладки
     const currentRewards = useMemo(() => {
         return activeTab === 'available' 
-            ? reward.availableRewards 
-            : reward.myPurchases.map(p => p.reward);
+                ? reward.availableRewards 
+                : reward.myPurchases.map(p => p.reward);
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
-
+    
     // Используем хук для загрузки анимаций
     const [animations] = useAnimationLoader(
         currentRewards,

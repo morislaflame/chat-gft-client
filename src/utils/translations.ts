@@ -394,36 +394,36 @@ type TranslationType = {
         en: 'Welcome,'
     },
     welcomeDescription: {
-        ru: 'Каждый выбор формирует историю.',
-        en: 'Every choice shapes the story.'
+        ru: 'Это AI-игра, в которой ты становишься героем',
+        en: 'This is an AI game where you become the hero'
     },
     welcomeDescription2: {
-        ru: 'Миссии приводят к NFT-подаркам.',
-        en: 'Missions lead to NFT rewards.'
+        ru: 'И переписываешь историю по-своему',
+        en: 'And rewrite the story your way'
     },
     wanderer: {
         ru: 'Странник',
         en: 'Wanderer'
     },
     gameExplanationTitle: {
-        ru: 'Ты решаешь',
-        en: 'You decide your fate'
+        ru: 'Тебя ждут:',
+        en: 'What awaits you:'
     },
     gameExplanation1: {
-        ru: 'Каждый выбор формирует историю',
-        en: 'Every choice shapes the story'
+        ru: 'ИИ-герои, реагирующие на твои решения',
+        en: 'AI heroes reacting to your decisions'
     },
     gameExplanation2: {
-        ru: 'Проходите миссии и получайте призы',
-        en: 'Complete missions and get rewards'
+        ru: 'Миссии с наградами',
+        en: 'Missions with rewards'
     },
     gameExplanation3: {
-        ru: 'Выбирайте NFT',
-        en: 'Choose NFTs'
+        ru: 'NFT-предметы и GFT Box',
+        en: 'NFT items and GFT Box'
     },
     gameExplanation4: {
-        ru: 'Зарабатывайте с друзьями',
-        en: 'Earn with friends'
+        ru: 'Прогресс и бонусы с друзьями',
+        en: 'Progress and bonuses with friends'
     },
     // Navigation
     chat: {

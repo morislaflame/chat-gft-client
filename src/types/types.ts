@@ -242,6 +242,8 @@ export interface DailyRewardCheckResponse {
       day: number;
       reward: number;
       rewardType: RewardType;
+      secondReward?: number | null;
+      secondRewardType?: RewardType | null;
       description: string;
     } | null;
   }
@@ -253,6 +255,8 @@ export interface DailyRewardCheckResponse {
       day: number;
       reward: number;
       rewardType: RewardType;
+      secondReward?: number | null;
+      secondRewardType?: RewardType | null;
       description: string;
     };
     user: {

@@ -145,7 +145,7 @@ const ChatContainer: React.FC = observer(() => {
                                 >
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-md font-semibold text-amber-400 flex flex-col gap-2">
-                                            {t('stage')} {message.mission.orderIndex} 
+                                            {t('mission')} {message.mission.orderIndex} 
                                             <span className="font-medium text-gray-200 italic">{message.mission.title}</span>
                                         </span>
                                     </div>
@@ -279,7 +279,7 @@ const ChatContainer: React.FC = observer(() => {
                                 >
                                     <span className="text-amber-400 font-medium flex items-center">
                                         <i className="fas fa-gift mr-1"></i>
-                                        {t('stage')} {chat.currentStage}
+                                        {t('mission')} {chat.currentStage}
                                     </span>
                                     {chat.mission && (
                                         <button

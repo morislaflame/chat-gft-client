@@ -7,6 +7,8 @@ export interface DailyReward {
   day: number;
   reward: number;
   rewardType: 'energy' | 'tokens';
+  secondReward: number;
+  secondRewardType: 'energy' | 'tokens' | null;
   description: string;
   createdAt: string;
   updatedAt: string;

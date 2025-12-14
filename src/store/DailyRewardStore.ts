@@ -6,7 +6,7 @@ import {
   getAllDailyRewards,
   type DailyReward,
 } from "@/http/dailyRewardAPI";
-import type { DailyRewardCheckResponse, DailyRewardClaimResponse, RewardType } from "@/types/types";
+import type { DailyRewardCheckResponse, DailyRewardClaimResponse } from "@/types/types";
 import type UserStore from "@/store/UserStore";
 
 export default class DailyRewardStore {
@@ -18,7 +18,9 @@ export default class DailyRewardStore {
   private _rewardInfo: {
     day: number;
     reward: number;
-    rewardType: RewardType;
+    rewardType: 'energy' | 'tokens';
+    secondReward?: number | null;
+    secondRewardType?: 'energy' | 'tokens' | null;
     description: string;
   } | null = null;
 

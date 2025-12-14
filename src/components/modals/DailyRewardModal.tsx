@@ -26,7 +26,10 @@ const DailyRewardModal: React.FC = observer(() => {
   const rewardInfo = dailyReward.rewardInfo;
   if (!rewardInfo) return null;
 
-  const isEnergy = rewardInfo.rewardType === 'energy';
+  const isEnergyAvailable =
+    (rewardInfo.rewardType === 'energy' ? rewardInfo.reward : rewardInfo.secondRewardType === 'energy' ? rewardInfo.secondReward ?? 0 : 0) > 0;
+  const isTokensAvailable =
+    (rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : rewardInfo.secondRewardType === 'tokens' ? rewardInfo.secondReward ?? 0 : 0) > 0;
 
   return (
     <Modal
@@ -67,10 +70,22 @@ const DailyRewardModal: React.FC = observer(() => {
           className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
         >
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-3xl font-bold text-white">
-              +{rewardInfo.reward}
-            </span>
-            <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
+            {isEnergyAvailable && (
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-bold text-white">
+                  +{rewardInfo.rewardType === 'energy' ? rewardInfo.reward : rewardInfo.secondReward}
+                </span>
+                <i className="fa-solid fa-bolt text-purple-400 text-2xl"></i>
+              </div>
+            )}
+            {isTokensAvailable && (
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-bold text-white">
+                  +{rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : rewardInfo.secondReward}
+                </span>
+                <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+              </div>
+            )}
           </div>
         </motion.div>
 

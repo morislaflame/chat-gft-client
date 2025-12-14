@@ -7,7 +7,7 @@ import Modal from '@/components/CoreComponents/Modal';
 
 const StageRewardModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
-  const { t, language } = useTranslate();
+  const { t } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
 
@@ -17,12 +17,7 @@ const StageRewardModal: React.FC = observer(() => {
 
   if (!stageReward) return null;
 
-  const stageNames = {
-    en: [t('firstStage'), t('secondStage'), t('thirdStage')],
-    ru: [t('firstStage'), t('secondStage'), t('thirdStage')]
-  };
-
-  const stageName = stageNames[language as keyof typeof stageNames][stageReward.stageNumber - 1];
+  const missionNumberText = `${t('stageCompletedMissionPrefix')} ${stageReward.stageNumber}`;
 
   return (
     <Modal
@@ -51,7 +46,7 @@ const StageRewardModal: React.FC = observer(() => {
             {t('stageCompleted')}
           </h2>
           <p className="text-gray-400 text-sm">
-            {t('youHaveCompleted')} {stageName}
+            {missionNumberText}
           </p>
         </div>
 

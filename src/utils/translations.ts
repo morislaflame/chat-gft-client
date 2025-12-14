@@ -259,8 +259,12 @@ type TranslationType = {
     },
     // StageRewardModal
     stageCompleted: {
-        ru: 'Этап пройден!',
-        en: 'Stage Completed!'
+        ru: 'Миссия пройдена!',
+        en: 'Mission Completed!'
+    },
+    stageCompletedMissionPrefix: {
+        ru: 'Вы завершили миссию',
+        en: 'You have completed mission'
     },
     youHaveCompleted: {
         ru: 'Вы завершили',

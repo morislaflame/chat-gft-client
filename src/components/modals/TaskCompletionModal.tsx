@@ -100,14 +100,11 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
         >
           <div className="text-center">
             <div className="text-sm text-gray-400 mb-2">{t('taskRewardReceived')}</div>
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex items-center justify-center gap-2">
               <span className="text-3xl font-bold text-white">
                 +{rewardAmount}
               </span>
               <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
-            </div>
-            <div className="text-xs text-gray-400">
-              {isEnergy ? t('energy') : t('gems')}
             </div>
           </div>
         </motion.div>

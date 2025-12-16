@@ -25,7 +25,14 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
   
   if (!day || !reward) return null;
 
-  const isEnergy = reward.rewardType === 'energy';
+  const energyAmount =
+    (reward.rewardType === 'energy' ? reward.reward : 0) +
+    (reward.secondRewardType === 'energy' ? (reward.secondReward ?? 0) : 0);
+  const tokensAmount =
+    (reward.rewardType === 'tokens' ? reward.reward : 0) +
+    (reward.secondRewardType === 'tokens' ? (reward.secondReward ?? 0) : 0);
+  const isEnergyAvailable = energyAmount > 0;
+  const isTokensAvailable = tokensAmount > 0;
 
   return (
     <Modal
@@ -73,17 +80,25 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
         >
           <div className="text-center">
             <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div>
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">
-                +{reward.reward}
-              </span>
-              <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              {isEnergyAvailable && (
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-white">+{energyAmount}</span>
+                  <i className="fa-solid fa-bolt text-purple-400 text-2xl"></i>
+                </div>
+              )}
+              {isTokensAvailable && (
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl font-bold text-white">+{tokensAmount}</span>
+                  <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
 
         {/* Status Info */}
-        {isClaimed && (
+        {/* {isClaimed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -95,7 +110,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
               <span>{t('rewardReceived')}</span>
             </div>
           </motion.div>
-        )}
+        )} */}
 
         {/* Close Button */}
         <motion.div

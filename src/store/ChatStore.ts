@@ -315,9 +315,15 @@ export default class ChatStore {
             const orderedHistory = historyData.slice().sort((a, b) => {
                 return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
             });
+            // Определяем минимальный orderIndex миссий, по которым есть сообщения в текущей порции истории
+            let minOrderWithMessages: number | null = null;
             orderedHistory.forEach((item) => {
                 const mid = item.missionId ?? null;
                 if (mid !== null && missionsMap.has(mid)) {
+                    const mOrder = missionsMap.get(mid)!.orderIndex;
+                    if (minOrderWithMessages === null || mOrder < minOrderWithMessages) {
+                        minOrderWithMessages = mOrder;
+                    }
                     if (!missionMessages.has(mid)) missionMessages.set(mid, []);
                     missionMessages.get(mid)!.push(item);
                 }
@@ -338,10 +344,19 @@ export default class ChatStore {
                 // - первая миссия всегда
                 // - иначе, если есть сообщения по миссии (значит пользователь дошёл)
                 // - или если предыдущая завершена
+                // Если истории нет совсем — показываем первую миссию
+                const noMessagesAtAll = orderedHistory.length === 0;
+
+                // Если сообщения есть только для более поздних миссий (из-за пагинации),
+                // не показываем карточки старых миссий без сообщений.
+                const isBeforeFirstLoaded =
+                    minOrderWithMessages !== null && mission.orderIndex < minOrderWithMessages;
+
                 const canShow =
-                    idx === 0 ||
+                    (noMessagesAtAll && idx === 0) || // свежий пользователь
                     hasMessages ||
-                    prevMissionCompleted;
+                    prevMissionCompleted ||
+                    (!isBeforeFirstLoaded && idx === 0);
 
                 if (!canShow) {
                     prevMissionCompleted = missionCompleted;

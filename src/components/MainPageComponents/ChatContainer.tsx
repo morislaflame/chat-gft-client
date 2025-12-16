@@ -1,22 +1,22 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import FormattedText from './FormattedText';
 import Button from '../CoreComponents/Button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import ChatMessages from './chat/ChatMessages';
+import MissionProgress from './chat/MissionProgress';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [inputValue, setInputValue] = useState('');
-    const [isMissionExpanded, setIsMissionExpanded] = useState(false);
+    // state for mission expansion is now managed inside MissionProgress
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
     const [currentMissionVideo, setCurrentMissionVideo] = useState<{ video: MediaFile; mission: string | null } | null>(null);
@@ -107,17 +107,11 @@ const ChatContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
-    // Вычисляем процент прогресса на основе текущего этапа
-    // Этап 1 = 0%, этап 2 = 33.33%, этап 3 = 66.66%
-    const progressPercent = chat.forceProgress;
-
-    const isMobile = document.body.classList.contains('telegram-mobile');
+    
     const backgroundUrl = chat.background?.url;
-    const avatarUrl = chat.avatar?.url;
 
     return (
         <div className="h-full relative flex flex-col overflow-x-hidden w-full">
-            {/* AI Introduction */}
             <div 
                 ref={chatContainerRef} 
                 className="flex-1 px-4 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
@@ -129,205 +123,15 @@ const ChatContainer: React.FC = observer(() => {
                     backgroundAttachment: 'fixed'
                 } : {}}
             >
-            
-
-            {/* Chat Messages Container */}
-            <div className="space-y-6" style={{ marginTop: isMobile ? '156px' : '56px' }}>
-                {Array.isArray(chat.messages) && chat.messages.map((message, index) => {
-                    // Карточка миссии
-                    if (message.isMissionCard && message.mission) {
-                        return (
-                            <div key={message.id} className="flex justify-center mb-6">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-primary-800 rounded-xl px-4 py-3 inline-block max-w-md w-full"
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-md font-semibold text-amber-400 flex flex-col gap-2">
-                                            {t('mission')} {message.mission.orderIndex} 
-                                            <span className="font-medium text-gray-200 italic">{message.mission.title}</span>
-                                        </span>
-                                    </div>
-                                    <div className="text-sm text-gray-300">
-                                        
-                                    </div>
-                                    {message.mission.description && (
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            {message.mission.description}
-                                        </div>
-                                    )}
-                                    {!message.missionHasMessages && (
-                                        <div className="mt-3">
-                                            <Button
-                                                onClick={() => handleStartMission(message.mission!.orderIndex)}
-                                                variant="secondary"
-                                                size="sm"
-                                                className="w-full"
-                                                icon="fas fa-play"
-                                            >
-                                                {t('start')}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            </div>
-                        );
-                    }
-
-                    const isLastAIMessage = !message.isUser && index === chat.messages.length - 1;
-                    const showSuggestions = isLastAIMessage && chat.suggestions && chat.suggestions.length > 0 && !chat.isTyping;
-                    
-                    return (
-                        <div key={message.id} className="message-container flex items-start mb-6">
-                            {!message.isUser && (
-                                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2 overflow-hidden p-1">
-                                    {avatarUrl ? (
-                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <i className="fas fa-mask text-xs"></i>
-                                    )}
-                                </div>
-                            )}
-                            <div className={`flex-1 ${message.isUser ? 'flex justify-end' : ''}`}>
-                                <div className={`rounded-xl px-4 py-3 ${
-                                    message.isUser 
-                                        ? 'bg-secondary-500 max-w-xs' 
-                                        : 'bg-primary-800 rounded-tl-none'
-                                }`}>
-                                    <div className="text-sm">
-                                        {message.isUser ? (
-                                            <span className="whitespace-pre-wrap">{message.text}</span>
-                                        ) : (
-                                            <>
-                                            <FormattedText text={message.text} />
-                                            <AnimatePresence mode="popLayout">
-                                                {showSuggestions && (
-                                                    <motion.div 
-                                                        key="suggestions"
-                                                        layout
-                                                        initial={{ opacity: 0, y: 10 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        exit={{ opacity: 0, y: 10 }}
-                                                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                                                        className="mt-3 grid grid-cols-2 gap-2"
-                                                    >
-                                                        {chat.suggestions.map((suggestion, suggestionIndex) => (
-                                                            <motion.button
-                                                                key={suggestionIndex}
-                                                                layout
-                                                                onClick={() => handleSelectSuggestion(suggestion)}
-                                                                className="bg-primary-700 hover:bg-primary-600 rounded-lg px-2 py-1.5 text-xs text-center transition-colors border border-primary-600 hover:border-red-500 text-white cursor-pointer"
-                                                                whileHover={{ scale: 1.02 }}
-                                                                whileTap={{ scale: 0.98 }}
-                                                                initial={{ opacity: 0, y: 6 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: 6 }}
-                                                                transition={{ duration: 0.2, delay: suggestionIndex * 0.05 }}
-                                                            >
-                                                                {suggestion}
-                                                            </motion.button>
-                                                        ))}
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
-                    );
-                })}
-
-                {/* Typing Indicator */}
-                {chat.isTyping && (
-                    <div className="message-container flex items-start mb-6">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center mr-2 overflow-hidden">
-                            {avatarUrl ? (
-                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                <i className="fas fa-mask text-xs"></i>
-                            )}
-                        </div>
-                        <div className="bg-primary-800 rounded-xl rounded-tl-none px-4 py-3">
-                            <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <AnimatePresence>
-                
-            </AnimatePresence>
-                <div ref={messagesEndRef} className='mb-[128px]'/>
+                <ChatMessages
+                    onStartMission={handleStartMission}
+                    onSelectSuggestion={handleSelectSuggestion}
+                    messageEndRef={messagesEndRef}
+                />
             </div>
 
-            </div>
-
-            {/* Message Input */}
             <div className="absolute bottom-0 right-0 w-full p-4 flex flex-col gap-3">
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1">
-                            <div className="flex justify-end text-xs mb-2">
-                                {/* <span className='backdrop-blur-sm rounded-full p-2'>{t('mission_progress')}</span> */}
-                                <div className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
-                                onClick={() => {
-                                    hapticImpact('soft');
-                                    setIsMissionExpanded(!isMissionExpanded);
-                                }}
-                                >
-                                    <span className="text-amber-400 font-medium flex items-center">
-                                        <i className="fas fa-gift mr-1"></i>
-                                        {t('mission')} {chat.currentStage}
-                                    </span>
-                                    {chat.mission && (
-                                        <button
-                                            
-                                            className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
-                                            aria-label="Toggle mission"
-                                        >
-                                            <i className={`fas ${isMissionExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
-                                <div 
-                                    className="h-full bg-gradient-to-r from-red-500 to-red-600 persuasion-bar" 
-                                    style={{ width: `${progressPercent}%` }}
-                                ></div>
-                                {/* <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-xs font-medium text-white">{t('mission_progress')}</span>
-                                </div> */}
-                            </div>
-                            {/* Current Mission - Collapsible */}
-                            <AnimatePresence>
-                                {chat.mission && isMissionExpanded && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="mt-4 bg-primary-800 p-2 rounded-lg">
-                                            <div className="flex items-start gap-2">
-                                                <span className="text-xs text-gray-100">{t('mission')}:</span>
-                                                <span className="flex-1 text-xs text-gray-400">{chat.mission}</span>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </div>
-                </div>
-                
+                <MissionProgress />
                 <form onSubmit={handleSubmit} className="flex space-x-2">
                     <input
                         type="text"

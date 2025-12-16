@@ -159,21 +159,23 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                     </div>
 
                     {/* Navigation Controls */}
-                    <div className="flex justify-center gap-2 mt-4">
-                        {histories.map((_, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => {
-                                    hapticImpact('soft');
-                                    onSetActiveIndex(idx);
-                                }}
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                    activeIndex === idx ? 'bg-white w-6' : 'bg-white/50'
-                                }`}
-                                aria-label={`Go to history ${idx + 1}`}
-                            />
-                        ))}
-                    </div>
+                    {histories.length > 1 && (
+                        <div className="flex justify-center gap-2 mt-4">
+                            {histories.map((_, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => {
+                                        hapticImpact('soft');
+                                        onSetActiveIndex(idx);
+                                    }}
+                                    className={`w-2 h-2 rounded-full transition-all ${
+                                        activeIndex === idx ? 'bg-white w-6' : 'bg-white/50'
+                                    }`}
+                                    aria-label={`Go to history ${idx + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="text-center text-white py-20">

@@ -110,11 +110,11 @@ const RewardsContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
-    const isMobile = document.body.classList.contains('telegram-mobile');
+    
 
     return (
-        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4"
-        style={{ marginTop: isMobile ? '156px' : '56px' }}>
+        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4 relative overflow-x-hidden" 
+        >
             <RewardsHeader
                 activeTab={activeTab}
                 onChange={setActiveTab}

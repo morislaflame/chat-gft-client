@@ -53,7 +53,7 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
             <Button
                 onClick={onClick}
                 disabled={isCreating}
-                variant="secondary"
+                variant="danger"
                 size="sm"
                 className="w-full"
                 icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}

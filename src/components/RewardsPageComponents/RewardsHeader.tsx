@@ -15,8 +15,12 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
     availableLabel,
     purchasedLabel
 }) => {
+    const isMobile = document.body.classList.contains('telegram-mobile');
     return (
-        <div className="flex items-center justify-between">
+        <div
+            className="fixed inset-x-4 flex items-center justify-between z-100"
+            style={{ marginTop: isMobile ? '136px' : '36px' }}
+        >
             <h2 className="text-xl font-bold text-white">{title}</h2>
             <div className="flex bg-primary-800 rounded-lg p-1">
                 <button

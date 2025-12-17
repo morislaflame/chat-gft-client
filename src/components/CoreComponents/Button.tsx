@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
-type ButtonVariant = 'primary' | 'secondary' | 'success' | 'tretiary' | 'default';
+type ButtonVariant = 'primary' | 'secondary' | 'success' | 'tretiary' | 'default' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -34,7 +34,8 @@ const Button: React.FC<ButtonProps> = ({
     secondary: 'bg-secondary-500 hover:bg-secondary-400 text-white shadow-lg',
     tretiary: ' bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white shadow-lg',
     success: 'bg-green-500 hover:bg-green-500 text-white shadow-lg ',
-    default: 'text-white hover:bg-white/10'
+    default: 'text-white hover:bg-white/10',
+    danger: 'bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white shadow-lg'
   };
 
   const sizeClasses = {

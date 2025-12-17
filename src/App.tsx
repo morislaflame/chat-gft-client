@@ -10,8 +10,38 @@ import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 import Onboarding from './components/modals/Onboarding';
+import { ProgressiveBlur } from './components/ui/progressive-blur';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
+
+
+const AppContent = () => {
+  const isMobile = document.body.classList.contains('telegram-mobile');
+  const blurHeight = isMobile ? 124 : 56;
+
+  return (
+    <>
+      <Header />
+      <ProgressiveBlur
+        className="pointer-events-none fixed left-0 right-0 top-0 z-15"
+        containerStyle={{ height: `${blurHeight}px` }}
+        blurIntensity={2}
+        direction="top"
+      />
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-screen w-screen">
+          <LoadingIndicator />
+        </div>
+      }>
+        <AppRouter />
+      </Suspense>
+      <BottomNavigation />
+      <DailyRewardModal />
+      <StageRewardModal />
+      <InsufficientEnergyModal />
+    </>
+  );
+};
 
 const App = observer(() => {
   const { user, dailyReward } = useContext(Context) as IStoreContext;
@@ -122,18 +152,7 @@ const App = observer(() => {
   // Основной контент показывается только если онбординг не нужен
   return (
       <BrowserRouter>
-        <Header/>
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-screen w-screen">
-            <LoadingIndicator />
-          </div>
-        }>
-          <AppRouter />
-        </Suspense>
-        <BottomNavigation />
-        <DailyRewardModal />
-        <StageRewardModal />
-        <InsufficientEnergyModal />
+        <AppContent />
       </BrowserRouter>
   )
 });

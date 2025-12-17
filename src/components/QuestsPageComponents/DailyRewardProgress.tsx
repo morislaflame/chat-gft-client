@@ -47,6 +47,9 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
         {[1, 2, 3, 4, 5, 6, 7].map((day) => {
           const isClaimed = isDayClaimed(day);
           const reward = getRewardForDay(day);
+          const isFirst = day === 1;
+          const bounceAnimation = isFirst ? { y: [0, -20, 0, -6, 0] } : undefined;
+          const bounceTransition = isFirst ? { duration: 1, repeat: Infinity, repeatDelay: 2 } : undefined;
           
           return (
             <motion.button
@@ -54,6 +57,8 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
               onClick={() => onDayClick(day, reward)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
+              animate={bounceAnimation}
+              transition={bounceTransition}
               className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 isClaimed
                   ? 'bg-green-500 border-2 border-green-400'

@@ -212,8 +212,8 @@ type TranslationType = {
         en: 'Sending...'
     },
     retryRequest: {
-        ru: 'Повторить запрос',
-        en: 'Retry Request'
+        ru: 'Повторить',
+        en: 'Retry'
     },
     withdraw: {
         ru: 'Вывести',

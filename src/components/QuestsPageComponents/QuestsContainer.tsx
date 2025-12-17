@@ -80,7 +80,7 @@ const QuestsContainer: React.FC = observer(() => {
 
     return (
         <div className="p-4 overflow-y-auto flex w-full flex-col gap-2"
-        style={{ marginTop: isMobile ? '156px' : '56px' }}>
+        style={{ marginTop: isMobile ? '142px' : '42px' }}>
             <QuestsList
                 quests={quest.quests}
                 language={language}

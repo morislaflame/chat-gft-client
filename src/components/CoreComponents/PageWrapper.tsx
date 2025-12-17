@@ -15,7 +15,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) =
             className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden w-full hide-scrollbar ios-scroll ${className}`}
             style={{ 
                 height: `calc(100vh - ${navigationHeight}px)`,
-                // paddingTop: `${headerHeight}px`,
+                paddingBottom: `${navigationHeight}`,
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

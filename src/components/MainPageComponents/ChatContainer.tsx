@@ -31,7 +31,12 @@ const ChatContainer: React.FC = observer(() => {
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
 
-    const handleSendMessage = async (message: string) => {
+    const handleSendMessage = async (message: string): Promise<boolean> => {
+        if (user.energy <= 0) {
+            chat.setInsufficientEnergy(true);
+            return false;
+        }
+
         const response = await chat.sendMessage(message);
         // Проверяем, завершена ли миссия
         if (response && response.missionCompleted && response.mission) {
@@ -40,6 +45,7 @@ const ChatContainer: React.FC = observer(() => {
                 stage: response.stage || chat.currentStage
             });
         }
+        return true;
     };
 
     const handleStartMission = (orderIndex: number) => {
@@ -55,7 +61,7 @@ const ChatContainer: React.FC = observer(() => {
             setShowMissionVideoModal(true);
         } else {
             console.log('No mission video found, sending start message directly');
-            handleSendMessage("старт");
+            void handleSendMessage("старт");
         }
     };
 
@@ -64,7 +70,7 @@ const ChatContainer: React.FC = observer(() => {
         setShowMissionVideoModal(false);
         // После закрытия видео отправляем сообщение "старт"
         if (currentMissionVideo) {
-            handleSendMessage("старт");
+            void handleSendMessage("старт");
             setCurrentMissionVideo(null);
         }
         // Очищаем lastMissionCompleted после показа видео новой миссии
@@ -90,16 +96,26 @@ const ChatContainer: React.FC = observer(() => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (inputValue.trim()) {
-            hapticImpact('soft');
-            handleSendMessage(inputValue.trim());
-            setInputValue('');
-        }
+        const trimmed = inputValue.trim();
+        if (!trimmed) return;
+
+        handleSendMessage(trimmed).then((sent) => {
+            if (sent) {
+                hapticImpact('soft');
+                setInputValue('');
+            }
+        });
     };
 
     const handleSelectSuggestion = (text: string) => {
-        hapticImpact('soft');
-        handleSendMessage(text.trim());
+        const trimmed = text.trim();
+        if (!trimmed) return;
+
+        handleSendMessage(trimmed).then((sent) => {
+            if (sent) {
+                hapticImpact('soft');
+            }
+        });
     };
 
     // Показываем лоадинг пока загружается история чата

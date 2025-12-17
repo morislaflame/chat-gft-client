@@ -292,8 +292,16 @@ type TranslationType = {
         en: 'Insufficient Energy'
     },
     insufficientEnergyDesc: {
-        ru: 'У вас недостаточно энергии для отправки сообщения. Купите больше звезд, чтобы продолжить общение.',
-        en: "You don't have enough energy to send a message. Purchase more stars to continue chatting."
+        ru: 'У вас недостаточно энергии для отправки сообщения. Вы можете приобрести ее в шопе, чтобы продолжить общение.',
+        en: "You don't have enough energy to send a message. Purchase more energy in the store to continue chatting."
+    },
+    insufficientEnergyTasksNote: {
+        ru: 'или получите бесплатную энергию за выполнение заданий',
+        en: 'or get free energy by completing quests'
+    },
+    goToQuests: {
+        ru: 'Перейти к заданиям',
+        en: 'Go to quests'
     },
     goToStore: {
         ru: 'Перейти в магазин',

@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import { STORE_ROUTE } from '@/utils/consts';
+import { QUESTS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import Button from '../CoreComponents/Button';
 
 const InsufficientEnergyModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
@@ -20,6 +21,11 @@ const InsufficientEnergyModal: React.FC = observer(() => {
   const handleGoToStore = () => {
     chat.closeInsufficientEnergy();
     navigate(STORE_ROUTE);
+  };
+
+  const handleGoToQuests = () => {
+    chat.closeInsufficientEnergy();
+    navigate(QUESTS_ROUTE);
   };
 
   return (
@@ -55,28 +61,55 @@ const InsufficientEnergyModal: React.FC = observer(() => {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3">
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Button
             onClick={handleGoToStore}
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden cursor-pointer"
+            variant="tretiary"
+            size="md"
+            className="w-full"
+            icon="fas fa-store"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <i className="fa-solid fa-store text-white"></i>
-              {t('goToStore')}
-            </span>
-          </motion.button>
+           {t('goToStore')}
+          </Button>
+        </motion.div>
 
-          <motion.button
+          <p className="text-center text-gray-400 text-xs">{t('insufficientEnergyTasksNote')}</p>
+
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            onClick={handleClose}
-            className="w-full bg-primary-700 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
           >
-            {t('cancel')}
-          </motion.button>
+            <Button
+              onClick={handleGoToQuests}
+              variant="secondary"
+              size="md"
+              className="w-full"
+              icon="fas fa-tasks"
+            >
+              {t('goToQuests')}
+            </Button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Button
+              onClick={handleClose}
+              variant="default"
+              size="md"
+              className="w-full"
+            >
+              {t('cancel')}
+            </Button>
+          </motion.div>
+
         </div>
       </div>
     </Modal>

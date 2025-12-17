@@ -9,6 +9,7 @@ import type { Reward, UserReward } from '@/http/rewardAPI';
 import WithdrawalModal from '../modals/WithdrawalModal';
 import RewardPurchaseModal from '../modals/RewardPurchaseModal';
 import RewardDetailModal from '../modals/RewardDetailModal';
+import WithdrawalResultModal from '../modals/WithdrawalResultModal';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
@@ -23,6 +24,7 @@ const RewardsContainer: React.FC = observer(() => {
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
     const [selectedRewardForDetail, setSelectedRewardForDetail] = useState<UserReward | null>(null);
+    const [withdrawResult, setWithdrawResult] = useState<{ status: 'success' | 'error'; message?: string } | null>(null);
 
     useEffect(() => {
         // Load rewards when component mounts
@@ -69,8 +71,10 @@ const RewardsContainer: React.FC = observer(() => {
             // Обновляем список покупок и запросов
             await reward.fetchMyPurchases();
             await reward.fetchWithdrawalRequests();
+            setWithdrawResult({ status: 'success' });
             return true;
         }
+        setWithdrawResult({ status: 'error', message: reward.error || undefined });
         return false;
     };
 
@@ -89,6 +93,10 @@ const RewardsContainer: React.FC = observer(() => {
             // Обновляем список покупок и запросов
             await reward.fetchMyPurchases();
             await reward.fetchWithdrawalRequests();
+            setWithdrawResult({ status: 'success' });
+        } else {
+            setWithdrawResult({ status: 'error', message: reward.error || undefined });
+            setWithdrawalModalOpen(false);
         }
     };
 
@@ -99,7 +107,7 @@ const RewardsContainer: React.FC = observer(() => {
         
         if (status === 'completed') {
             return (
-                <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
+                <div className="w-full px-2.5 py-2 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
                     <i className="fas fa-check-circle"></i>
                     {t('withdrawn')}
                 </div>
@@ -108,7 +116,7 @@ const RewardsContainer: React.FC = observer(() => {
         
         if (status === 'pending') {
             return (
-                <div className="w-full px-4 py-3 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                <div className="w-full px-2.5 py-2 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                     <i className="fas fa-clock"></i>
                     {t('pending')}
                 </div>
@@ -327,6 +335,13 @@ const RewardsContainer: React.FC = observer(() => {
                 canAfford={selectedReward ? (user.user?.balance || 0) >= selectedReward.price : false}
                 withdrawalStatus={selectedRewardForDetail ? reward.getWithdrawalStatus(selectedRewardForDetail.id) : null}
                 isCreatingWithdrawal={selectedRewardForDetail ? reward.isCreatingWithdrawal(selectedRewardForDetail.id) : false}
+            />
+
+            <WithdrawalResultModal
+                isOpen={!!withdrawResult}
+                status={withdrawResult?.status || null}
+                message={withdrawResult?.message}
+                onClose={() => setWithdrawResult(null)}
             />
         </div>
     );

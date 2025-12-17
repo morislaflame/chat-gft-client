@@ -72,16 +72,33 @@ class RewardStore {
     try {
       // Вызываем API для покупки награды
       const purchaseResponse = await rewardAPI.purchaseReward(rewardId);
-      
-      // Находим купленную награду
-      const purchasedReward = this.availableRewards.find(r => r.id === rewardId);
+
+      // Находим купленную награду (из ответа или из списка доступных)
+      const purchasedReward = purchaseResponse.userReward?.reward
+        || this.availableRewards.find(r => r.id === rewardId)
+        || null;
       if (purchasedReward) {
         this.purchasedReward = purchasedReward;
-        this.purchasePrice = purchaseResponse.userReward.purchasePrice || purchasedReward.price;
+        this.purchasePrice = purchaseResponse.userReward?.purchasePrice || purchasedReward.price;
       }
-      
-      // Обновляем список купленных наград
-      await this.fetchMyPurchases();
+
+      // Мгновенно обновляем список купленных наград локально
+      if (purchaseResponse.userReward) {
+        const userRewardEntry: UserReward = {
+          ...purchaseResponse.userReward,
+          reward: purchaseResponse.userReward.reward || purchasedReward!,
+        };
+        const existingIndex = this.myPurchases.findIndex((p) => p.id === userRewardEntry.id);
+        if (existingIndex >= 0) {
+          this.myPurchases[existingIndex] = userRewardEntry;
+        } else {
+          this.myPurchases = [userRewardEntry, ...this.myPurchases];
+        }
+        this._purchasesLoaded = true;
+      } else {
+        // Fallback: обновляем покупки, если объект не пришёл
+        await this.fetchMyPurchases(true);
+      }
       
       return true;
     } catch (error: unknown) {
@@ -132,9 +149,19 @@ class RewardStore {
     this.error = null;
     
     try {
-      await rewardAPI.createWithdrawalRequest(userRewardId);
-      // Обновляем список запросов
-      await this.fetchWithdrawalRequests();
+      const response = await rewardAPI.createWithdrawalRequest(userRewardId);
+
+      // Мгновенно обновляем список запросов, чтобы статус ушёл в pending
+      const existingIndex = this.withdrawalRequests.findIndex((r) => r.id === response.id);
+      if (existingIndex >= 0) {
+        this.withdrawalRequests[existingIndex] = response;
+      } else {
+        this.withdrawalRequests = [response, ...this.withdrawalRequests];
+      }
+      this._withdrawalsLoaded = true;
+
+      // Фоново обновляем запросы для консистентности
+      void this.fetchWithdrawalRequests(true);
       return true;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 

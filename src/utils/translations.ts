@@ -334,6 +334,22 @@ type TranslationType = {
         ru: 'Запрос на вывод приза',
         en: 'Withdrawal Request'
     },
+    withdrawalSuccessTitle: {
+        ru: 'Запрос создан',
+        en: 'Request created'
+    },
+    withdrawalSuccessDesc: {
+        ru: 'Мы обработаем ваш запрос и уведомим о статусе.',
+        en: 'We will process your request and notify you of the status.'
+    },
+    withdrawalErrorTitle: {
+        ru: 'Не удалось создать запрос',
+        en: 'Failed to create request'
+    },
+    withdrawalErrorDesc: {
+        ru: 'Попробуйте позже или обратитесь в поддержку.',
+        en: 'Please try again later or contact support.'
+    },
     purchasedFor: {
         ru: 'Куплено за',
         en: 'Purchased for'

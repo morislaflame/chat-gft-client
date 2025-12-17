@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
+import Button from '../CoreComponents/Button';
 
 const StageRewardModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
@@ -66,18 +67,21 @@ const StageRewardModal: React.FC = observer(() => {
         </motion.div>
 
         {/* Continue Button */}
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          onClick={handleClose}
-          className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl relative overflow-hidden cursor-pointer"
         >
-          <span className="relative z-10 flex items-center justify-center gap-2">
-            <i className="fa-solid fa-check text-white"></i>
+          <Button
+            onClick={handleClose}
+            variant="default"
+            size="md"
+            className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white"
+            icon="fa-solid fa-check"
+          >
             {t('continue')}
-          </span>
-        </motion.button>
+          </Button>
+        </motion.div>
       </div>
     </Modal>
   );

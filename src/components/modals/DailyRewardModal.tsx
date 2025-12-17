@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
+import Button from '../CoreComponents/Button';
 
 const DailyRewardModal: React.FC = observer(() => {
   const { dailyReward } = useContext(Context) as IStoreContext;
@@ -108,40 +109,29 @@ const DailyRewardModal: React.FC = observer(() => {
         </div>
 
         {/* Claim Button */}
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          onClick={handleClaim}
-          disabled={dailyReward.loading}
-          className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden cursor-pointer"
         >
-          {dailyReward.loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {t('claiming')}
-            </span>
-          ) : (
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <i className="fa-solid fa-gift text-white"></i>
-              {t('claimReward')}
-            </span>
-          )}
-          {/* <motion.div
-            className="absolute inset-0 transform origin-center bg-white/20 rounded-lg "
-            initial={{ scale: 0, opacity: 0.6 }}
-            animate={{ 
-              scale: [0, 1.4, 1.4],
-              opacity: [0.6, 0, 0]
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.5,
-              delay: 0.3,
-              ease: 'easeOut'
-            }}
-          /> */}
-        </motion.button>
+          <Button
+            onClick={handleClaim}
+            disabled={dailyReward.loading}
+            className="w-full"
+            variant="tretiary"
+            size="md"
+            icon="fa-solid fa-gift"
+          >
+            {dailyReward.loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {t('claiming')}
+              </span>
+            ) : (
+              t('claimReward')
+            )}
+          </Button>
+        </motion.div>
       </div>
     </Modal>
   );

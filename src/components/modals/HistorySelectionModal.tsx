@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
+import Button from '../CoreComponents/Button';
 
 interface HistorySelectionModalProps {
     isOpen: boolean;
@@ -90,60 +91,62 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                         {agent.agents.map((agentItem, index) => {
                             const isSelected = agentItem.historyName === currentHistory;
                             return (
-                                <motion.button
+                                <motion.div
                                     key={agentItem.id}
                                     initial={{ opacity: 0, y: 0 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
+                                >
+                                  <Button
                                     onClick={() => handleSelectHistory(agentItem.historyName)}
                                     disabled={agent.saving || isSelected}
-                                    className={`w-full text-left p-4 rounded-lg transition-all duration-200 ${
-                                        isSelected
-                                            ? 'bg-gradient-to-r from-red-500/30 to-red-700/30 border-2 border-red-500 cursor-default'
-                                            : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600 hover:border-red-500 cursor-pointer'
+                                    variant="default"
+                                    size="md"
+                                    className={`w-full text-left p-4 rounded-lg transition-all duration-200 [&>span]:w-full [&>span]:justify-start ${
+                                      isSelected
+                                        ? 'bg-gradient-to-r from-red-500/30 to-red-700/30 border-2 border-red-500 cursor-default'
+                                        : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600 hover:border-red-500 cursor-pointer'
                                     } ${agent.saving ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-semibold text-white">
-                                                    {getHistoryDisplayName(agentItem.historyName, language)}
-                                                </span>
-                                                {/* {isSelected && (
-                                                    <span className="text-xs px-2 py-0.5 bg-red-500/30 text-red-300 rounded">
-                                                        {t.current}
-                                                    </span>
-                                                )} */}
-                                            </div>
-                                            {agentItem.description && (
-                                                <p className="text-xs text-gray-300 mt-1 mb-1">
-                                                    {agentItem.description}
-                                                </p>
-                                            )}
-                                            {/* <span className="text-xs text-gray-400">
-                                                {agentItem.historyName}
-                                            </span> */}
+                                  >
+                                    <div className="flex items-center justify-between gap-2 w-full">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-semibold text-white">
+                                            {getHistoryDisplayName(agentItem.historyName, language)}
+                                          </span>
                                         </div>
-                                        {isSelected && (
-                                            <i className="fas fa-check-circle text-red-400 text-xl"></i>
+                                        {agentItem.description && (
+                                          <p className="text-xs text-gray-300 mt-1 mb-1">
+                                            {agentItem.description}
+                                          </p>
                                         )}
+                                      </div>
+                                      {isSelected && (
+                                        <i className="fas fa-check-circle text-red-400 text-xl"></i>
+                                      )}
                                     </div>
-                                </motion.button>
+                                  </Button>
+                                </motion.div>
                             );
                         })}
                     </div>
                 )}
 
                 {/* Close Button */}
-                <motion.button
+                <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    onClick={onClose}
-                    className="w-full mt-6 bg-primary-700 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
                 >
+                  <Button
+                    onClick={onClose}
+                    variant="default"
+                    size="md"
+                    className="w-full mt-6 bg-primary-700 hover:bg-primary-600 text-white"
+                  >
                     {t('close')}
-                </motion.button>
+                  </Button>
+                </motion.div>
             </div>
         </Modal>
     );

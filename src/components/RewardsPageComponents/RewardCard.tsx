@@ -1,0 +1,162 @@
+import React from 'react';
+import Button from '../CoreComponents/Button';
+import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import type { Reward, UserReward } from '@/http/rewardAPI';
+
+type TranslateFn = (key: string) => string;
+
+type WithdrawalStatus = 'pending' | 'completed' | 'rejected' | null;
+
+type RewardCardProps = {
+    rewardItem: Reward;
+    userReward: UserReward | null;
+    activeTab: 'available' | 'purchased';
+    animations: { [url: string]: Record<string, unknown> };
+    onCardClick: (rewardItem: Reward, userReward: UserReward | null) => void;
+    onPurchase: (rewardId: number) => void;
+    onWithdrawClick: (userReward: UserReward) => void;
+    isPurchasing: boolean;
+    canAfford: boolean;
+    withdrawStatus: WithdrawalStatus;
+    isCreatingWithdrawal: boolean;
+    t: TranslateFn;
+};
+
+type WithdrawalButtonProps = {
+    status: WithdrawalStatus;
+    isCreating: boolean;
+    onClick: () => void;
+    t: TranslateFn;
+};
+
+const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating, onClick, t }) => {
+    if (status === 'completed') {
+        return (
+            <div className="w-full px-2.5 py-2 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
+                <i className="fas fa-check-circle"></i>
+                {t('withdrawn')}
+            </div>
+        );
+    }
+
+    if (status === 'pending') {
+        return (
+            <div className="w-full px-2.5 py-2 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                <i className="fas fa-clock"></i>
+                {t('pending')}
+            </div>
+        );
+    }
+
+    if (status === 'rejected') {
+        return (
+            <Button
+                onClick={onClick}
+                disabled={isCreating}
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
+            >
+                {isCreating ? t('sending') : t('retryRequest')}
+            </Button>
+        );
+    }
+
+    return (
+        <Button
+            onClick={onClick}
+            disabled={isCreating}
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-download'}
+        >
+            {isCreating ? t('sending') : t('withdraw')}
+        </Button>
+    );
+};
+
+const RewardCard: React.FC<RewardCardProps> = ({
+    rewardItem,
+    userReward,
+    activeTab,
+    animations,
+    onCardClick,
+    onPurchase,
+    onWithdrawClick,
+    isPurchasing,
+    canAfford,
+    withdrawStatus,
+    isCreatingWithdrawal,
+    t
+}) => {
+    const handleCardClick = () => onCardClick(rewardItem, userReward);
+    const key = activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id);
+
+    return (
+        <div
+            key={key}
+            onClick={handleCardClick}
+            className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+        >
+            <div className="mb-2 w-20 h-20 flex items-center justify-center">
+                <LazyMediaRenderer
+                    mediaFile={rewardItem.mediaFile}
+                    animations={animations}
+                    name={rewardItem.name}
+                    className="w-20 h-20 object-contain"
+                    loop={false}
+                    loadOnIntersect={true}
+                />
+            </div>
+
+            <div className="text-center mb-2 flex-1">
+                <div className="text-sm text-white mb-1">{rewardItem.name}</div>
+                {rewardItem.description && (
+                    <div className="text-xs text-gray-300 mb-2 line-clamp-2">{rewardItem.description}</div>
+                )}
+                {rewardItem.tonPrice && (
+                    <div className="text-xs text-gray-500">
+                        {rewardItem.tonPrice} TON
+                    </div>
+                )}
+            </div>
+
+            {activeTab === 'available' && (
+                <Button
+                    onClick={(e) => {
+                        e?.stopPropagation();
+                        onPurchase(rewardItem.id);
+                    }}
+                    disabled={isPurchasing || !canAfford}
+                    variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+                    size="sm"
+                    className="w-full"
+                    icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+                >
+                    {isPurchasing ? t('purchasing') : (
+                        <span className="flex items-center gap-1">
+                            {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
+                        </span>
+                    )}
+                </Button>
+            )}
+
+            {activeTab === 'purchased' && userReward && (
+                <div
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <WithdrawalButton
+                        status={withdrawStatus}
+                        isCreating={isCreatingWithdrawal}
+                        onClick={() => onWithdrawClick(userReward)}
+                        t={t}
+                    />
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default RewardCard;

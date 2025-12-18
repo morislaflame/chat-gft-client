@@ -47,7 +47,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
                             <button
                                 type="button"
                                 aria-label={tab.label}
-                                className={`w-full inline-flex items-center justify-center px-3 py-2 text-sm font-semibold ${
+                                className={`w-full inline-flex items-center justify-center px-3 py-2 text-xs font-semibold ${
                                     activeTab === tab.key
                                         ? 'text-white'
                                         : 'text-gray-300'

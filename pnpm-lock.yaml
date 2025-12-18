@@ -39,8 +39,8 @@ importers:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
       react-roulette-pro:
-        specifier: ^3.2.3
-        version: 3.2.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: 3.2.2
+        version: 3.2.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-router-dom:
         specifier: ^7.8.2
         version: 7.8.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -1296,8 +1296,8 @@ packages:
     peerDependencies:
       react: ^19.1.1
 
-  react-roulette-pro@3.2.3:
-    resolution: {integrity: sha512-N+F5l/tavLkqfFAWXuTJ+gDIZQh5uV9Wa5a+IE8/aA+LIDaM2b0wbVLYCIoEoW9784RJ6tu4sjyKD5woLFcHNg==}
+  react-roulette-pro@3.2.2:
+    resolution: {integrity: sha512-d1TB1H1hU83awHF5x591gfvOkt077h9O8A+IH2+57RwFEYPwqaF/cZtahOlW4TEN2seGRQ8W7bRzrmNn26t0mw==}
     engines: {node: '>=14'}
     peerDependencies:
       react: '>=17.0.0'
@@ -2528,7 +2528,7 @@ snapshots:
       react: 19.1.1
       scheduler: 0.26.0
 
-  react-roulette-pro@3.2.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+  react-roulette-pro@3.2.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
     dependencies:
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)

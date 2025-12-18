@@ -24,27 +24,6 @@ export interface Reward {
   };
 }
 
-export interface CaseItem {
-  id: number;
-  type: 'reward' | 'gems' | 'energy';
-  rewardId?: number | null;
-  amount?: number | null;
-  weight: number;
-}
-
-export interface CaseBox {
-  id: number;
-  name: string;
-  description?: string;
-  price: number;
-  isActive: boolean;
-  image?: string;
-  createdAt: string;
-  updatedAt: string;
-  mediaFile?: Reward['mediaFile'];
-  items?: CaseItem[];
-}
-
 export interface UserReward {
   id: number;
   userId: number;
@@ -102,10 +81,4 @@ export const rewardAPI = {
     const { data } = await $authHost.get('/api/withdrawal/my-requests');
     return data;
   },
-
-  // Получить активные кейсы
-  getActiveCases: async (): Promise<CaseBox[]> => {
-    const { data } = await $authHost.get('/api/case/active');
-    return data;
-  }
 };

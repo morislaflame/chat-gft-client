@@ -3,7 +3,8 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import type { Reward, UserReward, CaseBox } from '@/http/rewardAPI';
+import type { Reward, UserReward } from '@/http/rewardAPI';
+import type { CaseBox } from '@/http/caseAPI';
 import WithdrawalModal from '../modals/WithdrawalModal';
 import RewardPurchaseModal from '../modals/RewardPurchaseModal';
 import RewardDetailModal from '../modals/RewardDetailModal';
@@ -13,12 +14,14 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import RewardsHeader from './RewardsHeader';
 import RewardsGrid from './RewardsGrid';
 import RewardsEmptyState from './RewardsEmptyState';
+import { useNavigate } from 'react-router-dom';
 // import RewardsBalance from './RewardsBalance';
 
 const RewardsContainer: React.FC = observer(() => {
-    const { reward, user } = useContext(Context) as IStoreContext;
+    const { reward, user, cases } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'available' | 'purchased' | 'boxes'>('available');
     const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
     const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
@@ -30,18 +33,18 @@ const RewardsContainer: React.FC = observer(() => {
     useEffect(() => {
         // Load rewards when component mounts
         reward.fetchAvailableRewards();
-        reward.fetchAvailableCases();
+        cases.fetchActiveCases();
         reward.fetchMyPurchases();
         reward.fetchWithdrawalRequests();
         // user.fetchMyInfo();
-    }, [reward, user]);
+    }, [reward, cases, user]);
 
     const currentRewards = useMemo(() => {
-        if (activeTab === 'boxes') return reward.availableCases;
+        if (activeTab === 'boxes') return cases.activeCases;
         return activeTab === 'available'
             ? reward.availableRewards
             : reward.myPurchases.map((purchase) => purchase.reward);
-    }, [activeTab, reward.availableCases, reward.availableRewards, reward.myPurchases]);
+    }, [activeTab, cases.activeCases, reward.availableRewards, reward.myPurchases]);
 
     const rewardsData = useMemo(() => {
         return activeTab === 'available'
@@ -49,10 +52,13 @@ const RewardsContainer: React.FC = observer(() => {
             : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }));
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
 
-    const casesData: CaseBox[] = useMemo(() => reward.availableCases, [reward.availableCases]);
+    const casesData: CaseBox[] = useMemo(() => cases.activeCases, [cases.activeCases]);
+
+    // Important: avoid passing a new [] on each render to useAnimationLoader
+    const emptyRewards = useMemo(() => [] as Reward[], []);
 
     const [animations] = useAnimationLoader(
-        activeTab === 'boxes' ? [] : (currentRewards as Reward[]),
+        activeTab === 'boxes' ? emptyRewards : (currentRewards as Reward[]),
         (rewardItem: Reward) => rewardItem.mediaFile,
         [activeTab]
     );
@@ -82,7 +88,7 @@ const RewardsContainer: React.FC = observer(() => {
 
     const navigateToCase = (box: CaseBox) => {
         hapticImpact('soft');
-        window.location.href = `/cases/${box.id}`;
+        navigate(`/cases/${box.id}`);
     };
 
     const handleWithdrawClick = async (userReward: UserReward): Promise<boolean> => {
@@ -164,7 +170,7 @@ const RewardsContainer: React.FC = observer(() => {
                     actionText={t('refresh')}
                     onRefresh={() => {
                         reward.fetchAvailableRewards();
-                        reward.fetchAvailableCases();
+                        cases.fetchActiveCases(true);
                         reward.fetchMyPurchases();
                     }}
                 />

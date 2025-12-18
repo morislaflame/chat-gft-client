@@ -1,9 +1,8 @@
 import { makeAutoObservable } from 'mobx';
-import { rewardAPI, type Reward, type UserReward, type WithdrawalRequest, type CaseBox } from '@/http/rewardAPI';
+import { rewardAPI, type Reward, type UserReward, type WithdrawalRequest } from '@/http/rewardAPI';
 
 class RewardStore {
   availableRewards: Reward[] = [];
-  availableCases: CaseBox[] = [];
   myPurchases: UserReward[] = [];
   withdrawalRequests: WithdrawalRequest[] = [];
   loading = false;
@@ -13,7 +12,6 @@ class RewardStore {
   purchasedReward: Reward | null = null;
   purchasePrice: number | null = null;
   _rewardsLoaded = false; // Флаг для отслеживания загрузки доступных наград
-  _casesLoaded = false;
   _purchasesLoaded = false; // Флаг для отслеживания загрузки покупок
   _withdrawalsLoaded = false; // Флаг для отслеживания загрузки запросов на вывод
 
@@ -40,26 +38,6 @@ class RewardStore {
         : 'Failed to load rewards';
       this.error = errorMessage || 'Failed to load rewards';
       console.error('Error fetching available rewards:', error);
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  async fetchAvailableCases(forceReload = false) {
-    if (!forceReload && this._casesLoaded && this.availableCases.length > 0 && !this.loading) {
-      return;
-    }
-    this.loading = true;
-    this.error = null;
-    try {
-      this.availableCases = await rewardAPI.getActiveCases();
-      this._casesLoaded = true;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error && 'response' in error 
-        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
-        : 'Failed to load cases';
-      this.error = errorMessage || 'Failed to load cases';
-      console.error('Error fetching cases:', error);
     } finally {
       this.loading = false;
     }
@@ -224,7 +202,6 @@ class RewardStore {
   // Сбросить состояние
   reset() {
     this.availableRewards = [];
-    this.availableCases = [];
     this.myPurchases = [];
     this.withdrawalRequests = [];
     this.loading = false;
@@ -232,7 +209,6 @@ class RewardStore {
     this.purchasingRewards.clear();
     this.creatingWithdrawal.clear();
     this._rewardsLoaded = false;
-    this._casesLoaded = false;
     this._purchasesLoaded = false;
     this._withdrawalsLoaded = false;
   }

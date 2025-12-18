@@ -6,6 +6,7 @@ import QuestStore from "@/store/QuestStore";
 import ShopStore from "@/store/ShopStore";
 import ProductStore from "@/store/ProductStore";
 import RewardStore from "@/store/RewardStore";
+import CaseStore from "@/store/CaseStore";
 import DailyRewardStore from "@/store/DailyRewardStore";
 import AgentStore from "@/store/AgentStore";
 // Определяем интерфейс для нашего контекста
@@ -16,6 +17,7 @@ export interface IStoreContext {
   shop: ShopStore;
   product: ProductStore;
   reward: RewardStore;
+  cases: CaseStore;
   dailyReward: DailyRewardStore;
   agent: AgentStore;
 }
@@ -46,6 +48,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     shop: ShopStore;
     product: ProductStore;
     reward: RewardStore;
+    cases: CaseStore;
     dailyReward: DailyRewardStore;
     agent: AgentStore;
     } | null>(null);
@@ -59,6 +62,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         { default: ShopStore },
         { default: ProductStore },
         { default: RewardStore },
+        { default: CaseStore },
         { default: DailyRewardStore },
         { default: AgentStore },
       ] = await Promise.all([
@@ -68,6 +72,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         import("@/store/ShopStore"),
         import("@/store/ProductStore"),
         import("@/store/RewardStore"),
+        import("@/store/CaseStore"),
         import("@/store/DailyRewardStore"),
         import("@/store/AgentStore"),
       ]);
@@ -79,6 +84,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
         shop: new ShopStore(),
         product: new ProductStore(),
         reward: new RewardStore(),
+        cases: new CaseStore(),
         dailyReward: new DailyRewardStore(),
         agent: new AgentStore(),
       });
@@ -95,6 +101,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
       stores.dailyReward.setUserStore(stores.user);
       stores.agent.setUserStore(stores.user);
       stores.agent.setChatStore(stores.chat);
+      stores.cases.setUserStore(stores.user);
     }
   }, [stores]);
 

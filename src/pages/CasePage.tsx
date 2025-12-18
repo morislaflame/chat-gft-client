@@ -3,30 +3,32 @@ import { useParams } from 'react-router-dom';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import PageWrapper from '@/components/CoreComponents/PageWrapper';
+import CaseRoulette from '@/components/RewardsPageComponents/CaseRoulette';
 
 const CasePage: React.FC = () => {
   const { id } = useParams();
-  const { reward } = useContext(Context) as IStoreContext;
+  const { cases } = useContext(Context) as IStoreContext;
 
   useEffect(() => {
-    if (!reward.availableCases.length) {
-      reward.fetchAvailableCases(true);
+    if (!cases.activeCases.length) {
+      cases.fetchActiveCases(true);
     }
-  }, [reward]);
+  }, [cases]);
 
   if (!id) {
     return null;
   }
 
-  const box = reward.availableCases.find((c) => c.id === Number(id));
+  const box = cases.activeCases.find((c) => c.id === Number(id));
 
-  if (reward.loading && !box) {
+  if (cases.loading && !box) {
     return <LoadingIndicator />;
   }
 
   return (
     <PageWrapper>
       <h1 className="text-white text-2xl font-semibold">{box?.name || 'Case'}</h1>
+      {box ? <CaseRoulette caseBox={box} /> : null}
     </PageWrapper>
   );
 };

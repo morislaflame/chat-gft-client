@@ -28,6 +28,9 @@ const BottomNavigation = () => {
     };
 
     const getActiveTab = (): TabType => {
+        if (location.pathname.startsWith('/cases/')) {
+            return 'rewards';
+        }
         switch (location.pathname) {
             case MAIN_ROUTE:
                 return 'chat';

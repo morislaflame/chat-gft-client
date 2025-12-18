@@ -1,5 +1,6 @@
 import React from 'react';
-import type { Reward, UserReward, CaseBox } from '@/http/rewardAPI';
+import type { Reward, UserReward } from '@/http/rewardAPI';
+import type { CaseBox } from '@/http/caseAPI';
 import RewardCard from './RewardCard';
 import BoxCard from './BoxCard';
 

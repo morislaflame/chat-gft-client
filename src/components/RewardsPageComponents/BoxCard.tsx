@@ -1,5 +1,5 @@
 import React from 'react';
-import { type CaseBox } from '@/http/rewardAPI';
+import { type CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 
 type BoxCardProps = {

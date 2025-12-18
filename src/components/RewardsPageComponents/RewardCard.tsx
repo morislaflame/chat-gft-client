@@ -112,10 +112,10 @@ const RewardCard: React.FC<RewardCardProps> = ({
             </div>
 
             <div className="text-center mb-2 flex-1">
-                <div className="text-sm text-white mb-1">{rewardItem.name}</div>
-                {rewardItem.description && (
+                <div className="text-md text-white mb-1 font-semibold">{rewardItem.name}</div>
+                {/* {rewardItem.description && (
                     <div className="text-xs text-gray-300 mb-2 line-clamp-2">{rewardItem.description}</div>
-                )}
+                )} */}
                 {rewardItem.tonPrice && (
                     <div className="text-xs text-gray-500">
                         {rewardItem.tonPrice} TON

@@ -25,15 +25,11 @@ const BoxCard: React.FC<BoxCardProps> = ({ box, animations, onClick }) => {
         />
       </div>
 
-      <div className="text-center mb-2 flex-1">
-        <div className="text-sm text-white mb-1">{box.name}</div>
+      <div className="text-center flex-1">
+        <div className="text-md text-white mb-1 font-semibold">{box.name}</div>
         {box.description && (
-          <div className="text-xs text-gray-300 mb-2 line-clamp-2">{box.description}</div>
+          <div className="text-xs text-gray-300 line-clamp-2">{box.description}</div>
         )}
-      </div>
-
-      <div className="text-sm text-yellow-400 font-semibold flex items-center gap-1">
-        {box.price} <i className="fa-solid fa-gem text-white"></i>
       </div>
     </div>
   );

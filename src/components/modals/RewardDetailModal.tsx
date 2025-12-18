@@ -164,12 +164,12 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
           }}
           className="flex justify-center mb-6"
         >
-          <div className="w-32 h-32 flex items-center justify-center">
+          <div className="w-36 h-36 flex items-center justify-center">
             <LazyMediaRenderer
               mediaFile={reward.mediaFile}
               animations={animations}
               name={reward.name}
-              className="w-32 h-32 object-contain"
+              className="w-36 h-36 object-contain"
               loop={false}
               loadOnIntersect={false}
             />
@@ -181,9 +181,9 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-center mb-6"
+          className="text-center mb-4"
         >
-          <h2 className="text-2xl font-bold text-white mb-3">
+          <h2 className="text-2xl font-bold text-white mb-1">
             {reward.name}
           </h2>
           

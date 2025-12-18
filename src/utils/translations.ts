@@ -175,6 +175,10 @@ type TranslationType = {
         ru: 'Награды',
         en: 'Rewards'
     },
+    allRewards: {
+        ru: 'Все награды',
+        en: 'All rewards'
+    },
     available: {
         ru: 'Доступные',
         en: 'Available'
@@ -182,6 +186,10 @@ type TranslationType = {
     myPurchases: {
         ru: 'Мои покупки',
         en: 'My Purchases'
+    },
+    boxes: {
+        ru: 'Боксы',
+        en: 'Boxes'
     },
     noRewardsAvailable: {
         ru: 'Нет доступных наград',

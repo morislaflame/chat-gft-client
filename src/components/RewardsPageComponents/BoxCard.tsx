@@ -1,0 +1,42 @@
+import React from 'react';
+import { type CaseBox } from '@/http/rewardAPI';
+import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+
+type BoxCardProps = {
+  box: CaseBox;
+  animations: { [url: string]: Record<string, unknown> };
+  onClick: (box: CaseBox) => void;
+};
+
+const BoxCard: React.FC<BoxCardProps> = ({ box, animations, onClick }) => {
+  return (
+    <div
+      className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+      onClick={() => onClick(box)}
+    >
+      <div className="mb-2 w-20 h-20 flex items-center justify-center">
+        <LazyMediaRenderer
+          mediaFile={box.mediaFile}
+          animations={animations}
+          name={box.name}
+          className="w-20 h-20 object-contain"
+          loop={false}
+          loadOnIntersect
+        />
+      </div>
+
+      <div className="text-center mb-2 flex-1">
+        <div className="text-sm text-white mb-1">{box.name}</div>
+        {box.description && (
+          <div className="text-xs text-gray-300 mb-2 line-clamp-2">{box.description}</div>
+        )}
+      </div>
+
+      <div className="text-sm text-yellow-400 font-semibold flex items-center gap-1">
+        {box.price} <i className="fa-solid fa-gem text-white"></i>
+      </div>
+    </div>
+  );
+};
+
+export default BoxCard;

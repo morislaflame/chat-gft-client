@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import type { Reward, UserReward } from '@/http/rewardAPI';
+import type { Reward, UserReward, CaseBox } from '@/http/rewardAPI';
 import WithdrawalModal from '../modals/WithdrawalModal';
 import RewardPurchaseModal from '../modals/RewardPurchaseModal';
 import RewardDetailModal from '../modals/RewardDetailModal';
@@ -13,13 +13,13 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import RewardsHeader from './RewardsHeader';
 import RewardsGrid from './RewardsGrid';
 import RewardsEmptyState from './RewardsEmptyState';
-import RewardsBalance from './RewardsBalance';
+// import RewardsBalance from './RewardsBalance';
 
 const RewardsContainer: React.FC = observer(() => {
     const { reward, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
-    const [activeTab, setActiveTab] = useState<'available' | 'purchased'>('available');
+    const [activeTab, setActiveTab] = useState<'available' | 'purchased' | 'boxes'>('available');
     const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
     const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -30,16 +30,18 @@ const RewardsContainer: React.FC = observer(() => {
     useEffect(() => {
         // Load rewards when component mounts
         reward.fetchAvailableRewards();
+        reward.fetchAvailableCases();
         reward.fetchMyPurchases();
         reward.fetchWithdrawalRequests();
         // user.fetchMyInfo();
     }, [reward, user]);
 
     const currentRewards = useMemo(() => {
+        if (activeTab === 'boxes') return reward.availableCases;
         return activeTab === 'available'
             ? reward.availableRewards
             : reward.myPurchases.map((purchase) => purchase.reward);
-    }, [activeTab, reward.availableRewards, reward.myPurchases]);
+    }, [activeTab, reward.availableCases, reward.availableRewards, reward.myPurchases]);
 
     const rewardsData = useMemo(() => {
         return activeTab === 'available'
@@ -47,10 +49,18 @@ const RewardsContainer: React.FC = observer(() => {
             : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }));
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
 
+    const casesData: CaseBox[] = useMemo(() => reward.availableCases, [reward.availableCases]);
+
     const [animations] = useAnimationLoader(
-        currentRewards,
-        (rewardItem) => rewardItem.mediaFile,
+        activeTab === 'boxes' ? [] : (currentRewards as Reward[]),
+        (rewardItem: Reward) => rewardItem.mediaFile,
         [activeTab]
+    );
+
+    const [boxAnimations] = useAnimationLoader(
+        casesData as unknown as Reward[],
+        (box: CaseBox) => box.mediaFile,
+        [casesData.length]
     );
     
     const handlePurchase = async (rewardId: number): Promise<boolean> => {
@@ -68,6 +78,11 @@ const RewardsContainer: React.FC = observer(() => {
         setSelectedReward(rewardItem);
         setSelectedRewardForDetail(userReward);
         setDetailModalOpen(true);
+    };
+
+    const navigateToCase = (box: CaseBox) => {
+        hapticImpact('soft');
+        window.location.href = `/cases/${box.id}`;
     };
 
     const handleWithdrawClick = async (userReward: UserReward): Promise<boolean> => {
@@ -119,8 +134,9 @@ const RewardsContainer: React.FC = observer(() => {
                 activeTab={activeTab}
                 onChange={setActiveTab}
                 title={t('rewards')}
-                availableLabel={t('available')}
+                availableLabel={t('allRewards')}
                 purchasedLabel={t('myPurchases')}
+                boxesLabel={t('boxes')}
             />
 
             {reward.error && (
@@ -131,20 +147,36 @@ const RewardsContainer: React.FC = observer(() => {
 
             {(!currentRewards || !Array.isArray(currentRewards) || currentRewards.length === 0) ? (
                 <RewardsEmptyState
-                    title={activeTab === 'available' ? t('noRewardsAvailable') : t('noPurchasesYet')}
-                    description={activeTab === 'available' ? t('noRewardsAvailableDesc') : t('noPurchasesYetDesc')}
+                    title={
+                        activeTab === 'available'
+                            ? t('noRewardsAvailable')
+                            : activeTab === 'boxes'
+                                ? 'No boxes available'
+                                : t('noPurchasesYet')
+                    }
+                    description={
+                        activeTab === 'available'
+                            ? t('noRewardsAvailableDesc')
+                            : activeTab === 'boxes'
+                                ? 'Boxes will appear here once available.'
+                                : t('noPurchasesYetDesc')
+                    }
                     actionText={t('refresh')}
                     onRefresh={() => {
                         reward.fetchAvailableRewards();
+                        reward.fetchAvailableCases();
                         reward.fetchMyPurchases();
                     }}
                 />
             ) : (
                 <RewardsGrid
                     data={rewardsData}
+                    cases={casesData}
                     activeTab={activeTab}
                     animations={animations}
+                    boxAnimations={boxAnimations}
                     onCardClick={handleCardClick}
+                    onBoxClick={navigateToCase}
                     onPurchase={handlePurchase}
                     onWithdrawClick={handleWithdrawClickForModal}
                     getPurchaseState={(rewardItem: Reward) => ({
@@ -159,10 +191,10 @@ const RewardsContainer: React.FC = observer(() => {
                 />
             )}
 
-            <RewardsBalance
+            {/* <RewardsBalance
                 balanceLabel={t('yourBalance')}
                 balance={user.user?.balance || 0}
-            />
+            /> */}
 
             {/* Withdrawal Modal */}
             <WithdrawalModal
@@ -194,7 +226,7 @@ const RewardsContainer: React.FC = observer(() => {
                 }}
                 reward={selectedReward}
                 userReward={selectedRewardForDetail}
-                activeTab={activeTab}
+                activeTab={(activeTab === 'boxes' ? 'available' : activeTab) as 'available' | 'purchased'}
                 animations={animations}
                 onPurchase={handlePurchase}
                 onWithdraw={handleWithdrawClick}

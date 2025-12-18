@@ -72,8 +72,6 @@ const App = observer(() => {
   useEffect(() => {
     const authenticate = async () => {
       const initData = tg?.initData;
-      console.log("Init Data:", initData);
-
       if (initData) {
         try {
           await user.telegramLogin(initData);

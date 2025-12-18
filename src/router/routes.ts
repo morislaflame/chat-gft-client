@@ -5,7 +5,8 @@ import QuestsPage from '@/pages/QuestsPage';
 import FriendsPage from '@/pages/FriendsPage';
 import RewardsPage from '@/pages/RewardsPage';
 import StorePage from '@/pages/StorePage';
-import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE, CASE_ROUTE } from '@/utils/consts';
+import CasePage from '@/pages/CasePage';
 
 interface Route {
   path: string;
@@ -18,6 +19,7 @@ export const publicRoutes: Route[] = [
   { path: FRIENDS_ROUTE, Component: FriendsPage },
   { path: REWARDS_ROUTE, Component: RewardsPage },
   { path: STORE_ROUTE, Component: StorePage },
+  { path: CASE_ROUTE, Component: CasePage },
 ];
 
 export const privateRoutes: Route[] = [

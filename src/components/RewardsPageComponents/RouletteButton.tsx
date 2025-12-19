@@ -21,7 +21,14 @@ const RouletteButton: React.FC<RouletteButtonProps> = ({
       variant="secondary"
       className="w-40 h-10 rounded-lg flex items-center justify-center"
     >
-      {isLoading ? 'Loading...' : label}
+      {isLoading ? (
+        <span className="flex items-center gap-2">
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          {label}
+        </span>
+      ) : (
+        label
+      )}
     </Button>
   );
 };

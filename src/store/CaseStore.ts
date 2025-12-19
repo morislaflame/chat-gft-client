@@ -78,13 +78,18 @@ class CaseStore {
     }
   }
 
-  async purchaseCase(caseId: number): Promise<PurchaseCaseResponse | null> {
+  async purchaseCase(caseId: number, quantity = 1): Promise<PurchaseCaseResponse | null> {
     this.loading = true;
     this.error = null;
     try {
-      const response = await caseAPI.purchaseCase(caseId);
+      const response = await caseAPI.purchaseCase(caseId, quantity);
       runInAction(() => {
-        this.myUnopenedCases = [response.userCase, ...this.myUnopenedCases];
+        const created = response.userCases?.length
+          ? response.userCases
+          : response.userCase
+            ? [response.userCase]
+            : [];
+        this.myUnopenedCases = [...created, ...this.myUnopenedCases];
         this._unopenedLoaded = true;
       });
       if (this._userStore) {

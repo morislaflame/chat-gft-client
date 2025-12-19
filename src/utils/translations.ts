@@ -166,6 +166,26 @@ type TranslationType = {
         ru: 'Купить за',
         en: 'Buy for'
     },
+    buy: {
+        ru: 'Купить',
+        en: 'Buy'
+    },
+    quantity: {
+        ru: 'Количество',
+        en: 'Quantity'
+    },
+    total: {
+        ru: 'Итого',
+        en: 'Total'
+    },
+    caseContents: {
+        ru: 'Содержимое бокса',
+        en: 'Box contents'
+    },
+    insufficientBalance: {
+        ru: 'Недостаточно гемов',
+        en: 'Insufficient gems'
+    },
     great: {
         ru: 'Отлично!',
         en: 'Great!'
@@ -394,6 +414,26 @@ type TranslationType = {
     claimReward: {
         ru: 'Получить награду',
         en: 'Claim Reward'
+    },
+    open: {
+        ru: 'Открыть',
+        en: 'Open'
+    },
+    opening: {
+        ru: 'Открываем...',
+        en: 'Opening...'
+    },
+    youWon: {
+        ru: 'Вы выиграли:',
+        en: 'You won:'
+    },
+    congratulations: {
+        ru: 'Поздравляем!',
+        en: 'Congratulations!'
+    },
+    caseNotAvailable: {
+        ru: 'У вас нет этого бокса. Сначала купите его.',
+        en: 'You do not have this box. Purchase it first.'
     },
     // Onboarding
     welcomeToAdventure: {

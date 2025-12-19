@@ -13,6 +13,7 @@ export interface CaseItem {
   reward?: Pick<Reward, 'id' | 'name' | 'description' | 'isActive'> & {
     onlyCase?: boolean;
     price?: number;
+    mediaFile?: Reward['mediaFile'];
   };
 }
 
@@ -43,14 +44,15 @@ export interface UserCase {
 
 export interface PurchaseCaseResponse {
   message: string;
-  userCase: UserCase;
+  userCase?: UserCase | null;
+  userCases?: UserCase[];
   newBalance: number;
 }
 
 export type OpenCaseResult =
-  | { type: 'reward'; reward: NonNullable<CaseItem['reward']>; userRewardId: number }
-  | { type: 'gems'; amount: number }
-  | { type: 'energy'; amount: number };
+  | { type: 'reward'; caseItemId: number; reward: NonNullable<CaseItem['reward']>; userRewardId: number }
+  | { type: 'gems'; caseItemId: number; amount: number }
+  | { type: 'energy'; caseItemId: number; amount: number };
 
 export interface OpenCaseResponse {
   message: string;
@@ -65,8 +67,8 @@ export const caseAPI = {
     return data;
   },
 
-  purchaseCase: async (caseId: number): Promise<PurchaseCaseResponse> => {
-    const { data } = await $authHost.post(`/api/case/purchase/${caseId}`);
+  purchaseCase: async (caseId: number, quantity = 1): Promise<PurchaseCaseResponse> => {
+    const { data } = await $authHost.post(`/api/case/purchase/${caseId}`, { quantity });
     return data;
   },
 

@@ -7,12 +7,11 @@ import type { CaseBox, CaseItem, OpenCaseResponse } from '@/http/caseAPI';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
-import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 
-import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
 import RouletteButton from './RouletteButton';
 import RouletteLottie from './RouletteLottie';
+import CaseOpenResultModal from '@/components/modals/CaseOpenResultModal';
+import CaseItemsRibbon from '@/components/RewardsPageComponents/CaseItemsRibbon';
 
 type RoulettePrize = {
   id: string;
@@ -86,6 +85,10 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
   const openRequestUserCaseIdRef = useRef<number | null>(null);
 
   const isSpinning = spinning || start;
+  const availableCasesCount = useMemo(
+    () => cases.myUnopenedCases.filter((uc) => uc.caseId === caseBox.id).length,
+    [cases.myUnopenedCases, caseBox.id]
+  );
 
   // Load reward animations (Lottie JSON) if reward.mediaFile is application/json
   const [animations, isLoadingAnimations] = useAnimationLoader(
@@ -165,6 +168,7 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
 
   const handleStart = () => {
     if (isSpinning) return;
+    if (availableCasesCount <= 0) return;
 
     setLocalError(null);
     setOpenResult(null);
@@ -229,7 +233,7 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
 
     return (
       <div className="roulette-pro-regular-prize-item-image w-30 h-30 flex items-center justify-center">
-        <PrizeIcon item={caseItem} className="text-2xl" />
+        <PrizeIcon item={caseItem} className="text-6xl" />
       </div>
     );
   };
@@ -242,47 +246,6 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
           <div className="roulette-pro-regular-image-wrapper">{renderPrizeItemMedia(typed)}</div>
           <p className="roulette-pro-regular-prize-item-text">{typed.text}</p>
         </div>
-      </div>
-    );
-  };
-
-  const sortedItemsForRibbon = useMemo(() => {
-    const items = [...(caseBox.items || [])];
-    // More probable first (like typical case contents UI)
-    items.sort((a, b) => (b.weight || 0) - (a.weight || 0));
-    return items;
-  }, [caseBox.items]);
-
-  const renderRibbonItem = (item: CaseItem) => {
-    const isReward = item.type === 'reward';
-    const title = isReward
-      ? item.reward?.name || 'Reward'
-      : item.type === 'gems'
-        ? `+${item.amount ?? 0} ${t('gems')}`
-        : `+${item.amount ?? 0} ${t('energy')}`;
-
-    return (
-      <div
-        key={item.id}
-        className="flex-shrink-0 w-28 bg-primary-800 border border-primary-700 rounded-xl p-3"
-      >
-        <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
-          {isReward ? (
-            <LazyMediaRenderer
-              mediaFile={item.reward?.mediaFile}
-              imageUrl={item.reward?.mediaFile?.mimeType !== 'application/json' ? item.reward?.mediaFile?.url : undefined}
-              animations={animations}
-              name={item.reward?.name || ''}
-              className="w-16 h-16 object-contain"
-              loop={false}
-              loadOnIntersect={true}
-            />
-          ) : (
-            <PrizeIcon item={item} className="text-3xl" />
-          )}
-        </div>
-        <div className="text-xs text-gray-200 text-center font-medium truncate">{title}</div>
-        <div className="text-[10px] text-gray-500 text-center mt-1">{item.weight}%</div>
       </div>
     );
   };
@@ -303,45 +266,8 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
     pointerEvents: 'none',
   } as const;
 
-  const renderResultBody = () => {
-    if (!openResult) return null;
-
-    const result = openResult.result;
-
-    if (result.type === 'reward') {
-      return (
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-28 h-28 flex items-center justify-center">
-            <LazyMediaRenderer
-              mediaFile={result.reward.mediaFile}
-              imageUrl={result.reward.mediaFile?.mimeType !== 'application/json' ? result.reward.mediaFile?.url : undefined}
-              animations={animations}
-              name={result.reward.name}
-              className="w-28 h-28 object-contain"
-              loop={false}
-              loadOnIntersect={false}
-            />
-          </div>
-          <div className="text-white font-semibold text-lg text-center">{result.reward.name}</div>
-        </div>
-      );
-    }
-
-    const isGems = result.type === 'gems';
-    return (
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-28 h-28 flex items-center justify-center">
-          <i className={`fa-solid ${isGems ? 'fa-gem text-amber-400' : 'fa-bolt text-purple-400'} text-5xl`} />
-        </div>
-        <div className="text-white font-semibold text-lg text-center">
-          +{result.amount} {t(isGems ? 'gems' : 'energy')}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="w-full flex flex-col items-center gap-6">
+    <div className="w-full flex flex-col items-center gap-4 mb-2">
       <div className="top-40 w-full overflow-hidden">
         <div className="roulette horizontal relative">
           <div className="roulette-center-target" style={rouletteCenterStyle} />
@@ -356,51 +282,35 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
               wrapper: 'roulette-pro-wrapper-additional-styles',
             }}
             options={{ stopInCenter: true, withoutAnimation: false }}
-            defaultDesignOptions={{ prizesWithText: true, hideCenterDelimiter: false }}
+            defaultDesignOptions={{ prizesWithText: true, hideCenterDelimiter: true }}
             prizeItemRenderFunction={customPrizeItemRender}
           />
         </div>
       </div>
 
-      <RouletteButton
-        onStart={handleStart}
-        disabled={isSpinning || isLoadingAnimations}
-        isLoading={isLoading}
-        label={isLoading ? t('opening') : t('open')}
-      />
+      <div className='flex flex-col gap-2 items-center'>
+          <RouletteButton
+            onStart={handleStart}
+            disabled={isSpinning || isLoadingAnimations || availableCasesCount <= 0}
+            isLoading={isLoading}
+            label={isLoading ? t('opening') : t('open')}
+          />
+          <div className="text-xs text-gray-400 text-center">
+            {t('boxes')}: {availableCasesCount}
+          </div>
+      </div>
 
       {/* Case items ribbon under the button */}
-      <div className="w-full">
-        <div className="text-sm text-gray-300 mb-2">{t('caseContents')}</div>
-        <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-          {sortedItemsForRibbon.map(renderRibbonItem)}
-        </div>
-      </div>
+      <CaseItemsRibbon items={caseBox.items} animations={animations} />
 
       {localError ? <div className="text-sm text-red-400 text-center">{localError}</div> : null}
 
-      <Modal isOpen={showResult} onClose={handleCloseResult} closeOnOverlayClick={true} className="p-6">
-        <div className="relative">
-          <button
-            onClick={handleCloseResult}
-            className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-700 transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            <i className="fas fa-times text-white text-xl"></i>
-          </button>
-
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold text-white mb-2">{t('congratulations')}</h2>
-            <p className="text-gray-300 text-sm">{t('youWon')}</p>
-          </div>
-
-          <div className="flex justify-center mb-6">{renderResultBody()}</div>
-
-          <Button onClick={handleCloseResult} className="w-full" variant="secondary" size="lg">
-            {t('close')}
-          </Button>
-        </div>
-      </Modal>
+      <CaseOpenResultModal
+        isOpen={showResult}
+        onClose={handleCloseResult}
+        openResult={openResult}
+        animations={animations}
+      />
     </div>
   );
 });

@@ -29,7 +29,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
             className="fixed inset-x-4 flex items-center justify-between z-100"
             style={{ marginTop: isMobile ? '142px' : '42px' }}
         >
-            <div className="rounded-lg bg-primary-900 p-[2px] w-full">
+            <div className="bg-primary-800 border border-primary-700 rounded-xl p-2 w-full">
                 <AnimatedBackground
                     defaultValue={activeTab}
                     onValueChange={(val) => {
@@ -47,7 +47,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
                             <button
                                 type="button"
                                 aria-label={tab.label}
-                                className={`w-full inline-flex items-center justify-center px-3 py-2 text-xs font-semibold ${
+                                className={`w-full inline-flex items-center justify-center px-3 py-2 text-xs font-semibold cursor-pointer ${
                                     activeTab === tab.key
                                         ? 'text-white'
                                         : 'text-gray-300'

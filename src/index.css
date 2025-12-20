@@ -271,8 +271,8 @@ body.telegram-mobile .telegram-padding {
   }
   
   .roulette-pro-regular-prize-item-wrapper {
-    background: radial-gradient(farthest-corner, #3a3a3a 0, #13161a00 100%) !important;
-    border: none !important;
+    background: var(--color-primary-800) !important;
+    border: 1px solid var(--color-primary-700) !important;
     border-radius: 16px !important;
     display: flex !important;
     flex-direction: column !important;
@@ -314,9 +314,9 @@ body.telegram-mobile .telegram-padding {
     width: 205px !important;
     padding: 0 10px !important;
     text-align: center;
-    border-left: 1px solid hsl(0, 0%, 70%) !important;
+    /* border-left: 1px solid hsl(0, 0%, 70%) !important; */
   }
   
   .roulette-pro-wrapper {
-    background-color: hsl(0 0% 0%) !important;
+    background-color: hsla(0, 0%, 0%, 0) !important;
   }

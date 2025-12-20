@@ -43,7 +43,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
     const isMobile = document.body.classList.contains('telegram-mobile');
     return (
         <div className="flex flex-col h-full">
-            <div className='w-full' style={{ marginTop: isMobile ? '198px' : '98px' }}></div>
+            <div className='w-full' style={{ marginTop: isMobile ? '208px' : '108px' }}></div>
             {activeTab === 'boxes' ? (
                 <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
                     {cases.map((box) => (

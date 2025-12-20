@@ -20,10 +20,6 @@ const CaseContainer: React.FC = observer(() => {
     () => cases.activeCases.find((c) => c.id === caseId),
     [cases.activeCases, caseId]
   );
-  const myQty = useMemo(() => {
-    if (!box) return 0;
-    return cases.myUnopenedCases.filter((uc) => uc.caseId === box.id).length;
-  }, [cases.myUnopenedCases, box]);
 
   useEffect(() => {
     // Ensure we have both the case data and user's unopened cases (needed to open).
@@ -73,36 +69,21 @@ const CaseContainer: React.FC = observer(() => {
 
   return (
     <div
-      className="p-4 overflow-y-auto flex w-full flex-col gap-4"
-      style={{ marginTop: isMobile ? '148px' : '48px' }}
+      className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll"
+      // style={{ marginTop: isMobile ? '148px' : '48px' }}
     >
-      <h1 className="text-white text-2xl font-semibold">{box.name}</h1>
+      <div className='w-full' style={{ marginTop: isMobile ? '148px' : '48px' }}></div>
+      <h1 className="text-white text-2xl font-bold mb-4 ">{box.name}</h1>
       <CaseRoulette caseBox={box} />
 
       {/* Purchase card */}
-      <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-sm text-gray-300">{t('buy')}</div>
-            <div className="text-xs text-gray-500">
-              {t('buyFor')} {box.price} <i className="fa-solid fa-gem text-white"></i>
-              {myQty > 0 ? <span className="ml-2">• {myQty} {t('boxes')}</span> : null}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-gray-500">{t('total')}</div>
-            <div className={`text-sm font-semibold ${canAfford ? 'text-white' : 'text-red-400'}`}>
-              {total} <i className="fa-solid fa-gem text-white"></i>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
+      <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4 flex flex-col gap-2 items-center">
+        
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleMinus}
-              className="w-10 h-10 rounded-lg bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
+              className="w-6 h-6 rounded-lg text-xs bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
               aria-label="Decrease quantity"
             >
               <i className="fa-solid fa-minus" />
@@ -115,7 +96,7 @@ const CaseContainer: React.FC = observer(() => {
             <button
               type="button"
               onClick={handlePlus}
-              className="w-10 h-10 rounded-lg bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
+              className="w-6 h-6 rounded-lg text-xs bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
               aria-label="Increase quantity"
             >
               <i className="fa-solid fa-plus" />
@@ -128,15 +109,15 @@ const CaseContainer: React.FC = observer(() => {
             variant={canAfford ? 'secondary' : 'primary'}
             size="md"
             className="flex-1"
-            icon={cases.loading ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : 'fas fa-shopping-cart'}
+            icon={cases.loading ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : ''}
           >
-            {cases.loading ? t('purchasing') : t('buy')}
+            {cases.loading ? t('purchasing') : canAfford ? `${t('buyFor')}` : `${t('insufficientBalance')}`} {total} <i className="fa-solid fa-gem text-white"></i>
           </Button>
+          {cases.error ? <div className="text-xs text-red-400 mt-2">{cases.error}</div> : null}
         </div>
 
-        {!canAfford ? <div className="text-xs text-red-400 mt-2">{t('insufficientBalance')}</div> : null}
-        {cases.error ? <div className="text-xs text-red-400 mt-2">{cases.error}</div> : null}
-      </div>
+        
+        
     </div>
   );
 });

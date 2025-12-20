@@ -100,12 +100,12 @@ const RewardCard: React.FC<RewardCardProps> = ({
             onClick={handleCardClick}
             className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
         >
-            <div className="mb-2 w-20 h-20 flex items-center justify-center">
+            <div className="mb-2 flex items-center justify-center">
                 <LazyMediaRenderer
                     mediaFile={rewardItem.mediaFile}
                     animations={animations}
                     name={rewardItem.name}
-                    className="w-20 h-20 object-contain"
+                    className="w-26 h-26 object-contain"
                     loop={false}
                     loadOnIntersect={true}
                 />

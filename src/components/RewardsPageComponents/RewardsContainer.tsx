@@ -14,7 +14,7 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import RewardsHeader from './RewardsHeader';
 import RewardsGrid from './RewardsGrid';
 import RewardsEmptyState from './RewardsEmptyState';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 // import RewardsBalance from './RewardsBalance';
 
 const RewardsContainer: React.FC = observer(() => {
@@ -22,6 +22,8 @@ const RewardsContainer: React.FC = observer(() => {
     const { t } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState<'available' | 'purchased' | 'boxes'>('available');
     const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
     const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
@@ -38,6 +40,18 @@ const RewardsContainer: React.FC = observer(() => {
         reward.fetchWithdrawalRequests();
         // user.fetchMyInfo();
     }, [reward, cases, user]);
+
+    useEffect(() => {
+        // Allow deep-linking / returning to a specific tab
+        const tabFromQuery = searchParams.get('tab');
+        const tabFromState = (location.state as { activeTab?: 'available' | 'purchased' | 'boxes' } | null)?.activeTab;
+        const nextTab = tabFromState || tabFromQuery;
+        if (nextTab === 'available' || nextTab === 'purchased' || nextTab === 'boxes') {
+            setActiveTab(nextTab);
+        }
+        // We want this to run only on first mount for current location
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const currentRewards = useMemo(() => {
         if (activeTab === 'boxes') return cases.activeCases;
@@ -141,7 +155,7 @@ const RewardsContainer: React.FC = observer(() => {
                 onChange={setActiveTab}
                 title={t('rewards')}
                 availableLabel={t('allRewards')}
-                purchasedLabel={t('myPurchases')}
+                purchasedLabel={t('myRewards')}
                 boxesLabel={t('boxes')}
             />
 

@@ -207,6 +207,10 @@ type TranslationType = {
         ru: 'Мои покупки',
         en: 'My Purchases'
     },
+    myRewards: {
+        ru: 'Мои награды',
+        en: 'My Rewards'
+    },
     boxes: {
         ru: 'Боксы',
         en: 'Boxes'

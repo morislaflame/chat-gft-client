@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import EmptyPage from '@/components/CoreComponents/EmptyPage';
 import { useTranslate } from '@/utils/useTranslate';
+import { REWARDS_ROUTE } from '@/utils/consts';
 
 import CaseRoulette from '@/components/RewardsPageComponents/CaseRoulette';
 import Button from '@/components/CoreComponents/Button';
 
 const CaseContainer: React.FC = observer(() => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const { cases, user } = useContext(Context) as IStoreContext;
   const { t } = useTranslate();
@@ -73,7 +75,17 @@ const CaseContainer: React.FC = observer(() => {
       // style={{ marginTop: isMobile ? '148px' : '48px' }}
     >
       <div className='w-full' style={{ marginTop: isMobile ? '148px' : '48px' }}></div>
-      <h1 className="text-white text-2xl font-bold mb-4 ">{box.name}</h1>
+      <div className="flex items-center gap-3 mb-4">
+        <button
+          type="button"
+          onClick={() => navigate(`${REWARDS_ROUTE}?tab=boxes`)}
+          className="w-9 h-9 rounded-lg bg-primary-800 hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
+          aria-label="Go back"
+        >
+          <i className="fa-solid fa-chevron-left text-white" />
+        </button>
+        <h1 className="text-white text-2xl font-bold">{box.name}</h1>
+      </div>
       <CaseRoulette caseBox={box} />
 
       {/* Purchase card */}

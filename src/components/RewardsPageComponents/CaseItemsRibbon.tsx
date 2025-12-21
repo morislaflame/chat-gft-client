@@ -21,7 +21,7 @@ const PrizeIcon: React.FC<{ item: CaseItem; className?: string }> = ({ item, cla
 
 const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animations }) => {
   const { t } = useTranslate();
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const sortedItems = useMemo(() => {
     const list = [...items];

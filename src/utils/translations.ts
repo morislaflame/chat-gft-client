@@ -215,6 +215,10 @@ type TranslationType = {
         ru: 'Боксы',
         en: 'Boxes'
     },
+    myBoxes: {
+        ru: 'Мои боксы',
+        en: 'My boxes'
+    },
     noRewardsAvailable: {
         ru: 'Нет доступных наград',
         en: 'No Rewards Available'

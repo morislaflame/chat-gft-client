@@ -78,7 +78,7 @@ const CaseContainer: React.FC = observer(() => {
       <div className="flex items-center gap-3 mb-4">
         <button
           type="button"
-          onClick={() => navigate(`${REWARDS_ROUTE}?tab=boxes`)}
+          onClick={() => navigate(REWARDS_ROUTE)}
           className="w-9 h-9 rounded-lg bg-primary-800 hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
           aria-label="Go back"
         >

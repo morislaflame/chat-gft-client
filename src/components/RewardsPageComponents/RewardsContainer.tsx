@@ -9,6 +9,8 @@ import WithdrawalModal from '../modals/WithdrawalModal';
 import RewardPurchaseModal from '../modals/RewardPurchaseModal';
 import RewardDetailModal from '../modals/RewardDetailModal';
 import WithdrawalResultModal from '../modals/WithdrawalResultModal';
+import CaseDetailModal from '../modals/CaseDetailModal';
+import CasePurchaseModal from '../modals/CasePurchaseModal';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import RewardsHeader from './RewardsHeader';
@@ -24,18 +26,23 @@ const RewardsContainer: React.FC = observer(() => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
-    const [activeTab, setActiveTab] = useState<'available' | 'purchased' | 'boxes'>('available');
+    const [activeTab, setActiveTab] = useState<'available' | 'purchased'>('available');
     const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
     const [selectedUserReward, setSelectedUserReward] = useState<UserReward | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
     const [selectedRewardForDetail, setSelectedRewardForDetail] = useState<UserReward | null>(null);
     const [withdrawResult, setWithdrawResult] = useState<{ status: 'success' | 'error'; message?: string } | null>(null);
+    const [selectedBox, setSelectedBox] = useState<CaseBox | null>(null);
+    const [caseDetailOpen, setCaseDetailOpen] = useState(false);
+    const [purchasedBox, setPurchasedBox] = useState<CaseBox | null>(null);
+    const [purchasingBoxId, setPurchasingBoxId] = useState<number | null>(null);
 
     useEffect(() => {
         // Load rewards when component mounts
         reward.fetchAvailableRewards();
         cases.fetchActiveCases();
+        cases.fetchMyUnopenedCases();
         reward.fetchMyPurchases();
         reward.fetchWithdrawalRequests();
         // user.fetchMyInfo();
@@ -44,9 +51,9 @@ const RewardsContainer: React.FC = observer(() => {
     useEffect(() => {
         // Allow deep-linking / returning to a specific tab
         const tabFromQuery = searchParams.get('tab');
-        const tabFromState = (location.state as { activeTab?: 'available' | 'purchased' | 'boxes' } | null)?.activeTab;
+        const tabFromState = (location.state as { activeTab?: 'available' | 'purchased' } | null)?.activeTab;
         const nextTab = tabFromState || tabFromQuery;
-        if (nextTab === 'available' || nextTab === 'purchased' || nextTab === 'boxes') {
+        if (nextTab === 'available' || nextTab === 'purchased') {
             setActiveTab(nextTab);
         }
         // We want this to run only on first mount for current location
@@ -54,11 +61,10 @@ const RewardsContainer: React.FC = observer(() => {
     }, []);
 
     const currentRewards = useMemo(() => {
-        if (activeTab === 'boxes') return cases.activeCases;
         return activeTab === 'available'
             ? reward.availableRewards
             : reward.myPurchases.map((purchase) => purchase.reward);
-    }, [activeTab, cases.activeCases, reward.availableRewards, reward.myPurchases]);
+    }, [activeTab, reward.availableRewards, reward.myPurchases]);
 
     const rewardsData = useMemo(() => {
         return activeTab === 'available'
@@ -67,12 +73,63 @@ const RewardsContainer: React.FC = observer(() => {
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
 
     const casesData: CaseBox[] = useMemo(() => cases.activeCases, [cases.activeCases]);
+    const myUnopenedCases = useMemo(() => cases.myUnopenedCases, [cases.myUnopenedCases]);
 
-    // Important: avoid passing a new [] on each render to useAnimationLoader
-    const emptyRewards = useMemo(() => [] as Reward[], []);
+    const ownedCasesData = useMemo(() => {
+        const counts = new Map<number, number>();
+        const sampleCaseMeta = new Map<number, { name?: string; description?: string | null; price?: number }>();
+
+        for (const uc of myUnopenedCases) {
+            counts.set(uc.caseId, (counts.get(uc.caseId) || 0) + 1);
+            if (!sampleCaseMeta.has(uc.caseId) && uc.case) {
+                sampleCaseMeta.set(uc.caseId, {
+                    name: uc.case.name,
+                    description: uc.case.description,
+                    price: uc.case.price,
+                });
+            }
+        }
+
+        const result: Array<{ box: CaseBox; count: number }> = [];
+
+        for (const [caseId, count] of counts.entries()) {
+            if (count <= 0) continue;
+            const active = casesData.find((c) => c.id === caseId);
+            if (active) {
+                result.push({ box: active, count });
+                continue;
+            }
+
+            const meta = sampleCaseMeta.get(caseId);
+            // Fallback: show case even if it's not in active cases (without media)
+            result.push({
+                box: {
+                    id: caseId,
+                    name: meta?.name || `Case #${caseId}`,
+                    description: meta?.description ?? null,
+                    price: meta?.price ?? 0,
+                    isActive: false,
+                    createdAt: '',
+                    updatedAt: '',
+                    image: null,
+                    mediaFile: undefined,
+                    items: [],
+                },
+                count,
+            });
+        }
+
+        // Stable ordering: by count desc then name
+        result.sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count;
+            return a.box.name.localeCompare(b.box.name);
+        });
+
+        return result;
+    }, [casesData, myUnopenedCases]);
 
     const [animations] = useAnimationLoader(
-        activeTab === 'boxes' ? emptyRewards : (currentRewards as Reward[]),
+        currentRewards as Reward[],
         (rewardItem: Reward) => rewardItem.mediaFile,
         [activeTab]
     );
@@ -103,6 +160,23 @@ const RewardsContainer: React.FC = observer(() => {
     const navigateToCase = (box: CaseBox) => {
         hapticImpact('soft');
         navigate(`/cases/${box.id}`);
+    };
+
+    const handleBoxClick = (box: CaseBox) => {
+        hapticImpact('soft');
+        setSelectedBox(box);
+        setCaseDetailOpen(true);
+    };
+
+    const handleBoxPurchase = async (box: CaseBox) => {
+        if (purchasingBoxId) return;
+        setPurchasingBoxId(box.id);
+        const response = await cases.purchaseCase(box.id, 1);
+        setPurchasingBoxId(null);
+
+        if (response) {
+            setPurchasedBox(box);
+        }
     };
 
     const handleWithdrawClick = async (userReward: UserReward): Promise<boolean> => {
@@ -156,7 +230,6 @@ const RewardsContainer: React.FC = observer(() => {
                 title={t('rewards')}
                 availableLabel={t('allRewards')}
                 purchasedLabel={t('myRewards')}
-                boxesLabel={t('boxes')}
             />
 
             {reward.error && (
@@ -165,22 +238,17 @@ const RewardsContainer: React.FC = observer(() => {
                 </div>
             )}
 
-            {(!currentRewards || !Array.isArray(currentRewards) || currentRewards.length === 0) ? (
+            {(() => {
+                const isEmpty =
+                    activeTab === 'available'
+                        ? rewardsData.length === 0 && casesData.length === 0
+                        : rewardsData.length === 0 && ownedCasesData.length === 0;
+
+                if (isEmpty) {
+                    return (
                 <RewardsEmptyState
-                    title={
-                        activeTab === 'available'
-                            ? t('noRewardsAvailable')
-                            : activeTab === 'boxes'
-                                ? 'No boxes available'
-                                : t('noPurchasesYet')
-                    }
-                    description={
-                        activeTab === 'available'
-                            ? t('noRewardsAvailableDesc')
-                            : activeTab === 'boxes'
-                                ? 'Boxes will appear here once available.'
-                                : t('noPurchasesYetDesc')
-                    }
+                    title={activeTab === 'available' ? t('noRewardsAvailable') : t('noPurchasesYet')}
+                    description={activeTab === 'available' ? t('noRewardsAvailableDesc') : t('noPurchasesYetDesc')}
                     actionText={t('refresh')}
                     onRefresh={() => {
                         reward.fetchAvailableRewards();
@@ -188,20 +256,30 @@ const RewardsContainer: React.FC = observer(() => {
                         reward.fetchMyPurchases();
                     }}
                 />
-            ) : (
+                    );
+                }
+
+                return (
                 <RewardsGrid
                     data={rewardsData}
                     cases={casesData}
+                    ownedCases={ownedCasesData}
                     activeTab={activeTab}
                     animations={animations}
                     boxAnimations={boxAnimations}
                     onCardClick={handleCardClick}
-                    onBoxClick={navigateToCase}
+                    onBoxClick={handleBoxClick}
+                    onBoxPurchase={handleBoxPurchase}
+                    onOwnedCaseOpen={navigateToCase}
                     onPurchase={handlePurchase}
                     onWithdrawClick={handleWithdrawClickForModal}
                     getPurchaseState={(rewardItem: Reward) => ({
                         isPurchasing: reward.isRewardPurchasing(rewardItem.id),
                         canAfford: (user.user?.balance || 0) >= rewardItem.price
+                    })}
+                    getBoxPurchaseState={(box: CaseBox) => ({
+                        isPurchasing: purchasingBoxId === box.id || cases.loading,
+                        canAfford: (user.user?.balance || 0) >= box.price
                     })}
                     getWithdrawalState={(userReward: UserReward) => ({
                         status: reward.getWithdrawalStatus(userReward.id),
@@ -209,7 +287,8 @@ const RewardsContainer: React.FC = observer(() => {
                     })}
                     t={t}
                 />
-            )}
+                );
+            })()}
 
             {/* <RewardsBalance
                 balanceLabel={t('yourBalance')}
@@ -246,7 +325,7 @@ const RewardsContainer: React.FC = observer(() => {
                 }}
                 reward={selectedReward}
                 userReward={selectedRewardForDetail}
-                activeTab={(activeTab === 'boxes' ? 'available' : activeTab) as 'available' | 'purchased'}
+                activeTab={activeTab}
                 animations={animations}
                 onPurchase={handlePurchase}
                 onWithdraw={handleWithdrawClick}
@@ -254,6 +333,32 @@ const RewardsContainer: React.FC = observer(() => {
                 canAfford={selectedReward ? (user.user?.balance || 0) >= selectedReward.price : false}
                 withdrawalStatus={selectedRewardForDetail ? reward.getWithdrawalStatus(selectedRewardForDetail.id) : null}
                 isCreatingWithdrawal={selectedRewardForDetail ? reward.isCreatingWithdrawal(selectedRewardForDetail.id) : false}
+            />
+
+            <CaseDetailModal
+                isOpen={caseDetailOpen}
+                onClose={() => {
+                    setCaseDetailOpen(false);
+                    setSelectedBox(null);
+                }}
+                box={selectedBox}
+                animations={boxAnimations}
+                onGoToCase={(box) => {
+                    setCaseDetailOpen(false);
+                    setSelectedBox(null);
+                    navigateToCase(box);
+                }}
+            />
+
+            <CasePurchaseModal
+                isOpen={!!purchasedBox}
+                onClose={() => setPurchasedBox(null)}
+                box={purchasedBox}
+                animations={boxAnimations}
+                onGoToCase={(box) => {
+                    setPurchasedBox(null);
+                    navigateToCase(box);
+                }}
             />
 
             <WithdrawalResultModal

@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import type { CaseItem } from '@/http/caseAPI';
 import { useTranslate } from '@/utils/useTranslate';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 type CaseItemsRibbonProps = {
   items?: CaseItem[];
@@ -22,7 +23,7 @@ const PrizeIcon: React.FC<{ item: CaseItem; className?: string }> = ({ item, cla
 const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animations }) => {
   const { t } = useTranslate();
   const [isOpen, setIsOpen] = useState(false);
-
+  const { hapticImpact } = useHapticFeedback();
   const sortedItems = useMemo(() => {
     const list = [...items];
     list.sort((a, b) => (b.weight || 0) - (a.weight || 0));
@@ -31,13 +32,18 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
 
   if (!sortedItems.length) return null;
 
+  const handleOpen = () => {
+    hapticImpact('soft');
+    setIsOpen((v) => !v);
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
         <div className="text-sm text-gray-300 font-semibold">{t('caseContents')}</div>
         <button
           type="button"
-          onClick={() => setIsOpen((v) => !v)}
+          onClick={handleOpen}
           className="w-8 h-8 hover:bg-primary-700 rounded-md flex items-center justify-center cursor-pointer"
           aria-label="Toggle case contents"
         >

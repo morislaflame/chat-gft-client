@@ -10,12 +10,14 @@ import { REWARDS_ROUTE } from '@/utils/consts';
 
 import CaseRoulette from '@/components/RewardsPageComponents/CaseRoulette';
 import Button from '@/components/CoreComponents/Button';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const CaseContainer: React.FC = observer(() => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { cases, user } = useContext(Context) as IStoreContext;
   const { t } = useTranslate();
+  const { hapticImpact } = useHapticFeedback();
   const [qty, setQty] = useState(1);
   const caseId = useMemo(() => (id ? Number(id) : NaN), [id]);
   const box = useMemo(
@@ -58,8 +60,14 @@ const CaseContainer: React.FC = observer(() => {
   const total = box.price * qty;
   const canAfford = balance >= total;
 
-  const handleMinus = () => setQty((q) => Math.max(1, q - 1));
-  const handlePlus = () => setQty((q) => Math.min(50, q + 1));
+  const handleMinus = () => {
+    hapticImpact('soft');
+    setQty((q) => Math.max(1, q - 1));
+  };
+  const handlePlus = () => {
+    hapticImpact('soft');
+    setQty((q) => Math.min(50, q + 1));
+  };
 
   const handlePurchase = async () => {
     if (!canAfford || cases.loading) return;
@@ -78,7 +86,10 @@ const CaseContainer: React.FC = observer(() => {
       <div className="flex items-center gap-3 mb-4">
         <button
           type="button"
-          onClick={() => navigate(REWARDS_ROUTE)}
+          onClick={() => {
+            hapticImpact('soft');
+            navigate(REWARDS_ROUTE);
+          }}
           className="w-9 h-9 rounded-lg bg-primary-800 hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
           aria-label="Go back"
         >

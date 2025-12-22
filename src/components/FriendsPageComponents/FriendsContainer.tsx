@@ -18,7 +18,7 @@ const FriendsContainer: React.FC = observer(() => {
 
     const handleCopyReferral = async () => {
         hapticImpact('soft');
-        const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
+        const referralLink = `https://t.me/gftrobot?startapp=${user.user?.refCode}`;
         try {
             await navigator.clipboard.writeText(referralLink);
             hapticNotification('success');
@@ -34,7 +34,7 @@ const FriendsContainer: React.FC = observer(() => {
 
     const handleShareReferral = () => {
         hapticImpact('soft');
-        const referralLink = `https://t.me/Gft_Chat_bot?startapp=${user.user?.refCode}`;
+        const referralLink = `https://t.me/gftrobot?startapp=${user.user?.refCode}`;
         shareUrl(referralLink, t('join'));
     };
 

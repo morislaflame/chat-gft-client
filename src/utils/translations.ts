@@ -219,6 +219,38 @@ type TranslationType = {
         ru: 'Мои боксы',
         en: 'My boxes'
     },
+    goToRewards: {
+        ru: 'Перейти в награды',
+        en: 'Go to rewards'
+    },
+    gemsInfoTitle: {
+        ru: 'Как зарабатывать гемы',
+        en: 'How to earn gems'
+    },
+    gemsInfoP1: {
+        ru: 'Проходите сюжет и выполняйте миссии агента в чате',
+        en: 'Complete agent missions in the chat'
+    },
+    gemsInfoP2: {
+        ru: 'Приглашайте друзей по реферальной программе и получайте бонусы',
+        en: 'Invite friends via the referral program to get bonuses'
+    },
+    gemsInfoP3: {
+        ru: 'Заработанные гемы вы можете тратить в разделе наград и получать уникальные гифты',
+        en: 'You can spend earned gems in the rewards section and get unique GFT items'
+    },
+    energyInfoTitle: {
+        ru: 'Зачем нужна энергия',
+        en: 'Why is energy needed'
+    },
+    energyInfoP1: {
+        ru: 'Энергия тратится при общении в чате и выполнении миссий',
+        en: 'Energy is spent on chat and task completion'
+    },
+    energyInfoP3: {
+        ru: 'Энергию можно восполнять, выполняя миссии, ежедневно заходя в игру или покупая её в магазине',
+        en: 'You can restore energy by completing tasks, daily logging in or buying it in the store'
+    },
     noRewardsAvailable: {
         ru: 'Нет доступных наград',
         en: 'No Rewards Available'
@@ -597,4 +629,4 @@ export const getTaskText = (task: Task, language: 'ru' | 'en'): string => {
   }
   
   return text;
-};
+ };

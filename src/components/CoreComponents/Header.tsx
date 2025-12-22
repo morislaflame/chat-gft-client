@@ -1,17 +1,18 @@
-import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import { STORE_ROUTE, REWARDS_ROUTE } from '@/utils/consts';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import GemsInfoModal from '@/components/modals/GemsInfoModal';
+import EnergyInfoModal from '@/components/modals/EnergyInfoModal';
 
 
 const Header: React.FC = observer(() => {
     const { user, chat } = useContext(Context) as IStoreContext;
-    const navigate = useNavigate();
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
+    const [gemsInfoOpen, setGemsInfoOpen] = useState(false);
+    const [energyInfoOpen, setEnergyInfoOpen] = useState(false);
     const glassStyle = {
         // border: '1px solid rgba(255, 255, 255, 0.08)',
         boxShadow: 'inset 0 0 24px rgba(0, 0, 0, 0.13)',
@@ -20,14 +21,14 @@ const Header: React.FC = observer(() => {
     // Получаем аватар текущей истории
     const avatarUrl = chat.avatar?.url;
     
-    const handleStarsClick = () => {
+    const handleEnergyClick = () => {
         hapticImpact('soft');
-        navigate(STORE_ROUTE);
+        setEnergyInfoOpen(true);
     }
 
     const handleGemsClick = () => {
         hapticImpact('soft');
-        navigate(REWARDS_ROUTE);
+        setGemsInfoOpen(true);
     }
 
     const handleAvatarClick = () => {
@@ -91,7 +92,7 @@ const Header: React.FC = observer(() => {
                         </div>
                     </button>
                         <button 
-                            onClick={handleStarsClick}
+                            onClick={handleEnergyClick}
                             className="backdrop-blur-sm rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                             style={glassStyle}
                         >
@@ -110,6 +111,15 @@ const Header: React.FC = observer(() => {
                         </button>
                 </div>
             </div>
+
+            <GemsInfoModal
+                isOpen={gemsInfoOpen}
+                onClose={() => setGemsInfoOpen(false)}
+            />
+            <EnergyInfoModal
+                isOpen={energyInfoOpen}
+                onClose={() => setEnergyInfoOpen(false)}
+            />
         </div>
     );
 });

@@ -64,6 +64,9 @@ const StageRewardModal: React.FC = observer(() => {
             </span>
             <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
           </div>
+          <div className="mt-2 text-center text-xs text-gray-300">
+            {t('stageRewardGemsHint')}
+          </div>
         </motion.div>
 
         {/* Continue Button */}

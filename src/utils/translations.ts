@@ -62,6 +62,14 @@ type TranslationType = {
       ru: 'Реферальные бонусы',
       en: 'Referral bonuses'
     },
+    referralRewardDependsOnPackage: {
+      ru: 'Награда зависит от пакета, который купит друг',
+      en: 'The reward depends on the package your friend buys'
+    },
+    referralMaxPerFriend: {
+      ru: 'Максимум за одного друга:',
+      en: 'Maximum per friend:'
+    },
     from: {
       ru: 'От',
       en: 'From'
@@ -69,6 +77,10 @@ type TranslationType = {
     noBonusesYet: {
       ru: 'Пока нет бонусов',
       en: 'No bonuses yet'
+    },
+    noBonusesYetReferralDesc: {
+      ru: 'Пока нет бонусов. Пригласи друга и попроси его выбрать пакет — награда придёт сюда.',
+      en: 'No bonuses yet. Invite a friend and ask them to choose a package — the reward will appear here.'
     },
     userDataUnavailable: {
       ru: 'Данные пользователя недоступны',
@@ -224,32 +236,36 @@ type TranslationType = {
         en: 'Go to rewards'
     },
     gemsInfoTitle: {
-        ru: 'Как зарабатывать гемы',
-        en: 'How to earn gems'
+        ru: 'Что такое Gems',
+        en: 'What are Gems'
     },
     gemsInfoP1: {
-        ru: 'Проходите сюжет и выполняйте миссии агента в чате',
-        en: 'Complete agent missions in the chat'
+        ru: 'Gems — награда за прохождение истории',
+        en: 'Gems are a reward for progressing through the story'
     },
     gemsInfoP2: {
-        ru: 'Приглашайте друзей по реферальной программе и получайте бонусы',
-        en: 'Invite friends via the referral program to get bonuses'
+        ru: 'Получай за миссии, квесты и друзей',
+        en: 'Earn them from missions, quests, and friends'
     },
     gemsInfoP3: {
-        ru: 'Заработанные гемы вы можете тратить в разделе наград и получать уникальные гифты',
-        en: 'You can spend earned gems in the rewards section and get unique GFT items'
+        ru: 'Трать в «Луте» на подарки и уникальные NFT',
+        en: 'Spend them in “Loot” on gifts and unique NFTs'
     },
     energyInfoTitle: {
         ru: 'Зачем нужна энергия',
-        en: 'Why is energy needed'
+        en: 'What energy is for'
     },
     energyInfoP1: {
-        ru: 'Энергия тратится при общении в чате и выполнении миссий',
-        en: 'Energy is spent on chat and task completion'
+        ru: 'Энергия — это действия в игре',
+        en: 'Energy powers your in-game actions'
+    },
+    energyInfoP2: {
+        ru: 'Без энергии сюжет на паузе',
+        en: 'Without energy, the story is paused'
     },
     energyInfoP3: {
-        ru: 'Энергию можно восполнять, выполняя миссии, ежедневно заходя в игру или покупая её в магазине',
-        en: 'You can restore energy by completing tasks, daily logging in or buying it in the store'
+        ru: 'Получай ее за квесты, друзей или покупку',
+        en: 'Get it from quests, friends, or purchases'
     },
     noRewardsAvailable: {
         ru: 'Нет доступных наград',
@@ -333,6 +349,10 @@ type TranslationType = {
     stageCompletedMissionPrefix: {
         ru: 'Вы завершили миссию',
         en: 'You have completed mission'
+    },
+    stageRewardGemsHint: {
+        ru: 'Gems тратятся в “Луте” — на подарки и коробки с шансом NFT',
+        en: 'Gems are spent in “Rewards” — on gifts and boxes with a chance for an NFT'
     },
     youHaveCompleted: {
         ru: 'Вы завершили',
@@ -522,24 +542,24 @@ type TranslationType = {
         en: 'Wanderer'
     },
     gameExplanationTitle: {
-        ru: 'Тебя ждут:',
-        en: 'What awaits you:'
+        ru: 'Приключения ведут к подаркам',
+        en: 'Adventures lead to gifts'
     },
     gameExplanation1: {
-        ru: 'ИИ-герои, реагирующие на твои решения',
-        en: 'AI heroes reacting to your decisions'
+        ru: 'Проходи миссии и продвигайся по сюжету',
+        en: 'Complete missions and progress through the story'
     },
     gameExplanation2: {
-        ru: 'Миссии с наградами',
-        en: 'Missions with rewards'
+        ru: 'За миссии получай Gems',
+        en: 'Earn Gems from missions'
     },
     gameExplanation3: {
-        ru: 'NFT-предметы и GFT Box',
-        en: 'NFT items and GFT Box'
+        ru: 'Обменивай Gems на подарки',
+        en: 'Exchange Gems for gifts'
     },
     gameExplanation4: {
-        ru: 'Прогресс и бонусы с друзьями',
-        en: 'Progress and bonuses with friends'
+        ru: 'Энергию дают активные друзья и квесты',
+        en: 'Active friends and quests give energy'
     },
     // Navigation
     chat: {

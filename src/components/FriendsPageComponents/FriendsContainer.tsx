@@ -115,14 +115,17 @@ const FriendsContainer: React.FC = observer(() => {
                                 {t('share')}
                             </motion.button>
                         </div>
-                        <div className="mt-2 text-xs text-gray-400">
-                            {t('shareLinkWithFriends')}
+                        <div className="mt-4 text-xs text-gray-300 font-semibold">
+                                {t('referralRewardDependsOnPackage')}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                                {t('referralMaxPerFriend')} <span className="font-semibold">+30 <i className="fa-solid fa-bolt text-purple-400 text-md"></i> + 20 <i className="fa-solid fa-gem text-amber-400 text-md"></i></span>
                         </div>
                     </div>
 
                     {/* Referral bonuses */}
                     <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3">
-                        <div className="text-xs text-gray-400 mb-2">{t('referralBonuses')}</div>
+                        <div className="text-xs font-semibold text-gray-400 mb-2">{t('referralBonuses')}</div>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
                             {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (
                                 user.user.lastBonuses.map((bonus: Bonus, index: number) => {
@@ -188,7 +191,7 @@ const FriendsContainer: React.FC = observer(() => {
                                     );
                                 })
                             ) : (
-                                <div className="text-xs text-gray-500">{t('noBonusesYet')}</div>
+                                <div className="text-xs text-gray-500">{t('noBonusesYetReferralDesc')}</div>
                             )}
                         </div>
                     </div>

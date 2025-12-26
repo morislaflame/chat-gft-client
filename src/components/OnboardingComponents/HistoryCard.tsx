@@ -13,6 +13,8 @@ interface HistoryCardProps {
     preview?: MediaFile | null;
     showLeftSwipeHint?: boolean;
     showRightSwipeHint?: boolean;
+    onPrev?: () => void;
+    onNext?: () => void;
     onSelect: () => void;
 }
 
@@ -25,6 +27,8 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
     preview,
     showLeftSwipeHint = false,
     showRightSwipeHint = false,
+    onPrev,
+    onNext,
     onSelect
 }) => {
     return (
@@ -47,24 +51,36 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 
                     {/* Swipe hints (decorative) */}
                     {showLeftSwipeHint && (
-                        <div
-                            className="pointer-events-none absolute left-0 top-1/2 -translate-x-10 -translate-y-1/2 animate-swipe-hint-left"
-                            aria-hidden="true"
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onPrev?.();
+                            }}
+                            className="absolute left-0 top-1/2 -translate-x-12 -translate-y-1/2 animate-swipe-hint-left cursor-pointer"
+                            aria-label="Previous"
                         >
-                            <div className="w-9 h-9 flex items-center justify-center">
-                                <i className="fas fa-chevron-left text-white/90 text-sm"></i>
+                            <div className="w-15 h-15 flex items-center justify-center">
+                                <i className="fas fa-chevron-left text-white/90 text-xl text-semibold"></i>
                             </div>
-                        </div>
+                        </button>
                     )}
                     {showRightSwipeHint && (
-                        <div
-                            className="pointer-events-none absolute right-0 top-1/2 translate-x-10 -translate-y-1/2 animate-swipe-hint-right"
-                            aria-hidden="true"
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onNext?.();
+                            }}
+                            className="absolute right-0 top-1/2 translate-x-12 -translate-y-1/2 animate-swipe-hint-right cursor-pointer"
+                            aria-label="Next"
                         >
-                            <div className="w-9 h-9 flex items-center justify-center">
-                                <i className="fas fa-chevron-right text-white/90 text-sm"></i>
+                            <div className="w-15 h-15 flex items-center justify-center">
+                                <i className="fas fa-chevron-right text-white/90 text-xl text-semibold"></i>
                             </div>
-                        </div>
+                        </button>
                     )}
                 </div>
             )}

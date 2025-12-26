@@ -153,6 +153,16 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                         preview={agent.preview}
                                         showLeftSwipeHint={idx === activeIndex && activeIndex > 0}
                                         showRightSwipeHint={idx === activeIndex && activeIndex < histories.length - 1}
+                                        onPrev={() => {
+                                            if (idx !== activeIndex) return;
+                                            hapticImpact('soft');
+                                            if (activeIndex > 0) onSetActiveIndex(activeIndex - 1);
+                                        }}
+                                        onNext={() => {
+                                            if (idx !== activeIndex) return;
+                                            hapticImpact('soft');
+                                            if (activeIndex < histories.length - 1) onSetActiveIndex(activeIndex + 1);
+                                        }}
                                         onSelect={() => onSelectHistory(agent.historyName)}
                                     />
                                 </div>

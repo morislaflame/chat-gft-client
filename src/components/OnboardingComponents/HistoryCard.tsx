@@ -11,6 +11,8 @@ interface HistoryCardProps {
     loadingText: string;
     isSaving: boolean;
     preview?: MediaFile | null;
+    showLeftSwipeHint?: boolean;
+    showRightSwipeHint?: boolean;
     onSelect: () => void;
 }
 
@@ -21,6 +23,8 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
     loadingText,
     isSaving,
     preview,
+    showLeftSwipeHint = false,
+    showRightSwipeHint = false,
     onSelect
 }) => {
     return (
@@ -35,11 +39,33 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
         >
             {/* Preview - внутри карточки */}
             {preview && (
-                <div className="w-[80%]">
+                <div className="w-[80%] relative">
                     <AgentPreview
                         preview={preview}
                         size="full"
                     />
+
+                    {/* Swipe hints (decorative) */}
+                    {showLeftSwipeHint && (
+                        <div
+                            className="pointer-events-none absolute left-0 top-1/2 -translate-x-10 -translate-y-1/2 animate-swipe-hint-left"
+                            aria-hidden="true"
+                        >
+                            <div className="w-9 h-9 flex items-center justify-center">
+                                <i className="fas fa-chevron-left text-white/90 text-sm"></i>
+                            </div>
+                        </div>
+                    )}
+                    {showRightSwipeHint && (
+                        <div
+                            className="pointer-events-none absolute right-0 top-1/2 translate-x-10 -translate-y-1/2 animate-swipe-hint-right"
+                            aria-hidden="true"
+                        >
+                            <div className="w-9 h-9 flex items-center justify-center">
+                                <i className="fas fa-chevron-right text-white/90 text-sm"></i>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
             

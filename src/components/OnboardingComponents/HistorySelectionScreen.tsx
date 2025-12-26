@@ -142,7 +142,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                             }}
                             custom={direction}
                         >
-                            {histories.map((agent) => (
+                            {histories.map((agent, idx) => (
                                 <div key={agent.id} ref={ref} className='flex flex-col w-full justify-center items-center'>
                                     <HistoryCard
                                         title={getHistoryDisplayName(agent.historyName)}
@@ -151,6 +151,8 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                         loadingText={loadingText}
                                         isSaving={saving}
                                         preview={agent.preview}
+                                        showLeftSwipeHint={idx === activeIndex && activeIndex > 0}
+                                        showRightSwipeHint={idx === activeIndex && activeIndex < histories.length - 1}
                                         onSelect={() => onSelectHistory(agent.historyName)}
                                     />
                                 </div>

@@ -86,7 +86,7 @@ const Button: React.FC<ButtonProps> = ({
       className={baseClasses.trim()}
     >
       {hasContent && (
-        <span className="flex items-center justify-center gap-2">
+        <span className="flex items-center justify-center gap-1">
           {iconPosition === 'left' && iconElement}
           {children}
           {iconPosition === 'right' && iconElement}

@@ -37,6 +37,16 @@
   50% { transform: translateY(-15px); }
 }
 
+@keyframes swipeHintLeft {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(-2px); opacity: 1; }
+}
+
+@keyframes swipeHintRight {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(2px); opacity: 1; }
+}
+
 html, body {
     width: 100vw;
     height: 100vh;
@@ -219,6 +229,14 @@ body.telegram-mobile .telegram-padding {
 
 .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-swipe-hint-left {
+    animation: swipeHintLeft 2s ease-in-out infinite;
+}
+
+.animate-swipe-hint-right {
+    animation: swipeHintRight 2s ease-in-out infinite;
 }
 
 .hide-scrollbar {

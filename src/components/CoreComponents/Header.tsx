@@ -51,7 +51,7 @@ const Header: React.FC = observer(() => {
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
             {/* App Header */}
             <div className=" py-1 px-4 flex items-center justify-between gap-4 w-full">
-                <div className="flex items-center space-x-3 cursor-pointer backdrop-blur-sm rounded-full p-2 active:outline-none active:border-secondary-500 hover:border-secondary-500"
+                <div className="flex items-center space-x-2 cursor-pointer backdrop-blur-sm rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
                 style={glassStyle}
                 onClick={handleAvatarClick}>
                     <div className="relative">
@@ -69,16 +69,14 @@ const Header: React.FC = observer(() => {
                             )}
                         </div>
                     </div>
-                    <div>
-                        <div className="flex items-center space-x-2 text-xs">
-                            <span className="text-white text-xs font-medium">
+                        <div className="flex items-center w-fit">
+                            <span className="text-white text-sm font-medium leading-none text-center w-fit whitespace-nowrap">
                                 {(() => {
                                     const historyName = user.user?.selectedHistoryName || 'starwars';
                                     return historyName.charAt(0).toUpperCase() + historyName.slice(1);
                                 })()}
                             </span>
                         </div>
-                    </div>
                 </div>
                 <div className="flex space-x-2">
                     <button 

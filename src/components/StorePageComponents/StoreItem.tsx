@@ -22,8 +22,8 @@ const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t
                         <span>{product.energy}</span>
                     </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-1">
-                    <div className="text-sm font-semibold">{product.name}</div>
+                <div className="flex-1 flex flex-col ">
+                    <div className="text-md font-semibold">{product.name}</div>
                     <div className="text-xs text-gray-400">
                         {t('energy')}: {product.energy}
                     </div>

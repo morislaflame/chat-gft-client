@@ -29,9 +29,13 @@ function isEnabled(): boolean {
 
 function ensureDataLayer() {
   if (!window.dataLayer) window.dataLayer = [];
+  // Must match the official GA snippet: dataLayer.push(arguments)
+  // Using a rest array here can break gtag.js processing in some environments.
   if (!window.gtag) {
-    window.gtag = function gtag(...args: unknown[]) {
-      window.dataLayer?.push(args);
+    // eslint-disable-next-line func-names
+    window.gtag = function () {
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer?.push(arguments);
     };
   }
 }

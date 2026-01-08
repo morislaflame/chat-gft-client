@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { caseAPI, type CaseBox, type OpenCaseResponse, type PurchaseCaseResponse, type UserCase } from '@/http/caseAPI';
 import type UserStore from '@/store/UserStore';
+import { trackEvent } from '@/utils/analytics';
 
 class CaseStore {
   activeCases: CaseBox[] = [];
@@ -82,6 +83,7 @@ class CaseStore {
     this.loading = true;
     this.error = null;
     try {
+      trackEvent('case_purchase_attempt', { case_id: caseId, quantity });
       const response = await caseAPI.purchaseCase(caseId, quantity);
       runInAction(() => {
         const created = response.userCases?.length
@@ -95,6 +97,11 @@ class CaseStore {
       if (this._userStore) {
         this._userStore.setBalance(response.newBalance);
       }
+      trackEvent('case_purchase', {
+        case_id: caseId,
+        quantity,
+        new_balance: response.newBalance,
+      });
       return response;
     } catch (error: unknown) {
       const errorMessage =
@@ -105,6 +112,7 @@ class CaseStore {
         this.error = errorMessage || 'Failed to purchase case';
       });
       console.error('Error purchasing case:', error);
+      trackEvent('case_purchase_failed', { case_id: caseId, quantity, reason: this.error || 'unknown' });
       return null;
     } finally {
       runInAction(() => {
@@ -117,6 +125,7 @@ class CaseStore {
     this.loading = true;
     this.error = null;
     try {
+      trackEvent('case_open_attempt', { user_case_id: userCaseId });
       const response = await caseAPI.openCase(userCaseId);
       runInAction(() => {
         this.myUnopenedCases = this.myUnopenedCases.filter((c) => c.id !== userCaseId);
@@ -125,6 +134,10 @@ class CaseStore {
         this._userStore.setBalance(response.balance);
         this._userStore.setEnergy(response.energy);
       }
+      trackEvent('case_open', {
+        user_case_id: userCaseId,
+        result_type: response.result?.type || 'unknown',
+      });
       return response;
     } catch (error: unknown) {
       const errorMessage =
@@ -135,6 +148,7 @@ class CaseStore {
         this.error = errorMessage || 'Failed to open case';
       });
       console.error('Error opening case:', error);
+      trackEvent('case_open_failed', { user_case_id: userCaseId, reason: this.error || 'unknown' });
       return null;
     } finally {
       runInAction(() => {

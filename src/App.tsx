@@ -1,5 +1,5 @@
-import { lazy, Suspense, useContext, useEffect, useState } from 'react'
-import { BrowserRouter } from "react-router-dom";
+import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react'
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { observer } from 'mobx-react-lite';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -11,9 +11,19 @@ import StageRewardModal from "./components/modals/StageRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 import Onboarding from './components/modals/Onboarding';
 import { ProgressiveBlur } from './components/ui/progressive-blur';
+import { initAnalytics, setUserId, setUserProperties, trackEvent, trackPageView } from '@/utils/analytics';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
+const AnalyticsRouteListener = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(`${location.pathname}${location.search || ''}`);
+  }, [location.pathname, location.search]);
+
+  return null;
+};
 
 const AppContent = () => {
   const isMobile = document.body.classList.contains('telegram-mobile');
@@ -21,6 +31,7 @@ const AppContent = () => {
 
   return (
     <>
+      <AnalyticsRouteListener />
       <Header />
       <ProgressiveBlur
         className="pointer-events-none fixed left-0 right-0 top-0 z-15"
@@ -46,6 +57,9 @@ const AppContent = () => {
 const App = observer(() => {
   const { user, dailyReward } = useContext(Context) as IStoreContext;
   const [loading, setLoading] = useState(true);
+  const analyticsBootstrappedRef = useRef(false);
+  const lastAuthTrackedRef = useRef(false);
+  const onboardingShownRef = useRef(false);
   const {
     disableVerticalSwipes,
     lockOrientation,
@@ -56,6 +70,17 @@ const App = observer(() => {
   } = useTelegramApp();
 
   useEffect(() => {
+    // Init analytics once (safe no-op in dev builds by default).
+    if (!analyticsBootstrappedRef.current) {
+      analyticsBootstrappedRef.current = true;
+      void initAnalytics().then(() => {
+        trackEvent('app_open', {
+          platform: window.Telegram?.WebApp ? 'telegram' : 'web',
+        });
+        trackPageView(`${window.location.pathname}${window.location.search || ''}`);
+      });
+    }
+
     if (isAvailable) {
       disableVerticalSwipes();
       setHeaderColor('#121826');
@@ -92,6 +117,24 @@ const App = observer(() => {
   }, [user, tg?.initData]);
 
   useEffect(() => {
+    // Once authenticated, attach stable identity and key properties.
+    if (!loading && user.isAuth && user.user) {
+      setUserId(user.user.id);
+      setUserProperties({
+        language: user.user.language,
+        selected_history: user.user.selectedHistoryName || 'unknown',
+      });
+
+      if (!lastAuthTrackedRef.current) {
+        lastAuthTrackedRef.current = true;
+        trackEvent('login', {
+          method: tg?.initData ? 'telegram' : 'session',
+        });
+      }
+    }
+  }, [loading, user.isAuth, user.user, tg?.initData]);
+
+  useEffect(() => {
     if (!loading && user.isAuth) {
       const checkDailyRewardFn = async () => {
         try {
@@ -105,6 +148,9 @@ const App = observer(() => {
   }, [loading, user.isAuth, dailyReward]);
 
   const handleOnboardingComplete = async () => {
+    trackEvent('onboarding_completed', {
+      source: user.isHistorySelectionFromHeader ? 'header' : 'auto',
+    });
     await user.completeOnboarding();
   };
 
@@ -135,6 +181,13 @@ const App = observer(() => {
   // Если нужно показать онбординг, показываем только его (без Header и основного контента)
   // Показываем онбординг если: обычный онбординг (shouldShowOnboarding) ИЛИ открыт из Header (showOnboarding)
   if ((user.shouldShowOnboarding && user.showOnboarding) || (user.showOnboarding && user.isHistorySelectionFromHeader)) {
+    if (!onboardingShownRef.current) {
+      onboardingShownRef.current = true;
+      trackEvent('onboarding_shown', {
+        initial_step: user.onboardingInitialStep,
+        source: user.isHistorySelectionFromHeader ? 'header' : 'auto',
+      });
+    }
     return (
       <BrowserRouter>
         <Onboarding 

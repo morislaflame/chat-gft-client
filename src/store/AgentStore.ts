@@ -3,6 +3,7 @@ import { getPublicAgents, type Agent } from "@/http/agentAPI";
 import { setSelectedHistoryName } from "@/http/userAPI";
 import type UserStore from "@/store/UserStore";
 import type ChatStore from "@/store/ChatStore";
+import { trackEvent, setUserProperties } from "@/utils/analytics";
 
 export default class AgentStore {
     _agents: Agent[] = [];
@@ -76,12 +77,15 @@ export default class AgentStore {
         this.setSaving(true);
         this.setError('');
         try {
+            trackEvent("history_select_attempt", { history_name: historyName });
             const response = await setSelectedHistoryName(historyName);
             // Обновляем selectedHistoryName в UserStore напрямую из ответа API
             if (this._userStore && response.selectedHistoryName) {
                 runInAction(() => {
                     this._userStore!.setSelectedHistoryName(response.selectedHistoryName);
                 });
+                setUserProperties({ selected_history: response.selectedHistoryName });
+                trackEvent("history_selected", { history_name: response.selectedHistoryName });
             }
             // Загружаем историю чата для новой выбранной истории
             if (this._chatStore) {
@@ -92,6 +96,7 @@ export default class AgentStore {
             runInAction(() => {
                 this.setError('Failed to change history');
             });
+            trackEvent("history_select_failed", { history_name: historyName });
             throw error;
         } finally {
             runInAction(() => {

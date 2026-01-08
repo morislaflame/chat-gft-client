@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import { trackEvent } from '@/utils/analytics';
 
 type TabType = 'chat' | 'quests' | 'friends' | 'rewards' | 'store';
 
@@ -23,6 +24,11 @@ const BottomNavigation = () => {
         
         const target = routeMap[tab];
         if (target) {
+            trackEvent('navigation_tab_click', {
+                tab_id: tab,
+                from_path: location.pathname,
+                to_path: target,
+            });
             navigate(target);
         }
     };

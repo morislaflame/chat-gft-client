@@ -3,6 +3,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { Product } from "@/types/types";
 import { getProducts, generateInvoice } from "@/http/productAPI";
 import { getStore } from "./StoreProvider";
+import { trackEvent } from "@/utils/analytics";
 
 const tg = window.Telegram?.WebApp;
 console.log("tg =>", tg);
@@ -65,6 +66,7 @@ export default class ProductStore {
   async buyProduct(productId: number) {
     this.setProductLoading(productId, true);
     try {
+      trackEvent('store_purchase_start', { product_id: productId, method: 'telegram_stars' });
       // 1) Запрос на сервер: получаем invoiceLink
       const invoiceLink = await generateInvoice(productId);
       console.log("invoiceLink =>", invoiceLink);
@@ -74,14 +76,19 @@ export default class ProductStore {
         tg?.openInvoice(invoiceLink, (status: string) => {
           console.log("status =>", status);
           if (status === "paid") {
+            trackEvent('store_purchase_paid', { product_id: productId });
             getStore().user.fetchMyInfo();
+          } else {
+            trackEvent('store_purchase_result', { product_id: productId, status });
           }
         });
       } catch (error) {
         console.error("Error opening invoice:", error);
+        trackEvent('store_purchase_failed', { product_id: productId, reason: 'open_invoice_failed' });
       }
     } catch (error) {
       console.error("Error generating invoice or opening invoice:", error);
+      trackEvent('store_purchase_failed', { product_id: productId, reason: 'invoice_generation_failed' });
     } finally {
       runInAction(() => {
         this.setProductLoading(productId, false);

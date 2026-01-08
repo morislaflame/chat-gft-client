@@ -8,6 +8,7 @@ import {
 } from "@/http/dailyRewardAPI";
 import type { DailyRewardCheckResponse, DailyRewardClaimResponse } from "@/types/types";
 import type UserStore from "@/store/UserStore";
+import { trackEvent } from "@/utils/analytics";
 
 export default class DailyRewardStore {
   // Поля, которые приходят при check
@@ -110,6 +111,14 @@ export default class DailyRewardStore {
           this._userStore.setEnergy(data.user.energy);
         }
       }
+
+      trackEvent("daily_reward_claim", {
+        day: data.reward.day,
+        reward: data.reward.reward,
+        reward_type: data.reward.rewardType,
+        second_reward: data.reward.secondReward ?? 0,
+        second_reward_type: data.reward.secondRewardType ?? null,
+      });
 
       return data;
     } catch (error) {

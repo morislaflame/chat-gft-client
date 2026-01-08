@@ -9,6 +9,7 @@ import {
 import type { Task } from "@/types/types";
 import { getTaskHandler } from "@/utils/taskHandlers";
 import { getStore } from "./StoreProvider";
+import { trackEvent } from "@/utils/analytics";
 
 // Получаем доступ к телеграм объекту
 const tg = window.Telegram?.WebApp;
@@ -88,6 +89,11 @@ export default class QuestStore {
             
             // Если задача была успешно выполнена, обновляем данные задачи
             if (result.success) {
+                trackEvent("quest_action_success", {
+                    task_id: task.id,
+                    task_type: task.type,
+                    code: task.code || "unknown",
+                });
                 // Сохраняем старое состояние задачи
                 const wasCompletedBefore = task.userProgress?.isCompletedForCurrent || false;
                 
@@ -103,6 +109,13 @@ export default class QuestStore {
                     runInAction(() => {
                         this._completedTask = updatedTask;
                     });
+                    trackEvent("quest_completed", {
+                        task_id: updatedTask.id,
+                        task_type: updatedTask.type,
+                        reward: updatedTask.reward,
+                        reward_type: updatedTask.rewardType,
+                        code: updatedTask.code || "unknown",
+                    });
                 }
             }
             
@@ -110,6 +123,7 @@ export default class QuestStore {
             return result;
         } catch (error) {
             console.error("Error handling task:", error);
+            trackEvent("quest_action_failed", { task_id: task.id, reason: "exception" });
             return { success: false, message: "Error handling task" };
         } finally {
             runInAction(() => this.setTaskLoading(task.id, false));
@@ -193,9 +207,11 @@ export default class QuestStore {
     // Метод для шаринга истории в Telegram
     async shareTaskToStory(task: Task, userRefCode?: string) {
         try {
+            trackEvent("quest_share_story_attempt", { task_id: task.id, code: task.code || "unknown" });
             // Проверяем наличие метода shareToStory в объекте Telegram
             if (!tg || typeof tg.shareToStory !== 'function') {
                 console.error("Telegram shareToStory method is not available");
+                trackEvent("quest_share_story_failed", { task_id: task.id, reason: "telegram_api_unavailable" });
                 return { success: false, message: "The shareToStory function is not available" };
             }
             
@@ -234,11 +250,13 @@ export default class QuestStore {
             
             // Отмечаем задание как выполненное на сервере
             await this.completeTask(task.id);
+            trackEvent("quest_share_story_success", { task_id: task.id });
             
             return { success: true, message: "Story published successfully" };
             
         } catch (error) {
             console.error("Error during story sharing:", error);
+            trackEvent("quest_share_story_failed", { task_id: task.id, reason: "exception" });
             return { success: false, message: "Error during story sharing" };
         }
     }

@@ -1,6 +1,7 @@
 import {makeAutoObservable, runInAction } from "mobx";
 import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
+import { trackEvent } from "@/utils/analytics";
 
 export default class UserStore {
     _user: UserInfo | null = null;
@@ -101,6 +102,7 @@ export default class UserStore {
             runInAction(() => {
                 this.setLanguage(lang);
             });
+            trackEvent("language_change", { language: lang });
         } catch (error) {
             console.error("Error changing language:", error);
         }
@@ -118,6 +120,7 @@ export default class UserStore {
         try {
             this.setIsAuth(false);
             this.setUser(null);
+            trackEvent("logout");
         } catch (error) {
             console.error("Error during logout:", error);
         }
@@ -334,6 +337,7 @@ export default class UserStore {
             this._showOnboarding = true;
             this._isHistorySelectionFromHeader = true;
         });
+        trackEvent("history_selection_opened", { source: "header" });
     }
 
     get isHistorySelectionFromHeader() {

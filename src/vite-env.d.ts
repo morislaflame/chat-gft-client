@@ -51,4 +51,6 @@ interface TelegramWebApp {
   interface Window {
     Telegram?: TelegramWebApp;
     __REACT_ROOT__?: ReactDOM.Root;
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
   }

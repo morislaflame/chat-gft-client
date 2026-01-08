@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
 import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile, Mission } from "@/types/types";
 import type UserStore from "@/store/UserStore";
+import { trackEvent } from "@/utils/analytics";
 
 export default class ChatStore {
     _messages: Message[] = [];
@@ -190,6 +191,11 @@ export default class ChatStore {
         const previousBalance = this._userStore?.user?.balance || 0;
 
         try {
+            trackEvent('chat_message_send', {
+                length: messageText.length,
+                is_start: messageText.trim().toLowerCase() === 'старт' ? true : false,
+                selected_history: this._userStore?.user?.selectedHistoryName || 'unknown',
+            });
             const response: ApiMessageResponse = await apiSendMessage(messageText);
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
@@ -239,6 +245,12 @@ export default class ChatStore {
                         rewardAmount: rewardAmount,
                         isOpen: true
                     });
+
+                    trackEvent('mission_completed', {
+                        stage: stageNumber,
+                        reward_amount: rewardAmount,
+                        selected_history: this._userStore?.user?.selectedHistoryName || 'unknown',
+                    });
                 }
                 
                 this._userStore.setBalance(response.newBalance);
@@ -271,8 +283,10 @@ export default class ChatStore {
             if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient energy')) {
                 this.setError('Insufficient energy. Please purchase more stars.');
                 this.setInsufficientEnergy(true);
+                trackEvent('chat_message_send_failed', { reason: 'insufficient_energy' });
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
+                trackEvent('chat_message_send_failed', { reason: 'unknown' });
             }
             return null;
         } finally {

@@ -1,5 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { rewardAPI, type Reward, type UserReward, type WithdrawalRequest } from '@/http/rewardAPI';
+import { trackEvent } from '@/utils/analytics';
 
 class RewardStore {
   availableRewards: Reward[] = [];
@@ -70,6 +71,7 @@ class RewardStore {
     this.error = null;
     
     try {
+      trackEvent('reward_purchase_attempt', { reward_id: rewardId });
       // Вызываем API для покупки награды
       const purchaseResponse = await rewardAPI.purchaseReward(rewardId);
 
@@ -80,6 +82,11 @@ class RewardStore {
       if (purchasedReward) {
         this.purchasedReward = purchasedReward;
         this.purchasePrice = purchaseResponse.userReward?.purchasePrice || purchasedReward.price;
+        trackEvent('reward_purchase', {
+          reward_id: rewardId,
+          price: this.purchasePrice,
+          currency: 'GEMS',
+        });
       }
 
       // Мгновенно обновляем список купленных наград локально
@@ -107,6 +114,7 @@ class RewardStore {
         : 'Failed to purchase reward';
       this.error = errorMessage || 'Failed to purchase reward';
       console.error('Error purchasing reward:', error);
+      trackEvent('reward_purchase_failed', { reward_id: rewardId, reason: this.error || 'unknown' });
       return false;
     } finally {
       this.purchasingRewards.delete(rewardId);
@@ -149,6 +157,7 @@ class RewardStore {
     this.error = null;
     
     try {
+      trackEvent('withdrawal_request_create_attempt', { user_reward_id: userRewardId });
       const response = await rewardAPI.createWithdrawalRequest(userRewardId);
 
       // Мгновенно обновляем список запросов, чтобы статус ушёл в pending
@@ -162,6 +171,7 @@ class RewardStore {
 
       // Фоново обновляем запросы для консистентности
       void this.fetchWithdrawalRequests(true);
+      trackEvent('withdrawal_request_created', { user_reward_id: userRewardId, request_id: response.id });
       return true;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error && 'response' in error 
@@ -169,6 +179,7 @@ class RewardStore {
         : 'Failed to create withdrawal request';
       this.error = errorMessage || 'Failed to create withdrawal request';
       console.error('Error creating withdrawal request:', error);
+      trackEvent('withdrawal_request_create_failed', { user_reward_id: userRewardId, reason: this.error || 'unknown' });
       return false;
     } finally {
       this.creatingWithdrawal.delete(userRewardId);

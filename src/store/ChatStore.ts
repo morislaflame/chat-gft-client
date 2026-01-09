@@ -22,6 +22,8 @@ export default class ChatStore {
     _missions: Mission[] = [];
     _loadedHistoryName: string | null = null; // Отслеживаем для какой истории загружены данные
     private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
+    private _trackedMissionViews = new Set<string>();
+    private _missionStartTs = new Map<number, number>();
 
     constructor(userStore?: UserStore) {
         makeAutoObservable(this);
@@ -73,6 +75,18 @@ export default class ChatStore {
             missionId: mission.id,
             missionHasMessages: false,
         });
+
+        // Track mission_view once per story+mission.
+        const storyId = this._userStore?.user?.selectedHistoryName || "unknown";
+        const key = `${storyId}:${mission.id}`;
+        if (!this._trackedMissionViews.has(key)) {
+            this._trackedMissionViews.add(key);
+            trackEvent('mission_view', {
+                story_id: storyId,
+                mission_id: mission.id,
+                mission_type: 'mission',
+            });
+        }
     }
 
     setIsTyping(isTyping: boolean) {
@@ -126,6 +140,11 @@ export default class ChatStore {
 
     setMissions(missions: Mission[]) {
         this._missions = missions;
+    }
+
+    setMissionStart(missionId: number) {
+        if (!missionId) return;
+        this._missionStartTs.set(missionId, Date.now());
     }
 
     getMissionVideoByOrderIndex(orderIndex: number): MediaFile | null {
@@ -189,12 +208,26 @@ export default class ChatStore {
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
+        const previousEnergy = this._userStore?.user?.energy ?? null;
+        const storyId = this._userStore?.user?.selectedHistoryName || "unknown";
 
         try {
+            const startTs = Date.now();
             trackEvent('chat_message_send', {
                 length: messageText.length,
                 is_start: messageText.trim().toLowerCase() === 'старт' ? true : false,
-                selected_history: this._userStore?.user?.selectedHistoryName || 'unknown',
+                selected_history: storyId,
+            });
+            trackEvent('message_send', {
+                story_id: storyId,
+                message_len: messageText.length,
+                has_voice: 0,
+            });
+            // Energy is spent per message. If you ever change pricing, adjust here.
+            trackEvent('energy_spent', {
+                amount: 1,
+                balance_after: previousEnergy !== null ? Math.max(0, Number(previousEnergy) - 1) : null,
+                reason: 'step',
             });
             const response: ApiMessageResponse = await apiSendMessage(messageText);
             const aiMessage: Message = {
@@ -204,6 +237,12 @@ export default class ChatStore {
                 timestamp: new Date()
             };
             this.addMessage(aiMessage);
+
+            trackEvent('ai_response_show', {
+                story_id: storyId,
+                response_len: (response.response || '').length,
+                latency_ms: Date.now() - startTs,
+            });
             
             // Обновляем энергию и баланс пользователя из ответа сервера
             if (response.newEnergy !== undefined) {
@@ -249,7 +288,32 @@ export default class ChatStore {
                     trackEvent('mission_completed', {
                         stage: stageNumber,
                         reward_amount: rewardAmount,
-                        selected_history: this._userStore?.user?.selectedHistoryName || 'unknown',
+                        selected_history: storyId,
+                    });
+
+                    const missionEntity = this._missions.find((m) => m.orderIndex === stageNumber) || null;
+                    const missionId = missionEntity?.id ?? null;
+                    const startedAt = missionId ? (this._missionStartTs.get(missionId) || null) : null;
+                    const timeToCompleteSec =
+                        startedAt ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : null;
+
+                    trackEvent('mission_complete', {
+                        story_id: storyId,
+                        mission_id: missionId,
+                        attempts: 1,
+                        time_to_complete_sec: timeToCompleteSec,
+                    });
+
+                    trackEvent('scene_complete', {
+                        story_id: storyId,
+                        scene_id: missionId,
+                        completion_type: 'mission',
+                    });
+
+                    trackEvent('gems_earned', {
+                        amount: rewardAmount,
+                        balance_after: response.newBalance,
+                        source: 'mission',
                     });
                 }
                 
@@ -284,9 +348,12 @@ export default class ChatStore {
                 this.setError('Insufficient energy. Please purchase more stars.');
                 this.setInsufficientEnergy(true);
                 trackEvent('chat_message_send_failed', { reason: 'insufficient_energy' });
+                trackEvent('energy_depleted', { balance: this._userStore?.user?.energy ?? null, context: 'story' });
+                trackEvent('mission_fail', { story_id: storyId, fail_reason: 'energy_depleted' });
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
                 trackEvent('chat_message_send_failed', { reason: 'unknown' });
+                trackEvent('mission_fail', { story_id: storyId, fail_reason: 'unknown' });
             }
             return null;
         } finally {
@@ -469,6 +536,8 @@ export default class ChatStore {
         this.setMission(null);
         this.setSuggestions([]);
         this._loadedHistoryName = null; // Сбрасываем отслеживание загруженной истории
+        this._trackedMissionViews.clear();
+        this._missionStartTs.clear();
         // Очищаем suggestions из localStorage при очистке сообщений
         try {
             localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);

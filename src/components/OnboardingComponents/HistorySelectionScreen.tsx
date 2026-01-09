@@ -7,6 +7,7 @@ import useMeasure from 'react-use-measure';
 import type { Agent } from '@/http/agentAPI';
 import HistoryCard from './HistoryCard';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { trackEvent } from '@/utils/analytics';
 
 interface HistorySelectionScreenProps {
     histories: Agent[];
@@ -42,6 +43,18 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     const { t } = useTranslate();
     const [ref, bounds] = useMeasure();
     const {hapticImpact} = useHapticFeedback();
+    const hasTrackedViewRef = React.useRef(false);
+
+    React.useEffect(() => {
+        if (hasTrackedViewRef.current) return;
+        if (loading) return;
+        if (!histories || histories.length === 0) return;
+        hasTrackedViewRef.current = true;
+        trackEvent('story_list_view', {
+            stories_shown_count: histories.length,
+            sort: 'orderIndex_asc',
+        });
+    }, [loading, histories]);
 
     const handleSwipeLeft = () => {
         hapticImpact('soft');

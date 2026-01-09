@@ -87,6 +87,11 @@ class RewardStore {
           price: this.purchasePrice,
           currency: 'GEMS',
         });
+        trackEvent('gems_spent', {
+          amount: this.purchasePrice,
+          balance_after: purchaseResponse.newBalance ?? null,
+          sink: 'direct_purchase',
+        });
       }
 
       // Мгновенно обновляем список купленных наград локально

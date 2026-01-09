@@ -66,7 +66,12 @@ export default class ProductStore {
   async buyProduct(productId: number) {
     this.setProductLoading(productId, true);
     try {
+      const product = this._products.find((p) => p.id === productId) || null;
       trackEvent('store_purchase_start', { product_id: productId, method: 'telegram_stars' });
+      trackEvent('stars_purchase_start', {
+        offer_id: String(productId),
+        price_stars: product?.starsPrice ?? null,
+      });
       // 1) Запрос на сервер: получаем invoiceLink
       const invoiceLink = await generateInvoice(productId);
       console.log("invoiceLink =>", invoiceLink);
@@ -77,18 +82,30 @@ export default class ProductStore {
           console.log("status =>", status);
           if (status === "paid") {
             trackEvent('store_purchase_paid', { product_id: productId });
+            trackEvent('stars_purchase_success', {
+              offer_id: String(productId),
+              price_stars: product?.starsPrice ?? null,
+              currency: 'XTR',
+              energy_granted: product?.energy ?? null,
+            });
             getStore().user.fetchMyInfo();
           } else {
             trackEvent('store_purchase_result', { product_id: productId, status });
+            trackEvent('stars_purchase_fail', {
+              offer_id: String(productId),
+              fail_reason: status,
+            });
           }
         });
       } catch (error) {
         console.error("Error opening invoice:", error);
         trackEvent('store_purchase_failed', { product_id: productId, reason: 'open_invoice_failed' });
+        trackEvent('stars_purchase_fail', { offer_id: String(productId), fail_reason: 'open_invoice_failed' });
       }
     } catch (error) {
       console.error("Error generating invoice or opening invoice:", error);
       trackEvent('store_purchase_failed', { product_id: productId, reason: 'invoice_generation_failed' });
+      trackEvent('stars_purchase_fail', { offer_id: String(productId), fail_reason: 'invoice_generation_failed' });
     } finally {
       runInAction(() => {
         this.setProductLoading(productId, false);

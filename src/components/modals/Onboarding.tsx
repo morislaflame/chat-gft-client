@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
@@ -12,6 +12,7 @@ import AgentVideoModal from '@/components/modals/AgentVideoModal';
 import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { trackEvent } from '@/utils/analytics';
 
 interface OnboardingProps {
     onComplete: () => void;
@@ -29,11 +30,24 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
     const [showVideoModal, setShowVideoModal] = useState(false);
     const {hapticImpact, hapticNotification} = useHapticFeedback();
+    const startTsRef = useRef<number>(Date.now());
+    const lastStepRef = useRef<'welcome' | 'select' | null>(null);
 
     // Если начальный шаг - выбор истории, загружаем агентов сразу
     useEffect(() => {
         agent.fetchPublicAgents();
     }, [agent]);
+
+    useEffect(() => {
+        // onboarding_view step: 1=welcome, 2=select
+        const stepNumber = step === 'welcome' ? 1 : 2;
+        if (lastStepRef.current === step) return;
+        lastStepRef.current = step;
+        trackEvent('onboarding_view', {
+            step: stepNumber,
+            variant: isFromHeader ? 'header' : 'default',
+        });
+    }, [step, isFromHeader]);
 
     const handleSetActiveIndex = (newIndex: number) => {
         hapticImpact('soft');
@@ -54,6 +68,10 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
                 setSelectedVideo(selectedAgent.video);
                 setShowVideoModal(true);
             } else {
+                trackEvent('onboarding_complete', {
+                    variant: isFromHeader ? 'header' : 'default',
+                    time_spent_sec: Math.max(0, Math.round((Date.now() - startTsRef.current) / 1000)),
+                });
                 onComplete();
             }
         } catch (error) {
@@ -66,6 +84,10 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
         setShowVideoModal(false);
         setSelectedVideo(null);
         // После закрытия видео закрываем онбординг
+        trackEvent('onboarding_complete', {
+            variant: isFromHeader ? 'header' : 'default',
+            time_spent_sec: Math.max(0, Math.round((Date.now() - startTsRef.current) / 1000)),
+        });
         onComplete();
     };
 

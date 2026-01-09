@@ -113,12 +113,26 @@ export default class DailyRewardStore {
       }
 
       trackEvent("daily_reward_claim", {
-        day: data.reward.day,
+        day_index: data.reward.day,
         reward: data.reward.reward,
         reward_type: data.reward.rewardType,
         second_reward: data.reward.secondReward ?? 0,
         second_reward_type: data.reward.secondRewardType ?? null,
       });
+
+      if (data.reward.rewardType === 'energy') {
+        trackEvent('energy_refill', {
+          amount: data.reward.reward,
+          balance_after: data.user.energy,
+          method: 'daily',
+        });
+      } else {
+        trackEvent('gems_earned', {
+          amount: data.reward.reward,
+          balance_after: data.user.balance,
+          source: 'daily',
+        });
+      }
 
       return data;
     } catch (error) {

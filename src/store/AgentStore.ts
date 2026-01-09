@@ -77,7 +77,9 @@ export default class AgentStore {
         this.setSaving(true);
         this.setError('');
         try {
+            const prevStoryId = this._userStore?.user?.selectedHistoryName || null;
             trackEvent("history_select_attempt", { history_name: historyName });
+            trackEvent("story_select", { story_id: historyName, entry_point: "home" });
             const response = await setSelectedHistoryName(historyName);
             // Обновляем selectedHistoryName в UserStore напрямую из ответа API
             if (this._userStore && response.selectedHistoryName) {
@@ -86,6 +88,10 @@ export default class AgentStore {
                 });
                 setUserProperties({ selected_history: response.selectedHistoryName });
                 trackEvent("history_selected", { history_name: response.selectedHistoryName });
+                trackEvent("story_start", {
+                    story_id: response.selectedHistoryName,
+                    is_new: prevStoryId && prevStoryId === response.selectedHistoryName ? 0 : 1,
+                });
             }
             // Загружаем историю чата для новой выбранной истории
             if (this._chatStore) {

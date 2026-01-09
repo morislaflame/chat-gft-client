@@ -8,6 +8,7 @@ import type { Bonus } from '@/types/types';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { trackEvent } from '@/utils/analytics';
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
@@ -20,6 +21,8 @@ const FriendsContainer: React.FC = observer(() => {
         hapticImpact('soft');
         const referralLink = `https://t.me/gftrobot?startapp=${user.user?.refCode}`;
         try {
+            trackEvent('referral_copy', { has_ref_code: !!user.user?.refCode });
+            trackEvent('invite_link_copied', { placement: 'friends', channel: 'copy' });
             await navigator.clipboard.writeText(referralLink);
             hapticNotification('success');
             setIsCopied(true);
@@ -35,6 +38,8 @@ const FriendsContainer: React.FC = observer(() => {
     const handleShareReferral = () => {
         hapticImpact('soft');
         const referralLink = `https://t.me/gftrobot?startapp=${user.user?.refCode}`;
+        trackEvent('referral_share', { has_ref_code: !!user.user?.refCode });
+        trackEvent('invite_share', { placement: 'friends', channel: 'tg_share' });
         shareUrl(referralLink, t('join'));
     };
 

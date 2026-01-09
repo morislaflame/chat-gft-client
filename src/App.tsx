@@ -60,6 +60,14 @@ const App = observer(() => {
   const analyticsBootstrappedRef = useRef(false);
   const lastAuthTrackedRef = useRef(false);
   const onboardingShownRef = useRef(false);
+  const onboardingStartRef = useRef<number | null>(null);
+  const sessionStartRef = useRef<number>(Date.now());
+  const sessionCountersRef = useRef({
+    messages_sent: 0,
+    missions_completed: 0,
+    energy_spent_total: 0,
+    gems_earned_total: 0,
+  });
   const {
     disableVerticalSwipes,
     lockOrientation,
@@ -92,6 +100,70 @@ const App = observer(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAvailable, disableVerticalSwipes, lockOrientation, ready]);
 
+  useEffect(() => {
+    // Lightweight session-quality aggregation (no new deps).
+    // We listen to dataLayer pushes and count key events.
+    const dl = window.dataLayer;
+    if (!dl || typeof dl.push !== 'function') return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalPush = dl.push.bind(dl) as (...args: any[]) => number;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (dl as any).push = (...args: any[]) => {
+      try {
+        const payload = args?.[0];
+        // payload is "arguments" object: ["event", eventName, params]
+        if (payload && payload[0] === 'event') {
+          const eventName = payload[1] as string;
+          const params = (payload[2] || {}) as Record<string, unknown>;
+          const c = sessionCountersRef.current;
+
+          if (eventName === 'message_send' || eventName === 'chat_message_send') {
+            c.messages_sent += 1;
+            c.energy_spent_total += 1;
+          }
+          if (eventName === 'mission_completed' || eventName === 'mission_complete') {
+            c.missions_completed += 1;
+          }
+          if (eventName === 'gems_earned') {
+            const amount = typeof params.amount === 'number' ? params.amount : Number(params.amount || 0);
+            if (!Number.isNaN(amount)) c.gems_earned_total += amount;
+          }
+        }
+      } catch {
+        // ignore
+      }
+      return originalPush(...args);
+    };
+
+    const flushSession = () => {
+      const durationSec = Math.max(0, Math.round((Date.now() - sessionStartRef.current) / 1000));
+      const c = sessionCountersRef.current;
+      trackEvent('session_quality', {
+        time_spent_sec: durationSec,
+        messages_sent: c.messages_sent,
+        missions_completed: c.missions_completed,
+        energy_spent_total: c.energy_spent_total,
+        gems_earned_total: c.gems_earned_total,
+      });
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushSession();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      // restore push
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (dl as any).push = originalPush;
+    };
+  }, []);
+
   const tg = window?.Telegram?.WebApp;
 
   useEffect(() => {
@@ -100,14 +172,20 @@ const App = observer(() => {
       if (initData) {
         try {
           await user.telegramLogin(initData);
+          trackEvent('auth_ready', { auth_status: 'ok' });
         } catch (error) {
           console.error("Telegram authentication error:", error);
+          trackEvent('auth_ready', { auth_status: 'fail', fail_reason: 'telegram_login_failed' });
+          trackEvent('error_show', { error_area: 'auth', error_code: 'telegram_login_failed', fatal: 1 });
         }
       } else {
         try {
           await user.checkAuth();
+          trackEvent('auth_ready', { auth_status: 'ok' });
         } catch (error) {
           console.error("Check authentication error:", error);
+          trackEvent('auth_ready', { auth_status: 'fail', fail_reason: 'check_auth_failed' });
+          trackEvent('error_show', { error_area: 'auth', error_code: 'check_auth_failed', fatal: 1 });
         }
       }
       setLoading(false);
@@ -148,6 +226,12 @@ const App = observer(() => {
   }, [loading, user.isAuth, dailyReward]);
 
   const handleOnboardingComplete = async () => {
+    const startedAt = onboardingStartRef.current;
+    const timeSpentSec = startedAt ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : null;
+    trackEvent('onboarding_complete', {
+      variant: user.isHistorySelectionFromHeader ? 'header' : 'default',
+      time_spent_sec: timeSpentSec,
+    });
     trackEvent('onboarding_completed', {
       source: user.isHistorySelectionFromHeader ? 'header' : 'auto',
     });
@@ -183,6 +267,7 @@ const App = observer(() => {
   if ((user.shouldShowOnboarding && user.showOnboarding) || (user.showOnboarding && user.isHistorySelectionFromHeader)) {
     if (!onboardingShownRef.current) {
       onboardingShownRef.current = true;
+      onboardingStartRef.current = Date.now();
       trackEvent('onboarding_shown', {
         initial_step: user.onboardingInitialStep,
         source: user.isHistorySelectionFromHeader ? 'header' : 'auto',

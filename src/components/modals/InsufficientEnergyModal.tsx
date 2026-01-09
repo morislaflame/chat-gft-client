@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -7,12 +7,26 @@ import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import { QUESTS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 import Button from '../CoreComponents/Button';
+import { trackEvent } from '@/utils/analytics';
 
 const InsufficientEnergyModal: React.FC = observer(() => {
   const { chat } = useContext(Context) as IStoreContext;
   const { t } = useTranslate();
   const navigate = useNavigate();
   const isOpen = chat.insufficientEnergy;
+  const trackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      trackedRef.current = false;
+      return;
+    }
+    if (trackedRef.current) return;
+    trackedRef.current = true;
+    trackEvent('stars_paywall_view', { context: 'energy_depleted' });
+    trackEvent('energy_depleted', { balance: null, context: 'story' });
+    trackEvent('error_show', { error_area: 'energy', error_code: 'energy_depleted', fatal: 0 });
+  }, [isOpen]);
 
   const handleClose = () => {
     chat.closeInsufficientEnergy();
@@ -20,11 +34,13 @@ const InsufficientEnergyModal: React.FC = observer(() => {
 
   const handleGoToStore = () => {
     chat.closeInsufficientEnergy();
+    trackEvent('stars_paywall_view', { context: 'energy_depleted', placement: 'modal_to_store' });
     navigate(STORE_ROUTE);
   };
 
   const handleGoToQuests = () => {
     chat.closeInsufficientEnergy();
+    trackEvent('stars_paywall_view', { context: 'energy_depleted', placement: 'modal_to_quests' });
     navigate(QUESTS_ROUTE);
   };
 

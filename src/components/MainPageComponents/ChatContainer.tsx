@@ -8,6 +8,7 @@ import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
 import MissionProgress from './chat/MissionProgress';
 
@@ -50,10 +51,20 @@ const ChatContainer: React.FC = observer(() => {
 
     const handleStartMission = (orderIndex: number) => {
         hapticImpact('soft');
+        const storyId = user.user?.selectedHistoryName || 'unknown';
+        const mission = chat.missions.find((m) => m.orderIndex === orderIndex) || null;
+        const missionId = mission?.id ?? null;
+
+        trackEvent('mission_start_click', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
+        trackEvent('mission_start', { story_id: storyId, mission_id: missionId });
+        if (missionId !== null) {
+            chat.setMissionStart(missionId);
+        }
         chat.markMissionHasMessagesByOrder(orderIndex);
         const missionVideo = chat.getMissionVideoByOrderIndex(orderIndex);
         
         if (missionVideo) {
+            trackEvent('mission_video_open', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
             setCurrentMissionVideo({
                 video: missionVideo,
                 mission: chat.mission
@@ -67,6 +78,7 @@ const ChatContainer: React.FC = observer(() => {
 
     const handleMissionVideoClose = () => {
         hapticNotification('success');
+        trackEvent('mission_video_close', { video_id: currentMissionVideo?.video?.id ?? null });
         setShowMissionVideoModal(false);
         // После закрытия видео отправляем сообщение "старт"
         if (currentMissionVideo) {
@@ -111,6 +123,7 @@ const ChatContainer: React.FC = observer(() => {
         const trimmed = text.trim();
         if (!trimmed) return;
 
+        trackEvent('chat_suggestion_click', { length: trimmed.length });
         handleSendMessage(trimmed).then((sent) => {
             if (sent) {
                 hapticImpact('soft');

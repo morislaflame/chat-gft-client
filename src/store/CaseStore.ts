@@ -102,6 +102,15 @@ class CaseStore {
         quantity,
         new_balance: response.newBalance,
       });
+      // Treat buying boxes as spending gems
+      const price = (this.activeCases.find((c) => c.id === caseId)?.price ?? null);
+      if (price !== null) {
+        trackEvent('gems_spent', {
+          amount: price * quantity,
+          balance_after: response.newBalance,
+          sink: 'box',
+        });
+      }
       return response;
     } catch (error: unknown) {
       const errorMessage =
@@ -125,7 +134,13 @@ class CaseStore {
     this.loading = true;
     this.error = null;
     try {
+      const userCase = this.myUnopenedCases.find((c) => c.id === userCaseId) || null;
+      const boxId = userCase?.caseId ?? null;
       trackEvent('case_open_attempt', { user_case_id: userCaseId });
+      trackEvent('box_open_start', {
+        box_id: boxId,
+        balance_before: this._userStore?.user?.balance ?? null,
+      });
       const response = await caseAPI.openCase(userCaseId);
       runInAction(() => {
         this.myUnopenedCases = this.myUnopenedCases.filter((c) => c.id !== userCaseId);
@@ -138,6 +153,29 @@ class CaseStore {
         user_case_id: userCaseId,
         result_type: response.result?.type || 'unknown',
       });
+
+      trackEvent('box_open_result', {
+        box_id: boxId,
+        reward_type: response.result?.type || 'unknown',
+        reward_amount: response.result?.amount ?? null,
+        nft_id: response.result?.type === 'reward' ? (response.result?.reward?.id ?? null) : null,
+      });
+
+      // If result is energy/gems, it’s also an "earned" event.
+      if (response.result?.type === 'gems' && typeof response.result.amount === 'number') {
+        trackEvent('gems_earned', {
+          amount: response.result.amount,
+          balance_after: response.balance,
+          source: 'box',
+        });
+      }
+      if (response.result?.type === 'energy' && typeof response.result.amount === 'number') {
+        trackEvent('energy_refill', {
+          amount: response.result.amount,
+          balance_after: response.energy,
+          method: 'box',
+        });
+      }
       return response;
     } catch (error: unknown) {
       const errorMessage =

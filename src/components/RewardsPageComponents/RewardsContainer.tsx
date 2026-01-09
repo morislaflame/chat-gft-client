@@ -13,6 +13,7 @@ import CaseDetailModal from '../modals/CaseDetailModal';
 import CasePurchaseModal from '../modals/CasePurchaseModal';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { trackEvent } from '@/utils/analytics';
 import RewardsHeader from './RewardsHeader';
 import RewardsGrid from './RewardsGrid';
 import RewardsEmptyState from './RewardsEmptyState';
@@ -37,6 +38,13 @@ const RewardsContainer: React.FC = observer(() => {
     const [caseDetailOpen, setCaseDetailOpen] = useState(false);
     const [purchasedBox, setPurchasedBox] = useState<CaseBox | null>(null);
     const [purchasingBoxId, setPurchasingBoxId] = useState<number | null>(null);
+
+    useEffect(() => {
+        // Loot screen view (custom product event)
+        trackEvent('loot_view', {
+            tab: activeTab === 'available' ? 'boxes' : 'inventory',
+        });
+    }, [activeTab]);
 
     useEffect(() => {
         // Load rewards when component mounts
@@ -152,6 +160,11 @@ const RewardsContainer: React.FC = observer(() => {
 
     const handleCardClick = (rewardItem: Reward, userReward: UserReward | null) => {
         hapticImpact('soft');
+        trackEvent('reward_detail_open', {
+            reward_id: rewardItem.id,
+            tab: activeTab,
+            owned: !!userReward,
+        });
         setSelectedReward(rewardItem);
         setSelectedRewardForDetail(userReward);
         setDetailModalOpen(true);
@@ -159,11 +172,13 @@ const RewardsContainer: React.FC = observer(() => {
 
     const navigateToCase = (box: CaseBox) => {
         hapticImpact('soft');
+        trackEvent('case_navigate', { case_id: box.id });
         navigate(`/cases/${box.id}`);
     };
 
     const handleBoxClick = (box: CaseBox) => {
         hapticImpact('soft');
+        trackEvent('case_detail_open', { case_id: box.id });
         setSelectedBox(box);
         setCaseDetailOpen(true);
     };
@@ -193,6 +208,7 @@ const RewardsContainer: React.FC = observer(() => {
     };
 
     const handleWithdrawClickForModal = (userReward: UserReward) => {
+        trackEvent('withdrawal_modal_open', { user_reward_id: userReward.id, reward_id: userReward.rewardId });
         setSelectedUserReward(userReward);
         setWithdrawalModalOpen(true);
     };

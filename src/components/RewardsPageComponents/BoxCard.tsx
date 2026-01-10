@@ -9,6 +9,7 @@ type BoxCardProps = {
   onClick: (box: CaseBox) => void;
   onPurchase: (box: CaseBox) => void;
   isPurchasing: boolean;
+  isDisabled?: boolean;
   canAfford: boolean;
   t: (key: string) => string;
 };
@@ -19,6 +20,7 @@ const BoxCard: React.FC<BoxCardProps> = ({
   onClick,
   onPurchase,
   isPurchasing,
+  isDisabled = false,
   canAfford,
   t,
 }) => {
@@ -53,7 +55,7 @@ const BoxCard: React.FC<BoxCardProps> = ({
       >
         <Button
           onClick={() => onPurchase(box)}
-          disabled={isPurchasing || !canAfford}
+          disabled={isPurchasing || isDisabled || !canAfford}
           variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
           size="sm"
           className="w-full"

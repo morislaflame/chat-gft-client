@@ -126,6 +126,29 @@ class RewardStore {
     }
   }
 
+  // Add a reward to user's purchases immediately (e.g. reward dropped from a case)
+  addPurchaseFromCase(params: { userRewardId: number; userId: number; reward: Reward; purchasePrice?: number; purchaseDate?: string }) {
+    const purchaseDate = params.purchaseDate || new Date().toISOString();
+    const purchasePrice = params.purchasePrice !== undefined ? params.purchasePrice : params.reward.price;
+
+    const userRewardEntry: UserReward = {
+      id: params.userRewardId,
+      userId: params.userId,
+      rewardId: params.reward.id,
+      purchasePrice,
+      purchaseDate,
+      reward: params.reward,
+    };
+
+    const existingIndex = this.myPurchases.findIndex((p) => p.id === userRewardEntry.id);
+    if (existingIndex >= 0) {
+      this.myPurchases[existingIndex] = userRewardEntry;
+    } else {
+      this.myPurchases = [userRewardEntry, ...this.myPurchases];
+    }
+    this._purchasesLoaded = true;
+  }
+
   clearPurchasedReward() {
     this.purchasedReward = null;
     this.purchasePrice = null;

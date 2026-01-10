@@ -83,6 +83,7 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
   const [selectedUserCaseId, setSelectedUserCaseId] = useState<number | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
   const openRequestUserCaseIdRef = useRef<number | null>(null);
+  const deferredEffectsAppliedRef = useRef<number | null>(null);
 
   const isSpinning = spinning || start;
   const availableCasesCount = useMemo(
@@ -139,7 +140,8 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
 
     const run = async () => {
       try {
-        const response = await cases.openCase(selectedUserCaseId);
+        // Defer balance/energy/reward store updates until the result modal is closed
+        const response = await cases.openCase(selectedUserCaseId, { deferEffects: true });
         if (!response) {
           setLocalError(cases.error || 'Failed to open case');
           setSpinning(false);
@@ -176,6 +178,7 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
     setPrizeIndex(0);
     setStart(false);
     openRequestUserCaseIdRef.current = null;
+    deferredEffectsAppliedRef.current = null;
 
     const userCaseInstance = cases.myUnopenedCases.find((uc) => uc.caseId === caseBox.id);
     if (!userCaseInstance) {
@@ -195,6 +198,11 @@ const CaseRoulette: React.FC<{ caseBox: CaseBox }> = observer(({ caseBox }) => {
   };
 
   const handleCloseResult = () => {
+    // Apply deferred balance/energy/reward updates after the user closes the modal
+    if (openResult && deferredEffectsAppliedRef.current !== selectedUserCaseId) {
+      cases.applyDeferredOpenCaseEffects(openResult);
+      deferredEffectsAppliedRef.current = selectedUserCaseId;
+    }
     setShowResult(false);
     setOpenResult(null);
     setPrizeIndex(0);

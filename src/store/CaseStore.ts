@@ -2,6 +2,8 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { caseAPI, type CaseBox, type OpenCaseResponse, type PurchaseCaseResponse, type UserCase } from '@/http/caseAPI';
 import type UserStore from '@/store/UserStore';
 import { trackEvent } from '@/utils/analytics';
+import type RewardStore from '@/store/RewardStore';
+import type { Reward } from '@/http/rewardAPI';
 
 class CaseStore {
   activeCases: CaseBox[] = [];
@@ -12,6 +14,7 @@ class CaseStore {
   private _activeLoaded = false;
   private _unopenedLoaded = false;
   private _userStore: UserStore | null = null;
+  private _rewardStore: RewardStore | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -19,6 +22,10 @@ class CaseStore {
 
   setUserStore(userStore: UserStore) {
     this._userStore = userStore;
+  }
+
+  setRewardStore(rewardStore: RewardStore) {
+    this._rewardStore = rewardStore;
   }
 
   async fetchActiveCases(forceReload = false) {
@@ -130,7 +137,40 @@ class CaseStore {
     }
   }
 
-  async openCase(userCaseId: number): Promise<OpenCaseResponse | null> {
+  private applyOpenCaseEffects(response: OpenCaseResponse) {
+    if (this._userStore) {
+      this._userStore.setBalance(response.balance);
+      this._userStore.setEnergy(response.energy);
+    }
+
+    // If a reward dropped, add it to RewardStore so it appears in "My rewards" without refetch.
+    if (response.result.type === 'reward' && this._rewardStore && this._userStore?.user) {
+      const nowIso = new Date().toISOString();
+      const r = response.result.reward;
+      const rewardFull: Reward = {
+        id: r.id,
+        name: r.name,
+        price: r.price ?? 0,
+        description: r.description,
+        isActive: r.isActive ?? true,
+        createdAt: nowIso,
+        updatedAt: nowIso,
+        mediaFile: r.mediaFile,
+      };
+      this._rewardStore.addPurchaseFromCase({
+        userRewardId: response.result.userRewardId,
+        userId: this._userStore.user.id,
+        reward: rewardFull,
+        purchasePrice: rewardFull.price,
+        purchaseDate: nowIso,
+      });
+    }
+  }
+
+  async openCase(
+    userCaseId: number,
+    opts?: { deferEffects?: boolean }
+  ): Promise<OpenCaseResponse | null> {
     this.loading = true;
     this.error = null;
     try {
@@ -145,20 +185,24 @@ class CaseStore {
       runInAction(() => {
         this.myUnopenedCases = this.myUnopenedCases.filter((c) => c.id !== userCaseId);
       });
-      if (this._userStore) {
-        this._userStore.setBalance(response.balance);
-        this._userStore.setEnergy(response.energy);
+      if (!opts?.deferEffects) {
+        this.applyOpenCaseEffects(response);
       }
       trackEvent('case_open', {
         user_case_id: userCaseId,
         result_type: response.result?.type || 'unknown',
       });
 
+      const droppedRewardPrice =
+        response.result.type === 'reward' ? (response.result.reward.price ?? null) : null;
+      const droppedRewardId =
+        response.result.type === 'reward' ? (response.result.reward.id ?? null) : null;
+
       trackEvent('box_open_result', {
         box_id: boxId,
         reward_type: response.result?.type || 'unknown',
-        reward_amount: response.result?.reward?.price ?? null,
-        nft_id: response.result?.type === 'reward' ? (response.result?.reward?.id ?? null) : null,
+        reward_amount: droppedRewardPrice,
+        nft_id: droppedRewardId,
       });
 
       // If result is energy/gems, it’s also an "earned" event.
@@ -193,6 +237,11 @@ class CaseStore {
         this.loading = false;
       });
     }
+  }
+
+  // Use this when you called openCase(..., { deferEffects: true })
+  applyDeferredOpenCaseEffects(response: OpenCaseResponse) {
+    this.applyOpenCaseEffects(response);
   }
 
   reset() {

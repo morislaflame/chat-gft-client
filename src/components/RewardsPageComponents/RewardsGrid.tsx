@@ -26,7 +26,7 @@ type RewardsGridProps = {
     onPurchase: (rewardId: number) => void;
     onWithdrawClick: (userReward: UserReward) => void;
     getPurchaseState: (rewardItem: Reward) => { isPurchasing: boolean; canAfford: boolean };
-    getBoxPurchaseState: (box: CaseBox) => { isPurchasing: boolean; canAfford: boolean };
+    getBoxPurchaseState: (box: CaseBox) => { isPurchasing: boolean; isDisabled: boolean; canAfford: boolean };
     getWithdrawalState: (userReward: UserReward) => { status: string | null; isCreating: boolean };
     t: TranslateFn;
 };
@@ -65,7 +65,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-4">
                         {cases.map((box) => {
-                            const { isPurchasing, canAfford } = getBoxPurchaseState(box);
+                            const { isPurchasing, isDisabled, canAfford } = getBoxPurchaseState(box);
                             return (
                                 <div key={box.id}>
                                     <BoxCard
@@ -74,6 +74,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                                         onClick={onBoxClick}
                                         onPurchase={onBoxPurchase}
                                         isPurchasing={isPurchasing}
+                                        isDisabled={isDisabled}
                                         canAfford={canAfford}
                                         t={t}
                                     />

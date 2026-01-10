@@ -294,7 +294,9 @@ const RewardsContainer: React.FC = observer(() => {
                         canAfford: (user.user?.balance || 0) >= rewardItem.price
                     })}
                     getBoxPurchaseState={(box: CaseBox) => ({
-                        isPurchasing: purchasingBoxId === box.id || cases.loading,
+                        // Important: don't use `cases.loading` here, otherwise all box cards show loading.
+                        isPurchasing: purchasingBoxId === box.id,
+                        isDisabled: purchasingBoxId !== null && purchasingBoxId !== box.id,
                         canAfford: (user.user?.balance || 0) >= box.price
                     })}
                     getWithdrawalState={(userReward: UserReward) => ({

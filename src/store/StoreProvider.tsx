@@ -102,6 +102,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
       stores.agent.setUserStore(stores.user);
       stores.agent.setChatStore(stores.chat);
       stores.cases.setUserStore(stores.user);
+      stores.cases.setRewardStore(stores.reward);
     }
   }, [stores]);
 

@@ -157,7 +157,7 @@ class CaseStore {
       trackEvent('box_open_result', {
         box_id: boxId,
         reward_type: response.result?.type || 'unknown',
-        reward_amount: response.result?.amount ?? null,
+        reward_amount: response.result?.reward?.price ?? null,
         nft_id: response.result?.type === 'reward' ? (response.result?.reward?.id ?? null) : null,
       });
 

@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 import { trackEvent } from "@/utils/analytics";
 
@@ -209,6 +209,26 @@ export default class UserStore {
             
         } catch (error) {
             console.error("Error during fetching my info:", error);
+        }
+    }
+
+    async updateMyReferralCode(refCode: string): Promise<{ success: boolean; refCode: string; balance?: number } | null> {
+        try {
+            const result = await setMyReferralCode(refCode);
+            runInAction(() => {
+                if (this._user) {
+                    this._user = { 
+                        ...this._user, 
+                        refCode: result.refCode,
+                        ...(typeof result.balance === 'number' ? { balance: result.balance } : {})
+                    };
+                }
+            });
+            trackEvent('referral_code_updated', { length: result.refCode?.length || 0 });
+            return result;
+        } catch (error: unknown) {
+            console.error("Error updating referral code:", error);
+            throw error;
         }
     }
 

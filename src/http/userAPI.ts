@@ -54,6 +54,11 @@ export const getReferralLink = async (): Promise<string> => {
     return data.link;
 };
 
+export const setMyReferralCode = async (refCode: string): Promise<{ success: boolean; refCode: string; balance?: number }> => {
+    const { data } = await $authHost.post('api/user/me/ref-code', { refCode });
+    return data;
+};
+
 export const getEnergy = async (): Promise<number> => {
     const { data } = await $authHost.get('api/user/me/energy');
     return data.energy;

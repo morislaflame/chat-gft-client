@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -9,6 +9,11 @@ import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
+import ReferralCodeChangeConfirmModal from '@/components/modals/ReferralCodeChangeConfirmModal';
+
+const REF_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const REF_CODE_CHANGE_COST = 3;
+const REF_CODE_MIN_LENGTH = 3;
 
 const FriendsContainer: React.FC = observer(() => {
     const { user } = useContext(Context) as IStoreContext;
@@ -16,6 +21,18 @@ const FriendsContainer: React.FC = observer(() => {
     const { t } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [isCopied, setIsCopied] = useState(false);
+    const [isEditingRefCode, setIsEditingRefCode] = useState(false);
+    const [refCodeDraft, setRefCodeDraft] = useState('');
+    const [refCodeError, setRefCodeError] = useState<string | null>(null);
+    const [refCodeSaving, setRefCodeSaving] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const normalizedDraft = useMemo(() => {
+        const up = (refCodeDraft || '').toUpperCase();
+        // keep only allowed chars and max 8
+        const filtered = up.split('').filter((ch) => REF_ALPHABET.includes(ch)).join('');
+        return filtered.slice(0, 8);
+    }, [refCodeDraft]);
 
     const handleCopyReferral = async () => {
         hapticImpact('soft');
@@ -66,7 +83,78 @@ const FriendsContainer: React.FC = observer(() => {
 
     const isMobile = document.body.classList.contains('telegram-mobile');
 
+    const beginEditRefCode = () => {
+        hapticImpact('soft');
+        setRefCodeError(null);
+        setRefCodeDraft(user.user?.refCode || '');
+        setIsEditingRefCode(true);
+        trackEvent('referral_code_edit_opened');
+    };
+
+    const cancelEditRefCode = () => {
+        hapticImpact('soft');
+        setRefCodeError(null);
+        setIsEditingRefCode(false);
+        setRefCodeDraft('');
+    };
+
+    const requestSaveRefCode = () => {
+        if (!user.user) return;
+        const next = normalizedDraft;
+        if (!next || next.length < REF_CODE_MIN_LENGTH || next.length > 8) {
+            setRefCodeError(t('referralCodeInvalid'));
+            hapticNotification('error');
+            return;
+        }
+        // validate allowed chars (client-side)
+        if ([...next].some((ch) => !REF_ALPHABET.includes(ch))) {
+            setRefCodeError(t('referralCodeInvalid'));
+            hapticNotification('error');
+            return;
+        }
+
+        // If code unchanged, just exit edit mode (no modal, no API)
+        const current = (user.user.refCode || '').toUpperCase();
+        if (current === next) {
+            setIsEditingRefCode(false);
+            setRefCodeDraft('');
+            setRefCodeError(null);
+            return;
+        }
+
+        // Show confirmation modal for paid change
+        setConfirmOpen(true);
+    };
+
+    const performSaveRefCode = async () => {
+        if (!user.user) return;
+        const next = normalizedDraft;
+
+        setRefCodeSaving(true);
+        setRefCodeError(null);
+        hapticImpact('soft');
+        try {
+            await user.updateMyReferralCode(next);
+            hapticNotification('success');
+            setIsEditingRefCode(false);
+            setRefCodeDraft('');
+            setConfirmOpen(false);
+        } catch (error: unknown) {
+            const errObj = error as { response?: { data?: { message?: string } } } | null;
+            const rawMessage = errObj?.response?.data?.message;
+            const message =
+                rawMessage === 'Insufficient gems'
+                    ? t('insufficientGems')
+                    : (rawMessage || t('referralCodeUpdateFailed'));
+            setRefCodeError(message);
+            hapticNotification('error');
+        } finally {
+            setRefCodeSaving(false);
+        }
+    };
+
     return (
+        <>
         <div className="p-4 overflow-y-auto flex w-full"
         style={{ marginTop: isMobile ? '148px' : '48px' }}>
             <div className="max-w-xl mx-auto w-full space-y-4">
@@ -93,33 +181,77 @@ const FriendsContainer: React.FC = observer(() => {
                         <div className="flex space-x-2">
                             <input
                                 type="text"
-                                readOnly
-                                value={user.user.refCode || 'Loading...'}
+                                readOnly={!isEditingRefCode}
+                                value={isEditingRefCode ? normalizedDraft : (user.user.refCode || 'Loading...')}
+                                onChange={(e) => setRefCodeDraft(e.target.value)}
                                 className="w-full bg-primary-800 border border-primary-700 rounded-md px-3 py-2 text-sm"
                             />
                         </div>
-                        <div className="flex space-x-2">
-                            <motion.button
-                                onClick={handleCopyReferral}
-                                whileTap={{ scale: 0.9 }}
-                                transition={{ duration: 0.2 }}
-                                className={`flex-1 px-3 py-2 text-xs rounded-md text-white font-medium transition-colors cursor-pointer ${
-                                    isCopied 
-                                        ? 'bg-green-500 hover:bg-green-500' 
-                                        : 'bg-secondary-500 hover:bg-secondary-400'
-                                }`}
-                            >
-                                {isCopied ? t('copied') : t('copyLink')}
-                            </motion.button>
-                            <motion.button
-                                onClick={handleShareReferral}
-                                whileTap={{ scale: 0.9 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
-                            >
-                                {t('share')}
-                            </motion.button>
-                        </div>
+                        {isEditingRefCode ? (
+                            <>
+                                <div className="text-xs text-gray-500">
+                                    {t('referralCodeRules')}
+                                </div>
+                                {refCodeError ? (
+                                    <div className="text-xs text-red-400">{refCodeError}</div>
+                                ) : null}
+                                <div className="flex space-x-2">
+                                    <motion.button
+                                        onClick={cancelEditRefCode}
+                                        whileTap={{ scale: 0.9 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
+                                        disabled={refCodeSaving}
+                                    >
+                                        {t('cancel')}
+                                    </motion.button>
+                                    <motion.button
+                                        onClick={requestSaveRefCode}
+                                        whileTap={{ scale: 0.9 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="flex-1 px-3 py-2 text-xs rounded-md bg-secondary-500 hover:bg-secondary-400 text-white font-medium transition-colors cursor-pointer disabled:opacity-50"
+                                        disabled={refCodeSaving}
+                                    >
+                                        {refCodeSaving ? t('saving') : t('confirm')}
+                                    </motion.button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex space-x-2">
+                                <motion.button
+                                    onClick={beginEditRefCode}
+                                    whileTap={{ scale: 0.9 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="w-full px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
+                                >
+                                    {t('editReferralCode')}
+                                </motion.button>
+                            </div>
+                        )}
+                        {!isEditingRefCode ? (
+                            <div className="flex space-x-2">
+                                <motion.button
+                                    onClick={handleCopyReferral}
+                                    whileTap={{ scale: 0.9 }}
+                                    transition={{ duration: 0.2 }}
+                                    className={`flex-1 px-3 py-2 text-xs rounded-md text-white font-medium transition-colors cursor-pointer ${
+                                        isCopied 
+                                            ? 'bg-green-500 hover:bg-green-500' 
+                                            : 'bg-secondary-500 hover:bg-secondary-400'
+                                    }`}
+                                >
+                                    {isCopied ? t('copied') : t('copyLink')}
+                                </motion.button>
+                                <motion.button
+                                    onClick={handleShareReferral}
+                                    whileTap={{ scale: 0.9 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex-1 px-3 py-2 text-xs rounded-md bg-primary-700 hover:bg-primary-600 text-white font-medium transition-colors cursor-pointer"
+                                >
+                                    {t('share')}
+                                </motion.button>
+                            </div>
+                        ) : null}
                         <div className="mt-4 text-xs text-gray-300 font-semibold">
                                 {t('referralRewardDependsOnPackage')}
                         </div>
@@ -203,6 +335,15 @@ const FriendsContainer: React.FC = observer(() => {
                 </div>
             </div>
         </div>
+        <ReferralCodeChangeConfirmModal
+            isOpen={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={performSaveRefCode}
+            isLoading={refCodeSaving}
+            nextRefCode={normalizedDraft}
+            costGems={REF_CODE_CHANGE_COST}
+        />
+        </>
     );
 });
 

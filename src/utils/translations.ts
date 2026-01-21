@@ -450,6 +450,38 @@ type TranslationType = {
         ru: 'Подтвердить',
         en: 'Confirm'
     },
+    saving: {
+        ru: 'Сохранение...',
+        en: 'Saving...'
+    },
+    editReferralCode: {
+        ru: 'Изменить реферальный код',
+        en: 'Edit referral code'
+    },
+    referralCodeRules: {
+        ru: 'От 3 до 8 символов. Допустимы только A-Z (без O, I) и цифры 2-9.',
+        en: '3 to 8 characters. Allowed: A-Z (excluding O, I) and digits 2-9.'
+    },
+    referralCodeInvalid: {
+        ru: 'Некорректный код',
+        en: 'Invalid code'
+    },
+    referralCodeUpdateFailed: {
+        ru: 'Не удалось обновить реферальный код',
+        en: 'Failed to update referral code'
+    },
+    changeReferralCodeTitle: {
+        ru: 'Сменить реферальный код?',
+        en: 'Change referral code?'
+    },
+    changeReferralCodeDesc: {
+        ru: 'За смену будет списано ',
+        en: 'Changing will cost '
+    },
+    cost: {
+        ru: 'Стоимость',
+        en: 'Cost'
+    },
     // DailyRewardModal
     dailyReward: {
         ru: 'Ежедневная награда',

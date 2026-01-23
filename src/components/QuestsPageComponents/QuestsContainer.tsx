@@ -90,7 +90,8 @@ const QuestsContainer: React.FC = observer(() => {
                     isCompleted: task.userProgress?.isCompletedForCurrent || false,
                     progress: task.userProgress?.progress || 0,
                     targetCount: task.targetCount,
-                    isLoading: quest.isTaskLoading(task.id)
+                    isLoading: quest.isTaskLoading(task.id),
+                    isReadyToCheck: task.code === 'STORY_SHARE' ? quest.isStoryShareReadyToCheck(task.id) : false,
                 })}
             />
             <DailyRewardProgress

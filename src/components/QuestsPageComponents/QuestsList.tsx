@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Task } from '@/types/types';
 import QuestItem from './QuestItem';
+import { observer } from 'mobx-react-lite';
 
 type TranslateFn = (key: string) => string;
 
@@ -14,10 +15,11 @@ type QuestsListProps = {
         progress: number;
         targetCount: number;
         isLoading: boolean;
+        isReadyToCheck: boolean;
     };
 };
 
-const QuestsList: React.FC<QuestsListProps> = ({
+const QuestsList: React.FC<QuestsListProps> = observer(({
     quests,
     language,
     t,
@@ -27,7 +29,7 @@ const QuestsList: React.FC<QuestsListProps> = ({
     return (
         <>
             {quests.map((task) => {
-                const { isCompleted, progress, targetCount, isLoading } = getTaskState(task);
+                const { isCompleted, progress, targetCount, isLoading, isReadyToCheck } = getTaskState(task);
 
                 return (
                     <QuestItem
@@ -36,6 +38,7 @@ const QuestsList: React.FC<QuestsListProps> = ({
                         language={language}
                         t={t}
                         isLoading={isLoading}
+                        isReadyToCheck={isReadyToCheck}
                         isCompleted={isCompleted}
                         progress={progress}
                         targetCount={targetCount}
@@ -45,6 +48,6 @@ const QuestsList: React.FC<QuestsListProps> = ({
             })}
         </>
     );
-};
+});
 
 export default QuestsList;

@@ -10,6 +10,7 @@ type QuestItemProps = {
     language: 'ru' | 'en';
     t: TranslateFn;
     isLoading: boolean;
+    isReadyToCheck: boolean;
     isCompleted: boolean;
     progress: number;
     targetCount: number;
@@ -51,6 +52,7 @@ const QuestItem: React.FC<QuestItemProps> = ({
     language,
     t,
     isLoading,
+    isReadyToCheck,
     isCompleted,
     progress,
     targetCount,
@@ -86,7 +88,7 @@ const QuestItem: React.FC<QuestItemProps> = ({
                 size="sm"
                 className="rounded-full"
             >
-                {isLoading ? t('loading') : isCompleted ? t('completed') : t('complete')}
+                {isLoading ? t('loading') : isCompleted ? t('completed') : isReadyToCheck ? t('check') : t('complete')}
             </Button>
         </div>
     );

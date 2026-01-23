@@ -140,6 +140,10 @@ type TranslationType = {
         ru: 'Выполнить',
         en: 'Complete'
     },
+    check: {
+        ru: 'Проверить',
+        en: 'Check'
+    },
     // StoreContainer
     storeUnavailable: {
         ru: 'Магазин недоступен',

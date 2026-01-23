@@ -13,6 +13,7 @@ import { trackEvent } from "@/utils/analytics";
 
 // Получаем доступ к телеграм объекту
 const tg = window.Telegram?.WebApp;
+const STORY_SHARE_BACKEND_DELAY_MS = 7000;
 
 export default class QuestStore {
     _tasks: Task[] = [];
@@ -21,6 +22,7 @@ export default class QuestStore {
     _taskLoadingStates: Map<number, boolean> = new Map();
     _completedTask: Task | null = null;
     _questsLoaded = false; // Флаг для отслеживания загрузки квестов
+    _storyShareReadyToCheck: Set<number> = new Set();
 
     constructor() {
         makeAutoObservable(this);
@@ -54,6 +56,10 @@ export default class QuestStore {
 
     isTaskLoading(taskId: number): boolean {
         return this._taskLoadingStates.has(taskId);
+    }
+
+    isStoryShareReadyToCheck(taskId: number): boolean {
+        return this._storyShareReadyToCheck.has(taskId);
     }
 
     // Получение списка заданий с информацией о прогрессе для текущего пользователя
@@ -207,6 +213,24 @@ export default class QuestStore {
     // Метод для шаринга истории в Telegram
     async shareTaskToStory(task: Task, userRefCode?: string) {
         try {
+            // Second click: user is checking after share attempt
+            if (this._storyShareReadyToCheck.has(task.id)) {
+                trackEvent("quest_share_story_check_attempt", { task_id: task.id, code: task.code || "unknown" });
+                try {
+                    await this.completeTask(task.id);
+                    runInAction(() => {
+                        this._storyShareReadyToCheck.delete(task.id);
+                    });
+                    trackEvent("quest_share_story_check_success", { task_id: task.id });
+                    return { success: true, message: "Task completed successfully" };
+                } catch (error) {
+                    console.error("Error completing story share task:", error);
+                    trackEvent("quest_share_story_check_failed", { task_id: task.id, reason: "exception" });
+                    // Keep ready-to-check state so user can retry
+                    return { success: false, message: "Error completing task" };
+                }
+            }
+
             trackEvent("quest_share_story_attempt", { task_id: task.id, code: task.code || "unknown" });
             // Проверяем наличие метода shareToStory в объекте Telegram
             if (!tg || typeof tg.shareToStory !== 'function') {
@@ -225,9 +249,9 @@ export default class QuestStore {
             if (userRefCode) {
                 // Проверяем, содержит ли URL уже параметры
                 if (widgetUrl.includes('?')) {
-                    widgetUrl = `${widgetUrl}&ref=${userRefCode}`;
+                    widgetUrl = `${widgetUrl}=${userRefCode}`;
                 } else {
-                    widgetUrl = `${widgetUrl}?ref=${userRefCode}`;
+                    widgetUrl = `${widgetUrl}=${userRefCode}`;
                 }
             }
             
@@ -248,11 +272,18 @@ export default class QuestStore {
                 }
             });
             
-            // Отмечаем задание как выполненное на сервере
-            await this.completeTask(task.id);
-            trackEvent("quest_share_story_success", { task_id: task.id });
-            
-            return { success: true, message: "Story published successfully" };
+            // Даем пользователю время опубликовать сторис в нативном редакторе
+            // (Telegram не предоставляет callback/событие для shareToStory)
+            await new Promise<void>((resolve) => setTimeout(resolve, STORY_SHARE_BACKEND_DELAY_MS));
+
+            // После задержки предлагаем пользователю "Check" (второй клик), а не автозакрываем задачу
+            runInAction(() => {
+                this._storyShareReadyToCheck.add(task.id);
+                // Сбрасываем loading, чтобы кнопка стала активной и показала "Check"
+                this.setTaskLoading(task.id, false);
+            });
+            trackEvent("quest_share_story_ready_to_check", { task_id: task.id });
+            return { success: false, message: "Ready to check" };
             
         } catch (error) {
             console.error("Error during story sharing:", error);

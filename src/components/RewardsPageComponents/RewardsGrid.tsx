@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Reward, UserReward } from '@/http/rewardAPI';
-import type { CaseBox } from '@/http/caseAPI';
+import type { CaseBox, UserCase } from '@/http/caseAPI';
 import RewardCard from './RewardCard';
 import BoxCard from './BoxCard';
 import OwnedBoxCard from './OwnedBoxCard';
@@ -16,6 +16,7 @@ type RewardsGridProps = {
     data: RewardItemWithUser[];
     cases?: CaseBox[];
     ownedCases?: Array<{ box: CaseBox; count: number }>;
+    myUnopenedCases?: UserCase[];
     activeTab: 'available' | 'purchased';
     animations: { [url: string]: Record<string, unknown> };
     boxAnimations?: { [url: string]: Record<string, unknown> };
@@ -47,6 +48,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
     t,
     cases = [],
     ownedCases = [],
+    myUnopenedCases = [],
     boxAnimations = {},
 }) => {
     const isMobile = document.body.classList.contains('telegram-mobile');
@@ -66,6 +68,8 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                     <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-4">
                         {cases.map((box) => {
                             const { isPurchasing, isDisabled, canAfford } = getBoxPurchaseState(box);
+                            const hasUnopenedCase = myUnopenedCases.some((uc) => uc.caseId === box.id);
+                            const unopenedCount = myUnopenedCases.filter((uc) => uc.caseId === box.id).length;
                             return (
                                 <div key={box.id}>
                                     <BoxCard
@@ -73,9 +77,12 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                                         animations={boxAnimations}
                                         onClick={onBoxClick}
                                         onPurchase={onBoxPurchase}
+                                        onOpen={hasUnopenedCase ? onOwnedCaseOpen : undefined}
                                         isPurchasing={isPurchasing}
                                         isDisabled={isDisabled}
                                         canAfford={canAfford}
+                                        hasUnopenedCase={hasUnopenedCase}
+                                        unopenedCount={unopenedCount}
                                         t={t}
                                     />
                                 </div>

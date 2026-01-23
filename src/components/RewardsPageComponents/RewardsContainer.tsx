@@ -280,6 +280,7 @@ const RewardsContainer: React.FC = observer(() => {
                     data={rewardsData}
                     cases={casesData}
                     ownedCases={ownedCasesData}
+                    myUnopenedCases={myUnopenedCases}
                     activeTab={activeTab}
                     animations={animations}
                     boxAnimations={boxAnimations}

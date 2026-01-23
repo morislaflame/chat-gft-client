@@ -8,9 +8,12 @@ type BoxCardProps = {
   animations: { [url: string]: Record<string, unknown> };
   onClick: (box: CaseBox) => void;
   onPurchase: (box: CaseBox) => void;
+  onOpen?: (box: CaseBox) => void;
   isPurchasing: boolean;
   isDisabled?: boolean;
   canAfford: boolean;
+  hasUnopenedCase?: boolean;
+  unopenedCount?: number;
   t: (key: string) => string;
 };
 
@@ -19,9 +22,12 @@ const BoxCard: React.FC<BoxCardProps> = ({
   animations,
   onClick,
   onPurchase,
+  onOpen,
   isPurchasing,
   isDisabled = false,
   canAfford,
+  hasUnopenedCase = false,
+  unopenedCount = 0,
   t,
 }) => {
   return (
@@ -53,20 +59,32 @@ const BoxCard: React.FC<BoxCardProps> = ({
           e.stopPropagation();
         }}
       >
-        <Button
-          onClick={() => onPurchase(box)}
-          disabled={isPurchasing || isDisabled || !canAfford}
-          variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
-          size="sm"
-          className="w-full"
-          icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
-        >
-          {isPurchasing ? t('purchasing') : (
-            <span className="flex items-center gap-1 justify-center">
-              {box.price} <i className="fa-solid fa-gem text-white"></i>
-            </span>
-          )}
-        </Button>
+        {hasUnopenedCase && onOpen ? (
+          <Button
+            onClick={() => onOpen(box)}
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            icon="fas fa-arrow-right"
+          >
+            {unopenedCount > 1 ? `${t('open')} x ${unopenedCount}` : t('open')}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => onPurchase(box)}
+            disabled={isPurchasing || isDisabled || !canAfford}
+            variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+            size="sm"
+            className="w-full"
+            icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+          >
+            {isPurchasing ? t('purchasing') : (
+              <span className="flex items-center gap-1 justify-center">
+                {box.price} <i className="fa-solid fa-gem text-white"></i>
+              </span>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );

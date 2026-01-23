@@ -54,6 +54,10 @@ type TranslationType = {
       ru: 'Поделиться',
       en: 'Share'
     },
+    shareToStory: {
+      ru: 'Поделиться в истории',
+      en: 'Share to story'
+    },
     shareLinkWithFriends: {
       ru: 'Поделитесь этой ссылкой с друзьями, чтобы получать награды!',
       en: 'Share this link with friends to earn rewards!'
@@ -621,6 +625,10 @@ type TranslationType = {
     join: {
         ru: 'Присоединяйся — пиши свою историю ✍️✨ и собирай NFT-награды 🎁💎',
         en: 'Join — write your story ✍️✨ and collect NFT rewards 🎁💎'
+    },
+    lookWhatIWon: {
+        ru: 'Смотри, что я выиграл!',
+        en: 'Look what I won!'
     }
   };
   

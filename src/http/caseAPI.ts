@@ -3,6 +3,14 @@ import type { Reward } from './rewardAPI';
 
 export type CaseItemType = 'reward' | 'gems' | 'energy';
 
+export type CaseReward = Pick<Reward, 'id' | 'name' | 'description' | 'isActive'> & {
+  onlyCase?: boolean;
+  price?: number;
+  mediaFile?: Reward['mediaFile'];
+  previewId?: Reward['previewId'];
+  preview?: Reward['preview'];
+};
+
 export interface CaseItem {
   id: number;
   caseId?: number;
@@ -10,11 +18,7 @@ export interface CaseItem {
   rewardId?: number | null;
   amount?: number | null;
   weight: number;
-  reward?: Pick<Reward, 'id' | 'name' | 'description' | 'isActive'> & {
-    onlyCase?: boolean;
-    price?: number;
-    mediaFile?: Reward['mediaFile'];
-  };
+  reward?: CaseReward;
 }
 
 export interface CaseBox {
@@ -50,7 +54,7 @@ export interface PurchaseCaseResponse {
 }
 
 export type OpenCaseResult =
-  | { type: 'reward'; caseItemId: number; reward: NonNullable<CaseItem['reward']>; userRewardId: number }
+  | { type: 'reward'; caseItemId: number; reward: CaseReward; userRewardId: number }
   | { type: 'gems'; caseItemId: number; amount: number }
   | { type: 'energy'; caseItemId: number; amount: number };
 

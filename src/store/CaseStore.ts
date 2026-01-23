@@ -153,9 +153,11 @@ class CaseStore {
         price: r.price ?? 0,
         description: r.description,
         isActive: r.isActive ?? true,
+        previewId: r.previewId ?? null,
         createdAt: nowIso,
         updatedAt: nowIso,
         mediaFile: r.mediaFile,
+        preview: r.preview,
       };
       this._rewardStore.addPurchaseFromCase({
         userRewardId: response.result.userRewardId,

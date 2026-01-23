@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 
@@ -7,6 +7,7 @@ import Button from '@/components/CoreComponents/Button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { OpenCaseResponse } from '@/http/caseAPI';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
+import { Context, type IStoreContext } from '@/store/StoreProvider';
 
 interface CaseOpenResultModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   animations,
 }) => {
   const { t } = useTranslate();
+  const { user } = useContext(Context) as IStoreContext;
+  const [isSharing, setIsSharing] = useState(false);
 
   if (!openResult) return null;
 
@@ -43,6 +46,61 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const amountLabel = !isReward
     ? `+${result.amount} ${t(isGems ? 'gems' : 'energy')}`
     : null;
+
+  const ref = user.user?.refCode || user.user?.username || '';
+  const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
+
+  const resolveStoryMediaUrl = async (mediaFile: { url: string; mimeType: string } | undefined) => {
+    if (!mediaFile?.url) return null;
+    if (mediaFile.mimeType.startsWith('image/')) return mediaFile.url;
+
+    // Lottie JSON: try common “first-frame” thumbnail conventions
+    if (mediaFile.mimeType === 'application/json') {
+      const base = mediaFile.url;
+      const candidates = [
+        base.replace(/\.json(\?.*)?$/i, '.png$1'),
+        base.replace(/\.json(\?.*)?$/i, '.webp$1'),
+        base.replace(/\.json(\?.*)?$/i, '.jpg$1'),
+        base.replace(/\.json(\?.*)?$/i, '.jpeg$1'),
+      ];
+
+      const canLoad = (src: string) =>
+        new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+
+      for (const c of candidates) {
+        if (await canLoad(c)) return c;
+      }
+    }
+
+    return null;
+  };
+
+  const handleShareToStory = async () => {
+    const tg = window.Telegram?.WebApp;
+    if (!tg || typeof tg.shareToStory !== 'function') return;
+    if (!isReward) return;
+
+    const mediaUrl = result.reward.preview?.url || (await resolveStoryMediaUrl(result.reward.mediaFile));
+    if (!mediaUrl) return;
+
+    setIsSharing(true);
+    try {
+      tg.shareToStory(mediaUrl, {
+        text: t('join'),
+        widget_link: {
+          url: referralLink,
+          name: t('lookWhatIWon'),
+        },
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <Modal
@@ -106,6 +164,18 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           >
             {t('close')}
           </Button>
+          {isReward ? (
+            <Button
+              onClick={handleShareToStory}
+              variant="tretiary"
+              size="md"
+              className="w-full mt-2"
+              icon="fas fa-share"
+              disabled={isSharing}
+            >
+              {t('shareToStory')}
+            </Button>
+          ) : null}
         </motion.div>
       </div>
     </Modal>

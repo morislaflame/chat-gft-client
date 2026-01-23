@@ -7,6 +7,7 @@ export interface Reward {
   tonPrice?: number;
   description?: string;
   isActive: boolean;
+  previewId?: number | null;
   createdAt: string;
   updatedAt: string;
   mediaFile?: {
@@ -21,6 +22,11 @@ export interface Reward {
     entityId: number;
     createdAt: string;
     updatedAt: string;
+  };
+  preview?: {
+    id: number;
+    url: string;
+    mimeType: string;
   };
 }
 

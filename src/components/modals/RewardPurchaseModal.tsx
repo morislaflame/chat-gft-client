@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
@@ -6,6 +6,7 @@ import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
 import type { Reward } from '@/http/rewardAPI';
 import { renderRewardMedia } from '@/utils/rewardUtils';
+import { Context, type IStoreContext } from '@/store/StoreProvider';
 
 interface RewardPurchaseModalProps {
   isOpen: boolean;
@@ -20,7 +21,9 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
   reward,
 }) => {
   const { t } = useTranslate();
+  const { user } = useContext(Context) as IStoreContext;
   const [animationData, setAnimationData] = useState<Record<string, unknown> | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   // Загружаем анимацию при изменении reward
   useEffect(() => {
@@ -45,6 +48,60 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
 
   if (!reward) return null;
 
+  const ref = user.user?.refCode || user.user?.username || '';
+  const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
+
+  const resolveStoryMediaUrl = async (mediaFile: { url: string; mimeType: string } | undefined) => {
+    if (!mediaFile?.url) return null;
+    if (mediaFile.mimeType.startsWith('image/')) return mediaFile.url;
+
+    if (mediaFile.mimeType === 'application/json') {
+      const base = mediaFile.url;
+      const candidates = [
+        base.replace(/\.json(\?.*)?$/i, '.png$1'),
+        base.replace(/\.json(\?.*)?$/i, '.webp$1'),
+        base.replace(/\.json(\?.*)?$/i, '.jpg$1'),
+        base.replace(/\.json(\?.*)?$/i, '.jpeg$1'),
+      ];
+
+      const canLoad = (src: string) =>
+        new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+
+      for (const c of candidates) {
+        if (await canLoad(c)) return c;
+      }
+    }
+
+    return null;
+  };
+
+  const handleShareToStory = async () => {
+    const tg = window.Telegram?.WebApp;
+    if (!tg || typeof tg.shareToStory !== 'function') return;
+    if (!reward.mediaFile) return;
+
+    const mediaUrl = reward.preview?.url || (await resolveStoryMediaUrl(reward.mediaFile));
+    if (!mediaUrl) return;
+
+    setIsSharing(true);
+    try {
+      tg.shareToStory(mediaUrl, {
+        text: t('join'),
+        widget_link: {
+          url: referralLink,
+          name: t('lookWhatIWon'),
+        },
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -55,7 +112,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
-          <motion.div
+          {/* <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ 
@@ -66,7 +123,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
             className="w-20 h-20 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
           >
             <i className="fas fa-gift text-white text-4xl"></i>
-          </motion.div>
+          </motion.div> */}
           
           <h2 className="text-2xl font-bold text-white mb-2">
             {t('purchaseSuccessful')}
@@ -137,11 +194,23 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
             onClick={onClose}
             variant="secondary"
             size="md"
-            className="w-full"
+            className="w-full mb-2"
             icon="fas fa-check"
           >
             {t('great')}
           </Button>
+          {reward.mediaFile ? (
+            <Button
+              onClick={handleShareToStory}
+              variant="tretiary"
+              size="md"
+              className="w-full"
+              icon="fas fa-share"
+              disabled={isSharing}
+            >
+              {t('shareToStory')}
+            </Button>
+          ) : null}
         </motion.div>
       </div>
     </Modal>

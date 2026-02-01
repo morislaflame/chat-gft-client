@@ -34,18 +34,10 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
 
     const currentHistory = user.user?.selectedHistoryName || 'starwars';
 
-    const historyDisplayNames: Record<string, { en: string; ru: string }> = {
-        starwars: { en: 'Star Wars', ru: 'Звёздные Войны' },
-        // Добавьте другие истории по мере необходимости
-    };
-
-    const getHistoryDisplayName = (historyName: string, lang: 'en' | 'ru' = 'en'): string => {
-        const displayName = historyDisplayNames[historyName];
-        if (displayName) {
-            return displayName[lang];
-        }
-        // Если нет специального названия, используем имя с заглавной буквы
-        return historyName.charAt(0).toUpperCase() + historyName.slice(1);
+    const getHistoryDisplayName = (agentItem: { historyName: string; displayName?: string | null; displayNameEn?: string | null }, lang: 'en' | 'ru'): string => {
+        const fallback = agentItem.historyName.charAt(0).toUpperCase() + agentItem.historyName.slice(1);
+        if (lang === 'en') return agentItem.displayNameEn || agentItem.displayName || fallback;
+        return agentItem.displayName || fallback;
     };
 
 
@@ -112,12 +104,12 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                                       <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                           <span className="font-semibold text-white">
-                                            {getHistoryDisplayName(agentItem.historyName, language)}
+                                            {getHistoryDisplayName(agentItem, language)}
                                           </span>
                                         </div>
-                                        {agentItem.description && (
+                                        {(language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description) && (
                                           <p className="text-xs text-gray-300 mt-1 mb-1">
-                                            {agentItem.description}
+                                            {language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description}
                                           </p>
                                         )}
                                       </div>

@@ -8,7 +8,7 @@ import EnergyInfoModal from '@/components/modals/EnergyInfoModal';
 
 
 const Header: React.FC = observer(() => {
-    const { user, chat } = useContext(Context) as IStoreContext;
+    const { user, chat, agent } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const [gemsInfoOpen, setGemsInfoOpen] = useState(false);
@@ -47,6 +47,15 @@ const Header: React.FC = observer(() => {
         user.changeLanguage(newLanguage);
     }
 
+    const historyTitle = (() => {
+        const historyName = user.user?.selectedHistoryName || 'starwars';
+        const fallback = historyName.charAt(0).toUpperCase() + historyName.slice(1);
+        const meta = agent.getAgentByHistoryName(historyName);
+        if (!meta) return fallback;
+        if (language === 'en') return meta.displayNameEn || meta.displayName || fallback;
+        return meta.displayName || fallback;
+    })();
+
     return (
         <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
             {/* App Header */}
@@ -71,10 +80,7 @@ const Header: React.FC = observer(() => {
                     </div>
                         <div className="flex items-center w-fit">
                             <span className="text-white text-sm font-medium leading-none text-center w-fit whitespace-nowrap">
-                                {(() => {
-                                    const historyName = user.user?.selectedHistoryName || 'starwars';
-                                    return historyName.charAt(0).toUpperCase() + historyName.slice(1);
-                                })()}
+                                {historyTitle}
                             </span>
                         </div>
                 </div>

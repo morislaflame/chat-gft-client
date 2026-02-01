@@ -40,7 +40,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     isFromHeader = false,
     onClose
 }) => {
-    const { t } = useTranslate();
+    const { t, language } = useTranslate();
     const [ref, bounds] = useMeasure();
     const {hapticImpact} = useHapticFeedback();
     const hasTrackedViewRef = React.useRef(false);
@@ -159,7 +159,11 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                 <div key={agent.id} ref={ref} className='flex flex-col w-full justify-center items-center'>
                                     <HistoryCard
                                         title={getHistoryDisplayName(agent.historyName)}
-                                        description={agent.description || t('startYourAdventure')}
+                                        description={
+                                          (language === 'en'
+                                            ? (agent.descriptionEn || agent.description)
+                                            : agent.description) || t('startYourAdventure')
+                                        }
                                         selectText={selectText}
                                         loadingText={loadingText}
                                         isSaving={saving}

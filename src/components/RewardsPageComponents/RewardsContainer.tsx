@@ -22,7 +22,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 const RewardsContainer: React.FC = observer(() => {
     const { reward, user, cases } = useContext(Context) as IStoreContext;
-    const { t } = useTranslate();
+    const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const navigate = useNavigate();
     const location = useLocation();
@@ -85,14 +85,19 @@ const RewardsContainer: React.FC = observer(() => {
 
     const ownedCasesData = useMemo(() => {
         const counts = new Map<number, number>();
-        const sampleCaseMeta = new Map<number, { name?: string; description?: string | null; price?: number }>();
+        const sampleCaseMeta = new Map<
+            number,
+            { name?: string; nameEn?: string | null; description?: string | null; descriptionEn?: string | null; price?: number }
+        >();
 
         for (const uc of myUnopenedCases) {
             counts.set(uc.caseId, (counts.get(uc.caseId) || 0) + 1);
             if (!sampleCaseMeta.has(uc.caseId) && uc.case) {
                 sampleCaseMeta.set(uc.caseId, {
                     name: uc.case.name,
+                    nameEn: uc.case.nameEn ?? null,
                     description: uc.case.description,
+                    descriptionEn: uc.case.descriptionEn ?? null,
                     price: uc.case.price,
                 });
             }
@@ -114,7 +119,9 @@ const RewardsContainer: React.FC = observer(() => {
                 box: {
                     id: caseId,
                     name: meta?.name || `Case #${caseId}`,
+                    nameEn: meta?.nameEn ?? null,
                     description: meta?.description ?? null,
+                    descriptionEn: meta?.descriptionEn ?? null,
                     price: meta?.price ?? 0,
                     isActive: false,
                     createdAt: '',
@@ -305,6 +312,7 @@ const RewardsContainer: React.FC = observer(() => {
                         isCreating: reward.isCreatingWithdrawal(userReward.id)
                     })}
                     t={t}
+                    language={language}
                 />
                 );
             })()}

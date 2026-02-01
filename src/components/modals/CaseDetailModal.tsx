@@ -24,10 +24,15 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
   animations,
   onGoToCase,
 }) => {
-  const { t } = useTranslate();
+  const { t, language } = useTranslate();
   const { hapticImpact } = useHapticFeedback();
 
   if (!box) return null;
+
+  const title = (language === 'en' ? (box.nameEn || box.name) : box.name) || box.name;
+  const description =
+    ((language === 'en' ? (box.descriptionEn || box.description) : box.description) ?? null) ||
+    null;
 
   const handleClose = () => {
     hapticImpact('soft');
@@ -71,7 +76,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
             <LazyMediaRenderer
               mediaFile={box.mediaFile}
               animations={animations}
-              name={box.name}
+              name={title}
               className="w-36 h-36 object-contain"
               loop={false}
               loadOnIntersect={false}
@@ -86,10 +91,10 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
           transition={{ delay: 0.2 }}
           className="text-center mb-4"
         >
-          <h2 className="text-2xl font-bold text-white mb-1">{box.name}</h2>
+          <h2 className="text-2xl font-bold text-white mb-1">{title}</h2>
 
-          {box.description && (
-            <p className="text-sm text-gray-300 mb-4 leading-relaxed">{box.description}</p>
+          {description && (
+            <p className="text-sm text-gray-300 mb-4 leading-relaxed">{description}</p>
           )}
 
         </motion.div>

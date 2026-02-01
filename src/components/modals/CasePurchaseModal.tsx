@@ -23,9 +23,10 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
   animations,
   onGoToCase,
 }) => {
-  const { t } = useTranslate();
+  const { t, language } = useTranslate();
 
   if (!box) return null;
+  const title = (language === 'en' ? (box.nameEn || box.name) : box.name) || box.name;
 
   return (
     <Modal
@@ -76,7 +77,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
               <LazyMediaRenderer
                 mediaFile={box.mediaFile}
                 animations={animations}
-                name={box.name}
+                name={title}
                 className="w-28 h-28 object-contain"
                 loop={false}
                 loadOnIntersect={false}
@@ -86,7 +87,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
 
           <div className="text-center">
             <div className="text-lg font-semibold text-white mb-1">
-              {box.name}
+              {title}
             </div>
           </div>
         </motion.div>

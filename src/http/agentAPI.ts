@@ -4,7 +4,10 @@ import type { MediaFile } from '@/types/types';
 export interface Agent {
     id: number;
     historyName: string;
+    displayName?: string | null;
+    displayNameEn?: string | null;
     description?: string | null;
+    descriptionEn?: string | null;
     orderIndex: number;
     createdAt: string;
     video?: MediaFile | null;

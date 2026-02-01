@@ -30,6 +30,7 @@ type RewardsGridProps = {
     getBoxPurchaseState: (box: CaseBox) => { isPurchasing: boolean; isDisabled: boolean; canAfford: boolean };
     getWithdrawalState: (userReward: UserReward) => { status: string | null; isCreating: boolean };
     t: TranslateFn;
+    language: 'ru' | 'en';
 };
 
 const RewardsGrid: React.FC<RewardsGridProps> = ({
@@ -46,6 +47,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
     getBoxPurchaseState,
     getWithdrawalState,
     t,
+    language,
     cases = [],
     ownedCases = [],
     myUnopenedCases = [],
@@ -84,6 +86,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                                         hasUnopenedCase={hasUnopenedCase}
                                         unopenedCount={unopenedCount}
                                         t={t}
+                                        language={language}
                                     />
                                 </div>
                             );
@@ -106,6 +109,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                                     animations={boxAnimations}
                                     onOpen={onOwnedCaseOpen}
                                     t={t}
+                                    language={language}
                                 />
                             </div>
                         ))}

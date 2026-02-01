@@ -91,7 +91,13 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
         onComplete();
     };
 
-    const getHistoryName = (historyName: string) => getHistoryDisplayName(historyName, language);
+    const getHistoryName = (historyName: string) => {
+        const fallback = getHistoryDisplayName(historyName, language);
+        const a = agent.getAgentByHistoryName(historyName);
+        if (!a) return fallback;
+        if (language === 'en') return a.displayNameEn || a.displayName || fallback;
+        return a.displayName || fallback;
+    };
 
     const onboardingContent = (
         <div

@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import type { DailyReward } from '@/http/dailyRewardAPI';
+import { useTranslate } from '@/utils/useTranslate';
 
 interface DailyRewardProgressProps {
   dailyRewardDay: number;
@@ -16,6 +17,7 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
   allRewards,
   onDayClick
 }) => {
+  const { t } = useTranslate();
   // Определяем, какие дни собраны
   const isDayClaimed = (day: number): boolean => {
     if (!lastDailyRewardClaimAt) return false;
@@ -33,10 +35,10 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
     <div className="bg-primary-800 border border-primary-700 rounded-xl px-4 pt-2 pb-4">
         <div className='flex flex-col gap-1 mb-4'>
             <h3 className="text-sm font-semibold text-white">
-                Ежедневные награды
+                {t('dailyRewards')}
             </h3>
             <p className='text-xs text-gray-400'>
-                Заходите каждый день и получайте награды
+                {t('dailyRewardsDesc')}
             </p>
         </div>
       <div className="flex items-center justify-between relative">

@@ -51,7 +51,9 @@ export interface Message {
     mission?: {
         id: number;
         title: string;
+        titleEn?: string | null;
         description?: string | null;
+        descriptionEn?: string | null;
         orderIndex: number;
     };
     missionId?: number | null;
@@ -81,7 +83,9 @@ export interface Mission {
     id: number;
     agentId: number;
     title: string;
+    titleEn?: string | null;
     description?: string | null;
+    descriptionEn?: string | null;
     orderIndex: number;
     video?: MediaFile | null;
 }

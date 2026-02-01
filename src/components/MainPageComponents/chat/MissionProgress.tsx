@@ -7,13 +7,21 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 const MissionProgressBase: React.FC = () => {
   const { chat } = React.useContext(Context) as IStoreContext;
-  const { t } = useTranslate();
+  const { t, language } = useTranslate();
   const { hapticImpact } = useHapticFeedback();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const progressPercent = chat.forceProgress;
-  const mission = chat.mission;
+  const missionText = chat.mission;
   const currentStage = chat.currentStage;
+
+  const missionMeta = chat.missions.find((m) => m.orderIndex === currentStage) || null;
+  const missionTitle = missionMeta
+    ? (language === 'en' ? (missionMeta.titleEn || missionMeta.title) : missionMeta.title)
+    : null;
+  const missionDescription = missionMeta
+    ? (language === 'en' ? (missionMeta.descriptionEn || missionMeta.description) : missionMeta.description)
+    : null;
 
   const handleToggle = () => {
     hapticImpact('soft');
@@ -33,7 +41,7 @@ const MissionProgressBase: React.FC = () => {
                 <i className="fas fa-gift mr-1"></i>
                 {t('mission')} {currentStage}
               </span>
-              {mission && (
+              {(missionTitle || missionText) && (
                 <button
                   className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
                   aria-label="Toggle mission"
@@ -52,7 +60,7 @@ const MissionProgressBase: React.FC = () => {
 
           {/* Current Mission - Collapsible */}
           <AnimatePresence>
-            {mission && isExpanded && (
+            {(missionTitle || missionText) && isExpanded && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
@@ -61,10 +69,27 @@ const MissionProgressBase: React.FC = () => {
                 className="overflow-hidden"
               >
                 <div className="mt-4 bg-primary-800 p-2 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <span className="text-xs text-gray-100">{t('mission')}:</span>
-                    <span className="flex-1 text-xs text-gray-400">{mission}</span>
-                  </div>
+                  {missionTitle ? (
+                    <div className="flex items-start gap-2 mb-1">
+                      {/* <span className="text-xs text-gray-100">{t('mission')}:</span> */}
+                      <span className="flex-1 text-md text-gray-200">{missionTitle}</span>
+                    </div>
+                  ) : null}
+
+                  {missionDescription ? (
+                    <div className="flex items-start gap-2 mt-1">
+                      {/* <span className="text-xs text-gray-100">{t('mission')}:</span> */}
+                      <span className="flex-1 text-xs text-gray-400">{missionDescription}</span>
+                    </div>
+                  ) : null}
+
+                  {/* Fallback to the dynamic mission text from LLM service (if any) */}
+                  {missionText && !missionDescription ? (
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs text-gray-100">{t('mission')}:</span>
+                      <span className="flex-1 text-xs text-gray-400">{missionText}</span>
+                    </div>
+                  ) : null}
                 </div>
               </motion.div>
             )}

@@ -490,6 +490,15 @@ type TranslationType = {
         ru: 'Стоимость',
         en: 'Cost'
     },
+    // DailyRewardProgress
+    dailyRewards: {
+        ru: 'Ежедневные награды',
+        en: 'Daily rewards'
+    },
+    dailyRewardsDesc: {
+        ru: 'Заходите каждый день и получайте награды',
+        en: 'Come every day and get rewards'
+    },
     // DailyRewardModal
     dailyReward: {
         ru: 'Ежедневная награда',

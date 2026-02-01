@@ -69,7 +69,9 @@ export default class ChatStore {
             mission: {
                 id: mission.id,
                 title: mission.title,
+                titleEn: mission.titleEn ?? null,
                 description: mission.description,
+                descriptionEn: mission.descriptionEn ?? null,
                 orderIndex: mission.orderIndex,
             },
             missionId: mission.id,

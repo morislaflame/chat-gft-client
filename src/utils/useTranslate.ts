@@ -13,5 +13,14 @@ export const useTranslate = () => {
 
   const t = useCallback((key: string) => translate(key, language), [language]);
 
-  return useMemo(() => ({ t, language }), [t, language]);
+  const pick = useCallback(
+    (value: { ru?: string | null; en?: string | null } | null | undefined, fallback = "") => {
+      if (!value) return fallback;
+      const selected = language === "en" ? value.en : value.ru;
+      return selected ?? fallback;
+    },
+    [language]
+  );
+
+  return useMemo(() => ({ t, language, pick }), [t, language, pick]);
 };

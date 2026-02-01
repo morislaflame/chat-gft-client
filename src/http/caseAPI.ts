@@ -24,7 +24,9 @@ export interface CaseItem {
 export interface CaseBox {
   id: number;
   name: string;
+  nameEn?: string | null;
   description?: string | null;
+  descriptionEn?: string | null;
   price: number;
   isActive: boolean;
   image?: string | null;
@@ -43,7 +45,10 @@ export interface UserCase {
   resultRewardId: number | null;
   createdAt?: string;
   updatedAt?: string;
-  case?: Pick<CaseBox, 'id' | 'name' | 'description' | 'price' | 'image' | 'isActive'>;
+  case?: Pick<
+    CaseBox,
+    'id' | 'name' | 'nameEn' | 'description' | 'descriptionEn' | 'price' | 'image' | 'isActive'
+  >;
 }
 
 export interface PurchaseCaseResponse {

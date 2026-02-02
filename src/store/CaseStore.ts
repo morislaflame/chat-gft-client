@@ -137,6 +137,29 @@ class CaseStore {
     }
   }
 
+  // Add unopened cases immediately without refetch (e.g. awarded from missions/daily rewards)
+  addUnopenedCasesFromExternal(userCases: Array<Pick<UserCase, 'id' | 'userId' | 'caseId' | 'isOpened'> & Partial<UserCase>>) {
+    if (!userCases || userCases.length === 0) return;
+    const normalized: UserCase[] = userCases.map((uc) => ({
+      id: uc.id,
+      userId: uc.userId,
+      caseId: uc.caseId,
+      isOpened: uc.isOpened ?? false,
+      resultType: (uc as UserCase).resultType ?? null,
+      resultRewardId: (uc as UserCase).resultRewardId ?? null,
+      createdAt: uc.createdAt,
+      updatedAt: uc.updatedAt,
+      case: uc.case,
+    }));
+
+    const existingIds = new Set(this.myUnopenedCases.map((c) => c.id));
+    const toAdd = normalized.filter((c) => !existingIds.has(c.id));
+    if (toAdd.length === 0) return;
+
+    this.myUnopenedCases = [...toAdd, ...this.myUnopenedCases];
+    this._unopenedLoaded = true;
+  }
+
   private applyOpenCaseEffects(response: OpenCaseResponse) {
     if (this._userStore) {
       this._userStore.setBalance(response.balance);

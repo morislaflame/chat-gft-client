@@ -2,6 +2,8 @@ import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
 import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile, Mission } from "@/types/types";
 import type UserStore from "@/store/UserStore";
+import type CaseStore from "@/store/CaseStore";
+import type { UserCase } from "@/http/caseAPI";
 import { trackEvent } from "@/utils/analytics";
 
 export default class ChatStore {
@@ -14,6 +16,7 @@ export default class ChatStore {
     _loading = false;
     _error = '';
     _userStore: UserStore | null = null;
+    _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
     _insufficientEnergy = false;
     _video: MediaFile | null = null;
@@ -32,6 +35,10 @@ export default class ChatStore {
 
     setUserStore(userStore: UserStore) {
         this._userStore = userStore;
+    }
+
+    setCaseStore(caseStore: CaseStore) {
+        this._caseStore = caseStore;
     }
 
     setMessages(messages: Message[]) {
@@ -276,16 +283,50 @@ export default class ChatStore {
             if (response.newBalance !== undefined && this._userStore) {
                 // Если миссия завершена (missionCompleted), вычисляем сумму награды
                 if (response.missionCompleted) {
-                    const rewardAmount = response.newBalance - previousBalance;
-                    
-                    // Используем completedStage из ответа (если есть), иначе вычисляем предыдущий этап
-                    const stageNumber = response.completedStage || (response.stage ? (response.stage === 1 ? 3 : response.stage - 1) : 1);
-                    
+                    const stageNumber =
+                        response.stageReward?.stageNumber ??
+                        response.completedStage ??
+                        (response.stage ? (response.stage === 1 ? 3 : response.stage - 1) : 1);
+
+                    const rewardAmount =
+                        typeof response.stageReward?.rewardAmount === 'number'
+                            ? response.stageReward.rewardAmount
+                            : (response.newBalance - previousBalance);
+
                     this.setStageReward({
-                        stageNumber: stageNumber,
-                        rewardAmount: rewardAmount,
-                        isOpen: true
+                        stageNumber,
+                        rewardAmount,
+                        rewardCaseId: response.stageReward?.rewardCaseId ?? null,
+                        rewardCase: response.stageReward?.rewardCase ?? null,
+                        isOpen: true,
                     });
+
+                    // If a case was granted, push it into CaseStore immediately (like purchase flow).
+                    const createdCases: Array<
+                        Pick<UserCase, 'id' | 'userId' | 'caseId' | 'isOpened'> & Partial<UserCase>
+                    > = (response.userCases?.length
+                        ? response.userCases
+                        : response.userCase
+                            ? [response.userCase]
+                            : []
+                    ).map((uc) => ({
+                        id: uc.id,
+                        userId: uc.userId,
+                        caseId: uc.caseId,
+                        isOpened: uc.isOpened,
+                        // ensure required fields for UserCase exist for downstream consumers
+                        resultType: uc.resultType ?? null,
+                        resultRewardId: uc.resultRewardId ?? null,
+                        createdAt: uc.createdAt,
+                        updatedAt: uc.updatedAt,
+                    }));
+                    if (createdCases.length > 0 && this._caseStore) {
+                        // The message endpoint returns a subset of fields; normalize inside CaseStore.
+                        this._caseStore.addUnopenedCasesFromExternal(createdCases);
+                    } else if (response.stageReward?.rewardCaseId && this._caseStore) {
+                        // Fallback for older backend responses: refetch unopened cases.
+                        void this._caseStore.fetchMyUnopenedCases(true);
+                    }
 
                     trackEvent('mission_completed', {
                         stage: stageNumber,

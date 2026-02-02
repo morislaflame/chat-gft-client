@@ -98,6 +98,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     // и ChatStore в AgentStore для загрузки истории после выбора
     if (stores) {
       stores.chat.setUserStore(stores.user);
+      stores.chat.setCaseStore(stores.cases);
       stores.dailyReward.setUserStore(stores.user);
       stores.agent.setUserStore(stores.user);
       stores.agent.setChatStore(stores.chat);

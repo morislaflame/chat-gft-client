@@ -74,6 +74,40 @@ export interface ApiMessageResponse {
     missionCompleted?: boolean;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
+    stageReward?: {
+        stageNumber: number;
+        rewardAmount: number | null;
+        rewardCaseId?: number | null;
+        rewardCase?: {
+            id: number;
+            name: string;
+            nameEn?: string | null;
+            description?: string | null;
+            descriptionEn?: string | null;
+            mediaFile?: { id: number; url: string; mimeType: string } | null;
+        } | null;
+    } | null;
+    // If mission completion granted a case, backend returns created UserCase record(s)
+    userCase?: {
+        id: number;
+        userId: number;
+        caseId: number;
+        isOpened: boolean;
+        resultType?: 'reward' | 'gems' | 'energy' | null;
+        resultRewardId?: number | null;
+        createdAt?: string;
+        updatedAt?: string;
+    } | null;
+    userCases?: Array<{
+        id: number;
+        userId: number;
+        caseId: number;
+        isOpened: boolean;
+        resultType?: 'reward' | 'gems' | 'energy' | null;
+        resultRewardId?: number | null;
+        createdAt?: string;
+        updatedAt?: string;
+    }>;
     mission?: string;
     progressPercent?: number; // Процент прогресса по миссии (0-100)
     timestamp: string;
@@ -118,6 +152,15 @@ export interface ProgressData {
 export interface StageRewardData {
     stageNumber: number;
     rewardAmount: number;
+    rewardCaseId?: number | null;
+    rewardCase?: {
+        id: number;
+        name: string;
+        nameEn?: string | null;
+        description?: string | null;
+        descriptionEn?: string | null;
+        mediaFile?: { id: number; url: string; mimeType: string } | null;
+    } | null;
     isOpen: boolean;
 }
 

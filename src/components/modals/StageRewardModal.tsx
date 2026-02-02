@@ -5,12 +5,24 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '../CoreComponents/Button';
+import LazyMediaRenderer from '@/utils/lazy-media-renderer';
+import { useAnimationLoader } from '@/utils/useAnimationLoader';
 
 const StageRewardModal: React.FC = observer(() => {
-  const { chat } = useContext(Context) as IStoreContext;
+  const { chat, user } = useContext(Context) as IStoreContext;
   const { t } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
+  const language = user.user?.language || 'ru';
+
+  const caseItems = [stageReward?.rewardCase].filter(Boolean) as Array<
+    NonNullable<NonNullable<typeof stageReward>['rewardCase']>
+  >;
+  const [animations] = useAnimationLoader(
+    caseItems,
+    (c) => c.mediaFile,
+    [isOpen]
+  );
 
   const handleClose = () => {
     chat.closeStageReward();
@@ -58,6 +70,35 @@ const StageRewardModal: React.FC = observer(() => {
           transition={{ delay: 0.3 }}
           className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
         >
+          {stageReward.rewardCase ? (
+            <div className="flex flex-col items-center gap-3 mb-3">
+              {(() => {
+                const c = stageReward.rewardCase;
+                const title = language === 'en' ? (c.nameEn || c.name) : c.name;
+                return (
+                  <div className="flex flex-col items-center">
+                    {c.mediaFile ? (
+                      <LazyMediaRenderer
+                        mediaFile={c.mediaFile}
+                        animations={animations}
+                        name={title}
+                        className="w-24 h-24 object-contain"
+                        loop={false}
+                        loadOnIntersect={false}
+                        autoplay={true}
+                      />
+                    ) : (
+                      <i className="fa-solid fa-box text-white text-4xl" />
+                    )}
+                    <div className="text-sm text-gray-200 mt-2 font-semibold text-center">
+                      {title}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : null}
+
           <div className="flex items-center justify-center gap-2">
             <span className="text-3xl font-bold text-white">
               +{stageReward.rewardAmount}

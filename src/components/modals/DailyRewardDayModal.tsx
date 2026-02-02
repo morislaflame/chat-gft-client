@@ -5,6 +5,8 @@ import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/CoreComponents/Button';
 import type { DailyReward } from '@/http/dailyRewardAPI';
+import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { useAnimationLoader } from '@/utils/useAnimationLoader';
 
 interface DailyRewardDayModalProps {
   isOpen: boolean;
@@ -21,8 +23,15 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
   reward,
   isClaimed
 }) => {
-  const { t } = useTranslate();
+  const { t, language } = useTranslate();
   
+  const caseItems = (reward?.rewardCase ? [reward.rewardCase] : []) as Array<{
+    mediaFile?: { url: string; mimeType: string } | null;
+    name: string;
+    nameEn?: string | null;
+  }>;
+  const [animations] = useAnimationLoader(caseItems, (c) => c.mediaFile || null, [reward?.id ?? 0]);
+
   if (!day || !reward) return null;
 
   const energyAmount =
@@ -33,6 +42,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
     (reward.secondRewardType === 'tokens' ? (reward.secondReward ?? 0) : 0);
   const isEnergyAvailable = energyAmount > 0;
   const isTokensAvailable = tokensAmount > 0;
+  const isCaseAvailable = !!reward.rewardCase;
 
   return (
     <Modal
@@ -80,6 +90,37 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
         >
           <div className="text-center">
             <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div>
+            {isCaseAvailable ? (
+              <div className="flex items-center justify-center gap-4 mb-3 flex-wrap">
+                {[reward.rewardCase].filter(Boolean).map((c, idx) => {
+                  const caseEntity = c as NonNullable<typeof c>;
+                  const title =
+                    language === 'en'
+                      ? (caseEntity.nameEn || caseEntity.name)
+                      : caseEntity.name;
+                  return (
+                    <div key={`${reward.id}-case-${idx}`} className="flex flex-col items-center">
+                      {caseEntity.mediaFile ? (
+                        <LazyMediaRenderer
+                          mediaFile={caseEntity.mediaFile}
+                          animations={animations}
+                          name={title}
+                          className="w-20 h-20 object-contain"
+                          loop={false}
+                          loadOnIntersect={false}
+                          autoplay={true}
+                        />
+                      ) : (
+                        <i className="fa-solid fa-box text-white text-3xl" />
+                      )}
+                      <div className="text-xs text-gray-200 mt-2 text-center max-w-[120px] line-clamp-2">
+                        {title}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <div className="flex items-center justify-center gap-3 mb-2">
               {isEnergyAvailable && (
                 <div className="flex items-center gap-2">

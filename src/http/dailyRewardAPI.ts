@@ -7,6 +7,18 @@ export interface DailyReward {
   day: number;
   reward: number;
   rewardType: 'energy' | 'tokens';
+  rewardCaseId?: number | null;
+  rewardCase?: {
+    id: number;
+    name: string;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionEn?: string | null;
+    price: number;
+    isActive: boolean;
+    image?: string | null;
+    mediaFile?: { id: number; url: string; mimeType: string } | null;
+  } | null;
   secondReward: number;
   secondRewardType: 'energy' | 'tokens' | null;
   description: string;

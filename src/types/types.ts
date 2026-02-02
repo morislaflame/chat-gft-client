@@ -246,6 +246,15 @@ export interface DailyRewardCheckResponse {
       day: number;
       reward: number;
       rewardType: RewardType;
+      rewardCaseId?: number | null;
+      rewardCase?: {
+        id: number;
+        name: string;
+        nameEn?: string | null;
+        description?: string | null;
+        descriptionEn?: string | null;
+        mediaFile?: { id: number; url: string; mimeType: string } | null;
+      } | null;
       secondReward?: number | null;
       secondRewardType?: RewardType | null;
       description: string;
@@ -259,10 +268,25 @@ export interface DailyRewardCheckResponse {
       day: number;
       reward: number;
       rewardType: RewardType;
+      rewardCaseId?: number | null;
+      rewardCase?: {
+        id: number;
+        name: string;
+        nameEn?: string | null;
+        description?: string | null;
+        descriptionEn?: string | null;
+        mediaFile?: { id: number; url: string; mimeType: string } | null;
+      } | null;
       secondReward?: number | null;
       secondRewardType?: RewardType | null;
       description: string;
     };
+    userCases?: Array<{
+      id: number;
+      userId: number;
+      caseId: number;
+      isOpened: boolean;
+    }>;
     user: {
       dailyRewardDay: number;
       lastDailyRewardClaimAt: string;

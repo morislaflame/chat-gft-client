@@ -12,6 +12,7 @@ interface MediaRendererProps {
   name?: string;
   className?: string;
   loop?: boolean;
+  autoplay?: boolean;
   isLoading?: boolean;
 }
 
@@ -23,6 +24,7 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({
   name = "",
   className = "",
   loop = false,
+  autoplay = false,
 }) => {
   const [itemLoaded, setItemLoaded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -46,6 +48,7 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({
         animationData={pepeZaglushkaAnimation}
         className={className}
         loop={false}
+        autoplay={autoplay}
       />
     );
   }
@@ -59,6 +62,7 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({
           animationData={animations[url]}
           className={className}
           loop={loop}
+          autoplay={autoplay}
         />
       );
     } else if (mimeType.startsWith('image/')) {
@@ -69,6 +73,7 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({
               animationData={pepeZaglushkaAnimation}
               className={className}
               loop={false}
+              autoplay={autoplay}
             />
           )}
           <img 
@@ -90,6 +95,7 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({
             animationData={pepeZaglushkaAnimation}
             className={className}
             loop={false}
+            autoplay={autoplay}
           />
         )}
         <img 

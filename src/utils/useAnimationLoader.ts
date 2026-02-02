@@ -21,6 +21,18 @@ export const useAnimationLoader = <T>(
   const [isLoading, setIsLoading] = useState(false);
   const loadedUrls = useRef<Set<string>>(new Set());
 
+  // IMPORTANT: `items` is often passed as a freshly created array on each render.
+  // If we depend on `items` identity, we can trigger an infinite render loop:
+  // render -> effect -> setState -> render -> new array -> effect -> ...
+  // Use a stable, content-based key (URLs) instead.
+  const urlsKey = items
+    .map((item) => {
+      const mf = getMediaFile(item);
+      return mf && mf.mimeType === 'application/json' ? mf.url : '';
+    })
+    .filter(Boolean)
+    .join('|');
+
   useEffect(() => {
     let isCancelled = false;
 
@@ -61,7 +73,7 @@ export const useAnimationLoader = <T>(
       isCancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, ...deps]);
+  }, [urlsKey, ...deps]);
 
   return [animations, isLoading];
 };

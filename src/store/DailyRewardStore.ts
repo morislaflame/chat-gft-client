@@ -20,6 +20,15 @@ export default class DailyRewardStore {
     day: number;
     reward: number;
     rewardType: 'energy' | 'tokens';
+    rewardCaseId?: number | null;
+    rewardCase?: {
+      id: number;
+      name: string;
+      nameEn?: string | null;
+      description?: string | null;
+      descriptionEn?: string | null;
+      mediaFile?: { id: number; url: string; mimeType: string } | null;
+    } | null;
     secondReward?: number | null;
     secondRewardType?: 'energy' | 'tokens' | null;
     description: string;
@@ -116,6 +125,7 @@ export default class DailyRewardStore {
         day_index: data.reward.day,
         reward: data.reward.reward,
         reward_type: data.reward.rewardType,
+        reward_case_id: (data.reward as { rewardCaseId?: number | null }).rewardCaseId ?? null,
         second_reward: data.reward.secondReward ?? 0,
         second_reward_type: data.reward.secondRewardType ?? null,
       });

@@ -14,6 +14,7 @@ interface LazyMediaRendererProps {
   className?: string;
   loop?: boolean;
   loadOnIntersect?: boolean;
+  autoplay?: boolean;
 }
 
 export const LazyMediaRenderer: React.FC<LazyMediaRendererProps> = ({
@@ -23,7 +24,8 @@ export const LazyMediaRenderer: React.FC<LazyMediaRendererProps> = ({
   name = "",
   className = "",
   loop = false,
-  loadOnIntersect = true
+  loadOnIntersect = true,
+  autoplay = false
 }) => {
   // const [_isVisible, setIsVisible] = useState(!loadOnIntersect);
   const [isIntersected, setIsIntersected] = useState(!loadOnIntersect);
@@ -66,12 +68,14 @@ export const LazyMediaRenderer: React.FC<LazyMediaRendererProps> = ({
           name={name}
           className={className}
           loop={loop}
+          autoplay={autoplay}
         />
       ) : (
         <VisibleLottie
           animationData={pepeZaglushkaAnimation}
           className={className}
           loop={false}
+          autoplay={autoplay}
         />
       )}
     </div>

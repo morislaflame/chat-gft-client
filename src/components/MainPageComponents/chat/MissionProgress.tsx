@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { Button } from '@/components/ui/button';
 
 const MissionProgressBase: React.FC = () => {
   const { chat } = React.useContext(Context) as IStoreContext;
@@ -42,12 +43,18 @@ const MissionProgressBase: React.FC = () => {
                 {t('mission')} {currentStage}
               </span>
               {(missionTitle || missionText) && (
-                <button
-                  className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  icon={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggle();
+                  }}
+                  className="text-amber-400 hover:text-amber-300 h-8 w-8 shrink-0"
                   aria-label="Toggle mission"
-                >
-                  <i className={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
-                </button>
+                />
               )}
             </div>
           </div>
@@ -68,7 +75,7 @@ const MissionProgressBase: React.FC = () => {
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="overflow-hidden"
               >
-                <div className="mt-4 bg-primary-800 p-2 rounded-lg">
+                <div className="mt-4 bg-card p-2 rounded-lg">
                   {missionTitle ? (
                     <div className="flex items-start gap-2 mb-1">
                       {/* <span className="text-xs text-gray-100">{t('mission')}:</span> */}

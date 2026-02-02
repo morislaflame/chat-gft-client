@@ -20,7 +20,7 @@ const OwnedBoxCard: React.FC<OwnedBoxCardProps> = ({ box, count, animations, onO
     null;
 
   return (
-    <div className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center">
+    <div className="bg-card border border-primary-700 rounded-xl p-4 flex flex-col items-center">
       <div className="mb-2 flex items-center justify-center">
         <LazyMediaRenderer
           mediaFile={box.mediaFile}

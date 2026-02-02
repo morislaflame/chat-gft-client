@@ -1,40 +1,253 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-900: #121826;
-  --color-primary-800: #1E293B;
-  --color-primary-700: #334155;
-  --color-primary-600: #475569;
+  --color-primary-900: hsl(0, 0%, 2%);
+  --color-primary-800: hsl(0, 0%, 7%);
+  --color-primary-700: hsl(0, 0%, 12%);
+  --color-primary-600: hsl(0, 0%, 20%);
   --color-primary-500: #64748B;
   --color-secondary-500: #8B5CF6;
   --color-secondary-400: #A78BFA;
-  --color-accent: #EC4899;
-  
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-wiggle: wiggle 1s ease-in-out infinite;
-  --animate-confetti-fall: confettiFall 5s linear forwards;
-  --animate-bounce-slow: bounceSlow 2s infinite;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
+@layer base {
+  /*
+    shadcn/ui design tokens.
+    We keep defaults dark for now (your app is mostly dark),
+    later we can introduce a real light theme by changing :root and using .dark toggle.
+  */
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 210 40% 98%;
 
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
+    --card: 222 47% 11% 80%;
+    --card-foreground: 210 40% 98%;
 
-@keyframes confettiFall {
-  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-}
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-@keyframes bounceSlow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+    /* Accent purple (shimmering purple can be layered via gradients later) */
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 19% 27%;
+    --input: 0 0% 10%;
+    --transparent: 0 0% 0%;
+    --ring: 262 83% 58%;
+
+    --radius: 0.75rem;
+
+    /* Reusable gradient borders (use with background + background-origin/clip) */
+    --gradient-border-silver: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2), rgba(255,255,255,0.3));
+    --gradient-border-silver-hover: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.25), rgba(255,255,255,0.4));
+    --gradient-border-silver-muted: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12), rgba(255,255,255,0.25));
+    --gradient-border-silver-ghost: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04), rgba(255,255,255,0.08));
+    --gradient-border-silver-ghost-hover: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+    --gradient-border-silver-card: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.15), rgba(255,255,255,0.3));
+    --gradient-border-secondary: linear-gradient(135deg, rgba(167,139,250,0.3), rgba(139,92,246,0.15), rgba(167,139,250,0.3));
+    --gradient-border-secondary-hover: linear-gradient(135deg, rgba(167,139,250,0.4), rgba(139,92,246,0.25), rgba(167,139,250,0.4));
+    --gradient-border-outline-hover: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18), rgba(255,255,255,0.35));
+    --gradient-border-destructive: linear-gradient(135deg, rgba(248,113,113,0.6), rgba(239,68,68,0.35), rgba(248,113,113,0.6));
+    --gradient-border-destructive-hover: linear-gradient(135deg, rgba(248,113,113,0.75), rgba(239,68,68,0.5), rgba(248,113,113,0.75));
+    --gradient-border-violet: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(192,132,252,0.15), rgba(255,255,255,0.3));
+    --gradient-border-glass: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18), rgba(255,255,255,0.35));
+    --gradient-border-glass-hover: linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.25), rgba(255,255,255,0.45));
+    
+
+    --gradient-accent-color: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+
+  } 
+
+  .dark {
+    /* Same as :root for now */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 19% 27%;
+    --input: 217 19% 27%;
+    --ring: 262 83% 58%;
+    /* Gradient borders inherited from :root (override here if needed for dark) */
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  .bg-card {
+    background-color: hsl(var(--card));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Default button: gray fill + silver gradient border */
+  .btn-default-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--input)), hsl(var(--input))) padding-box,
+      var(--gradient-border-silver) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+  .btn-default-silver-border:hover {
+    background:
+      linear-gradient(hsl(var(--input)), hsl(var(--input))) padding-box,
+      var(--gradient-border-silver-hover) border-box;
+  }
+
+  .btn-success-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--input)), hsl(var(--input))) padding-box,
+      var(--gradient-border-silver) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .only-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--transparent) / 0.9), hsl(var(--transparent) / 0.9)) padding-box,
+      var(--gradient-border-silver) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /* Secondary: violet/purple gradient border */
+  .btn-secondary-gradient-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--secondary)), hsl(var(--secondary))) padding-box,
+      var(--gradient-border-secondary) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+  .btn-secondary-gradient-border:hover {
+    background:
+      linear-gradient(hsl(var(--secondary) / 0.9), hsl(var(--secondary) / 0.9)) padding-box,
+      var(--gradient-border-secondary-hover) border-box;
+  }
+
+  /* Outline: muted/silver gradient border */
+  .btn-outline-gradient-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      var(--gradient-border-silver-muted) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+  .btn-outline-gradient-border:hover {
+    background:
+      linear-gradient(hsl(var(--accent)), hsl(var(--accent))) padding-box,
+      var(--gradient-border-outline-hover) border-box;
+  }
+
+  /* Ghost: very subtle gradient border (visible on hover) */
+  .btn-ghost-gradient-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      var(--gradient-border-silver-ghost) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+  .btn-ghost-gradient-border:hover {
+    background:
+      linear-gradient(hsl(var(--accent)), hsl(var(--accent))) padding-box,
+      var(--gradient-border-silver-ghost-hover) border-box;
+  }
+
+  /* Destructive: red gradient border */
+  .btn-destructive-gradient-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--destructive)), hsl(var(--destructive))) padding-box,
+      var(--gradient-border-destructive) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+  .btn-destructive-gradient-border:hover {
+    background:
+      linear-gradient(hsl(var(--destructive) / 0.9), hsl(var(--destructive) / 0.9)) padding-box,
+      var(--gradient-border-destructive-hover) border-box;
+  }
+
+  /* Gradient variant: violet/white gradient border */
+  .btn-gradient-border {
+    border: 1px solid transparent;
+    background:
+        var(--gradient-accent-color) padding-box,
+      var(--gradient-border-violet) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /* Glass: white gradient border */
+  .btn-glass-gradient-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(rgba(255,255,255,0.08), rgba(255,255,255,0.06)) padding-box,
+      var(--gradient-border-glass) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .btn-glass-gradient-border:hover {
+    background:
+      linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0.08)) padding-box,
+      var(--gradient-border-glass-hover) border-box;
+  }
+
+  /* Card: silver gradient border + card fill + backdrop blur */
+  .card-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(0 0% 6%), hsl(0 0% 5%)) padding-box,
+      var(--gradient-border-silver-card) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 @keyframes swipeHintLeft {
@@ -65,29 +278,12 @@ html, body {
 
 
 /* body.telegram-mobile #root {
-    height: calc(100vh - var(--tg-safe-area-inset-top, 45px) - var(--tg-content-safe-area-inset-top, 45px));
-    padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
-}
-/*
+  height: calc(100vh - var(--tg-safe-area-inset-top, 45px) - var(--tg-content-safe-area-inset-top, 45px));
+  padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
+} */
 
 
 /* Custom animations and styles from the original HTML */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOutLeft {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(-100%); opacity: 0; }
-}
-
-
 body.telegram-mobile .header {
     margin-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
 }
@@ -96,139 +292,15 @@ body.telegram-mobile .telegram-padding {
     padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
 }
 
-.message-animation {
-    animation: fadeIn 0.3s ease-out forwards;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.slide-in {
-    animation: slideInRight 0.3s ease-out forwards;
-}
-
-.slide-out {
-    animation: slideOutLeft 0.3s ease-out forwards;
-}
-
-.scrolling-hidden {
-    transform: translateY(-100%);
-}
-
-/* CTA Button styles */
-.cta-button {
-    background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-weight: 600;
-    padding: 16px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
-}
-
-.cta-shine {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.cta-button:hover .cta-shine {
-    left: 100%;
-}
-
-/* Tab active indicator */
-.tab-active-indicator {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: transparent;
-    transition: all 0.3s ease;
-}
-
 /* Quest item hover effects */
 .quest-item:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Saber card effects */
-.saber-card {
-    transition: all 0.3s ease;
-}
-
-.saber-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
-}
-
-/* Energy fill animation */
-.energy-fill {
-    transition: width 0.5s ease;
-}
-
 /* Persuasion bar animation */
 .persuasion-bar {
     transition: width 0.5s ease;
-}
-
-/* Chat scrollbar */
-.chat-scrollbar::-webkit-scrollbar {
-    width: 4px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(139, 92, 246, 0.3);
-    border-radius: 2px;
-}
-
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 92, 246, 0.5);
-}
-
-/* NFT image styles */
-.nft-img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-}
-
-/* Confetti animation */
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: #8B5CF6;
-    animation: confettiFall 5s linear forwards;
-}
-
-/* Custom utilities */
-.animate-float {
-    animation: float 6s ease-in-out infinite;
-}
-
-.animate-wiggle {
-    animation: wiggle 1s ease-in-out infinite;
-}
-
-.animate-bounce-slow {
-    animation: bounceSlow 2s infinite;
-}
-
-.animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-swipe-hint-left {
@@ -246,7 +318,6 @@ body.telegram-mobile .telegram-padding {
   
 .ios-scroll {
     -webkit-overflow-scrolling: touch;
-    overflow-scrolling: touch;
 }
 
 /* Scrollbar utilities for suggestions */
@@ -301,13 +372,7 @@ body.telegram-mobile .telegram-padding {
       padding: 10px 0;
   }
   
-  @media (max-width: 768px) {
-    .roulette-pro-regular-design-prize-item-horizontal {
-      /* transform: translateX(18px); */
-    }
-  }
-  
-  
+
   .roulette-pro-regular-prize-item-text {
     font-size: 12px !important;
     font-weight: 600 !important;

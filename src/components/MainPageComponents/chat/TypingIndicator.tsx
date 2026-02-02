@@ -13,7 +13,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = memo(({ avatarUrl }) => 
         <i className="fas fa-mask text-xs"></i>
       )}
     </div>
-    <div className="bg-primary-800 rounded-xl rounded-tl-none px-4 py-3">
+    <div className="bg-card rounded-xl rounded-tl-none px-4 py-3">
       <div className="flex space-x-1">
         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

@@ -50,7 +50,7 @@ const Modal: React.FC<ModalProps> = ({
                 duration: 0.3,
                 bounce: 0.2
               }}
-              className={`bg-primary-800 border border-primary-700 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto ${className}`}
+              className={`bg-card border border-primary-700 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto pointer-events-auto ${className}`}
             >
               {children}
             </motion.div>

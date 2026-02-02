@@ -73,7 +73,7 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
             return (
               <div
                 key={item.id}
-                className="flex-shrink-0 flex flex-col gap-2 items-center w-28 bg-primary-800 border border-primary-700 rounded-xl p-3"
+                className="flex-shrink-0 flex flex-col gap-2 items-center w-28 bg-card border border-primary-700 rounded-xl p-3"
               >
                 <div className="w-8 h-8 flex items-center justify-center">
                   {isReward ? (

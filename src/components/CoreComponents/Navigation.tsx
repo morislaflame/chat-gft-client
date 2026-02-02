@@ -29,7 +29,7 @@ const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange
     };
 
     return (
-        <div className="bg-primary-800 px-1 border-t border-primary-700 w-full py-4 pb-8 fixed bottom-0 left-0 right-0 z-20">
+        <div className="bg-card px-1 border-t border-primary-700 w-full py-4 pb-8 fixed bottom-0 left-0 right-0 z-20">
             
             <div className="flex justify-around">
                 {tabs.map((tab) => (

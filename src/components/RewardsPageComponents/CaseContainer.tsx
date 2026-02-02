@@ -92,7 +92,7 @@ const CaseContainer: React.FC = observer(() => {
             hapticImpact('soft');
             navigate(REWARDS_ROUTE);
           }}
-          className="w-9 h-9 rounded-lg bg-primary-800 hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
+          className="w-9 h-9 rounded-lg bg-card hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
           aria-label="Go back"
         >
           <i className="fa-solid fa-chevron-left text-white" />
@@ -102,7 +102,7 @@ const CaseContainer: React.FC = observer(() => {
       <CaseRoulette caseBox={box} />
 
       {/* Purchase card */}
-      <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4 flex flex-col gap-2 items-center">
+      <div className="bg-card border border-primary-700 rounded-2xl p-4 flex flex-col gap-2 items-center">
         
           <div className="flex items-center gap-2">
             <button

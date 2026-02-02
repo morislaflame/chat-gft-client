@@ -98,7 +98,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
         <div
             key={key}
             onClick={handleCardClick}
-            className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+            className="bg-card border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
         >
             <div className="mb-2 flex items-center justify-center">
                 <LazyMediaRenderer

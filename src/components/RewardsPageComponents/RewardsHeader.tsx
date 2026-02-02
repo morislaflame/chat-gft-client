@@ -25,7 +25,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
             className="fixed inset-x-4 flex items-center justify-between z-100"
             style={{ marginTop: isMobile ? '142px' : '42px' }}
         >
-            <div className="bg-primary-800 border border-primary-700 rounded-xl p-2 w-full">
+            <div className="bg-card border border-primary-700 rounded-xl p-2 w-full">
                 <div className="grid grid-cols-2 gap-2">
                     {tabs.map((tab) => (
                         <div

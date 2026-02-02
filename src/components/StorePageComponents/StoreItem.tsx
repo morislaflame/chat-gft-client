@@ -14,7 +14,7 @@ type StoreItemProps = {
 
 const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t }) => {
     return (
-        <div className="bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between hover:bg-primary-700/50 transition">
+        <div className="bg-card border border-primary-700 rounded-xl p-3 flex items-center justify-between hover:bg-primary-700/50 transition">
             <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full border border-purple-500 bg-gradient-to-br from-purple-500/20 to-violet-600/20 flex items-center justify-center">
                     <div className="flex items-center justify-center gap-1 text-white text-xs font-bold leading-none">

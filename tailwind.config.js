@@ -8,7 +8,36 @@ export default {
   theme: {
     extend: {
       colors: {
+        // shadcn/ui tokens (CSS variables in src/index.css)
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
         primary: {
+          // Keep existing palette (primary-900/800/...) while enabling bg-primary for shadcn components.
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
           900: '#121826',
           800: '#1E293B',
           700: '#334155',
@@ -16,10 +45,13 @@ export default {
           500: '#64748B',
         },
         secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
           500: '#8B5CF6',
           400: '#A78BFA',
         },
-        accent: '#EC4899',
+        // Legacy pink accent (not used currently; kept for compatibility)
+        pinkAccent: '#EC4899',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -27,6 +59,7 @@ export default {
         'wiggle': 'wiggle 1s ease-in-out infinite',
         'confetti-fall': 'confettiFall 5s linear forwards',
         'bounce-slow': 'bounceSlow 2s infinite',
+        'shimmer': 'shimmer 2.2s linear infinite',
       },
       keyframes: {
         float: {
@@ -44,8 +77,17 @@ export default {
         bounceSlow: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-15px)' },
-        }
-      }
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
     }
   },
   plugins: [],

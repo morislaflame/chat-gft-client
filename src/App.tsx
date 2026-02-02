@@ -91,8 +91,8 @@ const App = observer(() => {
 
     if (isAvailable) {
       disableVerticalSwipes();
-      setHeaderColor('#121826');
-      setBackgroundColor('#121826');
+      setHeaderColor('#050505');
+      setBackgroundColor('#050505');
       lockOrientation();
 
       ready();

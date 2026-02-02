@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import Button from '../CoreComponents/Button';
+import { Button } from '@/components/ui/button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import type { MediaFile } from '@/types/types';
@@ -171,10 +171,10 @@ const ChatContainer: React.FC = observer(() => {
                     />
                     <Button
                         type="submit"
-                        variant="secondary"
-                        size="md"
+                        variant="gradient"
+                        size="icon"
                         icon="fas fa-paper-plane"
-                        className="px-4 py-2"
+                        className="shrink-0 h-10 w-10"
                     />
                 </form>
             </div>

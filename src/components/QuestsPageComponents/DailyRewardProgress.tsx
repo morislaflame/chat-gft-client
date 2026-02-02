@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import type { DailyReward } from '@/http/dailyRewardAPI';
 import { useTranslate } from '@/utils/useTranslate';
+import { Card } from '@/components/ui/card';
 
 interface DailyRewardProgressProps {
   dailyRewardDay: number;
@@ -32,7 +33,7 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
   };
 
   return (
-    <div className="bg-primary-800 border border-primary-700 rounded-xl px-4 pt-2 pb-4">
+    <Card>
         <div className='flex flex-col gap-1 mb-4'>
             <h3 className="text-sm font-semibold text-white">
                 {t('dailyRewards')}
@@ -64,7 +65,7 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
               className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 isClaimed
                   ? 'bg-green-500 border-2 border-green-400'
-                  : 'bg-primary-600 border-2 border-primary-500'
+                  : 'btn-default-silver-border'
               }`}
             >
               {isClaimed ? (
@@ -76,7 +77,7 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 });
 

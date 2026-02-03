@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { CaseBox } from '@/http/caseAPI';
@@ -53,13 +53,14 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
     >
       <div className="relative">
         {/* Close button */}
-        <button
+        <Button
           onClick={handleClose}
-          className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-700 transition-colors cursor-pointer"
+          variant="ghost"
+          size="icon"
+          className="absolute top-0 right-0 w-8 h-8 min-w-8"
           aria-label="Close"
-        >
-          <i className="fas fa-times text-white text-xl"></i>
-        </button>
+          icon="fas fa-times"
+        />
 
         {/* Case Media */}
         <motion.div

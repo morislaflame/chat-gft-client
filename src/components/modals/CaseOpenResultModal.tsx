@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { OpenCaseResponse } from '@/http/caseAPI';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
@@ -158,7 +158,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           <Button
             onClick={onClose}
             variant="secondary"
-            size="md"
+            size="default"
             className="w-full"
             icon="fas fa-check"
           >
@@ -167,8 +167,8 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           {isReward ? (
             <Button
               onClick={handleShareToStory}
-              variant="tretiary"
-              size="md"
+              variant="gradient"
+              size="default"
               className="w-full mt-2"
               icon="fas fa-share"
               disabled={isSharing}

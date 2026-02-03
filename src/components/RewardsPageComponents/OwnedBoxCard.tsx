@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 
 type OwnedBoxCardProps = {
   box: CaseBox;
@@ -42,7 +42,7 @@ const OwnedBoxCard: React.FC<OwnedBoxCardProps> = ({ box, count, animations, onO
       <div className="w-full mt-3">
         <Button
           onClick={() => onOpen(box)}
-          variant="secondary"
+          variant="default"
           size="sm"
           className="w-full"
           icon="fas fa-arrow-right"

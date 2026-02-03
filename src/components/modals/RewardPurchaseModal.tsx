@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import type { Reward } from '@/http/rewardAPI';
 import { renderRewardMedia } from '@/utils/rewardUtils';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -193,7 +193,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
           <Button
             onClick={onClose}
             variant="secondary"
-            size="md"
+            size="default"
             className="w-full mb-2"
             icon="fas fa-check"
           >
@@ -202,8 +202,8 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
           {reward.mediaFile ? (
             <Button
               onClick={handleShareToStory}
-              variant="tretiary"
-              size="md"
+              variant="gradient"
+              size="default"
               className="w-full"
               icon="fas fa-share"
               disabled={isSharing}

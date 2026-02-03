@@ -2,6 +2,7 @@ import * as React from "react";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { useHapticFeedback } from "@/utils/useHapticFeedback";
 
 type ButtonVariant =
   | "default"
@@ -29,10 +30,10 @@ export interface ButtonProps
 }
 
 const base =
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold overflow-hidden h-fit" +
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold overflow-hidden h-fit cursor-pointer " +
   "transition-[box-shadow,color,background-color,border-color,outline-color,transform,opacity] duration-400 ease-out select-none " +
   "outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 " +
-  "disabled:pointer-events-none disabled:opacity-50 " +
+  "disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed " +
   "active:scale-[0.95] " +
   "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 
@@ -87,7 +88,7 @@ const iconSizeClasses: Record<ButtonSize, string> = {
 const rippleClasses: Record<ButtonVariant, string> = {
   default: "bg-white/40",
   secondary: "bg-primary-foreground/30",
-  outline: "bg-foreground/25",
+  outline: "bg-white/40",
   ghost: "bg-foreground/20",
   link: "bg-primary/40",
   destructive: "bg-white/50",
@@ -124,6 +125,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type,
       children: childrenProp,
       onPointerDown,
+      onClick,
+      disabled,
       state = "default",
       ...props
     },
@@ -132,6 +135,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const children = childrenProp as React.ReactNode;
     const buttonRef = React.useRef<HTMLButtonElement>(null);
     const [ripple, setRipple] = React.useState<RippleState>(null);
+    const { hapticImpact } = useHapticFeedback();
+
+    const handleClick = React.useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!disabled) hapticImpact("soft");
+        onClick?.(e);
+      },
+      [disabled, hapticImpact, onClick]
+    );
 
     const mergedRef = React.useCallback(
       (el: HTMLButtonElement | null) => {
@@ -195,7 +207,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={mergedRef}
         type={type ?? "button"}
         className={classes}
+        disabled={disabled}
         onPointerDown={handlePointerDown}
+        onClick={handleClick}
         {...SCALE_ANIMATION}
         {...props}
       >
@@ -242,4 +256,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-export { Button };
+export default Button;

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import type { UserReward } from '@/http/rewardAPI';
 import { renderRewardMedia } from '@/utils/rewardUtils';
 
@@ -125,8 +125,8 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
           <Button
             onClick={onClose}
             disabled={loading}
-            variant="secondary"
-            size="md"
+            variant="outline"
+            size="default"
             className="flex-1"
           >
             {t('cancel')}
@@ -134,8 +134,8 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
           <Button
             onClick={onConfirm}
             disabled={loading}
-            variant="primary"
-            size="md"
+            variant="secondary"
+            size="default"
             className="flex-1"
             icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
           >

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 
 interface SuggestionsProps {
     suggestions: string[];

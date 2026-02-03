@@ -57,15 +57,15 @@ const Header: React.FC = observer(() => {
     })();
 
     return (
-        <div className="fixed top-0 left-0 w-full z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
+        <div className="fixed top-0 left-0 w-[100vw] z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
             {/* App Header */}
-            <div className=" py-1 px-4 flex items-center justify-between gap-4 w-full">
-                <div className="flex items-center space-x-2 cursor-pointer backdrop-blur-sm rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
+            <div className=" py-1 px-4 flex items-center justify-between gap-6 w-full">
+                <div className="flex items-center space-x-2 cursor-pointer backdrop-blur-sm btn-default-silver-border-transparent rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
                 style={glassStyle}
                 onClick={handleAvatarClick}>
                     <div className="relative">
                         <div 
-                            className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer hover:from-red-500 hover:to-red-700 transition-all overflow-hidden p-1"
+                            className="w-8 h-8 rounded-full btn-default-silver-border flex items-center justify-center cursor-pointer hover:from-red-500 hover:to-red-700 transition-all overflow-hidden p-1"
                         >
                             {avatarUrl ? (
                                 <img 
@@ -78,8 +78,8 @@ const Header: React.FC = observer(() => {
                             )}
                         </div>
                     </div>
-                        <div className="flex items-center w-fit">
-                            <span className="text-white text-sm font-medium leading-none text-center w-fit whitespace-nowrap">
+                        <div className="flex items-center min-w-0">
+                            <span className="text-white text-sm font-medium leading-none break-words line-clamp-2">
                                 {historyTitle}
                             </span>
                         </div>
@@ -87,7 +87,7 @@ const Header: React.FC = observer(() => {
                 <div className="flex space-x-2">
                     <button 
                         onClick={handleGemsClick}
-                        className="backdrop-blur-sm rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
+                        className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                         style={glassStyle}
                     >
                         <i className="fa-solid fa-gem text-amber-400 text-lg"></i>
@@ -97,17 +97,17 @@ const Header: React.FC = observer(() => {
                     </button>
                         <button 
                             onClick={handleEnergyClick}
-                            className="backdrop-blur-sm rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
+                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                             style={glassStyle}
                         >
-                            <i className="fa-solid fa-bolt text-purple-400 text-lg"></i>
-                        <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
+                            <i className="fa-solid fa-bolt text-user-message-gradient text-lg"></i>
+                        <div className="absolute -top-2 -right-2 bg-user-message text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
                             {user.energy}
                         </div>
                         </button>
                         <button 
                             onClick={handleLanguageClick}
-                            className="backdrop-blur-sm rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center cursor-pointer"
+                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center cursor-pointer"
                             style={glassStyle}
                             title={t('language')}
                         >

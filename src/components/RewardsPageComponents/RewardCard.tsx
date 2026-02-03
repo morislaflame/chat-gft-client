@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 
@@ -53,7 +53,7 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
             <Button
                 onClick={onClick}
                 disabled={isCreating}
-                variant="danger"
+                variant="destructive"
                 size="sm"
                 className="w-full"
                 icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
@@ -130,7 +130,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
                         onPurchase(rewardItem.id);
                     }}
                     disabled={isPurchasing || !canAfford}
-                    variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+                    variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
                     size="sm"
                     className="w-full"
                     icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}

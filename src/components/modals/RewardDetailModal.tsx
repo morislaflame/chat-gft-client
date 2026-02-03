@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
@@ -73,7 +73,7 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
         <Button
           onClick={handlePurchaseClick}
           disabled={isPurchasing || !canAfford}
-          variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+          variant={canAfford && !isPurchasing ? 'secondary' : 'default'}
           size="lg"
           className="w-full"
           icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : 'fas fa-shopping-cart'}
@@ -145,13 +145,14 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
     >
       <div className="relative">
         {/* Close button */}
-        <button
+        <Button
           onClick={handleClose}
-          className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-700 transition-colors cursor-pointer"
+          variant="ghost"
+          size="icon"
+          className="absolute top-0 right-0 w-8 h-8 min-w-8"
           aria-label="Close"
-        >
-          <i className="fas fa-times text-white text-xl"></i>
-        </button>
+          icon="fas fa-times"
+        />
 
         {/* Reward Media */}
         <motion.div

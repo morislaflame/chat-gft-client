@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
@@ -102,7 +102,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
           <Button
             onClick={() => onGoToCase(box)}
             variant="secondary"
-            size="md"
+            size="default"
             className="w-full"
             icon="fas fa-arrow-right"
           >

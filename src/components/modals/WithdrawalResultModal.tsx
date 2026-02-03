@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 
 interface WithdrawalResultModalProps {
@@ -61,7 +61,7 @@ const WithdrawalResultModal: React.FC<WithdrawalResultModalProps> = observer(({
           <Button
             onClick={onClose}
             variant="secondary"
-            size="md"
+            size="default"
             className="w-full"
             icon="fas fa-check"
           >

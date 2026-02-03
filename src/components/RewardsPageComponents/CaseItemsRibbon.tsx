@@ -4,6 +4,7 @@ import type { CaseItem } from '@/http/caseAPI';
 import { useTranslate } from '@/utils/useTranslate';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import Button from '@/components/ui/button';
 
 type CaseItemsRibbonProps = {
   items?: CaseItem[];
@@ -41,10 +42,12 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
     <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
         <div className="text-sm text-gray-300 font-semibold">{t('caseContents')}</div>
-        <button
+        <Button
           type="button"
           onClick={handleOpen}
-          className="w-8 h-8 hover:bg-primary-700 rounded-md flex items-center justify-center cursor-pointer"
+          variant="outline"
+          size="icon"
+          className="w-8 h-8 min-w-8"
           aria-label="Toggle case contents"
         >
           <motion.i
@@ -52,7 +55,7 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
             animate={{ rotate: isOpen ? 0 : -90 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
           />
-        </button>
+        </Button>
       </div>
 
       <motion.div

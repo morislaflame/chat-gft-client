@@ -6,7 +6,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ReferralCodeChangeConfirmModal from '@/components/modals/ReferralCodeChangeConfirmModal';

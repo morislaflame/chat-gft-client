@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { motion } from 'motion/react';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { Message } from '@/types/types';
 

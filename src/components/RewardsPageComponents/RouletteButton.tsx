@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 
 type RouletteButtonProps = {
   onStart: () => void;
@@ -18,7 +18,7 @@ const RouletteButton: React.FC<RouletteButtonProps> = ({
     <Button
       onClick={() => onStart()}
       disabled={disabled || isLoading}
-      variant="secondary"
+      variant="gradient"
       className="w-40 h-10 rounded-lg flex items-center justify-center"
     >
       {isLoading ? (

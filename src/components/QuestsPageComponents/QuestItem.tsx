@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Task } from '@/types/types';
 import { getTaskText } from '@/utils/translations';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 type TranslateFn = (key: string) => string;

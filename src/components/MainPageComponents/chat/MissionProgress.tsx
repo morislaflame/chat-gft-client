@@ -1,62 +1,40 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion, AnimatePresence } from 'motion/react';
+// import { motion, AnimatePresence } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
-import { useTranslate } from '@/utils/useTranslate';
-import { useHapticFeedback } from '@/utils/useHapticFeedback';
-import { Button } from '@/components/ui/button';
+// import { useTranslate } from '@/utils/useTranslate';
+// import { useHapticFeedback } from '@/utils/useHapticFeedback';
+// import { Button } from '@/components/ui/button';
 
 const MissionProgressBase: React.FC = () => {
   const { chat } = React.useContext(Context) as IStoreContext;
-  const { t, language } = useTranslate();
-  const { hapticImpact } = useHapticFeedback();
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const { t, language } = useTranslate();
+  // const { hapticImpact } = useHapticFeedback();
+  // const [isExpanded, setIsExpanded] = useState(false);
 
   const progressPercent = chat.forceProgress;
-  const missionText = chat.mission;
-  const currentStage = chat.currentStage;
+  // const missionText = chat.mission;
+  // const currentStage = chat.currentStage;
 
-  const missionMeta = chat.missions.find((m) => m.orderIndex === currentStage) || null;
-  const missionTitle = missionMeta
-    ? (language === 'en' ? (missionMeta.titleEn || missionMeta.title) : missionMeta.title)
-    : null;
-  const missionDescription = missionMeta
-    ? (language === 'en' ? (missionMeta.descriptionEn || missionMeta.description) : missionMeta.description)
-    : null;
+  // const missionMeta = chat.missions.find((m) => m.orderIndex === currentStage) || null;
+  // const missionTitle = missionMeta
+  //   ? (language === 'en' ? (missionMeta.titleEn || missionMeta.title) : missionMeta.title)
+  //   : null;
+  // const missionDescription = missionMeta
+  //   ? (language === 'en' ? (missionMeta.descriptionEn || missionMeta.description) : missionMeta.description)
+  //   : null;
 
-  const handleToggle = () => {
-    hapticImpact('soft');
-    setIsExpanded((prev) => !prev);
-  };
+  // const handleToggle = () => {
+  //   hapticImpact('soft');
+  //   setIsExpanded((prev) => !prev);
+  // };
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-3">
         <div className="flex-1">
           <div className="flex justify-end text-xs mb-2">
-            <div
-              className="flex items-center gap-2 cursor-pointer backdrop-blur-sm rounded-full p-2"
-              onClick={handleToggle}
-            >
-              <span className="text-amber-400 font-medium flex items-center">
-                <i className="fas fa-gift mr-1"></i>
-                {t('mission')} {currentStage}
-              </span>
-              {(missionTitle || missionText) && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  icon={`fas ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggle();
-                  }}
-                  className="text-amber-400 hover:text-amber-300 h-8 w-8 shrink-0"
-                  aria-label="Toggle mission"
-                />
-              )}
-            </div>
+            
           </div>
           <div className="flex-1 h-3 bg-primary-700 rounded-full overflow-hidden relative">
             <div
@@ -66,7 +44,7 @@ const MissionProgressBase: React.FC = () => {
           </div>
 
           {/* Current Mission - Collapsible */}
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {(missionTitle || missionText) && isExpanded && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
@@ -78,19 +56,16 @@ const MissionProgressBase: React.FC = () => {
                 <div className="mt-4 bg-card p-2 rounded-lg">
                   {missionTitle ? (
                     <div className="flex items-start gap-2 mb-1">
-                      {/* <span className="text-xs text-gray-100">{t('mission')}:</span> */}
                       <span className="flex-1 text-md text-gray-200">{missionTitle}</span>
                     </div>
                   ) : null}
 
                   {missionDescription ? (
                     <div className="flex items-start gap-2 mt-1">
-                      {/* <span className="text-xs text-gray-100">{t('mission')}:</span> */}
                       <span className="flex-1 text-xs text-gray-400">{missionDescription}</span>
                     </div>
                   ) : null}
 
-                  {/* Fallback to the dynamic mission text from LLM service (if any) */}
                   {missionText && !missionDescription ? (
                     <div className="flex items-start gap-2">
                       <span className="text-xs text-gray-100">{t('mission')}:</span>
@@ -100,7 +75,7 @@ const MissionProgressBase: React.FC = () => {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </div>
     </div>

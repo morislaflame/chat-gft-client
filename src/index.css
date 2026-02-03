@@ -8,6 +8,7 @@
   --color-primary-500: #64748B;
   --color-secondary-500: #8B5CF6;
   --color-secondary-400: #A78BFA;
+  --color-accent: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
 }
 
 @layer base {
@@ -21,7 +22,7 @@
     --foreground: 210 40% 98%;
 
     --card: 222 47% 11% 80%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
@@ -30,14 +31,14 @@
     --primary: 262 83% 58%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 215 28% 17%;
+    --secondary: 300, 6%, 21%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 215 28% 17%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -51,6 +52,8 @@
 
     /* Reusable gradient borders (use with background + background-origin/clip) */
     --gradient-border-silver: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2), rgba(255,255,255,0.3));
+    --gradient-border-silver-transparent: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0), rgba(255,255,255,0.1));
+    
     --gradient-border-silver-hover: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.25), rgba(255,255,255,0.4));
     --gradient-border-silver-muted: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12), rgba(255,255,255,0.25));
     --gradient-border-silver-ghost: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04), rgba(255,255,255,0.08));
@@ -117,6 +120,36 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
+  .bg-user-message {
+    background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+  }
+
+  /* Same gradient as bg-user-message, applied to text/icon color (for headers, icons) */
+  .text-user-message-gradient {
+    background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Card-style blur + silver gradient border (same silver as btn-default-silver-border) */
+  .bg-card-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      var(--gradient-border-silver) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .bg-card-silver-border:hover {
+    background:
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+      var(--gradient-border-silver-hover) border-box;
+  }
+
   /* Default button: gray fill + silver gradient border */
   .btn-default-silver-border {
     border: 1px solid transparent;
@@ -126,10 +159,21 @@
     background-origin: padding-box, border-box;
     background-clip: padding-box, border-box;
   }
+
   .btn-default-silver-border:hover {
     background:
       linear-gradient(hsl(var(--input)), hsl(var(--input))) padding-box,
       var(--gradient-border-silver-hover) border-box;
+  }
+
+  .btn-default-silver-border-transparent {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--input)/0.1), hsl(var(--input)/0.1)) padding-box,
+      var(--gradient-border-silver-transparent) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+    backdrop-filter: blur(12px);
   }
 
   .btn-success-silver-border {
@@ -220,6 +264,8 @@
     background-clip: padding-box, border-box;
   }
 
+  
+
   /* Glass: white gradient border */
   .btn-glass-gradient-border {
     border: 1px solid transparent;
@@ -247,6 +293,20 @@
     background-clip: padding-box, border-box;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Agent message: avatar as block background (top-right), gradient overlay, text wraps left of avatar */
+  .agent-message-bubble {
+    background-color: var(--color-primary-800);
+  }
+  .agent-message-gradient { 
+    background: linear-gradient(
+      to bottom left,
+      transparent 0%,
+      hsla(285, 67%, 1%, 0.8) 30%,
+      var(--color-primary-800) 100%
+    );
+    pointer-events: none;
   }
 }
 
@@ -360,8 +420,12 @@ body.telegram-mobile .telegram-padding {
   }
   
   .roulette-pro-regular-prize-item-wrapper {
-    background: var(--color-primary-800) !important;
-    border: 1px solid var(--color-primary-700) !important;
+    border: 1px solid transparent !important;
+    background:
+      linear-gradient(hsl(var(--accent)), hsl(var(--accent))) padding-box,
+      var(--gradient-border-silver) border-box !important;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
     border-radius: 16px !important;
     display: flex !important;
     flex-direction: column !important;

@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from './Button';
+import Button from '@/components/ui/button';
 
 interface EmptyPageProps {
     icon: string;
@@ -36,6 +36,7 @@ const EmptyPage: React.FC<EmptyPageProps> = ({
                         onClick={onAction}
                         variant="secondary"
                         size="lg"
+                        className="w-full max-w-xs mx-auto"
                     >
                         {actionText}
                     </Button>

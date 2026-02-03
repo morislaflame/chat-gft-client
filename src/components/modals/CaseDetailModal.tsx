@@ -27,13 +27,6 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
   const { t, language } = useTranslate();
   const { hapticImpact } = useHapticFeedback();
 
-  if (!box) return null;
-
-  const title = (language === 'en' ? (box.nameEn || box.name) : box.name) || box.name;
-  const description =
-    ((language === 'en' ? (box.descriptionEn || box.description) : box.description) ?? null) ||
-    null;
-
   const handleClose = () => {
     hapticImpact('soft');
     onClose();
@@ -41,8 +34,13 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
 
   const handleGoToCase = () => {
     hapticImpact('soft');
-    onGoToCase(box);
+    if (box) onGoToCase(box);
   };
+
+  const title = box ? ((language === 'en' ? (box.nameEn || box.name) : box.name) || box.name) : '';
+  const description = box
+    ? (((language === 'en' ? (box.descriptionEn || box.description) : box.description) ?? null) || null)
+    : null;
 
   return (
     <Modal
@@ -51,6 +49,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-6"
     >
+      {box ? (
       <div className="relative">
         {/* Close button */}
         <Button
@@ -117,6 +116,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

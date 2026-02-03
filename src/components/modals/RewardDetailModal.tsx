@@ -40,8 +40,6 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
   const { t } = useTranslate();
   const { hapticImpact } = useHapticFeedback();
 
-  if (!reward) return null;
-
   const handlePurchaseClick = async () => {
     hapticImpact('soft');
     if (onPurchase && canAfford && !isPurchasing) {
@@ -143,6 +141,7 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-6"
     >
+      {reward ? (
       <div className="relative">
         {/* Close button */}
         <Button
@@ -212,6 +211,7 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
           {getActionButton()}
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

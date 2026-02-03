@@ -20,13 +20,11 @@ const WithdrawalResultModal: React.FC<WithdrawalResultModalProps> = observer(({
 }) => {
   const { t } = useTranslate();
 
-  if (!status) return null;
-
   const isSuccess = status === 'success';
-  const title = isSuccess ? t('withdrawalSuccessTitle') : t('withdrawalErrorTitle');
-  const description = isSuccess ? t('withdrawalSuccessDesc') : (message || t('withdrawalErrorDesc'));
-  const iconClass = isSuccess ? 'fa-circle-check text-green-400' : 'fa-circle-xmark text-red-400';
-  const bgGradient = isSuccess ? 'from-green-500 to-emerald-600' : 'from-red-500 to-red-700';
+  const title = status ? (isSuccess ? t('withdrawalSuccessTitle') : t('withdrawalErrorTitle')) : '';
+  const description = status ? (isSuccess ? t('withdrawalSuccessDesc') : (message || t('withdrawalErrorDesc'))) : '';
+  const iconClass = status ? (isSuccess ? 'fa-circle-check text-green-400' : 'fa-circle-xmark text-red-400') : '';
+  const bgGradient = status ? (isSuccess ? 'from-green-500 to-emerald-600' : 'from-red-500 to-red-700') : '';
 
   return (
     <Modal
@@ -35,6 +33,7 @@ const WithdrawalResultModal: React.FC<WithdrawalResultModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {status ? (
       <div className="relative">
         <div className="text-center mb-4">
           <motion.div
@@ -69,6 +68,7 @@ const WithdrawalResultModal: React.FC<WithdrawalResultModalProps> = observer(({
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

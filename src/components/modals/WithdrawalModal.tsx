@@ -46,9 +46,6 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
     }
   }, [userReward]);
 
-
-  if (!userReward) return null;
-
   return (
     <Modal
       isOpen={isOpen}
@@ -56,6 +53,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
       closeOnOverlayClick={!loading}
       className="p-4"
     >
+      {userReward ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -143,6 +141,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
           </Button>
         </div>
       </div>
+      ) : null}
     </Modal>
   );
 });

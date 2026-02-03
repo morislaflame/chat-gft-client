@@ -34,13 +34,13 @@ const DailyRewardModal: React.FC = observer(() => {
   }>;
   const [animations] = useAnimationLoader(caseItems, (c) => c.mediaFile || null, [rewardInfo?.day ?? 0]);
 
-  if (!rewardInfo) return null;
-
-  const isEnergyAvailable =
-    (rewardInfo.rewardType === 'energy' ? rewardInfo.reward : rewardInfo.secondRewardType === 'energy' ? rewardInfo.secondReward ?? 0 : 0) > 0;
-  const isTokensAvailable =
-    (rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : rewardInfo.secondRewardType === 'tokens' ? rewardInfo.secondReward ?? 0 : 0) > 0;
-  const isCaseAvailable = !!rewardInfo.rewardCase;
+  const isEnergyAvailable = rewardInfo
+    ? (rewardInfo.rewardType === 'energy' ? rewardInfo.reward : rewardInfo.secondRewardType === 'energy' ? rewardInfo.secondReward ?? 0 : 0) > 0
+    : false;
+  const isTokensAvailable = rewardInfo
+    ? (rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : rewardInfo.secondRewardType === 'tokens' ? rewardInfo.secondReward ?? 0 : 0) > 0
+    : false;
+  const isCaseAvailable = !!rewardInfo?.rewardCase;
 
   return (
     <Modal
@@ -49,6 +49,7 @@ const DailyRewardModal: React.FC = observer(() => {
       closeOnOverlayClick={false}
       className="p-4"
     >
+      {rewardInfo ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -175,6 +176,7 @@ const DailyRewardModal: React.FC = observer(() => {
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

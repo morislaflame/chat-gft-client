@@ -32,17 +32,17 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
   }>;
   const [animations] = useAnimationLoader(caseItems, (c) => c.mediaFile || null, [reward?.id ?? 0]);
 
-  if (!day || !reward) return null;
-
-  const energyAmount =
-    (reward.rewardType === 'energy' ? reward.reward : 0) +
-    (reward.secondRewardType === 'energy' ? (reward.secondReward ?? 0) : 0);
-  const tokensAmount =
-    (reward.rewardType === 'tokens' ? reward.reward : 0) +
-    (reward.secondRewardType === 'tokens' ? (reward.secondReward ?? 0) : 0);
+  const energyAmount = day && reward
+    ? (reward.rewardType === 'energy' ? reward.reward : 0) +
+      (reward.secondRewardType === 'energy' ? (reward.secondReward ?? 0) : 0)
+    : 0;
+  const tokensAmount = day && reward
+    ? (reward.rewardType === 'tokens' ? reward.reward : 0) +
+      (reward.secondRewardType === 'tokens' ? (reward.secondReward ?? 0) : 0)
+    : 0;
   const isEnergyAvailable = energyAmount > 0;
   const isTokensAvailable = tokensAmount > 0;
-  const isCaseAvailable = !!reward.rewardCase;
+  const isCaseAvailable = !!(day && reward && reward.rewardCase);
 
   return (
     <Modal
@@ -51,6 +51,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {day && reward ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -170,6 +171,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

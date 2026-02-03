@@ -24,11 +24,9 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
   reward
 }) => {
   const { t, language } = useTranslate();
-  
-  if (!task) return null;
 
-  const isEnergy = reward?.type === 'energy' || task.rewardType === 'energy';
-  const rewardAmount = reward?.amount || task.reward;
+  const isEnergy = task ? (reward?.type === 'energy' || task.rewardType === 'energy') : false;
+  const rewardAmount = task ? (reward?.amount || task.reward) : 0;
 
   const getTaskIcon = (code: string) => {
     switch (code) {
@@ -67,6 +65,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {task ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -126,6 +125,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

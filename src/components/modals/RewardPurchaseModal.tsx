@@ -46,8 +46,6 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
     }
   }, [reward]);
 
-  if (!reward) return null;
-
   const ref = user.user?.refCode || user.user?.username || '';
   const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
 
@@ -109,6 +107,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {reward ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -213,6 +212,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
           ) : null}
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

@@ -24,9 +24,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
   onGoToCase,
 }) => {
   const { t, language } = useTranslate();
-
-  if (!box) return null;
-  const title = (language === 'en' ? (box.nameEn || box.name) : box.name) || box.name;
+  const title = box ? ((language === 'en' ? (box.nameEn || box.name) : box.name) || box.name) : '';
 
   return (
     <Modal
@@ -35,6 +33,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {box ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -111,6 +110,7 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
 
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

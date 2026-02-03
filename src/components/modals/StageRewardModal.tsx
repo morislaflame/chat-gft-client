@@ -28,9 +28,7 @@ const StageRewardModal: React.FC = observer(() => {
     chat.closeStageReward();
   };
 
-  if (!stageReward) return null;
-
-  const missionNumberText = `${t('stageCompletedMissionPrefix')} ${stageReward.stageNumber}`;
+  const missionNumberText = stageReward ? `${t('stageCompletedMissionPrefix')} ${stageReward.stageNumber}` : '';
 
   return (
     <Modal
@@ -39,6 +37,7 @@ const StageRewardModal: React.FC = observer(() => {
       closeOnOverlayClick={false}
       className="p-4"
     >
+      {stageReward ? (
       <div className="relative">
         {/* Header */}
         <div className="text-center mb-4">
@@ -127,6 +126,7 @@ const StageRewardModal: React.FC = observer(() => {
           </Button>
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

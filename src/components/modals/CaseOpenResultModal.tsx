@@ -26,12 +26,10 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const { user } = useContext(Context) as IStoreContext;
   const [isSharing, setIsSharing] = useState(false);
 
-  if (!openResult) return null;
+  const result = openResult?.result;
 
-  const result = openResult.result;
-
-  const isReward = result.type === 'reward';
-  const isGems = result.type === 'gems';
+  const isReward = result?.type === 'reward';
+  const isGems = result?.type === 'gems';
 
   const iconClass = isReward
     ? 'fa-gift text-white'
@@ -43,7 +41,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const title = t('congratulations');
   const description = t('youWon');
 
-  const amountLabel = !isReward
+  const amountLabel = result && !isReward
     ? `+${result.amount} ${t(isGems ? 'gems' : 'energy')}`
     : null;
 
@@ -83,7 +81,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const handleShareToStory = async () => {
     const tg = window.Telegram?.WebApp;
     if (!tg || typeof tg.shareToStory !== 'function') return;
-    if (!isReward) return;
+    if (!isReward || !result) return;
 
     const mediaUrl = result.reward.preview?.url || (await resolveStoryMediaUrl(result.reward.mediaFile));
     if (!mediaUrl) return;
@@ -109,6 +107,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
       closeOnOverlayClick={true}
       className="p-4"
     >
+      {openResult && result ? (
       <div className="relative">
         <div className="text-center mb-4">
 
@@ -178,6 +177,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           ) : null}
         </motion.div>
       </div>
+      ) : null}
     </Modal>
   );
 });

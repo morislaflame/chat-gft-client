@@ -1,7 +1,8 @@
 import React from 'react';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import starsIcon from '@/assets/stars.svg';
 import type { Product } from '@/types/types';
+import { Card } from '../ui/card';
 
 type TranslateFn = (key: string) => string;
 
@@ -14,9 +15,9 @@ type StoreItemProps = {
 
 const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t }) => {
     return (
-        <div className="bg-card border border-primary-700 rounded-xl p-3 flex items-center justify-between hover:bg-primary-700/50 transition">
+        <Card className="flex items-center justify-between quest-item hover:bg-primary-700/50 transition">
             <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full border border-purple-500 bg-gradient-to-br from-purple-500/20 to-violet-600/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full only-silver-border flex items-center justify-center">
                     <div className="flex items-center justify-center gap-1 text-white text-xs font-bold leading-none">
                         <i className="fa-solid fa-bolt text-[10px] leading-none"></i>
                         <span>{product.energy}</span>
@@ -32,9 +33,9 @@ const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t
             <Button
                 onClick={() => onPurchase(product.id)}
                 disabled={isLoading}
-                variant="secondary"
+                variant="default"
                 size="sm"
-                className="min-w-[20%] rounded-full flex !gap-1 items-center justify-center"
+                className="min-w-[20%] flex !gap-1 items-center justify-center"
             >
                 {isLoading ? t('loading') : (
                     <>
@@ -43,7 +44,7 @@ const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t
                     </>
                 )}
             </Button>
-        </div>
+        </Card>
     );
 };
 

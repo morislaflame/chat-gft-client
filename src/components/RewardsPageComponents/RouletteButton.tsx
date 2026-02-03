@@ -18,17 +18,12 @@ const RouletteButton: React.FC<RouletteButtonProps> = ({
     <Button
       onClick={() => onStart()}
       disabled={disabled || isLoading}
-      variant="gradient"
+      variant={disabled ? 'default' : 'gradient'}
+      size="default"
+      state={isLoading ? 'loading' : 'default'}
       className="w-40 h-10 rounded-lg flex items-center justify-center"
     >
-      {isLoading ? (
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          {label}
-        </span>
-      ) : (
-        label
-      )}
+      {label}
     </Button>
   );
 };

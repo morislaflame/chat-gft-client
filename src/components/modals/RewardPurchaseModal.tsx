@@ -192,7 +192,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
         >
           <Button
             onClick={onClose}
-            variant="secondary"
+            variant="default"
             size="default"
             className="w-full mb-2"
             icon="fas fa-check"

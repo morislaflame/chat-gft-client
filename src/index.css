@@ -51,7 +51,7 @@
     --radius: 0.75rem;
 
     /* Reusable gradient borders (use with background + background-origin/clip) */
-    --gradient-border-silver: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2), rgba(255,255,255,0.3));
+    --gradient-border-silver: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1), rgba(255,255,255,0.3));
     --gradient-border-silver-transparent: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0), rgba(255,255,255,0.1));
     
     --gradient-border-silver-hover: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.25), rgba(255,255,255,0.4));
@@ -224,6 +224,15 @@
       var(--gradient-border-outline-hover) border-box;
   }
 
+  .card-outline-silver {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+      var(--gradient-border-silver-muted) border-box;
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+  }
+
   /* Ghost: very subtle gradient border (visible on hover) */
   .btn-ghost-gradient-border {
     border: 1px solid transparent;
@@ -303,8 +312,8 @@
     background: linear-gradient(
       to bottom left,
       transparent 0%,
-      hsla(285, 67%, 1%, 0.8) 30%,
-      var(--color-primary-800) 100%
+      hsla(280, 60%, 1%, 0.71) 30%,
+      var(--color-primary-700) 100%
     );
     pointer-events: none;
   }

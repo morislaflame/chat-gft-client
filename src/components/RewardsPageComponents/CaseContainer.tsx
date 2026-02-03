@@ -138,9 +138,10 @@ const CaseContainer: React.FC = observer(() => {
             variant={canAfford ? 'default' : 'default'}
             size="default"
             className="flex-1"
-            icon={cases.loading ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+            state={cases.loading ? 'loading' : 'default'}
+            icon={!canAfford ? 'fas fa-lock' : undefined}
           >
-            {cases.loading ? t('purchasing') : canAfford ? `${t('buyFor')}` : `${t('insufficientBalance')}`} {total} <i className="fa-solid fa-gem text-white"></i>
+            {canAfford ? t('buyFor') : t('insufficientBalance')} {total} <i className="fa-solid fa-gem text-white"></i>
           </Button>
           {cases.error ? <div className="text-xs text-red-400 mt-2">{cases.error}</div> : null}
         </Card>

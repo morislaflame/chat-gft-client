@@ -16,7 +16,7 @@ type ButtonVariant =
 
 type ButtonSize = "default" | "sm" | "lg" | "icon";
 
-export type ButtonState = "default" | "success";
+export type ButtonState = "default" | "success" | "loading";
 
 export interface ButtonProps
   extends Omit<HTMLMotionProps<"button">, "color"> {
@@ -33,7 +33,7 @@ const base =
   "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold overflow-hidden h-fit cursor-pointer " +
   "transition-[box-shadow,color,background-color,border-color,outline-color,transform,opacity] duration-400 ease-out select-none " +
   "outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 " +
-  "disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed " +
+  "disabled:pointer-events-none disabled:opacity-50 " +
   "active:scale-[0.95] " +
   "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0";
 
@@ -109,6 +109,7 @@ const SCALE_ANIMATION = {
 
 const stateOverlayClasses: Record<Exclude<ButtonState, "default">, string> = {
   success: "bg-green-500",
+  loading: "bg-black/40 pointer-events-none",
 };
 
 type RippleState = { x: number; y: number; size: number } | null;
@@ -175,6 +176,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const classes = cn(base, variantClasses[variant], sizeClasses[size], className);
 
     const iconEl = icon ? <i className={cn(icon, iconSizeClasses[size])} /> : null;
+    const loadingSpinnerEl =
+      state === "loading" ? (
+        <i className={cn("fas fa-spinner fa-spin text-white shrink-0", iconSizeClasses[size])} />
+      ) : null;
     const content = (
       <span
         className={cn(
@@ -182,9 +187,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           (variant === "gradient" || variant === "glass") && "relative z-10"
         )}
       >
-        {iconPosition === "left" && iconEl}
+        {loadingSpinnerEl}
+        {state !== "loading" && iconPosition === "left" && iconEl}
         {children}
-        {iconPosition === "right" && iconEl}
+        {state !== "loading" && iconPosition === "right" && iconEl}
       </span>
     );
 
@@ -244,7 +250,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             />
           ) : null}
         </AnimatePresence>

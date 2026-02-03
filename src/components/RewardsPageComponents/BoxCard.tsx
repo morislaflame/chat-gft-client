@@ -84,13 +84,12 @@ const BoxCard: React.FC<BoxCardProps> = ({
             variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
             size="sm"
             className="w-full"
-            icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+            state={isPurchasing ? 'loading' : 'default'}
+            icon={!canAfford ? 'fas fa-lock' : undefined}
           >
-            {isPurchasing ? t('purchasing') : (
-              <span className="flex items-center gap-1 justify-center">
-                {box.price} <i className="fa-solid fa-gem text-white"></i>
-              </span>
-            )}
+            <span className="flex items-center gap-1 justify-center">
+              {box.price} <i className="fa-solid fa-gem text-white"></i>
+            </span>
           </Button>
         )}
       </div>

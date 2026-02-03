@@ -19,16 +19,16 @@ const MissionCard: React.FC<MissionCardProps> = memo(({ message, onStartMission 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl px-4 py-3 inline-block max-w-md w-full"
+        className="card-outline-silver rounded-xl px-4 py-3 inline-block max-w-md w-full"
       >
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-md font-semibold text-amber-400 flex flex-col gap-2">
+        <div className="flex flex flex-col gap-1 mb-1">
+          <span className="text-sm font-semibold ">
             {t('mission')} {message.mission.orderIndex}
-            <span className="font-medium text-gray-200 italic">{message.mission.title}</span>
           </span>
+          <span className="font-medium text-user-message-gradient text-lg italic">{message.mission.title}</span>
         </div>
         {message.mission.description && (
-          <div className="text-sm text-gray-400 mt-1">
+          <div className="text-sm text-gray-300 mt-1">
             {message.mission.description}
           </div>
         )}

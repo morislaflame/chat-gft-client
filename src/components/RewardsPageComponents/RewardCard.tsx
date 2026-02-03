@@ -2,6 +2,7 @@ import React from 'react';
 import Button from '@/components/ui/button';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import type { Reward, UserReward } from '@/http/rewardAPI';
+import { Card } from '../ui/card';
 
 type TranslateFn = (key: string) => string;
 
@@ -56,9 +57,10 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
                 variant="destructive"
                 size="sm"
                 className="w-full"
-                icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
+                state={isCreating ? 'loading' : 'default'}
+                icon="fas fa-redo"
             >
-                {isCreating ? t('sending') : t('retryRequest')}
+                {t('retryRequest')}
             </Button>
         );
     }
@@ -70,9 +72,10 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
             variant="secondary"
             size="sm"
             className="w-full"
-            icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-download'}
+            state={isCreating ? 'loading' : 'default'}
+            icon="fas fa-download"
         >
-            {isCreating ? t('sending') : t('withdraw')}
+            {t('withdraw')}
         </Button>
     );
 };
@@ -95,10 +98,10 @@ const RewardCard: React.FC<RewardCardProps> = ({
     const key = activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id);
 
     return (
-        <div
+        <Card
             key={key}
             onClick={handleCardClick}
-            className="bg-card border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+            className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer"
         >
             <div className="mb-2 flex items-center justify-center">
                 <LazyMediaRenderer
@@ -133,13 +136,12 @@ const RewardCard: React.FC<RewardCardProps> = ({
                     variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
                     size="sm"
                     className="w-full"
-                    icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+                    state={isPurchasing ? 'loading' : 'default'}
+                    icon={!canAfford ? 'fas fa-lock' : undefined}
                 >
-                    {isPurchasing ? t('purchasing') : (
-                        <span className="flex items-center gap-1">
-                            {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
-                        </span>
-                    )}
+                    <span className="flex items-center gap-1">
+                        {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
+                    </span>
                 </Button>
             )}
 
@@ -155,7 +157,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
                     />
                 </div>
             )}
-        </div>
+        </Card>
     );
 };
 

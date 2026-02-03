@@ -37,7 +37,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
                                 type="button"
                                 aria-label={tab.label}
                                 onClick={() => onChange(tab.key)}
-                                variant={activeTab === tab.key ? 'gradient' : 'default'}
+                                variant={activeTab === tab.key ? 'gradient' : 'outline'}
                                 size="sm"
                                 className="w-full"
                             >

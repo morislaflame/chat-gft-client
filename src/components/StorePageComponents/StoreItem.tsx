@@ -16,6 +16,13 @@ type StoreItemProps = {
 const StoreItem: React.FC<StoreItemProps> = ({ product, isLoading, onPurchase, t }) => {
     return (
         <Card className="flex items-center justify-between quest-item hover:bg-primary-700/50 transition">
+            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div
+                className={
+                    'absolute -bottom-0 -left-10 h-60 w-60 rounded-full blur-3xl opacity-8 btn-secondary-gradient-border'
+                }
+                />
+            </div>
             <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full only-silver-border flex items-center justify-center">
                     <div className="flex items-center justify-center gap-1 text-white text-xs font-bold leading-none">

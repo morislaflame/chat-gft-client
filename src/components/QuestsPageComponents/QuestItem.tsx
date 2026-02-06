@@ -49,8 +49,9 @@ const QuestItem: React.FC<QuestItemProps> = ({
 }) => {
     return (
         <Card
-            className="flex items-center justify-between quest-item hover:bg-primary-700/50 transition"
+            className="flex items-center justify-between quest-item hover:bg-primary-700/50 transition relative"
         >
+            
             <div className="flex items-center space-x-3">
                 <div className={`w-12 h-12 rounded-full only-silver-border flex items-center justify-center`}>
                     <i className={`${getTaskIcon(task.code)} text-white text-sm`}></i>

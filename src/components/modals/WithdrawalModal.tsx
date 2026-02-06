@@ -51,27 +51,44 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
       isOpen={isOpen}
       onClose={onClose}
       closeOnOverlayClick={!loading}
-      className="p-4"
+      swipeToClose={!loading}
+      closeDisabled={loading}
+      title={t('withdrawalRequest')}
+      closeAriaLabel={t('close')}
+      footerClassName="flex-row gap-3"
+      footer={
+        <>
+          <Button
+            onClick={onClose}
+            disabled={loading}
+            variant="outline"
+            size="default"
+            className="flex-1"
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            onClick={onConfirm}
+            disabled={loading}
+            variant="secondary"
+            size="default"
+            className="flex-1"
+            icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
+          >
+            {loading ? t('sending') : t('confirm')}
+          </Button>
+        </>
+      }
     >
       {userReward ? (
-      <div className="relative">
-        {/* Header */}
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-bold text-white mb-4">
-            {t('withdrawalRequest')}
-          </h2>
-          
-          {/* Reward Media */}
-          
-        </div>
-
-        {/* Reward Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
-        >
+        <>
+          {/* Reward Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
+          >
             <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -101,46 +118,23 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
               {t('purchasedFor')} {userReward.purchasePrice} <i className="fa-solid fa-gem text-white"></i>
             </div>
           </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Info Message */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4"
-        >
-          <div className="flex items-start gap-2">
-            <i className="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
-            <p className="text-xs text-blue-300">
-              {t('withdrawalInfo')}
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Buttons */}
-        <div className="flex gap-3">
-          <Button
-            onClick={onClose}
-            disabled={loading}
-            variant="outline"
-            size="default"
-            className="flex-1"
+          {/* Info Message */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3"
           >
-            {t('cancel')}
-          </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={loading}
-            variant="secondary"
-            size="default"
-            className="flex-1"
-            icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
-          >
-            {loading ? t('sending') : t('confirm')}
-          </Button>
-        </div>
-      </div>
+            <div className="flex items-start gap-2">
+              <i className="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
+              <p className="text-xs text-blue-300">
+                {t('withdrawalInfo')}
+              </p>
+            </div>
+          </motion.div>
+        </>
       ) : null}
     </Modal>
   );

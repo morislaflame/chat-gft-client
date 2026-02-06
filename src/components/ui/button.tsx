@@ -77,10 +77,10 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  default: "px-4 py-2",
-  sm: "px-3 py-2 text-xs",
+  default: "px-4 py-2 rounded-lg",
+  sm: "px-3 py-3 text-xs rounded-lg",
   lg: "px-5 py-3 text-base rounded-xl",
-  icon: "h-9 w-9 px-0 py-2",
+  icon: "h-9 w-9 px-0 py-2 rounded-xl",
 };
 
 const iconSizeClasses: Record<ButtonSize, string> = {

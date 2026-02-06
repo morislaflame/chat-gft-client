@@ -34,6 +34,13 @@ const DailyRewardProgress: React.FC<DailyRewardProgressProps> = observer(({
 
   return (
     <Card>
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className={
+                'absolute -bottom-0 -left-10 h-60 w-60 rounded-full blur-3xl opacity-8 bg-green-500'
+              }
+            />
+        </div>
         <div className='flex flex-col gap-1 mb-4'>
             <h3 className="text-sm font-semibold text-white">
                 {t('dailyRewards')}

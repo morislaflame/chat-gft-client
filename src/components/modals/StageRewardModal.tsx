@@ -35,34 +35,27 @@ const StageRewardModal: React.FC = observer(() => {
       isOpen={isOpen}
       onClose={handleClose}
       closeOnOverlayClick={false}
-      className="p-4"
+      swipeToClose={false}
+      hideCloseButton
+      title={t('stageCompleted')}
+      description={missionNumberText}
+      headerIcon={<i className="fa-solid fa-trophy text-white text-2xl"></i>}
+      headerIconContainerClassName="bg-gradient-to-br from-red-500 to-red-700 shadow-lg"
+      footer={
+        stageReward ? (
+          <Button
+            onClick={handleClose}
+            variant="gradient"
+            size="default"
+            className="w-full"
+            icon="fa-solid fa-check"
+          >
+            {t('continue')}
+          </Button>
+        ) : null
+      }
     >
       {stageReward ? (
-      <div className="relative">
-        {/* Header */}
-        <div className="text-center mb-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ 
-              type: 'spring',
-              delay: 0.2,
-              bounce: 0.4
-            }}
-            className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg"
-          >
-            <i className="fa-solid fa-trophy text-white text-4xl"></i>
-          </motion.div>
-          
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {t('stageCompleted')}
-          </h2>
-          <p className="text-gray-400 text-sm">
-            {missionNumberText}
-          </p>
-        </div>
-
-        {/* Reward Info */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -108,24 +101,6 @@ const StageRewardModal: React.FC = observer(() => {
             {t('stageRewardGemsHint')}
           </div>
         </motion.div>
-
-        {/* Continue Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Button
-            onClick={handleClose}
-            variant="gradient"
-            size="default"
-            className="w-full"
-            icon="fa-solid fa-check"
-          >
-            {t('continue')}
-          </Button>
-        </motion.div>
-      </div>
       ) : null}
     </Modal>
   );

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
@@ -49,39 +48,13 @@ const InsufficientEnergyModal: React.FC = observer(() => {
       isOpen={isOpen}
       onClose={handleClose}
       closeOnOverlayClick={true}
-      className="p-4"
-    >
-      <div className="relative">
-        {/* Header */}
-        <div className="text-center mb-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ 
-              type: 'spring',
-              delay: 0.2,
-              bounce: 0.4
-            }}
-            className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg"
-          >
-            <i className="fa-solid fa-bolt text-white text-4xl"></i>
-          </motion.div>
-          
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {t('insufficientEnergy')}
-          </h2>
-          <p className="text-gray-400 text-sm">
-            {t('insufficientEnergyDesc')}
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+      title={t('insufficientEnergy')}
+      description={t('insufficientEnergyDesc')}
+      headerIcon={<i className="fa-solid fa-bolt text-white text-2xl"></i>}
+      headerIconContainerClassName="bg-gradient-to-br from-yellow-500 to-orange-500 shadow-lg"
+      closeAriaLabel={t('close')}
+      footer={
+        <>
           <Button
             onClick={handleGoToStore}
             variant="secondary"
@@ -89,45 +62,33 @@ const InsufficientEnergyModal: React.FC = observer(() => {
             className="w-full"
             icon="fas fa-store"
           >
-           {t('goToStore')}
+            {t('goToStore')}
           </Button>
-        </motion.div>
 
           <p className="text-center text-gray-400 text-xs">{t('insufficientEnergyTasksNote')}</p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+          <Button
+            onClick={handleGoToQuests}
+            variant="gradient"
+            size="default"
+            className="w-full"
+            icon="fas fa-tasks"
           >
-            <Button
-              onClick={handleGoToQuests}
-              variant="gradient"
-              size="default"
-              className="w-full"
-              icon="fas fa-tasks"
-            >
-              {t('goToQuests')}
-            </Button>
-          </motion.div>
+            {t('goToQuests')}
+          </Button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+          <Button
+            onClick={handleClose}
+            variant="outline"
+            size="default"
+            className="w-full"
           >
-            <Button
-              onClick={handleClose}
-              variant="outline"
-              size="default"
-              className="w-full"
-            >
-              {t('cancel')}
-            </Button>
-          </motion.div>
-
-        </div>
-      </div>
+            {t('cancel')}
+          </Button>
+        </>
+      }
+    >
+      <></>
     </Modal>
   );
 });

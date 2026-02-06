@@ -4,6 +4,7 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';
+import { AnimatePresence, motion } from 'motion/react';
 import EmptyPage from '../CoreComponents/EmptyPage';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '@/components/ui/button';
@@ -154,6 +155,8 @@ const FriendsContainer: React.FC = observer(() => {
         }
     };
 
+    const editTransition = { duration: 0.4, ease: 'easeInOut' as const };
+
     return (
         <>
         <div className="p-4 overflow-y-auto flex w-full"
@@ -161,13 +164,21 @@ const FriendsContainer: React.FC = observer(() => {
             <div className="max-w-xl mx-auto w-full space-y-4">
                 {/* Referral Stats */}
                 <Card>
+                    
+                    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                        <div
+                            className={
+                            'absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-8 bg-gradient-to-br from-purple-500 to-violet-600'
+                            }
+                        />
+                    </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-violet-700 flex items-center justify-center">
                                 <i className="fas fa-user-friends text-white"></i>
                             </div>
                             <div>
-                                <div className="text-sm font-semibold">{t('referralProgram')}</div>
+                                <div className="text-md font-semibold">{t('referralProgram')}</div>
                                 <div className="text-xs text-gray-400">{t('inviteFriendsEarnRewards')}</div>
                             </div>
                         </div>
@@ -177,7 +188,7 @@ const FriendsContainer: React.FC = observer(() => {
                     </div>
 
                     {/* Referral Code */}
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 space-y-2 overflow-hidden">
                         <div className="text-xs text-gray-400">{t('yourReferralCode')}</div>
                         <div className="flex space-x-2">
                             <input
@@ -188,68 +199,84 @@ const FriendsContainer: React.FC = observer(() => {
                                 className="w-full bg-card border border-primary-700 rounded-md px-3 py-2 text-sm"
                             />
                         </div>
-                        {isEditingRefCode ? (
-                            <>
-                                <div className="text-xs text-gray-500">
-                                    {t('referralCodeRules')}
-                                </div>
-                                {refCodeError ? (
-                                    <div className="text-xs text-red-400">{refCodeError}</div>
-                                ) : null}
-                                <div className="flex space-x-2">
-                                    <Button
-                                        onClick={cancelEditRefCode}
-                                        variant="outline"
-                                        size="sm"
-                                        disabled={refCodeSaving}
-                                        className="flex-1"
+                        <motion.div layout transition={editTransition} className="space-y-2">
+                            <AnimatePresence initial={false} mode="popLayout">
+                                {isEditingRefCode ? (
+                                    <motion.div
+                                        key="ref-edit"
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -8 }}
+                                        transition={editTransition}
+                                        className="space-y-2"
                                     >
-                                        {t('cancel')}
-                                    </Button>
-                                    <Button
-                                        onClick={requestSaveRefCode}
-                                        variant="gradient"
-                                        size="sm"
-                                        disabled={refCodeSaving}
-                                        className="flex-1"
+                                        <div className="text-xs text-gray-500">{t('referralCodeRules')}</div>
+                                        {refCodeError ? (
+                                            <div className="text-xs text-red-400">{refCodeError}</div>
+                                        ) : null}
+                                        <div className="flex space-x-2">
+                                            <Button
+                                                onClick={cancelEditRefCode}
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={refCodeSaving}
+                                                className="flex-1"
+                                            >
+                                                {t('cancel')}
+                                            </Button>
+                                            <Button
+                                                onClick={requestSaveRefCode}
+                                                variant="gradient"
+                                                size="sm"
+                                                disabled={refCodeSaving}
+                                                className="flex-1"
+                                            >
+                                                {refCodeSaving ? t('saving') : t('confirm')}
+                                            </Button>
+                                        </div>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="ref-view"
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -8 }}
+                                        transition={editTransition}
+                                        className="space-y-2"
                                     >
-                                        {refCodeSaving ? t('saving') : t('confirm')}
-                                    </Button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex space-x-2">
-                                <Button
-                                    onClick={beginEditRefCode}
-                                    variant="default"
-                                    size="sm"
-                                    className="w-full"
-                                >
-                                    {t('editReferralCode')}
-                                </Button>
-                            </div>
-                        )}
-                        {!isEditingRefCode ? (
-                            <div className="flex space-x-2">
-                                <Button
-                                    onClick={handleCopyReferral}
-                                    variant="gradient"
-                                    size="sm"
-                                    state={isCopied ? 'success' : 'default'}
-                                    className="flex-1"
-                                >
-                                    {isCopied ? t('copied') : t('copyLink')}
-                                </Button>
-                                <Button
-                                    onClick={handleShareReferral}
-                                    variant="default"
-                                    size="sm"
-                                    className="flex-1"
-                                >
-                                    {t('share')}
-                                </Button>
-                            </div>
-                        ) : null}
+                                        <div className="flex space-x-2">
+                                            <Button
+                                                onClick={beginEditRefCode}
+                                                variant="default"
+                                                size="sm"
+                                                className="w-full"
+                                            >
+                                                {t('editReferralCode')}
+                                            </Button>
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <Button
+                                                onClick={handleCopyReferral}
+                                                variant="gradient"
+                                                size="sm"
+                                                state={isCopied ? 'success' : 'default'}
+                                                className="flex-1"
+                                            >
+                                                {isCopied ? t('copied') : t('copyLink')}
+                                            </Button>
+                                            <Button
+                                                onClick={handleShareReferral}
+                                                variant="default"
+                                                size="sm"
+                                                className="flex-1"
+                                            >
+                                                {t('share')}
+                                            </Button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.div>
                         <div className="mt-4 text-xs text-gray-300 font-semibold">
                                 {t('referralRewardDependsOnPackage')}
                         </div>

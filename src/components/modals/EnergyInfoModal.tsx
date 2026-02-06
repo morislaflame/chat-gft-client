@@ -35,60 +35,34 @@ const EnergyInfoModal: React.FC<EnergyInfoModalProps> = observer(({ isOpen, onCl
       isOpen={isOpen}
       onClose={handleClose}
       closeOnOverlayClick={true}
-      className="p-6"
-    >
-      <div className="relative">
+      title={t('energyInfoTitle')}
+      headerIcon={<i className="fa-solid fa-bolt text-white text-2xl"></i>}
+      headerIconContainerClassName="bg-user-message border border-purple-500/30"
+      closeAriaLabel={t('close')}
+      footer={
         <Button
-          variant="outline"
-          size="icon"
-          onClick={handleClose}
-          className="absolute top-0 right-0 w-8 h-8 rounded-full"
-          aria-label={t('close')}
-          icon="fas fa-times"
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-center mb-4"
+          onClick={handleGoToStore}
+          variant="gradient"
+          size="lg"
+          className="w-full"
+          icon="fas fa-arrow-right"
         >
-          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-user-message border border-purple-500/30 flex items-center justify-center">
-            <i className="fa-solid fa-bolt text-white text-2xl"></i>
-          </div>
-          <h2 className="text-2xl font-bold text-white">{t('energyInfoTitle')}</h2>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.05 }}
-          className="bg-primary-700 border border-primary-600 rounded-lg p-4"
-        >
-          <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
-            <li>{t('energyInfoP1')}</li>
-            <li>{t('energyInfoP2')}</li>
-            <li>{t('energyInfoP3')}</li>
-          </ul>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.1 }}
-          className="mt-4"
-        >
-          <Button
-            onClick={handleGoToStore}
-            variant="gradient"
-            size="lg"
-            className="w-full mb-2"
-            icon="fas fa-arrow-right"
-          >
-            {t('goToStore')}
-          </Button>
-        </motion.div>
-      </div>
+          {t('goToStore')}
+        </Button>
+      }
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, delay: 0.05 }}
+        className="bg-primary-700 border border-primary-600 rounded-lg p-4"
+      >
+        <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
+          <li>{t('energyInfoP1')}</li>
+          <li>{t('energyInfoP2')}</li>
+          <li>{t('energyInfoP3')}</li>
+        </ul>
+      </motion.div>
     </Modal>
   );
 });

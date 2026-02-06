@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { REWARDS_ROUTE } from '@/utils/consts';
@@ -38,13 +38,14 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
       className="p-6"
     >
       <div className="relative">
-        <button
+        <Button
+          variant="outline"
+          size="icon"
           onClick={handleClose}
-          className="absolute top-0 right-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-700 transition-colors cursor-pointer"
+          className="absolute top-0 right-0 w-8 h-8 rounded-full"
           aria-label={t('close')}
-        >
-          <i className="fas fa-times text-white text-xl"></i>
-        </button>
+          icon="fas fa-times"
+        />
 
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -52,8 +53,8 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
           transition={{ duration: 0.2 }}
           className="text-center mb-4"
         >
-          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
-            <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-secondary-gradient border border-amber-500/30 flex items-center justify-center">
+            <i className="fa-solid fa-gem text-white text-2xl"></i>
           </div>
           <h2 className="text-2xl font-bold text-white">{t('gemsInfoTitle')}</h2>
         </motion.div>
@@ -62,9 +63,9 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: 0.05 }}
-          className="bg-primary-700/40 border border-primary-600 rounded-lg p-4"
+          className="bg-primary-700 border border-primary-600 rounded-lg p-4"
         >
-          <ul className="list-disc pl-5 space-y-2 text-sm text-gray-200">
+          <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
             <li>{t('gemsInfoP1')}</li>
             <li>{t('gemsInfoP2')}</li>
             <li>{t('gemsInfoP3')}</li>
@@ -79,8 +80,8 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
         >
           <Button
             onClick={handleGoToRewards}
-            variant="tretiary"
-            size="md"
+            variant="secondary"
+            size="lg"
             className="w-full mb-2"
             icon="fas fa-arrow-right"
           >

@@ -70,7 +70,7 @@
     
 
     --gradient-accent-color: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
-
+    --gradient-secondary-color: linear-gradient(to right, #eab308, #f97316); 
   } 
 
   .dark {
@@ -122,6 +122,18 @@
 
   .bg-user-message {
     background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+  }
+
+  .bg-secondary-gradient {
+    background: linear-gradient(to right, #eab308, #f97316);
+  }
+
+  .text-secondary-gradient {
+    background: linear-gradient(to right, #eab308, #f97316);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
   /* Same gradient as bg-user-message, applied to text/icon color (for headers, icons) */
@@ -216,16 +228,16 @@
   .btn-secondary-gradient-border {
     border: 1px solid transparent;
     background:
-      linear-gradient(hsl(var(--secondary)), hsl(var(--secondary))) padding-box,
-      var(--gradient-border-secondary) border-box;
+      var(--gradient-secondary-color) padding-box,
+      var(--gradient-border-destructive) border-box;
     background-origin: padding-box, border-box;
     background-clip: padding-box, border-box;
   }
-  .btn-secondary-gradient-border:hover {
+  /* .btn-secondary-gradient-border:hover {
     background:
       linear-gradient(hsl(var(--secondary) / 0.9), hsl(var(--secondary) / 0.9)) padding-box,
       var(--gradient-border-secondary-hover) border-box;
-  }
+  } */
 
   /* Outline: muted/silver gradient border */
   .btn-outline-gradient-border {

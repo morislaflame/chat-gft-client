@@ -48,10 +48,10 @@ const createPrizeList = (prizeItems: RoulettePrize[]) => {
 
 const PrizeIcon: React.FC<{ item: CaseItem; className?: string }> = ({ item, className = '' }) => {
   if (item.type === 'gems') {
-    return <i className={`fa-solid fa-gem text-amber-400 ${className}`} />;
+    return <i className={`fa-solid fa-gem text-secondary-gradient ${className}`} />;
   }
   if (item.type === 'energy') {
-    return <i className={`fa-solid fa-bolt text-purple-400 ${className}`} />;
+    return <i className={`fa-solid fa-bolt text-user-message-gradient ${className}`} />;
   }
   return <i className={`fas fa-gift text-white ${className}`} />;
 };

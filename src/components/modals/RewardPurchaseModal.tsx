@@ -192,7 +192,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
           <Button
             onClick={onClose}
             variant="default"
-            size="default"
+            size="lg"
             className="w-full mb-2"
             icon="fas fa-check"
           >
@@ -202,7 +202,7 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
             <Button
               onClick={handleShareToStory}
               variant="gradient"
-              size="default"
+              size="lg"
               className="w-full"
               icon="fas fa-share"
               disabled={isSharing}

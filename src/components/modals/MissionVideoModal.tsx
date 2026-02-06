@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { useTranslate } from '@/utils/useTranslate';
+import Button from '@/components/ui/button';
 import type { MediaFile } from '@/types/types';
 
 interface MissionVideoModalProps {
@@ -80,12 +81,13 @@ const MissionVideoModal: React.FC<MissionVideoModalProps> = observer(({ isOpen, 
                         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
                             <div className="flex items-center justify-end">
                                 {!videoEnded && (
-                                    <button
+                                    <Button
+                                        variant="default"
+                                        size="sm"
                                         onClick={handleSkip}
-                                        className="px-4 py-2 hover:bg-white/10 text-white rounded-lg transition-colors"
                                     >
                                         {t('skip')}
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         </div>

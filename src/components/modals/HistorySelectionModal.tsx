@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 
 interface HistorySelectionModalProps {
     isOpen: boolean;
@@ -63,12 +63,14 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                 {agent.error && (
                     <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
                         {agent.error}
-                        <button
+                        <Button
+                            variant="link"
+                            size="sm"
                             onClick={() => agent.fetchPublicAgents()}
-                            className="ml-2 underline hover:text-red-300"
+                            className="ml-2 underline hover:text-red-300 p-0 h-auto min-h-0 text-red-400"
                         >
                             {t('retry')}
-                        </button>
+                        </Button>
                     </div>
                 )}
 
@@ -92,12 +94,12 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                                   <Button
                                     onClick={() => handleSelectHistory(agentItem.historyName)}
                                     disabled={agent.saving || isSelected}
-                                    variant="default"
-                                    size="md"
-                                    className={`w-full text-left p-4 rounded-lg transition-all duration-200 [&>span]:w-full [&>span]:justify-start ${
+                                    variant="outline"
+                                    size="default"
+                                    className={`w-full text-left justify-start p-4 rounded-lg transition-all duration-200 [&>span]:w-full [&>span]:justify-start ${
                                       isSelected
-                                        ? 'bg-gradient-to-r from-red-500/30 to-red-700/30 border-2 border-red-500 cursor-default'
-                                        : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600 hover:border-red-500 cursor-pointer'
+                                        ? 'bg-primary-700/50 border-2 border-red-500 cursor-default'
+                                        : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600'
                                     } ${agent.saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                                   >
                                     <div className="flex items-center justify-between gap-2 w-full">
@@ -133,8 +135,8 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
                   <Button
                     onClick={onClose}
                     variant="default"
-                    size="md"
-                    className="w-full mt-6 bg-primary-700 hover:bg-primary-600 text-white"
+                    size="default"
+                    className="w-full mt-6"
                   >
                     {t('close')}
                   </Button>

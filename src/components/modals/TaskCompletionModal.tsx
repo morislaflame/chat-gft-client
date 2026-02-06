@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import { getTaskText } from '@/utils/translations';
 import type { Task } from '@/types/types';
@@ -103,7 +103,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
               <span className="text-3xl font-bold text-white">
                 +{rewardAmount}
               </span>
-              <i className={`fa-solid ${isEnergy ? 'fa-bolt text-purple-400' : 'fa-gem text-amber-400'} text-2xl`}></i>
+              <i className={`fa-solid ${isEnergy ? 'fa-bolt text-user-message-gradient' : 'fa-gem text-secondary-gradient'} text-2xl`}></i>
             </div>
           </div>
         </motion.div>
@@ -116,8 +116,8 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
         >
           <Button
             onClick={onClose}
-            variant="secondary"
-            size="md"
+            variant="gradient"
+            size="default"
             className="w-full"
             icon="fas fa-check"
           >

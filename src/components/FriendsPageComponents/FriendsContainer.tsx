@@ -254,7 +254,7 @@ const FriendsContainer: React.FC = observer(() => {
                                 {t('referralRewardDependsOnPackage')}
                         </div>
                         <div className="text-xs text-gray-400">
-                                {t('referralMaxPerFriend')} <span className="font-semibold">+30 <i className="fa-solid fa-bolt text-purple-400 text-md"></i> + 20 <i className="fa-solid fa-gem text-amber-400 text-md"></i></span>
+                                {t('referralMaxPerFriend')} <span className="font-semibold">+30 <i className="fa-solid fa-bolt text-user-message-gradient text-md"></i> + 20 <i className="fa-solid fa-gem text-secondary-gradient text-md"></i></span>
                         </div>
                     </div>
 
@@ -283,9 +283,9 @@ const FriendsContainer: React.FC = observer(() => {
                                     const getBonusTypeIcon = (bonusType?: string) => {
                                         switch (bonusType) {
                                             case 'energy':
-                                                return <i className="fa-solid fa-bolt text-purple-400"></i>;
+                                                return <i className="fa-solid fa-bolt text-user-message-gradient"></i>;
                                             case 'balance':
-                                                return <i className="fa-solid fa-gem text-amber-400"></i>;
+                                                return <i className="fa-solid fa-gem text-secondary-gradient"></i>;
                                             default:
                                                 return null;
                                         }
@@ -306,7 +306,7 @@ const FriendsContainer: React.FC = observer(() => {
                                             <div className="flex items-center justify-between text-xs">
                                                 <div className='flex gap-2 items-center'>
                                                     <div className="flex items-center">
-                                                        <i className={`${getBonusIcon(bonus.reason)} text-purple-400`}></i>
+                                                        <i className={`${getBonusIcon(bonus.reason)} text-user-message-gradient`}></i>
                                                     </div>
                                                     {bonus.sourceUser && (
                                                         <div className="text-xs">

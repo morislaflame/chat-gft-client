@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 
@@ -102,7 +102,7 @@ const StageRewardModal: React.FC = observer(() => {
             <span className="text-3xl font-bold text-white">
               +{stageReward.rewardAmount}
             </span>
-            <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+            <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
           </div>
           <div className="mt-2 text-center text-xs text-gray-300">
             {t('stageRewardGemsHint')}
@@ -117,9 +117,9 @@ const StageRewardModal: React.FC = observer(() => {
         >
           <Button
             onClick={handleClose}
-            variant="default"
-            size="md"
-            className="w-full bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white"
+            variant="gradient"
+            size="default"
+            className="w-full"
             icon="fa-solid fa-check"
           >
             {t('continue')}

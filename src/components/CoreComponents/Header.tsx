@@ -90,8 +90,8 @@ const Header: React.FC = observer(() => {
                         className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-8 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
                         style={glassStyle}
                     >
-                        <i className="fa-solid fa-gem text-amber-400 text-lg"></i>
-                        <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
+                        <i className="fa-solid fa-gem text-secondary-gradient text-lg"></i>
+                        <div className="absolute -top-2 -right-2 bg-secondary-gradient text-white text-[10px] rounded-full min-w-[22px] h-5 px-1 flex items-center justify-center font-bold">
                             {user.user?.balance || 0}
                         </div>
                     </button>

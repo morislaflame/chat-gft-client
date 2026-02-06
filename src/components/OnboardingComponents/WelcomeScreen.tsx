@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { TransitionPanel } from '@/components/ui/transitionPanel';
 import { useSwipe } from '@/utils/useSwipe';
 import useMeasure from 'react-use-measure';

@@ -79,7 +79,7 @@ const variantClasses: Record<ButtonVariant, string> = {
 const sizeClasses: Record<ButtonSize, string> = {
   default: "px-4 py-2",
   sm: "px-3 py-2 text-xs",
-  lg: "px-5 text-base",
+  lg: "px-5 py-3 text-base rounded-xl",
   icon: "h-9 w-9 px-0 py-2",
 };
 
@@ -92,7 +92,7 @@ const iconSizeClasses: Record<ButtonSize, string> = {
 
 const rippleClasses: Record<ButtonVariant, string> = {
   default: "bg-white/40",
-  secondary: "bg-primary-foreground/30",
+  secondary: "bg-[#421e05]",
   outline: "bg-white/40",
   ghost: "bg-foreground/20",
   link: "bg-primary/40",

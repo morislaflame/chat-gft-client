@@ -6,7 +6,7 @@ import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import { QUESTS_ROUTE, STORE_ROUTE } from '@/utils/consts';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { trackEvent } from '@/utils/analytics';
 
 const InsufficientEnergyModal: React.FC = observer(() => {
@@ -84,8 +84,8 @@ const InsufficientEnergyModal: React.FC = observer(() => {
         >
           <Button
             onClick={handleGoToStore}
-            variant="tretiary"
-            size="md"
+            variant="secondary"
+            size="default"
             className="w-full"
             icon="fas fa-store"
           >
@@ -102,8 +102,8 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           >
             <Button
               onClick={handleGoToQuests}
-              variant="secondary"
-              size="md"
+              variant="gradient"
+              size="default"
               className="w-full"
               icon="fas fa-tasks"
             >
@@ -118,8 +118,8 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           >
             <Button
               onClick={handleClose}
-              variant="default"
-              size="md"
+              variant="outline"
+              size="default"
               className="w-full"
             >
               {t('cancel')}

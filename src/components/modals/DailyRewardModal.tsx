@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 
@@ -119,7 +119,7 @@ const DailyRewardModal: React.FC = observer(() => {
                 <span className="text-3xl font-bold text-white">
                   +{rewardInfo.rewardType === 'energy' ? rewardInfo.reward : rewardInfo.secondReward}
                 </span>
-                <i className="fa-solid fa-bolt text-purple-400 text-2xl"></i>
+                <i className="fa-solid fa-bolt text-user-message-gradient text-2xl"></i>
               </div>
             )}
             {isTokensAvailable && (
@@ -127,7 +127,7 @@ const DailyRewardModal: React.FC = observer(() => {
                 <span className="text-3xl font-bold text-white">
                   +{rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : rewardInfo.secondReward}
                 </span>
-                <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+                <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
               </div>
             )}
           </div>
@@ -161,8 +161,8 @@ const DailyRewardModal: React.FC = observer(() => {
             onClick={handleClaim}
             disabled={dailyReward.loading}
             className="w-full"
-            variant="tretiary"
-            size="md"
+            variant="secondary"
+            size="lg"
             icon="fa-solid fa-gift"
           >
             {dailyReward.loading ? (

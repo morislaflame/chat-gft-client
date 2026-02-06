@@ -71,7 +71,7 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
         <Button
           onClick={handlePurchaseClick}
           disabled={isPurchasing || !canAfford}
-          variant={canAfford && !isPurchasing ? 'secondary' : 'default'}
+          variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
           size="lg"
           className="w-full"
           icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : 'fas fa-shopping-cart'}

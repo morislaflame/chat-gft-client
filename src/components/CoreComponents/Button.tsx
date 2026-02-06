@@ -31,7 +31,7 @@ const Button: React.FC<ButtonProps> = ({
   const { hapticImpact } = useHapticFeedback();
   const variantClasses = {
     primary: 'bg-primary-700 hover:bg-primary-600 text-white shadow-lg',
-    secondary: 'bg-secondary-500 hover:bg-secondary-400 text-white shadow-lg',
+    secondary: 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white shadow-lg',
     tretiary: ' bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white shadow-lg',
     success: 'bg-green-500 hover:bg-green-500 text-white shadow-lg ',
     default: 'text-white hover:bg-white/10',

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import type { DailyReward } from '@/http/dailyRewardAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
@@ -87,7 +87,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
+          className="bg-primary-700 rounded-lg p-4 mb-4 border border-primary-600"
         >
           <div className="text-center">
             <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div>
@@ -126,33 +126,18 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
               {isEnergyAvailable && (
                 <div className="flex items-center gap-2">
                   <span className="text-3xl font-bold text-white">+{energyAmount}</span>
-                  <i className="fa-solid fa-bolt text-purple-400 text-2xl"></i>
+                  <i className="fa-solid fa-bolt text-user-message-gradient text-2xl"></i>
                 </div>
               )}
               {isTokensAvailable && (
                 <div className="flex items-center gap-2">
                   <span className="text-3xl font-bold text-white">+{tokensAmount}</span>
-                  <i className="fa-solid fa-gem text-amber-400 text-2xl"></i>
+                  <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
                 </div>
               )}
             </div>
           </div>
         </motion.div>
-
-        {/* Status Info */}
-        {/* {isClaimed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-            className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 mb-4"
-          >
-            <div className="flex items-center justify-center gap-2 text-sm text-green-400">
-              <i className="fas fa-check-circle"></i>
-              <span>{t('rewardReceived')}</span>
-            </div>
-          </motion.div>
-        )} */}
 
         {/* Close Button */}
         <motion.div
@@ -162,8 +147,8 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
         >
           <Button
             onClick={onClose}
-            variant="secondary"
-            size="md"
+            variant="gradient"
+            size="lg"
             className="w-full"
             icon="fas fa-check"
           >

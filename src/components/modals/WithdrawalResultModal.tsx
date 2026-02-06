@@ -59,8 +59,8 @@ const WithdrawalResultModal: React.FC<WithdrawalResultModalProps> = observer(({
         >
           <Button
             onClick={onClose}
-            variant="secondary"
-            size="default"
+            variant="default"
+            size="lg"
             className="w-full"
             icon="fas fa-check"
           >

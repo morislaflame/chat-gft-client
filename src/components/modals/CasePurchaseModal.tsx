@@ -100,8 +100,8 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
         >
           <Button
             onClick={() => onGoToCase(box)}
-            variant="secondary"
-            size="default"
+            variant="gradient"
+            size="lg"
             className="w-full"
             icon="fas fa-arrow-right"
           >

@@ -34,8 +34,8 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const iconClass = isReward
     ? 'fa-gift text-white'
     : isGems
-      ? 'fa-gem text-amber-400'
-      : 'fa-bolt text-purple-400';
+      ? 'fa-gem text-secondary-gradient'
+      : 'fa-bolt text-user-message-gradient';
 
 
   const title = t('congratulations');
@@ -156,12 +156,12 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
         >
           <Button
             onClick={onClose}
-            variant="secondary"
-            size="default"
+            variant="default"
+            size="lg"
             className="w-full"
             icon="fas fa-check"
           >
-            {t('close')}
+            {t('great')}
           </Button>
           {isReward ? (
             <Button

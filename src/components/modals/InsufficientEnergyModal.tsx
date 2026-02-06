@@ -58,7 +58,7 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           <Button
             onClick={handleGoToStore}
             variant="secondary"
-            size="default"
+            size="lg"
             className="w-full"
             icon="fas fa-store"
           >
@@ -70,7 +70,7 @@ const InsufficientEnergyModal: React.FC = observer(() => {
           <Button
             onClick={handleGoToQuests}
             variant="gradient"
-            size="default"
+            size="lg"
             className="w-full"
             icon="fas fa-tasks"
           >
@@ -79,8 +79,8 @@ const InsufficientEnergyModal: React.FC = observer(() => {
 
           <Button
             onClick={handleClose}
-            variant="outline"
-            size="default"
+            variant="default"
+            size="lg"
             className="w-full"
           >
             {t('cancel')}

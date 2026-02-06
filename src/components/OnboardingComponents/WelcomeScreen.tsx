@@ -87,10 +87,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
             >
                 <Button
                     onClick={() => handleSetActiveIndex(1)}
-                    variant="secondary"
+                    variant="gradient"
                     size="lg"
                     className="w-full"
-                    icon="fas fa-chevron-right"
+                    icon="fas fa-rocket"
                 >
                     {t('joinAdventure')}
                 </Button>
@@ -131,7 +131,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
             >
                 <Button
                     onClick={onJoinAdventure}
-                    variant="secondary"
+                    variant="gradient"
                     size="lg"
                     className="w-full"
                     icon="fas fa-rocket"

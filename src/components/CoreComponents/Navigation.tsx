@@ -30,7 +30,7 @@ const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange
     };
 
     return (
-        <div className="px-4 w-full py-4 pb-8 fixed bottom-0 left-0 right-0 z-20">
+        <div className="px-4 w-full py-4 pb-8 fixed bottom-0 left-0 right-0 z-20" > 
             
             <div className="flex justify-around gap-1">
                 {tabs.map((tab) => (

@@ -78,7 +78,7 @@ const DailyRewardModal: React.FC = observer(() => {
       {rewardInfo ? (
         <>
           {/* Reward Info */}
-          <div className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600">
+          <div className="px-4">
             {isCaseAvailable ? (
               <div className="flex flex-col items-center gap-3 mb-2">
                 {[rewardInfo.rewardCase].filter(Boolean).map((c, idx) => {
@@ -102,8 +102,8 @@ const DailyRewardModal: React.FC = observer(() => {
                       ) : (
                         <i className="fa-solid fa-box text-white text-4xl" />
                       )}
-                      <div className="text-sm text-gray-200 mt-2 font-semibold text-center">
-                        {title}
+                      <div className="text-3xl text-gray-200 mt-2 text-center max-w-[120px] line-clamp-2">
+                        +
                       </div>
                     </div>
                   );
@@ -111,40 +111,40 @@ const DailyRewardModal: React.FC = observer(() => {
               </div>
             ) : null}
 
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-4">
               {isEnergyAvailable && (
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-white">
+                  <span className="text-4xl font-bold text-white">
                     +{rewardInfo.rewardType === 'energy' ? rewardInfo.reward : (rewardInfo.secondReward ?? 0)}
                   </span>
-                  <i className="fa-solid fa-bolt text-user-message-gradient text-2xl"></i>
+                  <i className="fa-solid fa-bolt text-user-message-gradient text-4xl"></i>
                 </div>
               )}
               {isTokensAvailable && (
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-white">
+                  <span className="text-4xl font-bold text-white">
                     +{rewardInfo.rewardType === 'tokens' ? rewardInfo.reward : (rewardInfo.secondReward ?? 0)}
                   </span>
-                  <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
+                  <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
                 </div>
               )}
             </div>
           </div>
 
           {/* Progress indicator */}
-          <div className="mb-4">
+          <div className="">
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs text-gray-400">{t('progress')}</span>
               <span className="text-xs text-gray-400">
                 {rewardInfo.day}/7 {t('days')}
               </span>
             </div>
-            <div className="w-full bg-primary-700 rounded-full h-2">
+            <div className="w-full bg-primary-700 rounded-full h-4 border border-primary-600">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(rewardInfo.day / 7) * 100}%` }}
                 transition={{ delay: 0.4, duration: 0.5 }}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 h-4 rounded-full"
               />
             </div>
           </div>

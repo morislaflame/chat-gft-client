@@ -72,7 +72,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
           <Button
             onClick={onClose}
             variant="gradient"
-            size="default"
+            size="lg"
             className="w-full"
             icon="fas fa-check"
           >
@@ -82,14 +82,13 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
       }
     >
       {task ? (
-        <div className="bg-primary-700/50 rounded-lg p-4 border border-primary-600">
+        <div className="px-4">
           <div className="text-center">
-            <div className="text-sm text-gray-400 mb-2">{t('taskRewardReceived')}</div>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-3xl font-bold text-white">
+              <span className="text-4xl font-bold text-white">
                 +{rewardAmount}
               </span>
-              <i className={`fa-solid ${isEnergy ? 'fa-bolt text-user-message-gradient' : 'fa-gem text-secondary-gradient'} text-2xl`}></i>
+              <i className={`fa-solid ${isEnergy ? 'fa-bolt text-user-message-gradient' : 'fa-gem text-secondary-gradient'} text-4xl`}></i>
             </div>
           </div>
         </div>

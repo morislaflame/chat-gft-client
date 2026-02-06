@@ -97,13 +97,27 @@ const RewardCard: React.FC<RewardCardProps> = ({
     const handleCardClick = () => onCardClick(rewardItem, userReward);
     const key = activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id);
 
+    const previewUrl = rewardItem.preview?.url;
+    const previewMimeType = rewardItem.preview?.mimeType ?? '';
+
     return (
         <Card
             key={key}
             onClick={handleCardClick}
-            className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer"
+            className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer relative overflow-hidden"
         >
-            <div className="mb-2 flex items-center justify-center">
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+                {previewUrl && previewMimeType.startsWith('image/') ? (
+                    <img
+                        src={previewUrl}
+                        alt=""
+                        className="absolute -top-40 -left-40 h-85 w-85 object-cover rounded-full blur-3xl opacity-60"
+                    />
+                ) : (
+                    <div className="absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-purple-500 to-violet-600" />
+                )}
+            </div>
+            <div className="mb-2 flex items-center justify-center relative">
                 <LazyMediaRenderer
                     mediaFile={rewardItem.mediaFile}
                     animations={animations}

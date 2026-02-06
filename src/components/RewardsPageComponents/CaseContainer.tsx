@@ -82,7 +82,7 @@ const CaseContainer: React.FC = observer(() => {
 
   return (
     <div
-      className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll"
+      className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll pb-[128px]"
       // style={{ marginTop: isMobile ? '148px' : '48px' }}
     >
       <div className='w-full' style={{ marginTop: isMobile ? '158px' : '58px' }}></div>

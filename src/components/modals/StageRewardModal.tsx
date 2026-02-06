@@ -45,7 +45,7 @@ const StageRewardModal: React.FC = observer(() => {
           <Button
             onClick={handleClose}
             variant="gradient"
-            size="default"
+            size="lg"
             className="w-full"
             icon="fa-solid fa-check"
           >
@@ -76,7 +76,7 @@ const StageRewardModal: React.FC = observer(() => {
                     ) : (
                       <i className="fa-solid fa-box text-white text-4xl" />
                     )}
-                    <div className="text-sm text-gray-200 mt-2 font-semibold text-center">
+                    <div className="text-sm text-gray-200 mt-4 font-semibold text-center">
                       {title}
                     </div>
                   </div>
@@ -86,10 +86,10 @@ const StageRewardModal: React.FC = observer(() => {
           ) : null}
 
           <div className="flex items-center justify-center gap-2">
-            <span className="text-3xl font-bold text-white">
+            <span className="text-4xl font-bold text-white">
               +{stageReward.rewardAmount}
             </span>
-            <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
+            <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
           </div>
           <div className="mt-2 text-center text-xs text-gray-300">
             {t('stageRewardGemsHint')}

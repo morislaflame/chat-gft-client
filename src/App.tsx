@@ -46,6 +46,12 @@ const AppContent = () => {
       }>
         <AppRouter />
       </Suspense>
+      <ProgressiveBlur
+        className="pointer-events-none fixed left-0 right-0 bottom-0 z-15"
+        containerStyle={{ height: `${blurHeight}px` }}
+        blurIntensity={2}
+        direction="bottom"
+      />
       <BottomNavigation />
       <DailyRewardModal />
       <StageRewardModal />

@@ -140,43 +140,52 @@ const ChatContainer: React.FC = observer(() => {
     const backgroundUrl = chat.background?.url;
 
     return (
-        <div className="h-full relative flex flex-col overflow-x-hidden w-full">
-            <div 
-                ref={chatContainerRef} 
-                className="flex-1 px-4 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
-                style={backgroundUrl ? {
-                    backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundAttachment: 'fixed'
-                } : {}}
-            >
-                <ChatMessages
-                    onStartMission={handleStartMission}
-                    onSelectSuggestion={handleSelectSuggestion}
-                    messageEndRef={messagesEndRef}
+        <div className="h-full relative flex flex-col overflow-x-hidden w-full fixed">
+            {/* Fixed background layer behind everything */}
+            {backgroundUrl && (
+                <div
+                    className="fixed inset-0 z-0"
+                    style={{
+                        backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                    aria-hidden
                 />
-            </div>
+            )}
 
-            <div className="absolute bottom-0 right-0 w-full p-4 flex flex-col gap-3">
-                <MissionProgress />
-                <form onSubmit={handleSubmit} className="flex space-x-2">
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={t('greeting')}
-                        className="flex-1 backdrop-blur-sm btn-default-silver-border-transparent rounded-full border border-primary-600 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
+            {/* Content: messages + bottom block, with navbar offset */}
+            <div
+                ref={chatContainerRef}
+                className="flex-1 flex flex-col min-h-0 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
+            >
+                <div className="flex-1 px-4 pb-[150px]">
+                    <ChatMessages
+                        onStartMission={handleStartMission}
+                        onSelectSuggestion={handleSelectSuggestion}
+                        messageEndRef={messagesEndRef}
                     />
-                    <Button
-                        type="submit"
-                        variant="gradient"
-                        size="icon"
-                        icon="fas fa-paper-plane"
-                        className="shrink-0 h-10 w-10"
-                    />
-                </form>
+                    <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0">
+                        <MissionProgress />
+                        <form onSubmit={handleSubmit} className="flex space-x-2">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder={t('greeting')}
+                                className="flex-1 backdrop-blur-sm btn-default-silver-border-transparent rounded-full border border-primary-600 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
+                            />
+                            <Button
+                                type="submit"
+                                variant="gradient"
+                                size="icon"
+                                icon="fas fa-paper-plane"
+                                className="shrink-0 h-10 w-10"
+                            />
+                        </form>
+                    </div>
+                </div>
             </div>
 
             {/* Agent Video Modal */}

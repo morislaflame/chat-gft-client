@@ -56,7 +56,7 @@ const BottomNavigation = () => {
     return (
         <div 
             ref={bottomNavigationRef}
-            className="flex justify-center z-20 w-full"
+            className="flex justify-center z-20 w-full fixed"
         >
             <Navigation 
                 activeTab={getActiveTab()}

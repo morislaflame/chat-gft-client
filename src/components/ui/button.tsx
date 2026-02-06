@@ -12,7 +12,8 @@ type ButtonVariant =
   | "link"
   | "destructive"
   | "gradient"
-  | "glass";
+  | "glass"
+  | "nav";
 
 type ButtonSize = "default" | "sm" | "lg" | "icon";
 
@@ -69,6 +70,10 @@ const variantClasses: Record<ButtonVariant, string> = {
   glass:
     "btn-glass-gradient-border text-white shadow-none " +
     "hover:brightness-110 active:bg-white/10",
+
+  nav:
+    "btn-nav-silver-border text-foreground shadow-none " +
+    "hover:opacity-90 active:opacity-95",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -94,6 +99,7 @@ const rippleClasses: Record<ButtonVariant, string> = {
   destructive: "bg-white/50",
   gradient: "bg-[#4c2d65]",
   glass: "bg-white/40",
+  nav: "bg-black/80",
 };
 
 const SCALE_ANIMATION = {

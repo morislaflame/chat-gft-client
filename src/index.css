@@ -46,7 +46,7 @@
     --border: 217 19% 27%;
     --input: 0 0% 10%;
     --transparent: 0 0% 0%;
-    --ring: 262 83% 58%;
+    --ring: 0 0% 15%;
 
     --radius: 0.75rem;
 
@@ -166,6 +166,12 @@
       var(--gradient-border-silver-hover) border-box;
   }
 
+  .btn-default-silver-border.is-active {
+    background:
+      linear-gradient(hsl(var(--ring)), hsl(var(--ring))) padding-box,
+      var(--gradient-border-silver-hover) border-box;
+  }
+
   .btn-default-silver-border-transparent {
     border: 1px solid transparent;
     background:
@@ -192,6 +198,18 @@
       var(--gradient-border-silver) border-box;
     background-origin: padding-box, border-box;
     background-clip: padding-box, border-box;
+  }
+
+  /* Nav tabs: no fill, silver border; active = silver-hover border (like default button hover) */
+  .btn-nav-silver-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(transparent, transparent) padding-box
+  }
+  .btn-nav-silver-border.is-active {
+    background:
+      linear-gradient(transparent, transparent) padding-box,
+      var(--gradient-border-silver-hover) border-box;
   }
 
   /* Secondary: violet/purple gradient border */

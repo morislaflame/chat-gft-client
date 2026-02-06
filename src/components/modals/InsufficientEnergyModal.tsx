@@ -88,7 +88,6 @@ const InsufficientEnergyModal: React.FC = observer(() => {
         </>
       }
     >
-      <></>
     </Modal>
   );
 });

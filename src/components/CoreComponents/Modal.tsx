@@ -1,4 +1,5 @@
 import React, { type ReactNode } from 'react';
+import { motion } from 'motion/react';
 
 import Button from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,7 +15,7 @@ import {
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   overlayClassName?: string;
   closeOnOverlayClick?: boolean;
@@ -89,7 +90,12 @@ const Modal: React.FC<ModalProps> = ({
       >
         <div className="mx-auto w-full max-w-md h-full flex flex-col">
           {hasHeader ? (
-            <div className="px-4 pb-8">
+            <motion.div
+              className="px-4 pb-4"
+              initial={{ opacity: 1, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.25 }}
+            >
               <div className="flex items-center flex-col gap-3 relative">
                 {headerIcon ? (
                   <div
@@ -104,12 +110,12 @@ const Modal: React.FC<ModalProps> = ({
 
                 <div className="min-w-0 flex-1 pt-1 text-center items-center flex-col gap-2 flex">
                   {title ? (
-                    <DrawerTitle className="text-white text-3xl font-bold leading-tight">
+                    <DrawerTitle className="text-white text-3xl font-bold leading-tight max-w-[850%]">
                       {title}
                     </DrawerTitle>
                   ) : null}
                   {description ? (
-                    <DrawerDescription className="text-gray-400 text-sm mt-1 max-w-[80%]">
+                    <DrawerDescription className="text-zinc-400 text-md max-w-[80%]">
                       {description}
                     </DrawerDescription>
                   ) : null}
@@ -138,17 +144,30 @@ const Modal: React.FC<ModalProps> = ({
                   )
                 ) : null}
               </div>
-            </div>
+            </motion.div>
           ) : null}
 
-          <div className={cn('flex-1 overflow-y-auto px-4 pb-4 ios-scroll', contentClassName)}>
+          {children && 
+          <motion.div
+            className={cn('flex-1 overflow-y-auto px-4 pb-8 pt-4 ios-scroll', contentClassName)}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.3 }}
+          >
             {children}
-          </div>
+          </motion.div>
+        }
 
           {footer ? (
-            <DrawerFooter className={cn('pt-8 pb-8', footerClassName)}>
-              {footer}
-            </DrawerFooter>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.4 }}
+            >
+              <DrawerFooter className={cn('pb-8', footerClassName)}>
+                {footer}
+              </DrawerFooter>
+            </motion.div>
           ) : null}
         </div>
       </DrawerContent>

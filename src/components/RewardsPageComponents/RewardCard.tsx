@@ -33,7 +33,7 @@ type WithdrawalButtonProps = {
 const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating, onClick, t }) => {
     if (status === 'completed') {
         return (
-            <div className="w-full px-2.5 py-2 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
                 <i className="fas fa-check-circle"></i>
                 {t('withdrawn')}
             </div>
@@ -42,7 +42,7 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
 
     if (status === 'pending') {
         return (
-            <div className="w-full px-2.5 py-2 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+            <div className="w-full px-4 py-3 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <i className="fas fa-clock"></i>
                 {t('pending')}
             </div>
@@ -147,6 +147,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
 
             {activeTab === 'purchased' && userReward && (
                 <div
+                    className='w-full'
                     onClick={(e) => e.stopPropagation()}
                 >
                     <WithdrawalButton

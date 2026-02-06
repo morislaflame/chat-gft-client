@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
@@ -56,12 +55,7 @@ const StageRewardModal: React.FC = observer(() => {
       }
     >
       {stageReward ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
-        >
+        <div className="px-4">
           {stageReward.rewardCase ? (
             <div className="flex flex-col items-center gap-3 mb-3">
               {(() => {
@@ -74,7 +68,7 @@ const StageRewardModal: React.FC = observer(() => {
                         mediaFile={c.mediaFile}
                         animations={animations}
                         name={title}
-                        className="w-24 h-24 object-contain"
+                        className="w-48 h-48 object-contain"
                         loop={false}
                         loadOnIntersect={false}
                         autoplay={true}
@@ -100,7 +94,7 @@ const StageRewardModal: React.FC = observer(() => {
           <div className="mt-2 text-center text-xs text-gray-300">
             {t('stageRewardGemsHint')}
           </div>
-        </motion.div>
+        </div>
       ) : null}
     </Modal>
   );

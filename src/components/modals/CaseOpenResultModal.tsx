@@ -52,7 +52,6 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
 
 
   const title = t('congratulations');
-  const description = t('youWon');
 
   const amountLabel = result && !isReward
     ? `+${result.amount} ${t(isGems ? 'gems' : 'energy')}`
@@ -119,7 +118,6 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
       onClose={onClose}
       closeOnOverlayClick={true}
       title={title}
-      description={description}
       headerIcon={headerIcon}
       headerIconContainerClassName={headerIconContainerClassName}
       closeAriaLabel={t('close')}
@@ -152,16 +150,16 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
       }
     >
       {openResult && result ? (
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center">
           {isReward ? (
             <div className="flex flex-col items-center gap-3">
-              <div className="w-28 h-28 flex items-center justify-center">
+              <div className="w-48 h-48 flex items-center justify-center">
                 <LazyMediaRenderer
                   mediaFile={result.reward.mediaFile}
                   imageUrl={result.reward.mediaFile?.mimeType !== 'application/json' ? result.reward.mediaFile?.url : undefined}
                   animations={animations}
                   name={result.reward.name}
-                  className="w-28 h-28 object-contain"
+                  className="w-48 h-48 object-contain"
                   loop={false}
                   loadOnIntersect={false}
                 />
@@ -171,7 +169,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-4">
               <div className=" flex items-center justify-center">
                 <i className={`fa-solid ${iconClass} text-8xl`} />
               </div>

@@ -55,7 +55,7 @@ const StoreContainer: React.FC = observer(() => {
 
     return (
         <div className="p-4 overflow-y-auto flex w-full flex-col gap-2"
-        style={{ marginTop: isMobile ? '148px' : '48px' }}>
+        style={{ marginTop: isMobile ? '158px' : '58px' }}>
 
             <StoreList
                 products={product.products}

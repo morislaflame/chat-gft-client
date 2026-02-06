@@ -53,7 +53,7 @@ const ReferralCodeChangeConfirmModal: React.FC<ReferralCodeChangeConfirmModalPro
           <Button
             onClick={handleConfirm}
             variant="gradient"
-            size="default"
+            size="lg"
             className="w-full"
             icon="fas fa-check"
             disabled={isLoading}
@@ -62,7 +62,6 @@ const ReferralCodeChangeConfirmModal: React.FC<ReferralCodeChangeConfirmModalPro
           </Button>
         }
       >
-        <></>
       </Modal>
     );
   }

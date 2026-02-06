@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
 import type { UserReward } from '@/http/rewardAPI';
-import { renderRewardMedia } from '@/utils/rewardUtils';
+import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { useAnimationLoader } from '@/utils/useAnimationLoader';
 
 interface WithdrawalModalProps {
   isOpen: boolean;
@@ -23,28 +24,15 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
   loading
 }) => {
   const { t } = useTranslate();
-  const [animationData, setAnimationData] = useState<Record<string, unknown> | null>(null);
 
-  // Загружаем анимацию при изменении userReward
-  useEffect(() => {
-    if (!userReward?.reward?.mediaFile) {
-      setAnimationData(null);
-      return;
-    }
+  const reward = userReward?.reward ?? null;
+  const [animations] = useAnimationLoader(
+    reward ? [reward] : [],
+    (r) => r.mediaFile ?? null,
+    [reward?.id ?? 0]
+  );
 
-    const mediaFile = userReward.reward.mediaFile;
-    if (mediaFile.mimeType === 'application/json') {
-      fetch(mediaFile.url)
-        .then(response => response.json())
-        .then(data => setAnimationData(data))
-        .catch(error => {
-          console.error('Error loading animation:', error);
-          setAnimationData(null);
-        });
-    } else {
-      setAnimationData(null);
-    }
-  }, [userReward]);
+  const description = t('withdrawalInfo')
 
   return (
     <Modal
@@ -54,6 +42,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
       swipeToClose={!loading}
       closeDisabled={loading}
       title={t('withdrawalRequest')}
+      description={description}
       closeAriaLabel={t('close')}
       footerClassName="flex-row gap-3"
       footer={
@@ -61,8 +50,8 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
           <Button
             onClick={onClose}
             disabled={loading}
-            variant="outline"
-            size="default"
+            variant="default"
+            size="lg"
             className="flex-1"
           >
             {t('cancel')}
@@ -71,7 +60,7 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
             onClick={onConfirm}
             disabled={loading}
             variant="secondary"
-            size="default"
+            size="lg"
             className="flex-1"
             icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
           >
@@ -83,57 +72,42 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
       {userReward ? (
         <>
           {/* Reward Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
-          >
+          <div className="rounded-lg px-4">
             <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ 
-              type: 'spring',
-              delay: 0.1,
-              bounce: 0.4
-            }}
-          >
-            {userReward && renderRewardMedia({
-              reward: userReward.reward,
-              animationData: animationData,
-              size: 'md',
-              containerClassName: 'mx-auto'
-            })}
-          </motion.div>
-          <div className="text-center">
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{
+                type: 'spring',
+                delay: 0.1,
+                bounce: 0.4
+              }}
+              className="flex justify-center"
+            >
+              {reward?.mediaFile ? (
+                <div className="w-48 h-48 flex items-center justify-center">
+                  <LazyMediaRenderer
+                    mediaFile={reward.mediaFile}
+                    animations={animations}
+                    name={reward.name}
+                    className="w-48 h-48 object-contain"
+                    loop={false}
+                    loadOnIntersect={false}
+                    autoplay={true}
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
+                  <i className="fas fa-gift text-white text-3xl" />
+                </div>
+              )}
+            </motion.div>
+          <div className="text-center mt-4">
             <div className="text-lg font-semibold text-white mb-1">
               {userReward.reward.name}
             </div>
-            {userReward.reward.description && (
-              <div className="text-sm text-gray-300 mb-2">
-                {userReward.reward.description}
-              </div>
-            )}
-            <div className="text-xs text-gray-400 flex items-center justify-center gap-1">
-              {t('purchasedFor')} {userReward.purchasePrice} <i className="fa-solid fa-gem text-white"></i>
             </div>
           </div>
-          </motion.div>
 
-          {/* Info Message */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3"
-          >
-            <div className="flex items-start gap-2">
-              <i className="fa-solid fa-info-circle text-blue-400 mt-0.5"></i>
-              <p className="text-xs text-blue-300">
-                {t('withdrawalInfo')}
-              </p>
-            </div>
-          </motion.div>
         </>
       ) : null}
     </Modal>

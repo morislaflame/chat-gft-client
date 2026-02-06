@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
@@ -83,12 +82,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
       }
     >
       {task ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-primary-700/50 rounded-lg p-4 border border-primary-600"
-        >
+        <div className="bg-primary-700/50 rounded-lg p-4 border border-primary-600">
           <div className="text-center">
             <div className="text-sm text-gray-400 mb-2">{t('taskRewardReceived')}</div>
             <div className="flex items-center justify-center gap-2">
@@ -98,7 +92,7 @@ const TaskCompletionModal: React.FC<TaskCompletionModalProps> = observer(({
               <i className={`fa-solid ${isEnergy ? 'fa-bolt text-user-message-gradient' : 'fa-gem text-secondary-gradient'} text-2xl`}></i>
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : null}
     </Modal>
   );

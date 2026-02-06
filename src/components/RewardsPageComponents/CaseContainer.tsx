@@ -85,7 +85,7 @@ const CaseContainer: React.FC = observer(() => {
       className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll"
       // style={{ marginTop: isMobile ? '148px' : '48px' }}
     >
-      <div className='w-full' style={{ marginTop: isMobile ? '148px' : '48px' }}></div>
+      <div className='w-full' style={{ marginTop: isMobile ? '158px' : '58px' }}></div>
       <div className="flex items-center gap-3 mb-4">
         <Button
           type="button"

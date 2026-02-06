@@ -25,7 +25,7 @@ const MissionCard: React.FC<MissionCardProps> = memo(({ message, onStartMission 
           <span className="text-sm font-semibold ">
             {t('mission')} {message.mission.orderIndex}
           </span>
-          <span className="font-medium text-user-message-gradient text-lg italic">{message.mission.title}</span>
+          <span className="font-bold text-user-message-gradient text-lg italic">{message.mission.title}</span>
         </div>
         {message.mission.description && (
           <div className="text-sm text-gray-300 mt-1">

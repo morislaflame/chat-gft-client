@@ -1,6 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
@@ -144,21 +143,14 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
       title={reward?.name ?? ''}
       description={reward?.description ?? null}
       headerIcon={<i className="fa-solid fa-gift text-white text-2xl"></i>}
-      headerIconContainerClassName="bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg"
+      headerIconContainerClassName={activeTab === 'purchased' ? 'bg-secondary-gradient shadow-lg' : 'bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg'}
       closeAriaLabel={t('close')}
       footer={reward ? getActionButton() : null}
     >
       {reward ? (
         <>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ 
-              type: 'spring',
-              delay: 0.1,
-              bounce: 0.4
-            }}
-            className="flex justify-center mb-4"
+          <div
+            className="flex justify-center"
           >
             <div className="w-46 h-46 flex items-center justify-center">
               <LazyMediaRenderer
@@ -170,14 +162,8 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
                 loadOnIntersect={false}
               />
             </div>
-          </motion.div>
+          </div>
 
-          {activeTab === 'purchased' && userReward ? (
-            <div className="text-xs text-gray-400 text-center">
-              {t('purchasedFor')} {userReward.purchasePrice}{' '}
-              <i className="fa-solid fa-gem text-white"></i>
-            </div>
-          ) : null}
         </>
       ) : null}
     </Modal>

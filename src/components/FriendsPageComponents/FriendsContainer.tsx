@@ -160,7 +160,7 @@ const FriendsContainer: React.FC = observer(() => {
     return (
         <>
         <div className="p-4 overflow-y-auto flex w-full"
-        style={{ marginTop: isMobile ? '148px' : '48px' }}>
+        style={{ marginTop: isMobile ? '158px' : '58px' }}>
             <div className="max-w-xl mx-auto w-full space-y-4">
                 {/* Referral Stats */}
                 <Card>
@@ -196,7 +196,7 @@ const FriendsContainer: React.FC = observer(() => {
                                 readOnly={!isEditingRefCode}
                                 value={isEditingRefCode ? normalizedDraft : (user.user.refCode || 'Loading...')}
                                 onChange={(e) => setRefCodeDraft(e.target.value)}
-                                className="w-full bg-card border border-primary-700 rounded-md px-3 py-2 text-sm"
+                                className="w-full bg-card border border-primary-700 rounded-md px-3 py-2 text-sm outline-none focus:border-primary-600 active:border-primary-600"
                             />
                         </div>
                         <motion.div layout transition={editTransition} className="space-y-2">

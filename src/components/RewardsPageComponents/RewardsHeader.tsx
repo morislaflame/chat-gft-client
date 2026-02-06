@@ -24,7 +24,7 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
     return (
         <div
             className="fixed inset-x-4 flex items-center justify-between z-100"
-            style={{ marginTop: isMobile ? '142px' : '42px' }}
+            style={{ marginTop: isMobile ? '152px' : '52px' }}
         >
             <div className="bg-card border border-primary-700 rounded-xl p-2 w-full">
                 <div className="grid grid-cols-2 gap-2">

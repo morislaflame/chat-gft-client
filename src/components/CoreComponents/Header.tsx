@@ -102,7 +102,7 @@ const Header: React.FC = observer(() => {
     return (
         <div className="fixed top-0 left-0 w-[100vw] z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
             {/* App Header */}
-            <div className=" py-1 px-4 flex items-center justify-between gap-6 w-full">
+            <div className=" py-4 px-4 flex items-center justify-between gap-6 w-full">
                 <div className="relative flex items-center space-x-2 cursor-pointer backdrop-blur-sm btn-default-silver-border-transparent rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
                 style={glassStyle}
                 onClick={handleAvatarClick}

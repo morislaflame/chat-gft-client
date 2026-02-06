@@ -78,12 +78,7 @@ const DailyRewardModal: React.FC = observer(() => {
       {rewardInfo ? (
         <>
           {/* Reward Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600"
-          >
+          <div className="bg-primary-700/50 rounded-lg p-4 mb-4 border border-primary-600">
             {isCaseAvailable ? (
               <div className="flex flex-col items-center gap-3 mb-2">
                 {[rewardInfo.rewardCase].filter(Boolean).map((c, idx) => {
@@ -134,7 +129,7 @@ const DailyRewardModal: React.FC = observer(() => {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* Progress indicator */}
           <div className="mb-4">

@@ -1,6 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
@@ -74,14 +73,9 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
       }
     >
       {day && reward ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-primary-700 rounded-lg p-4 border border-primary-600"
-        >
+        <div className="px-4">
           <div className="text-center">
-            <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div>
+            {/* <div className="text-sm text-gray-400 mb-2">{t('reward')}:</div> */}
             {isCaseAvailable ? (
               <div className="flex items-center justify-center gap-4 mb-3 flex-wrap">
                 {[reward.rewardCase].filter(Boolean).map((c, idx) => {
@@ -97,7 +91,7 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
                           mediaFile={caseEntity.mediaFile}
                           animations={animations}
                           name={title}
-                          className="w-20 h-20 object-contain"
+                          className="w-40 h-40 object-contain"
                           loop={false}
                           loadOnIntersect={false}
                           autoplay={true}
@@ -105,8 +99,8 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
                       ) : (
                         <i className="fa-solid fa-box text-white text-3xl" />
                       )}
-                      <div className="text-xs text-gray-200 mt-2 text-center max-w-[120px] line-clamp-2">
-                        {title}
+                      <div className="text-3xl text-gray-200 mt-2 text-center max-w-[120px] line-clamp-2">
+                        +
                       </div>
                     </div>
                   );
@@ -116,19 +110,20 @@ const DailyRewardDayModal: React.FC<DailyRewardDayModalProps> = observer(({
             <div className="flex items-center justify-center gap-3 mb-2">
               {isEnergyAvailable && (
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-white">+{energyAmount}</span>
-                  <i className="fa-solid fa-bolt text-user-message-gradient text-2xl"></i>
+                  <span className="text-4xl font-bold text-white">+{energyAmount}</span>
+                  <i className="fa-solid fa-bolt text-user-message-gradient text-4xl"></i>
                 </div>
               )}
+              
               {isTokensAvailable && (
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-bold text-white">+{tokensAmount}</span>
-                  <i className="fa-solid fa-gem text-secondary-gradient text-2xl"></i>
+                  <span className="text-4xl font-bold text-white">+{tokensAmount}</span>
+                  <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       ) : null}
     </Modal>
   );

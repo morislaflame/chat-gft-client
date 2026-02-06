@@ -1,6 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
@@ -67,16 +66,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
       }
     >
       {box ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            type: 'spring',
-            delay: 0.1,
-            bounce: 0.4,
-          }}
-          className="flex justify-center"
-        >
+        <div className="flex justify-center">
           <div className="w-46 h-46 flex items-center justify-center">
             <LazyMediaRenderer
               mediaFile={box.mediaFile}
@@ -87,7 +77,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
               loadOnIntersect={false}
             />
           </div>
-        </motion.div>
+        </div>
       ) : null}
     </Modal>
   );

@@ -1,6 +1,5 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 
 import Modal from '@/components/CoreComponents/Modal';
@@ -51,18 +50,13 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
         </Button>
       }
     >
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.05 }}
-        className="bg-primary-700 border border-primary-600 rounded-lg p-4"
-      >
+      <div className="rounded-lg px-4">
         <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
           <li>{t('gemsInfoP1')}</li>
           <li>{t('gemsInfoP2')}</li>
           <li>{t('gemsInfoP3')}</li>
         </ul>
-      </motion.div>
+      </div>
     </Modal>
   );
 });

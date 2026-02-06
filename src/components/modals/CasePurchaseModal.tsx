@@ -50,40 +50,35 @@ const CasePurchaseModal: React.FC<CasePurchaseModalProps> = observer(({
       }
     >
       {box ? (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-primary-700/50 rounded-lg p-4 border border-primary-600"
-        >
+        <div className="rounded-lg px-4">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{
               type: 'spring',
-              delay: 0.15,
+              delay: 0.2,
               bounce: 0.4,
             }}
-            className="flex justify-center mb-3"
+            className="flex justify-center"
           >
-            <div className="w-28 h-28 flex items-center justify-center">
+            <div className="w-48 h-48 flex items-center justify-center">
               <LazyMediaRenderer
                 mediaFile={box.mediaFile}
                 animations={animations}
                 name={title}
-                className="w-28 h-28 object-contain"
+                className="w-48 h-48 object-contain"
                 loop={false}
                 loadOnIntersect={false}
               />
             </div>
           </motion.div>
 
-          <div className="text-center">
-            <div className="text-lg font-semibold text-white mb-1">
+          {/* <div className="text-center">
+            <div className="text-xl font-semibold text-white mb-1">
               {title}
             </div>
-          </div>
-        </motion.div>
+          </div> */}
+        </div>
       ) : null}
     </Modal>
   );

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
@@ -52,7 +52,14 @@ const Header: React.FC = observer(() => {
     const { hapticImpact } = useHapticFeedback();
     const [gemsInfoOpen, setGemsInfoOpen] = useState(false);
     const [energyInfoOpen, setEnergyInfoOpen] = useState(false);
+    const [gemsBurstTrigger, setGemsBurstTrigger] = useState(0);
     const avatarRipple = useRipple();
+
+    useEffect(() => {
+        const onGemsLand = () => setGemsBurstTrigger((t) => t + 1);
+        document.addEventListener('gems-button-land', onGemsLand);
+        return () => document.removeEventListener('gems-button-land', onGemsLand);
+    }, []);
     const gemsRipple = useRipple();
     const energyRipple = useRipple();
     const languageRipple = useRipple();
@@ -100,7 +107,12 @@ const Header: React.FC = observer(() => {
     })();
 
     return (
-        <div className="fixed top-0 left-0 w-[100vw] z-20 transition-transform duration-300 flex flex-col justify-center items-center header">
+        <motion.div
+            className="fixed top-0 left-0 w-[100vw] z-20 flex flex-col justify-center items-center header"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
             {/* App Header */}
             <div className=" py-4 px-4 flex items-center justify-between gap-6 w-full">
                 <div className="relative flex items-center space-x-2 cursor-pointer backdrop-blur-sm btn-default-silver-border-transparent rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
@@ -131,13 +143,37 @@ const Header: React.FC = observer(() => {
                             </span>
                         </div>
                 </div>
-                <div className="flex space-x-2">
-                    <button 
+                <div className="flex space-x-2 overflow-visible">
+                    <motion.button
+                        key={gemsBurstTrigger}
+                        data-gems-target
                         onClick={handleGemsClick}
-                        className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
-                        style={glassStyle}
+                        className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer overflow-visible"
+                        style={{ ...glassStyle, overflow: 'visible' }}
                         onPointerDown={gemsRipple.onPointerDown}
+                        initial={{ scale: 1 }}
+                        animate={{
+                            scale: gemsBurstTrigger > 0 ? [1, 0.82, 1.2, 1] : 1,
+                        }}
+                        transition={{
+                            duration: 0.5,
+                            times: [0, 0.2, 0.55, 1],
+                            ease: 'easeOut',
+                        }}
                     >
+                        {gemsBurstTrigger > 0 && (
+                            <motion.span
+                                key={gemsBurstTrigger}
+                                className="absolute inset-[-4px] pointer-events-none rounded-full z-20 origin-center border-2"
+                                style={{
+                                    borderColor: 'rgba(249, 115, 22, 0.9)',
+                                    boxSizing: 'border-box',
+                                }}
+                                initial={{ scale: 0.3, opacity: 1 }}
+                                animate={{ scale: 3.5, opacity: 0 }}
+                                transition={{ duration: 0.5, ease: 'easeOut' }}
+                            />
+                        )}
                         <span className="absolute inset-0 overflow-hidden rounded-full pointer-events-none z-0">
                             {gemsRipple.rippleNode}
                         </span>
@@ -147,7 +183,7 @@ const Header: React.FC = observer(() => {
                                 {user.user?.balance || 0}
                             </div>
                         </span>
-                    </button>
+                    </motion.button>
                         <button 
                             onClick={handleEnergyClick} 
                             className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
@@ -187,7 +223,7 @@ const Header: React.FC = observer(() => {
                 isOpen={energyInfoOpen}
                 onClose={() => setEnergyInfoOpen(false)}
             />
-        </div>
+        </motion.div>
     );
 });
 

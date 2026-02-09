@@ -17,10 +17,10 @@ const EmptyPage: React.FC<EmptyPageProps> = ({
     onAction 
 }) => {
     return (
-        <div className="p-4 overflow-y-auto flex items-center justify-center flex-1">
+        <div className="p-4 overflow-y-auto flex items-center justify-center flex-1 h-[100vh]">
             <div className="max-w-md mx-auto text-center">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-card border border-primary-700 flex items-center justify-center">
-                    <i className={`${icon} text-3xl text-gray-400`}></i>
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full card-silver-border flex items-center justify-center">
+                    <i className={`${icon} text-3xl text-white`}></i>
                 </div>
                 
                 <h3 className="text-xl font-semibold text-gray-200 mb-2">
@@ -34,7 +34,7 @@ const EmptyPage: React.FC<EmptyPageProps> = ({
                 {actionText && onAction && (
                     <Button
                         onClick={onAction}
-                        variant="secondary"
+                        variant="gradient"
                         size="lg"
                         className="w-full max-w-xs mx-auto"
                     >

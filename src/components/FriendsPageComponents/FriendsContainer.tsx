@@ -172,7 +172,7 @@ const FriendsContainer: React.FC = observer(() => {
                             }
                         />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-2">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-violet-700 flex items-center justify-center">
                                 <i className="fas fa-user-friends text-white"></i>
@@ -188,7 +188,7 @@ const FriendsContainer: React.FC = observer(() => {
                     </div>
 
                     {/* Referral Code */}
-                    <div className="mt-4 space-y-2 overflow-hidden">
+                    <div className="mt-4 space-y-2 overflow-hidden p-2">
                         <div className="text-xs text-gray-400">{t('yourReferralCode')}</div>
                         <div className="flex space-x-2">
                             <input
@@ -286,7 +286,7 @@ const FriendsContainer: React.FC = observer(() => {
                     </div>
 
                     {/* Referral bonuses */}
-                    <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3">
+                    <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3 mr-2">
                         <div className="text-xs font-semibold text-gray-400 mb-2">{t('referralBonuses')}</div>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
                             {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (

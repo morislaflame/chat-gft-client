@@ -140,7 +140,7 @@ const ChatContainer: React.FC = observer(() => {
     const backgroundUrl = chat.background?.url;
 
     return (
-        <div className="h-full relative flex flex-col overflow-x-hidden w-full fixed">
+        <div className="h-[100vh] relative flex flex-col overflow-x-hidden w-full fixed">
             {/* Fixed background layer behind everything */}
             {backgroundUrl && (
                 <div

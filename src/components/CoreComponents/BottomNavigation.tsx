@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
 import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
 import { trackEvent } from '@/utils/analytics';
+import { motion } from 'motion/react';
 
 type TabType = 'chat' | 'quests' | 'friends' | 'rewards' | 'store';
 
@@ -54,15 +55,18 @@ const BottomNavigation = () => {
     };
 
     return (
-        <div 
+        <motion.div 
             ref={bottomNavigationRef}
             className="flex justify-center z-20 w-full fixed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
         >
             <Navigation 
                 activeTab={getActiveTab()}
                 onTabChange={handleTabClick}
             />
-        </div>
+        </motion.div>
     );
 };
 

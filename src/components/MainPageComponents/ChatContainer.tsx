@@ -10,7 +10,7 @@ import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
-import MissionProgress from './chat/MissionProgress';
+import GemsCaseProgress from './chat/GemsCaseProgress';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -28,9 +28,15 @@ const ChatContainer: React.FC = observer(() => {
 
     // Загружаем историю только при монтировании или при изменении выбранной истории
     useEffect(() => {
-        // Проверяем, нужно ли загружать историю (ChatStore сам проверит, не загружена ли она уже)
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
+
+    // Когда гем прилетает в хедер — обновляем баланс (temp) и запускаем анимацию прогресс-бара
+    useEffect(() => {
+        const onGemsLand = () => chat.onGemsLanded();
+        document.addEventListener('gems-button-land', onGemsLand);
+        return () => document.removeEventListener('gems-button-land', onGemsLand);
+    }, [chat]);
 
     const handleSendMessage = async (message: string): Promise<boolean> => {
         if (user.energy <= 0) {
@@ -166,8 +172,8 @@ const ChatContainer: React.FC = observer(() => {
                         onSelectSuggestion={handleSelectSuggestion}
                         messageEndRef={messagesEndRef}
                     />
-                    <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0">
-                        <MissionProgress />
+                    <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
+                        <GemsCaseProgress />
                         <form onSubmit={handleSubmit} className="flex space-x-2">
                             <input
                                 type="text"

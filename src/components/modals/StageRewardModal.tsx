@@ -60,6 +60,9 @@ const StageRewardModal: React.FC = observer(() => {
       handleClose();
       return;
     }
+    if (stageReward?.rewardAmount != null) {
+      chat.setPendingGemsOnLand(stageReward.rewardAmount);
+    }
     const fromRect = sourceEl.getBoundingClientRect();
     const toRect = targetEl.getBoundingClientRect();
     const fromX = fromRect.left + fromRect.width / 2;
@@ -96,7 +99,7 @@ const StageRewardModal: React.FC = observer(() => {
       title={t('stageCompleted')}
       description={t('stageRewardGemsHint')}
       headerIcon={<i className="fa-solid fa-trophy text-white text-2xl"></i>}
-      headerIconContainerClassName="bg-gradient-to-br from-red-500 to-red-700 shadow-lg"
+      headerIconContainerClassName="bg-user-message"
       footer={
         stageReward ? (
           <Button

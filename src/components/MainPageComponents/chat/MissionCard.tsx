@@ -28,7 +28,7 @@ const MissionCard: React.FC<MissionCardProps> = memo(({ message, onStartMission 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="card-outline-silver rounded-xl px-4 py-3 inline-block max-w-md w-full"
+        className="btn-default-silver-border rounded-xl px-4 py-3 inline-block max-w-md w-full"
       >
         <div className="flex flex-col gap-1 mb-1">
           <span className="text-sm font-semibold ">

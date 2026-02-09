@@ -28,17 +28,17 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
           </div>
         </div>
       ) : (
-        <div className="agent-message-bubble rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">
+        <div className="bg-[#1f1f1f] rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">
           {/* Avatar as background, top-right */}
           <div
-            className="absolute inset-0 bg-no-repeat bg-[length:20rem_20rem] bg-[position:top_-5rem_right_-5rem] rounded-xl rounded-tl-none opacity-30"
+            className="absolute inset-0 bg-no-repeat bg-[length:20rem_20rem] bg-[position:top_-5rem_right_-5rem] rounded-xl rounded-tl-none opacity-20"
             style={{
               backgroundImage: avatarUrl ? `url(${avatarUrl})` : undefined,
             }}
             aria-hidden
           />
           {!avatarUrl && (
-            <div className="absolute top-3 right-3 w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center opacity-60" aria-hidden>
+            <div className="absolute top-3 right-3 w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center opacity-20" aria-hidden>
               <i className="fas fa-mask text-lg" />
             </div>
           )}

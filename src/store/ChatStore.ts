@@ -407,19 +407,6 @@ export default class ChatStore {
                 this.setSuggestions([]);
             }
 
-            // TEMP: show stage reward modal after every message for testing (flying gem, etc.). Remove when done.
-            const TEMP_SHOW_STAGE_REWARD_AFTER_EVERY_MESSAGE = true;
-            if (TEMP_SHOW_STAGE_REWARD_AFTER_EVERY_MESSAGE) {
-                this._balanceBeforeReward = this._userStore?.user?.balance ?? 0;
-                this.setStageReward({
-                    stageNumber: 1,
-                    rewardAmount: 5,
-                    rewardCaseId: null,
-                    rewardCase: null,
-                    isOpen: true,
-                });
-            }
-            
             // Возвращаем response для использования в компонентах
             return response;
         } catch (error) {

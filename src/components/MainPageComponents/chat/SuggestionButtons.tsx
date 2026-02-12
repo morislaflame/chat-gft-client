@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { motion } from 'motion/react';
+import Button from '@/components/ui/button';
 
 interface SuggestionButtonsProps {
   suggestions: string[];
@@ -17,20 +18,15 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({ suggestions,
     className="mt-3 grid grid-cols-2 gap-2"
   >
     {suggestions.map((suggestion, suggestionIndex) => (
-      <motion.button
+      <Button
         key={suggestionIndex}
-        layout
+        variant="default"
+        size="sm"
         onClick={() => onSelectSuggestion(suggestion)}
-        className="bg-primary-700 hover:bg-primary-600 rounded-lg px-2 py-1.5 text-xs text-center transition-colors border border-primary-600 hover:border-red-500 text-white cursor-pointer"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 6 }}
-        transition={{ duration: 0.2, delay: suggestionIndex * 0.05 }}
+        className="rounded-lg px-2 py-auto text-xs text-center whitespace-normal h-full min-h-0"
       >
         {suggestion}
-      </motion.button>
+      </Button>
     ))}
   </motion.div>
 ));

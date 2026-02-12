@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
+import Button from '@/components/ui/button';
 
 interface SuggestionsProps {
     suggestions: string[];
@@ -70,18 +71,15 @@ const Suggestions: React.FC<SuggestionsProps> = observer(({
         >
             <div ref={contentRef} className="flex w-full overflow-x-auto scrollbar-thin">
                 {suggestions.map((suggestion, index) => (
-                    <motion.button
+                    <Button
                         key={index}
+                        variant="default"
+                        size="default"
                         onClick={() => handleSuggestionClick(suggestion)}
-                        className="flex-shrink-0 bg-primary-700 hover:bg-primary-600 rounded-lg px-4 py-2 text-sm m-2 text-left transition-colors whitespace-nowrap border border-primary-600 hover:border-red-500"
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.95 }}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
+                        className="flex-shrink-0 m-2 text-left whitespace-normal text-balance"
                     >
-                        <span className="text-white">{suggestion}</span>
-                    </motion.button>
+                        {suggestion}
+                    </Button>
                 ))}
             </div>
         </motion.div>

@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 
 interface HistorySelectionModalProps {
     isOpen: boolean;
@@ -46,100 +46,86 @@ const HistorySelectionModal: React.FC<HistorySelectionModalProps> = observer(({ 
             isOpen={isOpen}
             onClose={onClose}
             closeOnOverlayClick={true}
-            className="p-6"
+            title={t('selectHistory')}
+            description={t('selectHistoryDesc')}
+            closeAriaLabel={t('close')}
+            footer={
+              <Button
+                onClick={onClose}
+                variant="default"
+                size="default"
+                className="w-full"
+              >
+                {t('close')}
+              </Button>
+            }
         >
-            <div className="relative">
-                {/* Header */}
-                <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                        {t('selectHistory')}
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                        {t('selectHistoryDesc')}
-                    </p>
+            {/* Error Message */}
+            {agent.error && (
+                <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                    {agent.error}
+                    <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => agent.fetchPublicAgents()}
+                        className="ml-2 underline hover:text-red-300 p-0 h-auto min-h-0 text-red-400"
+                    >
+                        {t('retry')}
+                    </Button>
                 </div>
+            )}
 
-                {/* Error Message */}
-                {agent.error && (
-                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                        {agent.error}
-                        <button
-                            onClick={() => agent.fetchPublicAgents()}
-                            className="ml-2 underline hover:text-red-300"
-                        >
-                            {t('retry')}
-                        </button>
-                    </div>
-                )}
-
-                {/* Loading State */}
-                {agent.loading ? (
-                    <div className="text-center py-8 flex w-full justify-center">
-                        <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                ) : (
-                    /* Histories List */
-                    <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
-                        {agent.agents.map((agentItem, index) => {
-                            const isSelected = agentItem.historyName === currentHistory;
-                            return (
-                                <motion.div
-                                    key={agentItem.id}
-                                    initial={{ opacity: 0, y: 0 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                >
-                                  <Button
-                                    onClick={() => handleSelectHistory(agentItem.historyName)}
-                                    disabled={agent.saving || isSelected}
-                                    variant="default"
-                                    size="md"
-                                    className={`w-full text-left p-4 rounded-lg transition-all duration-200 [&>span]:w-full [&>span]:justify-start ${
-                                      isSelected
-                                        ? 'bg-gradient-to-r from-red-500/30 to-red-700/30 border-2 border-red-500 cursor-default'
-                                        : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600 hover:border-red-500 cursor-pointer'
-                                    } ${agent.saving ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                  >
-                                    <div className="flex items-center justify-between gap-2 w-full">
-                                      <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <span className="font-semibold text-white">
-                                            {getHistoryDisplayName(agentItem, language)}
-                                          </span>
-                                        </div>
-                                        {(language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description) && (
-                                          <p className="text-xs text-gray-300 mt-1 mb-1">
-                                            {language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description}
-                                          </p>
-                                        )}
-                                      </div>
-                                      {isSelected && (
-                                        <i className="fas fa-check-circle text-red-400 text-xl"></i>
-                                      )}
+            {/* Loading State */}
+            {agent.loading ? (
+                <div className="text-center py-8 flex w-full justify-center">
+                    <div className="w-8 h-8 border-4 border-secondary-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            ) : (
+                /* Histories List */
+                <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
+                    {agent.agents.map((agentItem, index) => {
+                        const isSelected = agentItem.historyName === currentHistory;
+                        return (
+                            <motion.div
+                                key={agentItem.id}
+                                initial={{ opacity: 0, y: 0 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                              <Button
+                                onClick={() => handleSelectHistory(agentItem.historyName)}
+                                disabled={agent.saving || isSelected}
+                                variant="outline"
+                                size="default"
+                                className={`w-full text-left justify-start p-4 rounded-lg transition-all duration-200 [&>span]:w-full [&>span]:justify-start ${
+                                  isSelected
+                                    ? 'bg-primary-700/50 border-2 border-red-500 cursor-default'
+                                    : 'bg-primary-700/50 hover:bg-primary-700 border-2 border-primary-600'
+                                } ${agent.saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              >
+                                <div className="flex items-center justify-between gap-2 w-full">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-white">
+                                        {getHistoryDisplayName(agentItem, language)}
+                                      </span>
                                     </div>
-                                  </Button>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* Close Button */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                >
-                  <Button
-                    onClick={onClose}
-                    variant="default"
-                    size="md"
-                    className="w-full mt-6 bg-primary-700 hover:bg-primary-600 text-white"
-                  >
-                    {t('close')}
-                  </Button>
-                </motion.div>
-            </div>
+                                    {(language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description) && (
+                                      <p className="text-xs text-gray-300 mt-1 mb-1">
+                                        {language === 'en' ? (agentItem.descriptionEn || agentItem.description) : agentItem.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  {isSelected && (
+                                    <i className="fas fa-check-circle text-red-400 text-xl"></i>
+                                  )}
+                                </div>
+                              </Button>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            )}
         </Modal>
     );
 });

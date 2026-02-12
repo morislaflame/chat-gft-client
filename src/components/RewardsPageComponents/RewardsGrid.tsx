@@ -61,7 +61,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className='w-full' style={{ marginTop: isMobile ? '208px' : '108px' }}></div>
+            <div className='w-full' style={{ marginTop: isMobile ? '218px' : '118px' }}></div>
             {showBoxes && (
                 <>
                     <div className="flex items-center justify-between mb-2">

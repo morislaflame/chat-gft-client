@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { TransitionPanel } from '@/components/ui/transitionPanel';
 import { useSwipe } from '@/utils/useSwipe';
 import useMeasure from 'react-use-measure';
@@ -87,10 +87,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
             >
                 <Button
                     onClick={() => handleSetActiveIndex(1)}
-                    variant="secondary"
+                    variant="gradient"
                     size="lg"
                     className="w-full"
-                    icon="fas fa-chevron-right"
+                    icon="fas fa-rocket"
                 >
                     {t('joinAdventure')}
                 </Button>
@@ -131,7 +131,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
             >
                 <Button
                     onClick={onJoinAdventure}
-                    variant="secondary"
+                    variant="gradient"
                     size="lg"
                     className="w-full"
                     icon="fas fa-rocket"

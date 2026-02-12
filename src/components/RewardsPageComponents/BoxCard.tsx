@@ -1,7 +1,8 @@
 import React from 'react';
 import { type CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 type BoxCardProps = {
   box: CaseBox;
@@ -37,11 +38,30 @@ const BoxCard: React.FC<BoxCardProps> = ({
     ((language === 'en' ? (box.descriptionEn || box.description) : box.description) ?? null) ||
     null;
 
+  const boxSize = (() => {
+    const n = (title || box.name || '').toUpperCase();
+    if (/\bS\b/.test(n) || n.endsWith(' S')) return 's';
+    if (/\bL\b/.test(n) || n.endsWith(' L')) return 'l';
+    return 'm';
+  })();
+
+  const gradientClass =
+    boxSize === 's'
+      ? 'bg-gradient-to-br from-red-500 to-rose-600'
+      : boxSize === 'l'
+        ? 'bg-gradient-to-br from-gray-200 to-white'
+        : 'bg-gradient-to-br from-purple-500 to-violet-600';
+
   return (
-    <div
-      className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+    <Card
       onClick={() => onClick(box)}
+      className='quest-item hover:bg-primary-700/50 transition cursor-pointer overflow-hidden'
     >
+      <div aria-hidden className="pointer-events-none absolute inset-0  rounded-lg">
+        <div
+          className={`absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-15 ${gradientClass}`}
+        />
+      </div>
       <div className="mb-2 flex items-center justify-center">
         <LazyMediaRenderer
           mediaFile={box.mediaFile}
@@ -69,7 +89,7 @@ const BoxCard: React.FC<BoxCardProps> = ({
         {hasUnopenedCase && onOpen ? (
           <Button
             onClick={() => onOpen(box)}
-            variant="secondary"
+            variant="default"
             size="sm"
             className="w-full"
             icon="fas fa-arrow-right"
@@ -80,20 +100,19 @@ const BoxCard: React.FC<BoxCardProps> = ({
           <Button
             onClick={() => onPurchase(box)}
             disabled={isPurchasing || isDisabled || !canAfford}
-            variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+            variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
             size="sm"
             className="w-full"
-            icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+            state={isPurchasing ? 'loading' : 'default'}
+            icon={!canAfford ? 'fas fa-lock' : undefined}
           >
-            {isPurchasing ? t('purchasing') : (
-              <span className="flex items-center gap-1 justify-center">
-                {box.price} <i className="fa-solid fa-gem text-white"></i>
-              </span>
-            )}
+            <span className="flex items-center gap-1 justify-center">
+              {box.price} <i className="fa-solid fa-gem text-white"></i>
+            </span>
           </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 };
 

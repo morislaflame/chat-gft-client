@@ -9,8 +9,9 @@ import { useTranslate } from '@/utils/useTranslate';
 import { REWARDS_ROUTE } from '@/utils/consts';
 
 import CaseRoulette from '@/components/RewardsPageComponents/CaseRoulette';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import { Card } from '../ui/card';
 
 const CaseContainer: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -81,65 +82,69 @@ const CaseContainer: React.FC = observer(() => {
 
   return (
     <div
-      className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll"
+      className="p-4 overflow-y-auto flex w-full flex-col hide-scrollbar ios-scroll pb-[128px]"
       // style={{ marginTop: isMobile ? '148px' : '48px' }}
     >
-      <div className='w-full' style={{ marginTop: isMobile ? '148px' : '48px' }}></div>
+      <div className='w-full' style={{ marginTop: isMobile ? '158px' : '58px' }}></div>
       <div className="flex items-center gap-3 mb-4">
-        <button
+        <Button
           type="button"
           onClick={() => {
             hapticImpact('soft');
             navigate(REWARDS_ROUTE);
           }}
-          className="w-9 h-9 rounded-lg bg-primary-800 hover:bg-primary-700 border border-primary-700 flex items-center justify-center cursor-pointer"
+          variant="outline"
+          size="icon"
+          className="w-9 h-9 shrink-0"
           aria-label="Go back"
-        >
-          <i className="fa-solid fa-chevron-left text-white" />
-        </button>
+          icon="fa-solid fa-chevron-left"
+        />
         <h1 className="text-white text-2xl font-bold">{title}</h1>
       </div>
       <CaseRoulette caseBox={box} />
 
       {/* Purchase card */}
-      <div className="bg-primary-800 border border-primary-700 rounded-2xl p-4 flex flex-col gap-2 items-center">
+      <Card className=" p-4 flex flex-col gap-2 items-center">
         
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
               onClick={handleMinus}
-              className="w-6 h-6 rounded-lg text-xs bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
+              variant="outline"
+              size="icon"
+              className="w-8 h-8 shrink-0"
               aria-label="Decrease quantity"
-            >
-              <i className="fa-solid fa-minus" />
-            </button>
+              icon="fa-solid fa-minus"
+            />
 
             <div className="min-w-[52px] h-10 rounded-lg bg-primary-900 border border-primary-700 text-white flex items-center justify-center font-semibold">
               {qty}
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={handlePlus}
-              className="w-6 h-6 rounded-lg text-xs bg-primary-700 hover:bg-primary-600 border border-primary-600 text-white flex items-center justify-center cursor-pointer"
+              variant="outline"
+              size="icon"
+              className="w-8 h-8 shrink-0"
               aria-label="Increase quantity"
-            >
-              <i className="fa-solid fa-plus" />
-            </button>
+              icon="fa-solid fa-plus"
+            />
           </div>
 
           <Button
             onClick={handlePurchase}
             disabled={!canAfford || cases.loading}
-            variant={canAfford ? 'secondary' : 'primary'}
-            size="md"
+            variant={canAfford ? 'secondary' : 'default'}
+            size="default"
             className="flex-1"
-            icon={cases.loading ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : ''}
+            state={cases.loading ? 'loading' : 'default'}
+            icon={!canAfford ? 'fas fa-lock' : undefined}
           >
-            {cases.loading ? t('purchasing') : canAfford ? `${t('buyFor')}` : `${t('insufficientBalance')}`} {total} <i className="fa-solid fa-gem text-white"></i>
+            {canAfford ? t('buyFor') : t('insufficientBalance')} {total} <i className="fa-solid fa-gem text-white"></i>
           </Button>
           {cases.error ? <div className="text-xs text-red-400 mt-2">{cases.error}</div> : null}
-        </div>
+        </Card>
 
         
         

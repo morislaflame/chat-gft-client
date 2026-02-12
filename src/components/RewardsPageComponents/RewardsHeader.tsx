@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '@/components/ui/button';
 
 type RewardsHeaderProps = {
     activeTab: 'available' | 'purchased';
@@ -23,28 +24,25 @@ const RewardsHeader: React.FC<RewardsHeaderProps> = ({
     return (
         <div
             className="fixed inset-x-4 flex items-center justify-between z-100"
-            style={{ marginTop: isMobile ? '142px' : '42px' }}
+            style={{ marginTop: isMobile ? '152px' : '52px' }}
         >
-            <div className="bg-primary-800 border border-primary-700 rounded-xl p-2 w-full">
+            <div className="bg-card border border-primary-700 rounded-xl p-2 w-full">
                 <div className="grid grid-cols-2 gap-2">
                     {tabs.map((tab) => (
                         <div
                             key={tab.key}
                             className="transition-transform active:scale-[0.98]"
                         >
-                            <button
+                            <Button
                                 type="button"
                                 aria-label={tab.label}
                                 onClick={() => onChange(tab.key)}
-                                className={[
-                                    'w-full inline-flex items-center justify-center px-3 py-2 text-xs font-semibold cursor-pointer rounded-md transition-colors',
-                                    activeTab === tab.key
-                                        ? 'bg-secondary-500 text-white border-secondary-500'
-                                        : 'bg-transparent text-gray-300 hover:bg-primary-700',
-                                ].join(' ')}
+                                variant={activeTab === tab.key ? 'gradient' : 'outline'}
+                                size="sm"
+                                className="w-full"
                             >
                                 {tab.label}
-                            </button>
+                            </Button>
                         </div>
                     ))}
                 </div>

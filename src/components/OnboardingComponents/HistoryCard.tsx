@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { AgentPreview } from '@/utils/agentUtils';
 import type { MediaFile } from '@/types/types';
 
@@ -98,7 +98,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
             {/* Select Button */}
             <Button
                 onClick={onSelect}
-                variant="secondary"
+                variant="gradient"
                 size="lg"
                 className="w-full"
                 disabled={isSaving}

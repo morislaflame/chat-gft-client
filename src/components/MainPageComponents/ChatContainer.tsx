@@ -3,14 +3,14 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
-import MissionProgress from './chat/MissionProgress';
+import GemsCaseProgress from './chat/GemsCaseProgress';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -28,9 +28,15 @@ const ChatContainer: React.FC = observer(() => {
 
     // Загружаем историю только при монтировании или при изменении выбранной истории
     useEffect(() => {
-        // Проверяем, нужно ли загружать историю (ChatStore сам проверит, не загружена ли она уже)
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
+
+    // Когда гем прилетает в хедер — обновляем баланс (temp) и запускаем анимацию прогресс-бара
+    useEffect(() => {
+        const onGemsLand = () => chat.onGemsLanded();
+        document.addEventListener('gems-button-land', onGemsLand);
+        return () => document.removeEventListener('gems-button-land', onGemsLand);
+    }, [chat]);
 
     const handleSendMessage = async (message: string): Promise<boolean> => {
         if (user.energy <= 0) {
@@ -140,43 +146,52 @@ const ChatContainer: React.FC = observer(() => {
     const backgroundUrl = chat.background?.url;
 
     return (
-        <div className="h-full relative flex flex-col overflow-x-hidden w-full">
-            <div 
-                ref={chatContainerRef} 
-                className="flex-1 px-4 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative"
-                style={backgroundUrl ? {
-                    backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundAttachment: 'fixed'
-                } : {}}
-            >
-                <ChatMessages
-                    onStartMission={handleStartMission}
-                    onSelectSuggestion={handleSelectSuggestion}
-                    messageEndRef={messagesEndRef}
+        <div className="h-[100vh] relative flex flex-col overflow-x-hidden w-full fixed">
+            {/* Fixed background layer behind everything */}
+            {backgroundUrl && (
+                <div
+                    className="fixed inset-0 z-0"
+                    style={{
+                        backgroundImage: `linear-gradient(rgba(18, 24, 38, 0.93), rgba(18, 24, 38, 0.63)), url(${backgroundUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                    aria-hidden
                 />
-            </div>
+            )}
 
-            <div className="absolute bottom-0 right-0 w-full p-4 flex flex-col gap-3">
-                <MissionProgress />
-                <form onSubmit={handleSubmit} className="flex space-x-2">
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={t('greeting')}
-                        className="flex-1 backdrop-blur-sm rounded-full border border-primary-700 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
+            {/* Content: messages + bottom block, with navbar offset */}
+            <div
+                ref={chatContainerRef}
+                className="flex-1 flex flex-col min-h-0 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
+            >
+                <div className="flex-1 px-4 pb-[150px]">
+                    <ChatMessages
+                        onStartMission={handleStartMission}
+                        onSelectSuggestion={handleSelectSuggestion}
+                        messageEndRef={messagesEndRef}
                     />
-                    <Button
-                        type="submit"
-                        variant="secondary"
-                        size="md"
-                        icon="fas fa-paper-plane"
-                        className="px-4 py-2"
-                    />
-                </form>
+                    <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
+                        <GemsCaseProgress />
+                        <form onSubmit={handleSubmit} className="flex space-x-2">
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder={t('greeting')}
+                                className="flex-1 backdrop-blur-sm btn-default-silver-border-transparent rounded-full border border-primary-600 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
+                            />
+                            <Button
+                                type="submit"
+                                variant="gradient"
+                                size="icon"
+                                icon="fas fa-paper-plane"
+                                className="shrink-0 h-10 w-10"
+                            />
+                        </form>
+                    </div>
+                </div>
             </div>
 
             {/* Agent Video Modal */}

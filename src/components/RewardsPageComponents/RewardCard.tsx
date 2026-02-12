@@ -1,7 +1,8 @@
 import React from 'react';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import type { Reward, UserReward } from '@/http/rewardAPI';
+import { Card } from '../ui/card';
 
 type TranslateFn = (key: string) => string;
 
@@ -32,7 +33,7 @@ type WithdrawalButtonProps = {
 const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating, onClick, t }) => {
     if (status === 'completed') {
         return (
-            <div className="w-full px-2.5 py-2 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="w-full px-4 py-3 text-xs text-green-400 flex items-center justify-center gap-1 bg-green-500/10 rounded-lg border border-green-500/20">
                 <i className="fas fa-check-circle"></i>
                 {t('withdrawn')}
             </div>
@@ -41,7 +42,7 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
 
     if (status === 'pending') {
         return (
-            <div className="w-full px-2.5 py-2 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+            <div className="w-full px-4 py-3 text-xs text-yellow-400 flex items-center justify-center gap-1 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <i className="fas fa-clock"></i>
                 {t('pending')}
             </div>
@@ -53,12 +54,13 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
             <Button
                 onClick={onClick}
                 disabled={isCreating}
-                variant="danger"
+                variant="destructive"
                 size="sm"
                 className="w-full"
-                icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-redo'}
+                state={isCreating ? 'loading' : 'default'}
+                icon="fas fa-redo"
             >
-                {isCreating ? t('sending') : t('retryRequest')}
+                {t('retryRequest')}
             </Button>
         );
     }
@@ -70,9 +72,10 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
             variant="secondary"
             size="sm"
             className="w-full"
-            icon={isCreating ? 'fas fa-spinner fa-spin' : 'fas fa-download'}
+            state={isCreating ? 'loading' : 'default'}
+            icon="fas fa-download"
         >
-            {isCreating ? t('sending') : t('withdraw')}
+            {t('withdraw')}
         </Button>
     );
 };
@@ -94,13 +97,27 @@ const RewardCard: React.FC<RewardCardProps> = ({
     const handleCardClick = () => onCardClick(rewardItem, userReward);
     const key = activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id);
 
+    const previewUrl = rewardItem.preview?.url;
+    const previewMimeType = rewardItem.preview?.mimeType ?? '';
+
     return (
-        <div
+        <Card
             key={key}
             onClick={handleCardClick}
-            className="bg-primary-800 border border-primary-700 rounded-xl p-4 flex flex-col items-center hover:bg-primary-700/50 transition cursor-pointer"
+            className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer relative overflow-hidden"
         >
-            <div className="mb-2 flex items-center justify-center">
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+                {previewUrl && previewMimeType.startsWith('image/') ? (
+                    <img
+                        src={previewUrl}
+                        alt=""
+                        className="absolute -top-40 -left-40 h-85 w-85 object-cover rounded-full blur-3xl opacity-60"
+                    />
+                ) : (
+                    <div className="absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-purple-500 to-violet-600" />
+                )}
+            </div>
+            <div className="mb-2 flex items-center justify-center relative">
                 <LazyMediaRenderer
                     mediaFile={rewardItem.mediaFile}
                     animations={animations}
@@ -130,21 +147,21 @@ const RewardCard: React.FC<RewardCardProps> = ({
                         onPurchase(rewardItem.id);
                     }}
                     disabled={isPurchasing || !canAfford}
-                    variant={canAfford && !isPurchasing ? 'secondary' : 'primary'}
+                    variant={canAfford && !isPurchasing ? 'gradient' : 'default'}
                     size="sm"
                     className="w-full"
-                    icon={isPurchasing ? 'fas fa-spinner fa-spin' : !canAfford ? 'fas fa-lock' : undefined}
+                    state={isPurchasing ? 'loading' : 'default'}
+                    icon={!canAfford ? 'fas fa-lock' : undefined}
                 >
-                    {isPurchasing ? t('purchasing') : (
-                        <span className="flex items-center gap-1">
-                            {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
-                        </span>
-                    )}
+                    <span className="flex items-center gap-1">
+                        {rewardItem.price} <i className="fa-solid fa-gem text-white"></i>
+                    </span>
                 </Button>
             )}
 
             {activeTab === 'purchased' && userReward && (
                 <div
+                    className='w-full'
                     onClick={(e) => e.stopPropagation()}
                 >
                     <WithdrawalButton
@@ -155,7 +172,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
                     />
                 </div>
             )}
-        </div>
+        </Card>
     );
 };
 

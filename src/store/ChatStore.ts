@@ -18,6 +18,9 @@ export default class ChatStore {
     _userStore: UserStore | null = null;
     _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
+    _balanceBeforeReward: number | null = null;
+    _pendingGemsOnLand: number | null = null;
+    _pendingProgressAnimation: { from: number; to: number } | null = null;
     _insufficientEnergy = false;
     _video: MediaFile | null = null;
     _avatar: MediaFile | null = null;
@@ -119,6 +122,29 @@ export default class ChatStore {
 
     setStageReward(reward: StageRewardData | null) {
         this._stageReward = reward;
+        if (reward?.isOpen) {
+            this._balanceBeforeReward = this._userStore?.user?.balance ?? 0;
+        }
+    }
+
+    setPendingGemsOnLand(amount: number) {
+        this._pendingGemsOnLand = amount;
+    }
+
+    onGemsLanded() {
+        if (this._pendingGemsOnLand == null || this._balanceBeforeReward == null) return;
+        const to = this._balanceBeforeReward + this._pendingGemsOnLand;
+        const currentBalance = this._userStore?.user?.balance ?? 0;
+        if (currentBalance === this._balanceBeforeReward && this._userStore) {
+            this._userStore.setBalance(to);
+        }
+        this._pendingProgressAnimation = { from: this._balanceBeforeReward, to };
+        this._balanceBeforeReward = null;
+        this._pendingGemsOnLand = null;
+    }
+
+    clearPendingProgressAnimation() {
+        this._pendingProgressAnimation = null;
     }
 
     closeStageReward() {
@@ -380,6 +406,19 @@ export default class ChatStore {
                 // Если подсказок нет, очищаем их
                 this.setSuggestions([]);
             }
+
+            // TEMP: show stage reward modal after every message for testing (flying gem, etc.). Remove when done.
+            const TEMP_SHOW_STAGE_REWARD_AFTER_EVERY_MESSAGE = true;
+            if (TEMP_SHOW_STAGE_REWARD_AFTER_EVERY_MESSAGE) {
+                this._balanceBeforeReward = this._userStore?.user?.balance ?? 0;
+                this.setStageReward({
+                    stageNumber: 1,
+                    rewardAmount: 5,
+                    rewardCaseId: null,
+                    rewardCase: null,
+                    isOpen: true,
+                });
+            }
             
             // Возвращаем response для использования в компонентах
             return response;
@@ -497,7 +536,9 @@ export default class ChatStore {
                     mission: {
                         id: mission.id,
                         title: mission.title,
+                        titleEn: mission.titleEn ?? null,
                         description: mission.description,
+                        descriptionEn: mission.descriptionEn ?? null,
                         orderIndex: mission.orderIndex,
                     },
                     missionId: mission.id,
@@ -623,6 +664,10 @@ export default class ChatStore {
 
     get stageReward() {
         return this._stageReward;
+    }
+
+    get pendingProgressAnimation() {
+        return this._pendingProgressAnimation;
     }
 
     get insufficientEnergy() {

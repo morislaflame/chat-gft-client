@@ -100,8 +100,11 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
     };
 
     const onboardingContent = (
-        <div
-            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary"
+        <motion.div
+            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary origin-center"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
         >
             {/* Background Images with smooth crossfade transition */}
             <motion.div
@@ -166,7 +169,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialSte
                     />
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 
     return (

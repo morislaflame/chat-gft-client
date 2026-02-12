@@ -33,7 +33,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   const isMobile = document.body.classList.contains('telegram-mobile');
 
   return (
-    <div className="space-y-6" style={{ marginTop: isMobile ? '156px' : '56px' }}>
+    <div className="space-y-6 pb-8" style={{ marginTop: isMobile ? '166px' : '66px' }}>
       {messages.map((message, index) => {
         if (message.isMissionCard && message.mission) {
           return (
@@ -63,7 +63,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
       {/* Typing Indicator */}
       {chat.isTyping && <TypingIndicator avatarUrl={avatarUrl} />}
 
-      <div ref={messageEndRef} className="mb-[128px]" />
+      <div ref={messageEndRef} />
     </div>
   );
 });

@@ -245,7 +245,7 @@ const RewardsContainer: React.FC = observer(() => {
     
 
     return (
-        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4 relative overflow-x-hidden" 
+        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4 relative overflow-x-hidden pb-[128px]" 
         >
             <RewardsHeader
                 activeTab={activeTab}

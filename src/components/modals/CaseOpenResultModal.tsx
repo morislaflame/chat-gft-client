@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { motion } from 'motion/react';
 
 import Modal from '@/components/CoreComponents/Modal';
-import Button from '@/components/CoreComponents/Button';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { OpenCaseResponse } from '@/http/caseAPI';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
@@ -26,24 +25,35 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const { user } = useContext(Context) as IStoreContext;
   const [isSharing, setIsSharing] = useState(false);
 
-  if (!openResult) return null;
+  const result = openResult?.result;
 
-  const result = openResult.result;
-
-  const isReward = result.type === 'reward';
-  const isGems = result.type === 'gems';
+  const isReward = result?.type === 'reward';
+  const isGems = result?.type === 'gems';
 
   const iconClass = isReward
     ? 'fa-gift text-white'
     : isGems
-      ? 'fa-gem text-amber-400'
-      : 'fa-bolt text-purple-400';
+      ? 'fa-gem text-secondary-gradient'
+      : 'fa-bolt text-user-message-gradient';
+
+  const headerIcon = isReward ? (
+    <i className="fa-solid fa-gift text-white text-2xl" />
+  ) : isGems ? (
+    <i className="fa-solid fa-gem text-white text-2xl" />
+  ) : (
+    <i className="fa-solid fa-bolt text-white text-2xl" />
+  );
+
+  const headerIconContainerClassName = isReward
+    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg'
+    : isGems
+      ? 'bg-secondary-gradient border border-amber-500/30 shadow-lg'
+      : 'bg-user-message border border-purple-500/30 shadow-lg';
 
 
   const title = t('congratulations');
-  const description = t('youWon');
 
-  const amountLabel = !isReward
+  const amountLabel = result && !isReward
     ? `+${result.amount} ${t(isGems ? 'gems' : 'energy')}`
     : null;
 
@@ -83,7 +93,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const handleShareToStory = async () => {
     const tg = window.Telegram?.WebApp;
     if (!tg || typeof tg.shareToStory !== 'function') return;
-    if (!isReward) return;
+    if (!isReward || !result) return;
 
     const mediaUrl = result.reward.preview?.url || (await resolveStoryMediaUrl(result.reward.mediaFile));
     if (!mediaUrl) return;
@@ -107,29 +117,49 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
       isOpen={isOpen}
       onClose={onClose}
       closeOnOverlayClick={true}
-      className="p-4"
+      title={title}
+      headerIcon={headerIcon}
+      headerIconContainerClassName={headerIconContainerClassName}
+      closeAriaLabel={t('close')}
+      footer={
+        openResult && result ? (
+          <>
+            <Button
+              onClick={onClose}
+              variant="default"
+              size="lg"
+              className="w-full"
+              icon="fas fa-check"
+            >
+              {t('great')}
+            </Button>
+            {isReward ? (
+              <Button
+                onClick={handleShareToStory}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                icon="fas fa-share"
+                disabled={isSharing}
+              >
+                {t('shareToStory')}
+              </Button>
+            ) : null}
+          </>
+        ) : null
+      }
     >
-      <div className="relative">
-        <div className="text-center mb-4">
-
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {title}
-          </h2>
-          <p className="text-gray-300 text-sm">
-            {description}
-          </p>
-        </div>
-
-        <div className="flex justify-center mb-6">
+      {openResult && result ? (
+        <div className="flex justify-center">
           {isReward ? (
             <div className="flex flex-col items-center gap-3">
-              <div className="w-28 h-28 flex items-center justify-center">
+              <div className="w-48 h-48 flex items-center justify-center">
                 <LazyMediaRenderer
                   mediaFile={result.reward.mediaFile}
                   imageUrl={result.reward.mediaFile?.mimeType !== 'application/json' ? result.reward.mediaFile?.url : undefined}
                   animations={animations}
                   name={result.reward.name}
-                  className="w-28 h-28 object-contain"
+                  className="w-48 h-48 object-contain"
                   loop={false}
                   loadOnIntersect={false}
                 />
@@ -139,9 +169,9 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-4">
               <div className=" flex items-center justify-center">
-                <i className={`fa-solid ${iconClass} text-5xl`} />
+                <i className={`fa-solid ${iconClass} text-8xl`} />
               </div>
               <div className="text-white font-semibold text-lg text-center">
                 {amountLabel}
@@ -149,35 +179,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
             </div>
           )}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Button
-            onClick={onClose}
-            variant="secondary"
-            size="md"
-            className="w-full"
-            icon="fas fa-check"
-          >
-            {t('close')}
-          </Button>
-          {isReward ? (
-            <Button
-              onClick={handleShareToStory}
-              variant="tretiary"
-              size="md"
-              className="w-full mt-2"
-              icon="fas fa-share"
-              disabled={isSharing}
-            >
-              {t('shareToStory')}
-            </Button>
-          ) : null}
-        </motion.div>
-      </div>
+      ) : null}
     </Modal>
   );
 });

@@ -1,7 +1,8 @@
 import React from 'react';
 import type { Task } from '@/types/types';
 import { getTaskText } from '@/utils/translations';
-import Button from '../CoreComponents/Button';
+import Button from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 type TranslateFn = (key: string) => string;
 
@@ -34,18 +35,6 @@ const getTaskIcon = (code: string) => {
     }
 };
 
-const getTaskGradient = (type: string) => {
-    switch (type) {
-        case 'DAILY':
-            return 'from-amber-500 to-orange-600';
-        case 'ONE_TIME':
-            return 'from-blue-500 to-indigo-600';
-        case 'SPECIAL':
-            return 'from-emerald-500 to-teal-600';
-        default:
-            return 'from-purple-500 to-violet-600';
-    }
-};
 
 const QuestItem: React.FC<QuestItemProps> = ({
     task,
@@ -59,11 +48,12 @@ const QuestItem: React.FC<QuestItemProps> = ({
     onAction
 }) => {
     return (
-        <div
-            className="bg-primary-800 border border-primary-700 rounded-xl p-3 flex items-center justify-between quest-item hover:bg-primary-700/50 transition"
+        <Card
+            className="flex items-center justify-between quest-item hover:bg-primary-700/50 transition relative"
         >
+            
             <div className="flex items-center space-x-3">
-                <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getTaskGradient(task.type)} flex items-center justify-center`}>
+                <div className={`w-12 h-12 rounded-full only-silver-border flex items-center justify-center`}>
                     <i className={`${getTaskIcon(task.code)} text-white text-sm`}></i>
                 </div>
                 <div className="flex-1 flex flex-col gap-1">
@@ -84,13 +74,13 @@ const QuestItem: React.FC<QuestItemProps> = ({
                     onAction(task);
                 }}
                 disabled={isCompleted || isLoading}
-                variant={isCompleted ? 'success' : 'secondary'}
+                variant={isCompleted ? 'outline' : 'default'}
                 size="sm"
-                className="rounded-full"
+                className="rounded-lg shrink-0"
             >
                 {isLoading ? t('loading') : isCompleted ? t('completed') : isReadyToCheck ? t('check') : t('complete')}
             </Button>
-        </div>
+        </Card>
     );
 };
 

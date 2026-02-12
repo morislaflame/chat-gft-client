@@ -4,6 +4,7 @@ import type { CaseItem } from '@/http/caseAPI';
 import { useTranslate } from '@/utils/useTranslate';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import Button from '@/components/ui/button';
 
 type CaseItemsRibbonProps = {
   items?: CaseItem[];
@@ -12,10 +13,10 @@ type CaseItemsRibbonProps = {
 
 const PrizeIcon: React.FC<{ item: CaseItem; className?: string }> = ({ item, className = '' }) => {
   if (item.type === 'gems') {
-    return <i className={`fa-solid fa-gem text-amber-400 ${className}`} />;
+    return <i className={`fa-solid fa-gem text-secondary-gradient ${className}`} />;
   }
   if (item.type === 'energy') {
-    return <i className={`fa-solid fa-bolt text-purple-400 ${className}`} />;
+    return <i className={`fa-solid fa-bolt text-user-message-gradient ${className}`} />;
   }
   return <i className={`fas fa-gift text-white ${className}`} />;
 };
@@ -41,10 +42,12 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
     <div className="w-full">
       <div className="flex items-center gap-2 mb-2">
         <div className="text-sm text-gray-300 font-semibold">{t('caseContents')}</div>
-        <button
+        <Button
           type="button"
           onClick={handleOpen}
-          className="w-8 h-8 hover:bg-primary-700 rounded-md flex items-center justify-center cursor-pointer"
+          variant="outline"
+          size="icon"
+          className="w-8 h-8 min-w-8"
           aria-label="Toggle case contents"
         >
           <motion.i
@@ -52,7 +55,7 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
             animate={{ rotate: isOpen ? 0 : -90 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
           />
-        </button>
+        </Button>
       </div>
 
       <motion.div
@@ -73,7 +76,7 @@ const CaseItemsRibbon: React.FC<CaseItemsRibbonProps> = ({ items = [], animation
             return (
               <div
                 key={item.id}
-                className="flex-shrink-0 flex flex-col gap-2 items-center w-28 bg-primary-800 border border-primary-700 rounded-xl p-3"
+                className="flex-shrink-0 flex flex-col gap-2 items-center w-28 bg-card border border-primary-700 rounded-xl p-3"
               >
                 <div className="w-8 h-8 flex items-center justify-center">
                   {isReward ? (

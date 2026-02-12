@@ -62,7 +62,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
 
     const cards = [
         // Первая карточка - приветствие (прозрачный фон)
-        <div key="welcome" ref={ref} className="flex flex-col justify-between h-full w-full">
+        <div key="welcome" ref={ref} className="flex flex-col justify-between h-full w-full overflow-visible">
             <div className="flex-1 flex justify-center items-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -143,7 +143,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     ];
     
     return (
-        <div className="flex flex-col justify-end h-full p-6 pb-8">
+        <div className="flex flex-col justify-center h-full p-6 pb-8">
             <div className="relative flex flex-col justify-center h-full">
                 <div
                     className="relative overflow-hidden select-none flex-1 flex items-center h-full justify-center"

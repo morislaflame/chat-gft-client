@@ -362,6 +362,14 @@ type TranslationType = {
         ru: 'Gems тратятся в “Луте” — на подарки и коробки с шансом NFT',
         en: 'Gems are spent in “Rewards” — on gifts and boxes with a chance for an NFT'
     },
+    stepRewardTitle: {
+        ru: 'Верный шаг!',
+        en: 'Right step!'
+    },
+    stepRewardDescription: {
+        ru: 'Вы верно двигаетесь в сторону выполнения миссии, продолжайте в том же духе!',
+        en: "You're moving in the right direction to complete the mission, keep it up!"
+    },
     youHaveCompleted: {
         ru: 'Вы завершили',
         en: 'You have completed'

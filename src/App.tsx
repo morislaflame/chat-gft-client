@@ -8,6 +8,7 @@ import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
+import StepRewardModal from "./components/modals/StepRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 import Onboarding from './components/modals/Onboarding';
 import { ProgressiveBlur } from './components/ui/progressive-blur';
@@ -55,6 +56,7 @@ const AppContent = () => {
       <BottomNavigation />
       <DailyRewardModal />
       <StageRewardModal />
+      <StepRewardModal />
       <InsufficientEnergyModal />
     </>
   );

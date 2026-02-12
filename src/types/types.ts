@@ -110,6 +110,12 @@ export interface ApiMessageResponse {
     }>;
     mission?: string;
     progressPercent?: number; // Процент прогресса по миссии (0-100)
+    /** Reward for a correct step in mission 1 or 2 (progress increased) */
+    stepReward?: {
+        stepNumber: number;
+        rewardGems: number;
+        newBalance: number;
+    } | null;
     timestamp: string;
 }
 
@@ -161,6 +167,12 @@ export interface StageRewardData {
         descriptionEn?: string | null;
         mediaFile?: { id: number; url: string; mimeType: string } | null;
     } | null;
+    isOpen: boolean;
+}
+
+export interface StepRewardData {
+    stepNumber: number;
+    rewardGems: number;
     isOpen: boolean;
 }
 

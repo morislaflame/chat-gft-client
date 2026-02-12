@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, MediaFile, Mission } from "@/types/types";
+import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, StepRewardData, MediaFile, Mission } from "@/types/types";
 import type UserStore from "@/store/UserStore";
 import type CaseStore from "@/store/CaseStore";
 import type { UserCase } from "@/http/caseAPI";
@@ -18,6 +18,7 @@ export default class ChatStore {
     _userStore: UserStore | null = null;
     _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
+    _stepReward: StepRewardData | null = null;
     _balanceBeforeReward: number | null = null;
     _pendingGemsOnLand: number | null = null;
     _pendingProgressAnimation: { from: number; to: number } | null = null;
@@ -150,6 +151,19 @@ export default class ChatStore {
     closeStageReward() {
         if (this._stageReward) {
             this._stageReward = { ...this._stageReward, isOpen: false };
+        }
+    }
+
+    setStepReward(reward: StepRewardData | null) {
+        this._stepReward = reward;
+        if (reward?.isOpen) {
+            this._balanceBeforeReward = this._userStore?.user?.balance ?? 0;
+        }
+    }
+
+    closeStepReward() {
+        if (this._stepReward) {
+            this._stepReward = { ...this._stepReward, isOpen: false };
         }
     }
 
@@ -384,9 +398,18 @@ export default class ChatStore {
                         balance_after: response.newBalance,
                         source: 'mission',
                     });
+                } else if (response.stepReward && typeof response.stepReward.rewardGems === 'number') {
+                    // Correct step in mission 1 or 2: show step reward modal; balance updates on "Continue" (gems land)
+                    this.setStepReward({
+                        stepNumber: response.stepReward.stepNumber,
+                        rewardGems: response.stepReward.rewardGems,
+                        isOpen: true,
+                    });
                 }
                 
-                this._userStore.setBalance(response.newBalance);
+                if (!response.stepReward || response.missionCompleted) {
+                    this._userStore.setBalance(response.newBalance);
+                }
             }
 
             // Если миссия завершена — добавляем карточку следующей миссии (если она есть и ещё не показана)
@@ -651,6 +674,10 @@ export default class ChatStore {
 
     get stageReward() {
         return this._stageReward;
+    }
+
+    get stepReward() {
+        return this._stepReward;
     }
 
     get pendingProgressAnimation() {

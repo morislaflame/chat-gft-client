@@ -164,7 +164,7 @@ const ChatContainer: React.FC = observer(() => {
             {/* Content: messages + bottom block, with navbar offset */}
             <div
                 ref={chatContainerRef}
-                className="flex-1 flex flex-col min-h-0 w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
+                className="flex-1 flex flex-col min-h-0 h-full w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
             >
                 <div className="flex-1 px-4 pb-[150px]">
                     <ChatMessages

@@ -8,14 +8,13 @@ interface PageWrapperProps {
 
 const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) => {
 
-    const navigationHeight = 125;
+    // const navigationHeight = 125;
 
     return (
         <motion.div 
-            className={`bg-primary-900 flex text-gray-200 font-sans overflow-hidden w-full hide-scrollbar h-100vw ios-scroll ${className}`}
+            className={`bg-primary-900 flex flex-col min-h-0 h-screen text-gray-200 font-sans overflow-hidden w-full hide-scrollbar ios-scroll ${className}`}
             style={{ 
-                // height: `calc(100vh - ${navigationHeight}px)`,
-                paddingBottom: `${navigationHeight}`,
+                // paddingBottom: `${navigationHeight}px`,
             }}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

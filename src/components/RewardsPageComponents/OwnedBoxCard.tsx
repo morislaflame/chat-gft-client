@@ -28,16 +28,16 @@ const OwnedBoxCard: React.FC<OwnedBoxCardProps> = ({ box, count, animations, onO
 
   const gradientClass =
     boxSize === 's'
-      ? 'bg-gradient-to-br from-red-500 to-rose-600'
+      ? 'bg-gradient-to-b from-red-500 to-transparent'
       : boxSize === 'l'
-        ? 'bg-gradient-to-br from-gray-200 to-white'
-        : 'bg-gradient-to-br from-purple-500 to-violet-600';
+        ? 'bg-gradient-to-b from-gray-200 to-transparent'
+        : 'bg-gradient-to-b from-purple-500 to-transparent';
 
   return (
     <div className="relative bg-card border border-primary-700 rounded-xl p-4 flex flex-col items-center overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
         <div
-          className={`absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-15 ${gradientClass}`}
+          className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
         />
       </div>
       <div className="mb-2 flex items-center justify-center relative">

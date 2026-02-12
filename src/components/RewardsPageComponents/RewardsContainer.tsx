@@ -245,8 +245,8 @@ const RewardsContainer: React.FC = observer(() => {
     
 
     return (
-        <div className="p-4 overflow-y-auto hide-scrollbar flex w-full flex-col gap-4 relative overflow-x-hidden pb-[128px]" 
-        >
+        <div className="flex-1 flex flex-col min-h-0 w-full">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden hide-scrollbar ios-scroll p-4 flex flex-col gap-4 relative">
             <RewardsHeader
                 activeTab={activeTab}
                 onChange={setActiveTab}
@@ -289,7 +289,6 @@ const RewardsContainer: React.FC = observer(() => {
                     ownedCases={ownedCasesData}
                     myUnopenedCases={myUnopenedCases}
                     activeTab={activeTab}
-                    animations={animations}
                     boxAnimations={boxAnimations}
                     onCardClick={handleCardClick}
                     onBoxClick={handleBoxClick}
@@ -321,6 +320,7 @@ const RewardsContainer: React.FC = observer(() => {
                 balanceLabel={t('yourBalance')}
                 balance={user.user?.balance || 0}
             /> */}
+            </div>
 
             {/* Withdrawal Modal */}
             <WithdrawalModal

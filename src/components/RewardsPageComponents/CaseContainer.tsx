@@ -135,7 +135,7 @@ const CaseContainer: React.FC = observer(() => {
           <Button
             onClick={handlePurchase}
             disabled={!canAfford || cases.loading}
-            variant={canAfford ? 'default' : 'default'}
+            variant={canAfford ? 'secondary' : 'default'}
             size="default"
             className="flex-1"
             state={cases.loading ? 'loading' : 'default'}

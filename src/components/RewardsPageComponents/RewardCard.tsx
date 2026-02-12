@@ -1,6 +1,5 @@
 import React from 'react';
 import Button from '@/components/ui/button';
-import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 import { Card } from '../ui/card';
 
@@ -12,7 +11,6 @@ type RewardCardProps = {
     rewardItem: Reward;
     userReward: UserReward | null;
     activeTab: 'available' | 'purchased';
-    animations: { [url: string]: Record<string, unknown> };
     onCardClick: (rewardItem: Reward, userReward: UserReward | null) => void;
     onPurchase: (rewardId: number) => void;
     onWithdrawClick: (userReward: UserReward) => void;
@@ -80,11 +78,18 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
     );
 };
 
+function getGradientClassByPrice(price: number): string {
+    if (price < 300) return 'bg-gradient-to-b from-red-500 to-transparent';
+    if (price < 1000) return 'bg-gradient-to-b from-pink-500 to-transparent';
+    if (price < 10000) return 'bg-gradient-to-b from-purple-500 to-transparent';
+    if (price < 50000) return 'bg-gradient-to-b from-blue-500 to-transparent';
+    return 'bg-gradient-to-b from-white to-transparent';
+}
+
 const RewardCard: React.FC<RewardCardProps> = ({
     rewardItem,
     userReward,
     activeTab,
-    animations,
     onCardClick,
     onPurchase,
     onWithdrawClick,
@@ -99,6 +104,9 @@ const RewardCard: React.FC<RewardCardProps> = ({
 
     const previewUrl = rewardItem.preview?.url;
     const previewMimeType = rewardItem.preview?.mimeType ?? '';
+    const isPreviewImage = previewUrl && previewMimeType.startsWith('image/');
+    const price = rewardItem.price ?? 0;
+    const gradientClass = getGradientClassByPrice(price);
 
     return (
         <Card
@@ -106,26 +114,23 @@ const RewardCard: React.FC<RewardCardProps> = ({
             onClick={handleCardClick}
             className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer relative overflow-hidden"
         >
-            <div aria-hidden className="pointer-events-none absolute inset-0">
-                {previewUrl && previewMimeType.startsWith('image/') ? (
+            <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
+                <div
+                    className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
+                />
+            </div>
+            <div className="mb-2 flex items-center justify-center relative w-26 h-26">
+                {isPreviewImage ? (
                     <img
                         src={previewUrl}
-                        alt=""
-                        className="absolute -top-40 -left-40 h-85 w-85 object-cover rounded-full blur-3xl opacity-60"
+                        alt={rewardItem.name}
+                        className="w-26 h-26 object-contain"
                     />
                 ) : (
-                    <div className="absolute -top-40 -left-40 h-85 w-85 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-purple-500 to-violet-600" />
+                    <div className="w-26 h-26 rounded-lg bg-primary-700/50 flex items-center justify-center">
+                        <i className="fa-solid fa-gift text-2xl text-gray-400" />
+                    </div>
                 )}
-            </div>
-            <div className="mb-2 flex items-center justify-center relative">
-                <LazyMediaRenderer
-                    mediaFile={rewardItem.mediaFile}
-                    animations={animations}
-                    name={rewardItem.name}
-                    className="w-26 h-26 object-contain"
-                    loop={false}
-                    loadOnIntersect={true}
-                />
             </div>
 
             <div className="text-center mb-2 flex-1">

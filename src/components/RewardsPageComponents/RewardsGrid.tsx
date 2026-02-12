@@ -18,7 +18,6 @@ type RewardsGridProps = {
     ownedCases?: Array<{ box: CaseBox; count: number }>;
     myUnopenedCases?: UserCase[];
     activeTab: 'available' | 'purchased';
-    animations: { [url: string]: Record<string, unknown> };
     boxAnimations?: { [url: string]: Record<string, unknown> };
     onCardClick: (rewardItem: Reward, userReward: UserReward | null) => void;
     onBoxClick: (box: CaseBox) => void;
@@ -36,7 +35,6 @@ type RewardsGridProps = {
 const RewardsGrid: React.FC<RewardsGridProps> = ({
     data,
     activeTab,
-    animations,
     onCardClick,
     onPurchase,
     onBoxClick,
@@ -73,7 +71,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                             const hasUnopenedCase = myUnopenedCases.some((uc) => uc.caseId === box.id);
                             const unopenedCount = myUnopenedCases.filter((uc) => uc.caseId === box.id).length;
                             return (
-                                <div key={box.id}>
+                                <div key={box.id} className="rewards-grid-item">
                                     <BoxCard
                                         box={box}
                                         animations={boxAnimations}
@@ -102,7 +100,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 mb-4">
                         {ownedCases.map(({ box, count }) => (
-                            <div key={box.id}>
+                            <div key={box.id} className="rewards-grid-item">
                                 <OwnedBoxCard
                                     box={box}
                                     count={count}
@@ -131,13 +129,12 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
                     return (
                         <div
                             key={activeTab === 'available' ? rewardItem.id : (userReward?.id || rewardItem.id)}
-                            className="last:mb-4"
+                            className="rewards-grid-item last:mb-30"
                         >
                             <RewardCard
                                 rewardItem={rewardItem}
                                 userReward={userReward}
                                 activeTab={activeTab}
-                                animations={animations}
                                 onCardClick={onCardClick}
                                 onPurchase={onPurchase}
                                 onWithdrawClick={onWithdrawClick}

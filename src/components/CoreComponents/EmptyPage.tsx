@@ -17,7 +17,8 @@ const EmptyPage: React.FC<EmptyPageProps> = ({
     onAction 
 }) => {
     return (
-        <div className="p-4 overflow-y-auto flex items-center justify-center flex-1 h-[100vh]">
+        <div className="p-4 overflow-y-auto flex items-center justify-center flex-1 hide-scroll"
+        >
             <div className="max-w-md mx-auto text-center">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full card-silver-border flex items-center justify-center">
                     <i className={`${icon} text-3xl text-white`}></i>

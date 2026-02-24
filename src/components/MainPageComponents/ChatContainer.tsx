@@ -14,7 +14,7 @@ import GemsCaseProgress from './chat/GemsCaseProgress';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
-    const { t } = useTranslate();
+    const { t, language } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [inputValue, setInputValue] = useState('');
     // state for mission expansion is now managed inside MissionProgress
@@ -78,7 +78,7 @@ const ChatContainer: React.FC = observer(() => {
             setShowMissionVideoModal(true);
         } else {
             console.log('No mission video found, sending start message directly');
-            void handleSendMessage("старт");
+            void handleSendMessage(language === 'en' ? 'start' : 'старт');
         }
     };
 
@@ -86,9 +86,8 @@ const ChatContainer: React.FC = observer(() => {
         hapticNotification('success');
         trackEvent('mission_video_close', { video_id: currentMissionVideo?.video?.id ?? null });
         setShowMissionVideoModal(false);
-        // После закрытия видео отправляем сообщение "старт"
         if (currentMissionVideo) {
-            void handleSendMessage("старт");
+            void handleSendMessage(language === 'en' ? 'start' : 'старт');
             setCurrentMissionVideo(null);
         }
         // Очищаем lastMissionCompleted после показа видео новой миссии

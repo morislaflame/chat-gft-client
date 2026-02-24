@@ -264,7 +264,7 @@ export default class ChatStore {
             const startTs = Date.now();
             trackEvent('chat_message_send', {
                 length: messageText.length,
-                is_start: messageText.trim().toLowerCase() === 'старт' ? true : false,
+                is_start: ['старт', 'start'].includes(messageText.trim().toLowerCase()),
                 selected_history: storyId,
             });
             trackEvent('message_send', {

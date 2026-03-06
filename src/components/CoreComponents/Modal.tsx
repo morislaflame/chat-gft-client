@@ -86,7 +86,7 @@ const Modal: React.FC<ModalProps> = ({
       <DrawerContent
         overlayClassName={overlayClassName}
         overlayProps={overlayProps}
-        className={cn('max-h-[85vh] overflow-hidden', className)}
+        className={cn('max-h-[95vh] overflow-hidden', className)}
       >
         <div className="mx-auto w-full max-w-md h-full flex flex-col">
           {hasHeader ? (
@@ -149,7 +149,7 @@ const Modal: React.FC<ModalProps> = ({
 
           {children && 
           <motion.div
-            className={cn('flex-1 overflow-y-auto px-4 pb-8 pt-4 ios-scroll', contentClassName)}
+            className={cn('flex-1 overflow-y-auto px-4 pb-4 pt-4 ios-scroll', contentClassName)}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: 0.3 }}

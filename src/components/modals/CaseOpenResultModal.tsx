@@ -60,42 +60,13 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
   const ref = user.user?.refCode || user.user?.username || '';
   const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
 
-  const resolveStoryMediaUrl = async (mediaFile: { url: string; mimeType: string } | undefined) => {
-    if (!mediaFile?.url) return null;
-    if (mediaFile.mimeType.startsWith('image/')) return mediaFile.url;
-
-    // Lottie JSON: try common “first-frame” thumbnail conventions
-    if (mediaFile.mimeType === 'application/json') {
-      const base = mediaFile.url;
-      const candidates = [
-        base.replace(/\.json(\?.*)?$/i, '.png$1'),
-        base.replace(/\.json(\?.*)?$/i, '.webp$1'),
-        base.replace(/\.json(\?.*)?$/i, '.jpg$1'),
-        base.replace(/\.json(\?.*)?$/i, '.jpeg$1'),
-      ];
-
-      const canLoad = (src: string) =>
-        new Promise<boolean>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = src;
-        });
-
-      for (const c of candidates) {
-        if (await canLoad(c)) return c;
-      }
-    }
-
-    return null;
-  };
 
   const handleShareToStory = async () => {
     const tg = window.Telegram?.WebApp;
     if (!tg || typeof tg.shareToStory !== 'function') return;
     if (!isReward || !result) return;
 
-    const mediaUrl = result.reward.preview?.url || (await resolveStoryMediaUrl(result.reward.mediaFile));
+    const mediaUrl = result.reward.preview?.url;
     if (!mediaUrl) return;
 
     setIsSharing(true);

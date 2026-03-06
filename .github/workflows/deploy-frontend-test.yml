@@ -1,0 +1,50 @@
+name: Deploy Frontend (TEST)
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to server (TEST)
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash << 'EOF'
+          set -e
+          cd ~/test-chat-gft-deploy/frontend-source/chat-gft-client
+          git remote set-url origin git@github.com:morislaflame/chat-gft-client.git 2>/dev/null || true
+
+          git pull origin dev || {
+            echo "⚠️  Git pull failed, trying to update..."
+            git fetch origin dev
+            git reset --hard origin/dev
+          }
+
+          # IMPORTANT: set test API URL for Vite build without changing tracked .env
+          cat > .env.production.local <<'EOT'
+          VITE_API_URL=https://chatgft.site
+          VITE_GA_ENABLED=false
+          EOT
+
+          cd ~/test-chat-gft-deploy
+          ./deploy-safe.sh frontend_test
+          EOF
+
+      - name: Health check (TEST)
+        run: |
+          sleep 30
+          curl -f https://chatgft.site/ || exit 1
+

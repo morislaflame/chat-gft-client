@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { useTranslate } from '@/utils/useTranslate';
@@ -7,6 +7,9 @@ import Button from '@/components/ui/button';
 import type { UserReward } from '@/http/rewardAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
+import { Context, type IStoreContext } from '@/store/StoreProvider';
+
+const STORY_DELAY_MS = 7000;
 
 interface WithdrawalModalProps {
   isOpen: boolean;
@@ -24,23 +27,61 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
   loading
 }) => {
   const { t } = useTranslate();
+  const { user } = useContext(Context) as IStoreContext;
+  const [step, setStep] = useState<'share' | 'withdraw'>('share');
+  const [isSharing, setIsSharing] = useState(false);
 
   const reward = userReward?.reward ?? null;
+  const previewUrl = reward?.preview?.url ?? null;
+  const ref = user.user?.refCode || user.user?.username || '';
+  const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
+
   const [animations] = useAnimationLoader(
     reward ? [reward] : [],
     (r) => r.mediaFile ?? null,
     [reward?.id ?? 0]
   );
 
-  const description = t('withdrawalInfo')
+  useEffect(() => {
+    if (isOpen) {
+      setStep('share');
+      setIsSharing(false);
+    }
+  }, [isOpen]);
+
+  const handleShareToStory = async () => {
+    const tg = window.Telegram?.WebApp;
+    if (!tg || typeof tg.shareToStory !== 'function' || !previewUrl) return;
+    setIsSharing(true);
+    try {
+      tg.shareToStory(previewUrl, {
+        text: t('join'),
+        widget_link: {
+          url: referralLink,
+          name: t('lookWhatIWon'),
+        },
+      });
+      await new Promise<void>((resolve) => setTimeout(resolve, STORY_DELAY_MS));
+      setStep('withdraw');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const showShareStep = Boolean(previewUrl) && step === 'share';
+  const showWithdrawStep = !previewUrl || step === 'withdraw';
+  const primaryLoading = isSharing || loading;
+  const primaryDisabled = primaryLoading;
+
+  const description = t('withdrawalInfo');
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      closeOnOverlayClick={!loading}
-      swipeToClose={!loading}
-      closeDisabled={loading}
+      closeOnOverlayClick={!primaryLoading}
+      swipeToClose={!primaryLoading}
+      closeDisabled={primaryLoading}
       title={t('withdrawalRequest')}
       description={description}
       closeAriaLabel={t('close')}
@@ -49,23 +90,36 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
         <>
           <Button
             onClick={onClose}
-            disabled={loading}
+            disabled={primaryLoading}
             variant="default"
             size="lg"
             className="flex-1"
           >
             {t('cancel')}
           </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={loading}
-            variant="secondary"
-            size="lg"
-            className="flex-1"
-            icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
-          >
-            {loading ? t('sending') : t('confirm')}
-          </Button>
+          {showShareStep ? (
+            <Button
+              onClick={handleShareToStory}
+              disabled={primaryDisabled}
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              icon={isSharing ? 'fas fa-spinner fa-spin' : 'fas fa-share'}
+            >
+              {isSharing ? t('sending') : t('shareToStory')}
+            </Button>
+          ) : showWithdrawStep ? (
+            <Button
+              onClick={onConfirm}
+              disabled={primaryDisabled}
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              icon={loading ? 'fas fa-spinner fa-spin' : 'fas fa-check'}
+            >
+              {loading ? t('sending') : t('withdraw')}
+            </Button>
+          ) : null}
         </>
       }
     >

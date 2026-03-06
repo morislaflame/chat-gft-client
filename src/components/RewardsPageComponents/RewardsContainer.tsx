@@ -172,6 +172,14 @@ const RewardsContainer: React.FC = observer(() => {
             tab: activeTab,
             owned: !!userReward,
         });
+        if (activeTab === 'purchased' && userReward) {
+            const status = reward.getWithdrawalStatus(userReward.id);
+            if (status !== 'pending' && status !== 'completed') {
+                setSelectedUserReward(userReward);
+                setWithdrawalModalOpen(true);
+                return;
+            }
+        }
         setSelectedReward(rewardItem);
         setSelectedRewardForDetail(userReward);
         setDetailModalOpen(true);

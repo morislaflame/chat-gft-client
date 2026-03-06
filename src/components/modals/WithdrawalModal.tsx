@@ -159,7 +159,12 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
             <div className="text-lg font-semibold text-white mb-1">
               {userReward.reward.name}
             </div>
-            </div>
+            {showShareStep ? (
+              <p className="text-sm text-gray-400">
+                {t('withdrawalStoryHint')}
+              </p>
+            ) : null}
+          </div>
           </div>
 
         </>

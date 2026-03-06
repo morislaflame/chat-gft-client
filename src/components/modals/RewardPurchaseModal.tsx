@@ -34,47 +34,23 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
   const ref = user.user?.refCode || user.user?.username || '';
   const referralLink = `https://t.me/gftrobot?startapp=${ref}`;
 
-  const resolveStoryMediaUrl = async (mediaFile: { url: string; mimeType: string } | undefined) => {
-    if (!mediaFile?.url) return null;
-    if (mediaFile.mimeType.startsWith('image/')) return mediaFile.url;
-
-    if (mediaFile.mimeType === 'application/json') {
-      const base = mediaFile.url;
-      const candidates = [
-        base.replace(/\.json(\?.*)?$/i, '.png$1'),
-        base.replace(/\.json(\?.*)?$/i, '.webp$1'),
-        base.replace(/\.json(\?.*)?$/i, '.jpg$1'),
-        base.replace(/\.json(\?.*)?$/i, '.jpeg$1'),
-      ];
-
-      const canLoad = (src: string) =>
-        new Promise<boolean>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = () => resolve(false);
-          img.src = src;
-        });
-
-      for (const c of candidates) {
-        if (await canLoad(c)) return c;
-      }
-    }
-
-    return null;
-  };
+  
 
   const handleShareToStory = async () => {
     const tg = window.Telegram?.WebApp;
     if (!tg || typeof tg.shareToStory !== 'function') return;
     if (!reward?.mediaFile) return;
 
-    const mediaUrl = reward.preview?.url || (await resolveStoryMediaUrl(reward.mediaFile));
+    const mediaUrl = reward.preview?.url;
     if (!mediaUrl) return;
 
+    const storyText = reward?.name
+      ? `${reward.name} from ChatGFT 💎\n${t('join')}`
+      : t('join');
     setIsSharing(true);
     try {
       tg.shareToStory(mediaUrl, {
-        text: t('join'),
+        text: storyText,
         widget_link: {
           url: referralLink,
           name: t('lookWhatIWon'),
@@ -91,8 +67,8 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
       onClose={onClose}
       closeOnOverlayClick={true}
       title={t('purchaseSuccessful')}
-      headerIcon={<i className="fa-solid fa-gift text-white text-2xl"></i>}
-      headerIconContainerClassName="bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg"
+      // headerIcon={<i className="fa-solid fa-gift text-white text-2xl"></i>}
+      // headerIconContainerClassName="bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg"
       closeAriaLabel={t('close')}
       footer={
         reward ? (

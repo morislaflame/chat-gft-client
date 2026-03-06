@@ -462,6 +462,10 @@ type TranslationType = {
         ru: 'После подтверждения ваш запрос будет отправлен администратору. Вы получите уведомление, когда приз будет выдан.',
         en: 'After confirmation, your request will be sent to the administrator. You will receive a notification when the prize is issued.'
     },
+    withdrawalStoryHint: {
+        ru: 'Выложите историю, чтобы отправить запрос на вывод.',
+        en: 'Post a story to submit a withdrawal request.'
+    },
     confirm: {
         ru: 'Подтвердить',
         en: 'Confirm'

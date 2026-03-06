@@ -83,11 +83,34 @@ const Modal: React.FC<ModalProps> = ({
       modal
       shouldScaleBackground={false}
     >
+      
       <DrawerContent
         overlayClassName={overlayClassName}
         overlayProps={overlayProps}
-        className={cn('max-h-[95vh] overflow-hidden', className)}
+        className={cn('max-h-[100vh] overflow-hidden', className)}
       >
+        {!hideCloseButton ? (
+                  closeDisabled ? (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 min-w-8 rounded-full absolute top-0 right-0"
+                      aria-label={closeAriaLabel}
+                      disabled
+                      icon="fas fa-times"
+                    />
+                  ) : (
+                    <DrawerClose asChild>
+                      <Button
+                        variant="nav"
+                        size="icon"
+                        className="w-8 h-8 min-w-8 rounded-full absolute top-2 right-2 text-white/50"
+                        aria-label={closeAriaLabel}
+                        icon="fas fa-times"
+                      />
+                    </DrawerClose>
+                  )
+                ) : null}
         <div className="mx-auto w-full max-w-md h-full flex flex-col">
           {hasHeader ? (
             <motion.div
@@ -121,28 +144,7 @@ const Modal: React.FC<ModalProps> = ({
                   ) : null}
                 </div>
 
-                {!hideCloseButton ? (
-                  closeDisabled ? (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-8 h-8 min-w-8 rounded-full absolute top-0 right-0"
-                      aria-label={closeAriaLabel}
-                      disabled
-                      icon="fas fa-times"
-                    />
-                  ) : (
-                    <DrawerClose asChild>
-                      <Button
-                        variant="nav"
-                        size="icon"
-                        className="w-8 h-8 min-w-8 rounded-full absolute top-0 right-0"
-                        aria-label={closeAriaLabel}
-                        icon="fas fa-times"
-                      />
-                    </DrawerClose>
-                  )
-                ) : null}
+                
               </div>
             </motion.div>
           ) : null}
@@ -164,7 +166,7 @@ const Modal: React.FC<ModalProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.4 }}
             >
-              <DrawerFooter className={cn('pb-8', footerClassName)}>
+              <DrawerFooter className={cn('pb-4', footerClassName)}>
                 {footer}
               </DrawerFooter>
             </motion.div>

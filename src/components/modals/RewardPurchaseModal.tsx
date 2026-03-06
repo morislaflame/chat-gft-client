@@ -44,10 +44,13 @@ const RewardPurchaseModal: React.FC<RewardPurchaseModalProps> = observer(({
     const mediaUrl = reward.preview?.url;
     if (!mediaUrl) return;
 
+    const storyText = reward?.name
+      ? `${reward.name} from ChatGFT 💎\n${t('join')}`
+      : t('join');
     setIsSharing(true);
     try {
       tg.shareToStory(mediaUrl, {
-        text: t('join'),
+        text: storyText,
         widget_link: {
           url: referralLink,
           name: t('lookWhatIWon'),

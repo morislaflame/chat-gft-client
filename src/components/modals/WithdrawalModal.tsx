@@ -54,8 +54,11 @@ const WithdrawalModal: React.FC<WithdrawalModalProps> = observer(({
     if (!tg || typeof tg.shareToStory !== 'function' || !previewUrl) return;
     setIsSharing(true);
     try {
+      const storyText = reward?.name
+        ? `${reward.name} from ChatGFT 💎\n${t('join')}`
+        : t('join');
       tg.shareToStory(previewUrl, {
-        text: t('join'),
+        text: storyText,
         widget_link: {
           url: referralLink,
           name: t('lookWhatIWon'),

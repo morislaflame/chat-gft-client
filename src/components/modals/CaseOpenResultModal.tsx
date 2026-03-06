@@ -69,10 +69,13 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
     const mediaUrl = result.reward.preview?.url;
     if (!mediaUrl) return;
 
+    const storyText = result.reward.name
+      ? `${result.reward.name} from ChatGFT 💎\n${t('join')}`
+      : t('join');
     setIsSharing(true);
     try {
       tg.shareToStory(mediaUrl, {
-        text: t('join'),
+        text: storyText,
         widget_link: {
           url: referralLink,
           name: t('lookWhatIWon'),

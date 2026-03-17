@@ -38,13 +38,24 @@ const ChatContainer: React.FC = observer(() => {
         return () => document.removeEventListener('gems-button-land', onGemsLand);
     }, [chat]);
 
-    const handleSendMessage = async (message: string): Promise<boolean> => {
+    const handleSendMessage = async (
+        message: string,
+        artifactActionId?: number | null,
+        suggestionId?: string | null,
+        payGemsForSuggestionId?: string | null,
+    ): Promise<boolean> => {
         if (user.energy <= 0) {
             chat.setInsufficientEnergy(true);
             return false;
         }
 
-        const response = await chat.sendMessage(message);
+        const response = await chat.sendMessage(
+            message,
+            undefined,
+            artifactActionId ?? null,
+            suggestionId ?? null,
+            payGemsForSuggestionId ?? null,
+        );
         // Проверяем, завершена ли миссия
         if (response && response.missionCompleted && response.mission) {
             setLastMissionCompleted({
@@ -78,7 +89,7 @@ const ChatContainer: React.FC = observer(() => {
             setShowMissionVideoModal(true);
         } else {
             console.log('No mission video found, sending start message directly');
-            void handleSendMessage(language === 'en' ? 'start' : 'старт');
+            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null);
         }
     };
 
@@ -87,7 +98,7 @@ const ChatContainer: React.FC = observer(() => {
         trackEvent('mission_video_close', { video_id: currentMissionVideo?.video?.id ?? null });
         setShowMissionVideoModal(false);
         if (currentMissionVideo) {
-            void handleSendMessage(language === 'en' ? 'start' : 'старт');
+            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null);
             setCurrentMissionVideo(null);
         }
         // Очищаем lastMissionCompleted после показа видео новой миссии
@@ -116,7 +127,7 @@ const ChatContainer: React.FC = observer(() => {
         const trimmed = inputValue.trim();
         if (!trimmed) return;
 
-        handleSendMessage(trimmed).then((sent) => {
+        handleSendMessage(trimmed, null, null).then((sent) => {
             if (sent) {
                 hapticImpact('soft');
                 setInputValue('');
@@ -124,12 +135,35 @@ const ChatContainer: React.FC = observer(() => {
         });
     };
 
-    const handleSelectSuggestion = (text: string) => {
+    const handleSelectSuggestion = (
+        text: string,
+        suggestionId?: string | null,
+        payGemsForSuggestionId?: string | null,
+    ) => {
         const trimmed = text.trim();
         if (!trimmed) return;
 
-        trackEvent('chat_suggestion_click', { length: trimmed.length });
-        handleSendMessage(trimmed).then((sent) => {
+        trackEvent('chat_suggestion_click', {
+            length: trimmed.length,
+            payGems: !!payGemsForSuggestionId,
+        });
+        handleSendMessage(
+            trimmed,
+            null,
+            suggestionId ?? null,
+            payGemsForSuggestionId ?? null,
+        ).then((sent) => {
+            if (sent) {
+                hapticImpact('soft');
+            }
+        });
+    };
+
+    const handleSelectArtifactAction = (action: { id: number; ui_label?: string | null; enabled: boolean }) => {
+        const label = (action.ui_label || '').trim();
+        trackEvent('artifact_action_click', { action_id: action.id, enabled: action.enabled, label_len: label.length });
+        if (!action.enabled || !label) return;
+        handleSendMessage(label, action.id, null).then((sent) => {
             if (sent) {
                 hapticImpact('soft');
             }
@@ -169,6 +203,7 @@ const ChatContainer: React.FC = observer(() => {
                     <ChatMessages
                         onStartMission={handleStartMission}
                         onSelectSuggestion={handleSelectSuggestion}
+                        onSelectArtifactAction={handleSelectArtifactAction}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">

@@ -9,13 +9,19 @@ import type { RefObject } from 'react';
 
 interface ChatMessagesProps {
   onStartMission: (orderIndex: number) => void;
-  onSelectSuggestion: (text: string) => void;
+  onSelectSuggestion: (
+    text: string,
+    suggestionId?: string | null,
+    payGemsForSuggestionId?: string | null,
+  ) => void;
+  onSelectArtifactAction: (action: { id: number; ui_label?: string | null; enabled: boolean }) => void;
   messageEndRef: RefObject<HTMLDivElement | null>;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   onStartMission,
   onSelectSuggestion,
+  onSelectArtifactAction,
   messageEndRef,
 }) => {
   const { chat } = React.useContext(Context) as IStoreContext;
@@ -23,11 +29,17 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
 
   const messages = chat.messages ?? [];
   const suggestions = chat.suggestions ?? [];
+  const suggestionsMeta = chat.suggestionsMeta ?? null;
+  const artifactAction = chat.artifactAction ?? null;
   const avatarUrl = chat.avatar?.url;
 
-  const handleSelectSuggestion = (text: string) => {
+  const handleSelectSuggestion = (
+    text: string,
+    suggestionId?: string | null,
+    payGemsForSuggestionId?: string | null,
+  ) => {
     hapticImpact('soft');
-    onSelectSuggestion(text);
+    onSelectSuggestion(text, suggestionId ?? null, payGemsForSuggestionId ?? null);
   };
 
   const isMobile = document.body.classList.contains('telegram-mobile');
@@ -47,15 +59,19 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
 
         const isLastAIMessage = !message.isUser && index === messages.length - 1;
         const showSuggestions = isLastAIMessage && suggestions.length > 0 && !chat.isTyping;
+        const showArtifactAction = isLastAIMessage && !!artifactAction && !chat.isTyping;
 
         return (
           <MessageItem
             key={message.id}
             message={message}
             suggestions={suggestions}
+            suggestionsMeta={suggestionsMeta}
             showSuggestions={showSuggestions}
+            artifactAction={showArtifactAction ? artifactAction : null}
             avatarUrl={avatarUrl}
             onSelectSuggestion={handleSelectSuggestion}
+            onSelectArtifactAction={onSelectArtifactAction}
           />
         );
       })}

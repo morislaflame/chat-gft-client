@@ -13,6 +13,8 @@ export default class ChatStore {
     _currentStage = 1;
     _mission: string | null = null;
     _suggestions: string[] = [];
+    _suggestionsMeta: ApiMessageResponse['suggestionsMeta'] = undefined;
+    _artifactAction: ApiMessageResponse['artifactAction'] = null;
     _loading = false;
     _error = '';
     _userStore: UserStore | null = null;
@@ -23,6 +25,7 @@ export default class ChatStore {
     _pendingGemsOnLand: number | null = null;
     _pendingProgressAnimation: { from: number; to: number } | null = null;
     _insufficientEnergy = false;
+    _insufficientGems = false;
     _video: MediaFile | null = null;
     _avatar: MediaFile | null = null;
     _background: MediaFile | null = null;
@@ -175,6 +178,14 @@ export default class ChatStore {
         this._insufficientEnergy = false;
     }
 
+    setInsufficientGems(value: boolean) {
+        this._insufficientGems = value;
+    }
+
+    closeInsufficientGems() {
+        this._insufficientGems = false;
+    }
+
     setVideo(video: MediaFile | null) {
         this._video = video;
     }
@@ -220,6 +231,15 @@ export default class ChatStore {
         }
     }
 
+    setSuggestionsMeta(meta: ApiMessageResponse['suggestionsMeta']) {
+        this._suggestionsMeta = meta ?? undefined;
+    }
+
+    setArtifactAction(action: ApiMessageResponse['artifactAction']) {
+        this._artifactAction = action ?? null;
+    }
+
+
     private loadSuggestionsFromStorage(): string[] {
         try {
             const stored = localStorage.getItem(this.SUGGESTIONS_STORAGE_KEY);
@@ -240,7 +260,13 @@ export default class ChatStore {
         this._error = error;
     }
 
-    async sendMessage(messageText: string, onEnergyUpdate?: (newEnergy: number) => void) {
+    async sendMessage(
+        messageText: string,
+        onEnergyUpdate?: (newEnergy: number) => void,
+        artifactActionId?: number | null,
+        suggestionId?: string | null,
+        payGemsForSuggestionId?: string | null,
+    ) {
         const userMessage: Message = {
             id: Date.now().toString(),
             text: messageText,
@@ -254,6 +280,8 @@ export default class ChatStore {
         
         // Очищаем suggestions при отправке нового сообщения
         this.setSuggestions([]);
+        this.setSuggestionsMeta(undefined);
+        this.setArtifactAction(null);
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
@@ -278,7 +306,12 @@ export default class ChatStore {
                 balance_after: previousEnergy !== null ? Math.max(0, Number(previousEnergy) - 1) : null,
                 reason: 'step',
             });
-            const response: ApiMessageResponse = await apiSendMessage(messageText);
+            const response: ApiMessageResponse = await apiSendMessage(
+                messageText,
+                artifactActionId ?? null,
+                suggestionId ?? null,
+                payGemsForSuggestionId ?? null,
+            );
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 text: response.response || '',
@@ -426,8 +459,15 @@ export default class ChatStore {
             if (response.suggestions && response.suggestions.length > 0) {
                 this.setSuggestions(response.suggestions);
             } else {
-                // Если подсказок нет, очищаем их
                 this.setSuggestions([]);
+            }
+            this.setSuggestionsMeta(response.suggestionsMeta ?? undefined);
+
+            // Artifact action button (server-deterministic)
+            if (response.artifactAction) {
+                this.setArtifactAction(response.artifactAction);
+            } else {
+                this.setArtifactAction(null);
             }
 
             // Возвращаем response для использования в компонентах
@@ -436,12 +476,19 @@ export default class ChatStore {
             console.error('Error sending message:', error);
             // Проверяем, если это ошибка недостаточного баланса
             const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-            if (axiosError.response?.status === 400 && axiosError.response?.data?.message?.includes('Insufficient energy')) {
+            if (axiosError.response?.status === 400) {
+                const msg = axiosError.response?.data?.message ?? '';
+                if (msg.includes('Insufficient energy')) {
                 this.setError('Insufficient energy. Please purchase more stars.');
                 this.setInsufficientEnergy(true);
                 trackEvent('chat_message_send_failed', { reason: 'insufficient_energy' });
                 trackEvent('energy_depleted', { balance: this._userStore?.user?.energy ?? null, context: 'story' });
                 trackEvent('mission_fail', { story_id: storyId, fail_reason: 'energy_depleted' });
+                } else if (msg.includes('Insufficient balance')) {
+                    this.setError('Недостаточно гемов для оплаты.');
+                } else {
+                    this.setError('Error: Unable to send message. Please try again.');
+                }
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
                 trackEvent('chat_message_send_failed', { reason: 'unknown' });
@@ -664,6 +711,15 @@ export default class ChatStore {
         return this._suggestions;
     }
 
+    get suggestionsMeta() {
+        return this._suggestionsMeta;
+    }
+
+    get artifactAction() {
+        return this._artifactAction;
+    }
+
+
     get loading() {
         return this._loading;
     }
@@ -686,6 +742,10 @@ export default class ChatStore {
 
     get insufficientEnergy() {
         return this._insufficientEnergy;
+    }
+
+    get insufficientGems() {
+        return this._insufficientGems;
     }
 
     get video() {

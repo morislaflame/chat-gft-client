@@ -10,6 +10,7 @@ import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import StepRewardModal from "./components/modals/StepRewardModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
+import InsufficientGemsModal from "./components/modals/InsufficientGemsModal";
 import Onboarding from './components/modals/Onboarding';
 import { ProgressiveBlur } from './components/ui/progressive-blur';
 import { initAnalytics, setUserId, setUserProperties, trackEvent, trackPageView } from '@/utils/analytics';
@@ -58,6 +59,7 @@ const AppContent = () => {
       <StageRewardModal />
       <StepRewardModal />
       <InsufficientEnergyModal />
+      <InsufficientGemsModal />
     </>
   );
 };

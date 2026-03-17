@@ -71,6 +71,7 @@ export interface ApiMessageResponse {
     newEnergy: number;
     newBalance?: number;
     suggestions?: string[];
+    suggestionsMeta?: Array<{ id: string; text: string; kind: 'core' | 'detour'; payable?: boolean }>;
     missionCompleted?: boolean;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
@@ -115,6 +116,17 @@ export interface ApiMessageResponse {
         stepNumber: number;
         rewardGems: number;
         newBalance: number;
+    } | null;
+    artifactAction?: {
+        id: number;
+        action: 'ACQUIRE' | 'USE';
+        artifact_code: string;
+        artifact_name?: string | null;
+        amount: number;
+        enabled: boolean;
+        available_quantity?: number | null;
+        missing_reason?: string | null;
+        ui_label?: string | null;
     } | null;
     timestamp: string;
 }

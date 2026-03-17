@@ -7,17 +7,28 @@ import type { Message } from '@/types/types';
 interface MessageItemProps {
   message: Message;
   suggestions: string[];
+  suggestionsMeta?: Array<{ id: string; text: string; kind: 'core' | 'detour'; payable?: boolean }> | null;
   showSuggestions: boolean;
+  artifactAction: {
+    id: number;
+    ui_label?: string | null;
+    enabled: boolean;
+    missing_reason?: string | null;
+  } | null;
   avatarUrl?: string;
-  onSelectSuggestion: (text: string) => void;
+  onSelectSuggestion: (text: string, suggestionId?: string | null) => void;
+  onSelectArtifactAction: (action: { id: number; ui_label?: string | null; enabled: boolean }) => void;
 }
 
 const MessageItem: React.FC<MessageItemProps> = memo(({
   message,
   suggestions,
+  suggestionsMeta,
   showSuggestions,
+  artifactAction,
   avatarUrl,
   onSelectSuggestion,
+  onSelectArtifactAction,
 }) => (
   <div className="message-container flex items-start mb-6">
     <div className={`flex-1 ${message.isUser ? 'flex justify-end' : ''}`}>
@@ -52,10 +63,13 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
           <div className="relative text-md">
             <FormattedText text={message.text} />
             <AnimatePresence mode="popLayout">
-              {showSuggestions && (
+              {(showSuggestions || !!artifactAction) && (
                 <SuggestionButtons
                   suggestions={suggestions}
+                  suggestionsMeta={suggestionsMeta ?? undefined}
+                  artifactAction={artifactAction}
                   onSelectSuggestion={onSelectSuggestion}
+                  onSelectArtifactAction={onSelectArtifactAction}
                 />
               )}
             </AnimatePresence>

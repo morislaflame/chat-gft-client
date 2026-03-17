@@ -17,8 +17,18 @@ export interface ApiHistoryResponse {
     background?: MediaFile | null;
 }
 
-export const sendMessage = async (message: string): Promise<ApiMessageResponse> => {
-    const { data } = await $authHost.post('api/message/', { message });
+export const sendMessage = async (
+    message: string,
+    artifactActionId?: number | null,
+    suggestionId?: string | null,
+    payGemsForSuggestionId?: string | null,
+): Promise<ApiMessageResponse> => {
+    const { data } = await $authHost.post('api/message/', {
+        message,
+        artifactActionId: artifactActionId ?? null,
+        suggestionId: suggestionId ?? null,
+        payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+    });
     return data;
 };
 

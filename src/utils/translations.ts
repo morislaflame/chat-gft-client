@@ -403,6 +403,19 @@ type TranslationType = {
         ru: 'или получите бесплатную энергию за выполнение заданий',
         en: 'or get free energy by completing quests'
     },
+    // InsufficientGemsModal
+    insufficientGems: {
+        ru: 'Недостаточно гемов',
+        en: 'Insufficient Gems'
+    },
+    insufficientGemsDesc: {
+        ru: 'У вас недостаточно гемов для покупки этого варианта. Вы можете приобрести гемы в магазине или получить их за выполнение заданий.',
+        en: "You don't have enough gems to purchase this option. You can buy gems in the store or earn them by completing quests."
+    },
+    insufficientGemsTasksNote: {
+        ru: 'или получите бесплатные гемы за выполнение заданий',
+        en: 'or get free gems by completing quests'
+    },
     goToQuests: {
         ru: 'Перейти к заданиям',
         en: 'Go to quests'

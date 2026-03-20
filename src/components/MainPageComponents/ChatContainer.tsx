@@ -17,7 +17,6 @@ const ChatContainer: React.FC = observer(() => {
     const { t, language } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [inputValue, setInputValue] = useState('');
-    // state for mission expansion is now managed inside MissionProgress
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
     const [currentMissionVideo, setCurrentMissionVideo] = useState<{ video: MediaFile; mission: string | null } | null>(null);
@@ -31,7 +30,7 @@ const ChatContainer: React.FC = observer(() => {
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
 
-    // Когда гем прилетает в хедер — обновляем баланс (temp) и запускаем анимацию прогресс-бара
+    // When gems land in the header — update balance (temp) and run case-bar fill animation
     useEffect(() => {
         const onGemsLand = () => chat.onGemsLanded();
         document.addEventListener('gems-button-land', onGemsLand);
@@ -40,7 +39,6 @@ const ChatContainer: React.FC = observer(() => {
 
     const handleSendMessage = async (
         message: string,
-        artifactActionId?: number | null,
         suggestionId?: string | null,
         payGemsForSuggestionId?: string | null,
     ): Promise<boolean> => {
@@ -52,7 +50,6 @@ const ChatContainer: React.FC = observer(() => {
         const response = await chat.sendMessage(
             message,
             undefined,
-            artifactActionId ?? null,
             suggestionId ?? null,
             payGemsForSuggestionId ?? null,
         );
@@ -149,21 +146,9 @@ const ChatContainer: React.FC = observer(() => {
         });
         handleSendMessage(
             trimmed,
-            null,
             suggestionId ?? null,
             payGemsForSuggestionId ?? null,
         ).then((sent) => {
-            if (sent) {
-                hapticImpact('soft');
-            }
-        });
-    };
-
-    const handleSelectArtifactAction = (action: { id: number; ui_label?: string | null; enabled: boolean }) => {
-        const label = (action.ui_label || '').trim();
-        trackEvent('artifact_action_click', { action_id: action.id, enabled: action.enabled, label_len: label.length });
-        if (!action.enabled || !label) return;
-        handleSendMessage(label, action.id, null).then((sent) => {
             if (sent) {
                 hapticImpact('soft');
             }
@@ -203,7 +188,6 @@ const ChatContainer: React.FC = observer(() => {
                     <ChatMessages
                         onStartMission={handleStartMission}
                         onSelectSuggestion={handleSelectSuggestion}
-                        onSelectArtifactAction={handleSelectArtifactAction}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">

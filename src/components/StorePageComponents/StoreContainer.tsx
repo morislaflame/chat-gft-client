@@ -7,13 +7,13 @@ import StoreEmptyState from './StoreEmptyState';
 import StoreList from './StoreList';
 
 const StoreContainer: React.FC = observer(() => {
-    const { product } = useContext(Context) as IStoreContext;
+    const { product, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
 
     useEffect(() => {
-        // Load products when component mounts
         product.fetchProducts();
-    }, [product]);
+        user?.fetchMyInfo?.(); // Обновляем артефакты в инвентаре
+    }, [product, user]);
 
     const handlePurchase = async (productId: number) => {
         try {
@@ -65,6 +65,29 @@ const StoreContainer: React.FC = observer(() => {
                     isLoading: product.isProductLoading(productId)
                 })}
             />
+
+            {/* Инвентарь артефактов пользователя */}
+            {user?.user?.artifacts && user.user.artifacts.length > 0 && (
+                <div className="mt-6 rounded-xl border border-primary-600 bg-primary-800/50 p-4">
+                    <h3 className="text-sm font-medium text-zinc-300 mb-3 flex items-center gap-2">
+                        <i className="fa-solid fa-backpack text-amber-400" />
+                        {t('inventory') || 'Инвентарь'}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {user.user.artifacts.map((a) => (
+                            <div
+                                key={a.code}
+                                className="inline-flex items-center gap-2 rounded-lg bg-primary-700/60 px-3 py-2 text-sm"
+                            >
+                                <span className="text-zinc-200">{a.name || a.code}</span>
+                                <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-xs font-medium text-amber-400">
+                                    ×{a.quantity}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
                 {/* Payment Info */}
                 {/* <div className="mt-6 bg-primary-800 border border-primary-700 rounded-xl p-4">

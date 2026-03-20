@@ -12,6 +12,9 @@ export interface ApiHistoryResponse {
     }>;
     hasMore?: boolean;
     nextCursor?: number | null;
+    /** Подсказки для последнего сообщения (с сервера, при перезагрузке) */
+    lastSuggestions?: string[];
+    lastSuggestionsMeta?: ApiMessageResponse['suggestionsMeta'];
     video?: MediaFile | null;
     avatar?: MediaFile | null;
     background?: MediaFile | null;
@@ -19,13 +22,11 @@ export interface ApiHistoryResponse {
 
 export const sendMessage = async (
     message: string,
-    artifactActionId?: number | null,
     suggestionId?: string | null,
     payGemsForSuggestionId?: string | null,
 ): Promise<ApiMessageResponse> => {
     const { data } = await $authHost.post('api/message/', {
         message,
-        artifactActionId: artifactActionId ?? null,
         suggestionId: suggestionId ?? null,
         payGemsForSuggestionId: payGemsForSuggestionId ?? null,
     });

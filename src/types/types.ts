@@ -16,6 +16,12 @@ export interface Bonus {
     [key: string]: unknown;
 }
 
+export interface UserArtifact {
+    code: string;
+    name?: string;
+    quantity: number;
+}
+
 export interface UserInfo {
     id: number;
     username: string;
@@ -32,6 +38,8 @@ export interface UserInfo {
     referrals?: Referral[];
     lastBonuses?: Bonus[];
     selectedHistoryName?: string; // Выбранная история пользователя (по умолчанию "starwars")
+    /** Артефакты в инвентаре для выбранной истории: для проверки USE на фронте */
+    artifacts?: UserArtifact[];
 }
 
 export interface Product {
@@ -71,7 +79,19 @@ export interface ApiMessageResponse {
     newEnergy: number;
     newBalance?: number;
     suggestions?: string[];
-    suggestionsMeta?: Array<{ id: string; text: string; kind: 'core' | 'detour'; payable?: boolean }>;
+    suggestionsMeta?: Array<{
+        id: string;
+        text: string;
+        kind: 'core' | 'detour';
+        payable?: boolean;
+        artifact_action?: boolean;
+        artifact_code?: string;
+        /** ACQUIRE = поднять, USE = применить. Для USE: disable если нет артефакта */
+        artifact_action_type?: 'ACQUIRE' | 'USE';
+        artifact_amount?: number;
+    }>;
+    /** Актуальный инвентарь артефактов после ответа (для обновления UserStore) */
+    artifacts?: Array<{ code: string; quantity: number }>;
     missionCompleted?: boolean;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
@@ -110,8 +130,7 @@ export interface ApiMessageResponse {
         updatedAt?: string;
     }>;
     mission?: string;
-    progressPercent?: number; // Процент прогресса по миссии (0-100)
-    /** Reward for a correct step in mission 1 or 2 (progress increased) */
+    /** Reward for completing key beats in mission 1 or 2 */
     stepReward?: {
         stepNumber: number;
         rewardGems: number;
@@ -146,7 +165,6 @@ export interface ApiStatusResponse {
     stage: number;
     mission: string | null;
     status: string;
-    progressPercent?: number | null; // Процент прогресса по миссии (0-100)
     agentId?: number | null;
     missions?: Mission[];
 }
@@ -158,13 +176,6 @@ export interface ApiHistoryItem {
     createdAt: string;
     missionId?: number | null;
     isCongratulation?: boolean;
-}
-
-export interface ProgressData {
-    current: number;
-    level: number;
-    untilReward: number;
-    lastProgressAt?: string | null;
 }
 
 export interface StageRewardData {
@@ -188,13 +199,6 @@ export interface StepRewardData {
     isOpen: boolean;
 }
 
-export interface ForceProgress {
-    messagesUntilGift: number;
-    totalMessagesForGift: number;
-    currentProgress: number;
-    messageCount: number;
-}
-
 export interface MediaFile {
     id: number;
     fileName: string;
@@ -211,8 +215,6 @@ export interface MediaFile {
 
 export interface ApiHistoryResponse {
     history: ApiHistoryItem[];
-    forceProgress?: ForceProgress;
-    progress?: ProgressData;
     hasMore?: boolean;
     nextCursor?: number | null;
     video?: MediaFile | null;

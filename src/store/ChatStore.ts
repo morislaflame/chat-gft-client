@@ -9,7 +9,6 @@ import { trackEvent } from "@/utils/analytics";
 export default class ChatStore {
     _messages: Message[] = [];
     _isTyping = false;
-    _forceProgress = 0;
     _currentStage = 1;
     _mission: string | null = null;
     _suggestions: string[] = [];
@@ -31,7 +30,6 @@ export default class ChatStore {
     _background: MediaFile | null = null;
     _missions: Mission[] = [];
     _loadedHistoryName: string | null = null; // Отслеживаем для какой истории загружены данные
-    private readonly SUGGESTIONS_STORAGE_KEY = 'chat_suggestions';
     private _trackedMissionViews = new Set<string>();
     private _missionStartTs = new Map<number, number>();
 
@@ -109,15 +107,8 @@ export default class ChatStore {
         this._isTyping = isTyping;
     }
 
-    setForceProgress(progress: number) {
-        this._forceProgress = progress;
-    }
-
     setCurrentStage(stage: number) {
         this._currentStage = stage;
-        // Вычисляем процент прогресса на основе этапа
-        // Этап 1 = 0%, этап 2 = 33.33%, этап 3 = 66.66%
-        this._forceProgress = ((stage - 1) / 3) * 100;
     }
 
     setMission(mission: string | null) {
@@ -214,21 +205,6 @@ export default class ChatStore {
 
     setSuggestions(suggestions: string[]) {
         this._suggestions = suggestions;
-        // Сохраняем suggestions в localStorage
-        if (suggestions && suggestions.length > 0) {
-            try {
-                localStorage.setItem(this.SUGGESTIONS_STORAGE_KEY, JSON.stringify(suggestions));
-            } catch (error) {
-                console.error('Failed to save suggestions to localStorage:', error);
-            }
-        } else {
-            // Очищаем localStorage если suggestions пустые
-            try {
-                localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);
-            } catch (error) {
-                console.error('Failed to remove suggestions from localStorage:', error);
-            }
-        }
     }
 
     setSuggestionsMeta(meta: ApiMessageResponse['suggestionsMeta']) {
@@ -239,18 +215,6 @@ export default class ChatStore {
         this._artifactAction = action ?? null;
     }
 
-
-    private loadSuggestionsFromStorage(): string[] {
-        try {
-            const stored = localStorage.getItem(this.SUGGESTIONS_STORAGE_KEY);
-            if (stored) {
-                return JSON.parse(stored);
-            }
-        } catch (error) {
-            console.error('Failed to load suggestions from localStorage:', error);
-        }
-        return [];
-    }
 
     setLoading(loading: boolean) {
         this._loading = loading;
@@ -263,7 +227,6 @@ export default class ChatStore {
     async sendMessage(
         messageText: string,
         onEnergyUpdate?: (newEnergy: number) => void,
-        artifactActionId?: number | null,
         suggestionId?: string | null,
         payGemsForSuggestionId?: string | null,
     ) {
@@ -281,7 +244,6 @@ export default class ChatStore {
         // Очищаем suggestions при отправке нового сообщения
         this.setSuggestions([]);
         this.setSuggestionsMeta(undefined);
-        this.setArtifactAction(null);
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
@@ -308,7 +270,6 @@ export default class ChatStore {
             });
             const response: ApiMessageResponse = await apiSendMessage(
                 messageText,
-                artifactActionId ?? null,
                 suggestionId ?? null,
                 payGemsForSuggestionId ?? null,
             );
@@ -341,12 +302,7 @@ export default class ChatStore {
             if (response.stage !== undefined) {
                 this.setCurrentStage(response.stage);
             }
-            
-            // Обновляем процент прогресса из ответа (если есть), иначе используется вычисление на основе этапа
-            if (response.progressPercent !== undefined && response.progressPercent !== null) {
-                this.setForceProgress(response.progressPercent);
-            }
-            
+
             if (response.mission !== undefined) {
                 this.setMission(response.mission);
             }
@@ -463,11 +419,9 @@ export default class ChatStore {
             }
             this.setSuggestionsMeta(response.suggestionsMeta ?? undefined);
 
-            // Artifact action button (server-deterministic)
-            if (response.artifactAction) {
-                this.setArtifactAction(response.artifactAction);
-            } else {
-                this.setArtifactAction(null);
+            // Обновляем артефакты юзера из ответа (актуально после подбора/использования)
+            if (response.artifacts && Array.isArray(response.artifacts) && this._userStore) {
+                this._userStore.setArtifacts(response.artifacts);
             }
 
             // Возвращаем response для использования в компонентах
@@ -486,8 +440,10 @@ export default class ChatStore {
                 trackEvent('mission_fail', { story_id: storyId, fail_reason: 'energy_depleted' });
                 } else if (msg.includes('Insufficient balance')) {
                     this.setError('Недостаточно гемов для оплаты.');
+                } else if (msg.includes('Artifact') || msg.includes('artifact')) {
+                    this.setError(msg || 'Артефакт недоступен.');
                 } else {
-                    this.setError('Error: Unable to send message. Please try again.');
+                    this.setError(msg || 'Error: Unable to send message. Please try again.');
                 }
             } else {
                 this.setError('Error: Unable to send message. Please try again.');
@@ -518,9 +474,6 @@ export default class ChatStore {
             const historyData = historyResponse.history ?? [];
 
             this.setCurrentStage(statusData.stage);
-            if (statusData.progressPercent !== undefined && statusData.progressPercent !== null) {
-                this.setForceProgress(statusData.progressPercent);
-            }
             this.setMission(statusData.mission);
             if (statusData.missions) {
                 this.setMissions(statusData.missions);
@@ -631,13 +584,16 @@ export default class ChatStore {
                 this.setBackground(historyResponse.background);
             }
 
-            // Восстанавливаем suggestions из localStorage для последнего сообщения бота
-            const lastBotMessage = messages.filter(m => !m.isUser).pop();
-            if (lastBotMessage) {
-                const savedSuggestions = this.loadSuggestionsFromStorage();
-                if (savedSuggestions.length > 0) {
-                    this.setSuggestions(savedSuggestions);
-                }
+            // Подсказки для последнего сообщения — с сервера (LastChatResponseMeta)
+            if (historyResponse.lastSuggestions?.length) {
+                this.setSuggestions(historyResponse.lastSuggestions);
+            } else {
+                this.setSuggestions([]);
+            }
+            if (historyResponse.lastSuggestionsMeta) {
+                this.setSuggestionsMeta(historyResponse.lastSuggestionsMeta);
+            } else {
+                this.setSuggestionsMeta(undefined);
             }
 
             this._loadedHistoryName = currentHistoryName;
@@ -653,10 +609,6 @@ export default class ChatStore {
         try {
             const statusData = await getStatus();
             this.setCurrentStage(statusData.stage);
-            // Обновляем процент прогресса из ответа (если есть), иначе используется вычисление на основе этапа
-            if (statusData.progressPercent !== undefined && statusData.progressPercent !== null) {
-                this.setForceProgress(statusData.progressPercent);
-            }
             this.setMission(statusData.mission);
             // Сохраняем миссии с видео
             if (statusData.missions) {
@@ -672,19 +624,13 @@ export default class ChatStore {
 
     clearMessages() {
         this.setMessages([]);
-        this.setForceProgress(0);
         this.setCurrentStage(1);
         this.setMission(null);
         this.setSuggestions([]);
+        this.setSuggestionsMeta(undefined);
         this._loadedHistoryName = null; // Сбрасываем отслеживание загруженной истории
         this._trackedMissionViews.clear();
         this._missionStartTs.clear();
-        // Очищаем suggestions из localStorage при очистке сообщений
-        try {
-            localStorage.removeItem(this.SUGGESTIONS_STORAGE_KEY);
-        } catch (error) {
-            console.error('Failed to remove suggestions from localStorage:', error);
-        }
     }
 
     get messages() {
@@ -693,10 +639,6 @@ export default class ChatStore {
 
     get isTyping() {
         return this._isTyping;
-    }
-
-    get forceProgress() {
-        return this._forceProgress;
     }
 
     get currentStage() {

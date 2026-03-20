@@ -76,6 +76,12 @@ export default class UserStore {
         }
     }
 
+    setArtifacts(artifacts: Array<{ code: string; quantity: number }>) {
+        if (this._user) {
+            this._user = { ...this._user, artifacts };
+        }
+    }
+
     setReferrals(referrals: Referral[]) {
         this._referrals = referrals;
     }

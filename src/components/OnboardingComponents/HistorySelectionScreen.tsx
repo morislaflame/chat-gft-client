@@ -38,7 +38,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     onSetActiveIndex,
     onSelectHistory,
     isFromHeader = false,
-    onClose
+    onClose,
 }) => {
     const { t, language } = useTranslate();
     const [ref, bounds] = useMeasure();
@@ -86,11 +86,11 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     return (
         <div className="flex flex-col justify-between h-full p-4 pb-8 gap-4">
             {/* Title */}
-            <div className="flex items-center justify-center relative">
+            <div className="flex items-center justify-center relative min-h-[40px]">
                 <motion.h2
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-2xl font-bold text-white text-center"
+                    className="text-2xl font-bold text-white text-center px-2"
                 >
                     {t('selectHistory')}
                 </motion.h2>

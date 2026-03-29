@@ -8,183 +8,197 @@ import onboardingImageWebp from '@/assets/Onboarding.webp';
 import onboardingImageJpg from '@/assets/Onboarding.jpg';
 import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
+import MissionPathScreen from '@/components/OnboardingComponents/MissionPathScreen';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
 import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 
+type Step = 'welcome' | 'select' | 'missions';
+
 interface OnboardingProps {
     onComplete: () => void;
-    initialStep?: 'welcome' | 'select';
+    initialStep?: Step;
     isFromHeader?: boolean;
     onClose?: () => void;
 }
 
-const Onboarding: React.FC<OnboardingProps> = observer(({ onComplete, initialStep = 'welcome', isFromHeader = false, onClose }) => {
-    const { agent } = useContext(Context) as IStoreContext;
-    const { t, language } = useTranslate();
-    const [step, setStep] = useState<'welcome' | 'select'>(initialStep);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [direction, setDirection] = useState(1);
-    const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
-    const [showVideoModal, setShowVideoModal] = useState(false);
-    const {hapticImpact, hapticNotification} = useHapticFeedback();
-    const startTsRef = useRef<number>(Date.now());
-    const lastStepRef = useRef<'welcome' | 'select' | null>(null);
+const Onboarding: React.FC<OnboardingProps> = observer(
+    ({ onComplete, initialStep = 'welcome', isFromHeader = false, onClose }) => {
+        const { agent, chat } = useContext(Context) as IStoreContext;
+        const { t, language } = useTranslate();
+        const [step, setStep] = useState<Step>(() =>
+            initialStep === 'missions' || initialStep === 'select' ? initialStep : 'welcome',
+        );
+        const [activeIndex, setActiveIndex] = useState(0);
+        const [direction, setDirection] = useState(1);
+        const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
+        const [showVideoModal, setShowVideoModal] = useState(false);
+        const { hapticImpact, hapticNotification } = useHapticFeedback();
+        const startTsRef = useRef<number>(Date.now());
+        const lastStepRef = useRef<Step | null>(null);
 
-    // Если начальный шаг - выбор истории, загружаем агентов сразу
-    useEffect(() => {
-        agent.fetchPublicAgents();
-    }, [agent]);
+        useEffect(() => {
+            agent.fetchPublicAgents();
+        }, [agent]);
 
-    useEffect(() => {
-        // onboarding_view step: 1=welcome, 2=select
-        const stepNumber = step === 'welcome' ? 1 : 2;
-        if (lastStepRef.current === step) return;
-        lastStepRef.current = step;
-        trackEvent('onboarding_view', {
-            step: stepNumber,
-            variant: isFromHeader ? 'header' : 'default',
-        });
-    }, [step, isFromHeader]);
-
-    const handleSetActiveIndex = (newIndex: number) => {
-        hapticImpact('soft');
-        if (newIndex < 0 || newIndex >= agent.agents.length) return;
-        setDirection(newIndex > activeIndex ? 1 : -1);
-        setActiveIndex(newIndex);
-    };
-
-    const handleSelectHistory = async (historyName: string) => {
-        if (agent.saving) return;
-        
-        try {
-            await agent.selectHistory(historyName);
-            
-            const selectedAgent = agent.getAgentByHistoryName(historyName);
-            
-            if (selectedAgent?.video?.url) {
-                setSelectedVideo(selectedAgent.video);
-                setShowVideoModal(true);
-            } else {
-                trackEvent('onboarding_complete', {
-                    variant: isFromHeader ? 'header' : 'default',
-                    time_spent_sec: Math.max(0, Math.round((Date.now() - startTsRef.current) / 1000)),
-                });
-                onComplete();
+        useEffect(() => {
+            if (step === 'missions') {
+                void chat.loadChatHistory(true);
             }
-        } catch (error) {
-            console.error('Failed to select history:', error);
-        }
-    };
+        }, [step, chat]);
 
-    const handleVideoClose = () => {
-        hapticNotification('success');
-        setShowVideoModal(false);
-        setSelectedVideo(null);
-        // После закрытия видео закрываем онбординг
-        trackEvent('onboarding_complete', {
-            variant: isFromHeader ? 'header' : 'default',
-            time_spent_sec: Math.max(0, Math.round((Date.now() - startTsRef.current) / 1000)),
-        });
-        onComplete();
-    };
+        useEffect(() => {
+            const stepNumber = step === 'welcome' ? 1 : step === 'select' ? 2 : 3;
+            if (lastStepRef.current === step) return;
+            lastStepRef.current = step;
+            trackEvent('onboarding_view', {
+                step: stepNumber,
+                variant: isFromHeader ? 'header' : 'default',
+            });
+        }, [step, isFromHeader]);
 
-    const getHistoryName = (historyName: string) => {
-        const fallback = getHistoryDisplayName(historyName, language);
-        const a = agent.getAgentByHistoryName(historyName);
-        if (!a) return fallback;
-        if (language === 'en') return a.displayNameEn || a.displayName || fallback;
-        return a.displayName || fallback;
-    };
+        const handleSetActiveIndex = (newIndex: number) => {
+            hapticImpact('soft');
+            if (newIndex < 0 || newIndex >= agent.agents.length) return;
+            setDirection(newIndex > activeIndex ? 1 : -1);
+            setActiveIndex(newIndex);
+        };
 
-    const onboardingContent = (
-        <motion.div
-            className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary origin-center"
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-        >
-            {/* Background Images with smooth crossfade transition */}
+        const handleSelectHistory = async (historyName: string) => {
+            if (agent.saving) return;
+
+            try {
+                await agent.selectHistory(historyName);
+
+                const selectedAgent = agent.getAgentByHistoryName(historyName);
+
+                if (selectedAgent?.video?.url) {
+                    setSelectedVideo(selectedAgent.video);
+                    setShowVideoModal(true);
+                } else {
+                    setStep('missions');
+                }
+            } catch (error) {
+                console.error('Failed to select history:', error);
+            }
+        };
+
+        const handleVideoClose = () => {
+            hapticNotification('success');
+            setShowVideoModal(false);
+            setSelectedVideo(null);
+            setStep('missions');
+        };
+
+        const getHistoryName = (historyName: string) => {
+            const fallback = getHistoryDisplayName(historyName, language);
+            const a = agent.getAgentByHistoryName(historyName);
+            if (!a) return fallback;
+            if (language === 'en') return a.displayNameEn || a.displayName || fallback;
+            return a.displayName || fallback;
+        };
+
+        const goToHistorySelectionFromMissions = () => {
+            setStep('select');
+        };
+
+        const onboardingContent = (
             <motion.div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{
-                    backgroundImage: `url(${onboardingImageWebp})`
-                }}
-                animate={{
-                    opacity: step === 'welcome' ? 1 : 0,
-                    scale: [1, 1.05, 1],
-                }}
-                transition={{
-                    opacity: { duration: 0.5, ease: "easeInOut" },
-                    scale: {
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }
-                }}
-            />
-            <motion.div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{
-                    backgroundImage: `url(${onboardingImageJpg})`
-                }}
-                animate={{
-                    opacity: step === 'select' ? 1 : 0,
-                    scale: [1, 1.05, 1],
-                }}
-                transition={{
-                    opacity: { duration: 0.5, ease: "easeInOut" },
-                    scale: {
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }
-                }}
-            />
+                className="fixed inset-0 z-[10000] flex flex-col overflow-hidden telegram-padding bg-primary origin-center"
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+            >
+                <motion.div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{
+                        backgroundImage: `url(${onboardingImageWebp})`,
+                    }}
+                    animate={{
+                        opacity: step === 'welcome' ? 1 : 0,
+                        scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                        opacity: { duration: 0.5, ease: 'easeInOut' },
+                        scale: {
+                            duration: 15,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                        },
+                    }}
+                />
+                <motion.div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{
+                        backgroundImage: `url(${onboardingImageJpg})`,
+                    }}
+                    animate={{
+                        opacity: step === 'welcome' ? 0 : 1,
+                        scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                        opacity: { duration: 0.5, ease: 'easeInOut' },
+                        scale: {
+                            duration: 15,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                        },
+                    }}
+                />
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col h-full">
-                {step === 'welcome' ? (
-                    <WelcomeScreen
-                        joinAdventureText={t('joinAdventure')}
-                        onJoinAdventure={() => setStep('select')}
-                    />
-                ) : (
-                    <HistorySelectionScreen
-                        histories={agent.agents}
-                        loading={agent.loading}
-                        saving={agent.saving}
-                        activeIndex={activeIndex}
-                        direction={direction}
-                        selectText={t('select')}
-                        loadingText={t('loading')}
-                        noHistoriesText={t('noHistoriesAvailable')}
-                        getHistoryDisplayName={getHistoryName}
-                        onSetActiveIndex={handleSetActiveIndex}
-                        onSelectHistory={handleSelectHistory}
-                        isFromHeader={isFromHeader}
-                        onClose={onClose}
-                    />
-                )}
-            </div>
-        </motion.div>
-    );
+                <div className="relative z-10 flex flex-col h-full min-h-0">
+                    {step === 'welcome' ? (
+                        <WelcomeScreen
+                            joinAdventureText={t('joinAdventure')}
+                            onJoinAdventure={() => setStep('select')}
+                        />
+                    ) : step === 'select' ? (
+                        <HistorySelectionScreen
+                            histories={agent.agents}
+                            loading={agent.loading}
+                            saving={agent.saving}
+                            activeIndex={activeIndex}
+                            direction={direction}
+                            selectText={t('select')}
+                            loadingText={t('loading')}
+                            noHistoriesText={t('noHistoriesAvailable')}
+                            getHistoryDisplayName={getHistoryName}
+                            onSetActiveIndex={handleSetActiveIndex}
+                            onSelectHistory={handleSelectHistory}
+                            isFromHeader={isFromHeader}
+                            onClose={onClose}
+                        />
+                    ) : (
+                        <MissionPathScreen
+                            chat={chat}
+                            onChooseHistory={goToHistorySelectionFromMissions}
+                            onMissionChosen={() => {
+                                trackEvent('onboarding_complete', {
+                                    variant: isFromHeader ? 'header' : 'default',
+                                    time_spent_sec: Math.max(
+                                        0,
+                                        Math.round((Date.now() - startTsRef.current) / 1000),
+                                    ),
+                                });
+                                onComplete();
+                            }}
+                            isFromHeader={isFromHeader}
+                            onClose={onClose}
+                        />
+                    )}
+                </div>
+            </motion.div>
+        );
 
-    return (
-        <>
-            {typeof document !== 'undefined'
-                ? createPortal(onboardingContent, document.body)
-                : null}
-            <AgentVideoModal
-                isOpen={showVideoModal}
-                video={selectedVideo}
-                onClose={handleVideoClose}
-            />
-        </>
-    );
-});
+        return (
+            <>
+                {typeof document !== 'undefined' ? createPortal(onboardingContent, document.body) : null}
+                <AgentVideoModal isOpen={showVideoModal} video={selectedVideo} onClose={handleVideoClose} />
+            </>
+        );
+    },
+);
 
 export default Onboarding;
-

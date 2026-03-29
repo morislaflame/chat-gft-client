@@ -47,6 +47,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
     sid: string,
     payGemsForSuggestionId: string | null,
     isArtifactAction: boolean,
+    isArtifactUse: boolean,
   ) => {
     if (payGemsForSuggestionId) {
       if (balance < PAYABLE_GEMS_COST) {
@@ -54,7 +55,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
         return;
       }
     }
-    if (isArtifactAction) {
+    if (isArtifactAction && !isArtifactUse) {
       trackEvent('artifact_action_click', { suggestion_id: sid });
     }
     onSelectSuggestion(suggestion, sid, payGemsForSuggestionId);
@@ -74,8 +75,8 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
         const sid = `s${suggestionIndex + 1}`;
         const meta = suggestionsMeta?.find((m) => m.id === sid);
         const isPayable = meta?.payable === true;
-        const isArtifactAction = meta?.artifact_action === true;
-        const isArtifactUse = meta?.artifact_action_type === 'USE';
+    const isArtifactAction = meta?.artifact_action === true;
+    const isArtifactUse = meta?.artifact_action_type === 'USE';
         const artifactAmount = meta?.artifact_amount ?? 1;
         const artifactCode = (meta?.artifact_code || '').trim();
         const isArtifactDisabled = Boolean(isArtifactUse && artifactCode && !hasArtifact(artifactCode, artifactAmount));
@@ -90,6 +91,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
               sid,
               isPayable ? sid : null,
               isArtifactAction,
+              isArtifactUse,
             )}
             className={[
               "rounded-lg px-2 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",

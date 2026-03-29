@@ -30,6 +30,13 @@ function bezier2(A: number, P: number, B: number, t: number): number {
 
 type FlyingGemCoords = { fromX: number; fromY: number; toX: number; toY: number } | null;
 
+type NextMissionRef = {
+  id: number;
+  title: string;
+  titleEn?: string | null;
+  orderIndex: number;
+} | null;
+
 const StageRewardModal: React.FC = observer(() => {
   const { chat, user } = useContext(Context) as IStoreContext;
   const { t } = useTranslate();
@@ -37,6 +44,7 @@ const StageRewardModal: React.FC = observer(() => {
   const isOpen = stageReward?.isOpen || false;
   const language = user.user?.language || 'ru';
   const gemSourceRef = useRef<HTMLDivElement>(null);
+  const pendingAfterGemFlight = useRef<NextMissionRef>(null);
   const [flyingGem, setFlyingGem] = useState<FlyingGemCoords>(null);
   const [fireworksPlaying, setFireworksPlaying] = useState(false);
 
@@ -53,15 +61,11 @@ const StageRewardModal: React.FC = observer(() => {
     chat.closeStageReward();
   };
 
-  const handleContinueClick = () => {
+  const startGemFlight = useCallback(() => {
     const sourceEl = gemSourceRef.current;
     const targetEl = document.querySelector('[data-gems-target]');
     if (!sourceEl || !targetEl) {
-      handleClose();
-      return;
-    }
-    if (stageReward?.rewardAmount != null) {
-      chat.setPendingGemsOnLand(stageReward.rewardAmount);
+      return false;
     }
     const fromRect = sourceEl.getBoundingClientRect();
     const toRect = targetEl.getBoundingClientRect();
@@ -71,7 +75,42 @@ const StageRewardModal: React.FC = observer(() => {
     const toY = toRect.top + toRect.height / 2;
     setFlyingGem({ fromX, fromY, toX, toY });
     setFireworksPlaying(true);
-    // Close modal immediately so drawer overlay (dark bg) is removed during fly
+    return true;
+  }, []);
+
+  const handleContinueClick = () => {
+    pendingAfterGemFlight.current = null;
+    const ra = stageReward?.rewardAmount;
+    if (ra != null && ra > 0) {
+      chat.setPendingGemsOnLand(ra);
+      const ok = startGemFlight();
+      if (!ok) {
+        handleClose();
+        return;
+      }
+      handleClose();
+      return;
+    }
+    handleClose();
+  };
+
+  const handleNextMissionClick = () => {
+    const nm = stageReward?.nextMission;
+    if (!nm) return;
+    const ra = stageReward?.rewardAmount;
+    if (ra != null && ra > 0) {
+      chat.setPendingGemsOnLand(ra);
+      pendingAfterGemFlight.current = nm;
+      const ok = startGemFlight();
+      if (!ok) {
+        void chat.startNextMissionAfterReward(nm);
+        handleClose();
+        return;
+      }
+      handleClose();
+      return;
+    }
+    void chat.startNextMissionAfterReward(nm);
     handleClose();
   };
 
@@ -80,13 +119,20 @@ const StageRewardModal: React.FC = observer(() => {
       document.dispatchEvent(new CustomEvent('gems-button-land'));
     }
     setFlyingGem(null);
+    const nm = pendingAfterGemFlight.current;
+    pendingAfterGemFlight.current = null;
+    if (nm) {
+      void chat.startNextMissionAfterReward(nm);
+    }
   };
 
   const onFireworksComplete = useCallback(() => {
     setFireworksPlaying(false);
   }, []);
 
-  // const missionNumberText = stageReward ? `${t('stageCompletedMissionPrefix')} ${stageReward.stageNumber}` : '';
+  const hasNextMission = !!(stageReward?.nextMission && stageReward.nextMission.id);
+  const showGems =
+    stageReward?.rewardAmount != null && Number(stageReward.rewardAmount) > 0;
 
   return (
     <>
@@ -102,22 +148,44 @@ const StageRewardModal: React.FC = observer(() => {
       headerIconContainerClassName="bg-user-message"
       footer={
         stageReward ? (
-          <Button
-            onClick={handleContinueClick}
-            variant="gradient"
-            size="lg"
-            className="w-full"
-            icon="fa-solid fa-check"
-          >
-            {t('continue')}
-          </Button>
+          <div className="flex flex-col gap-2 w-full">
+            {hasNextMission ? (
+              <Button
+                onClick={handleNextMissionClick}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                icon="fa-solid fa-arrow-right"
+              >
+                {t('nextMission')}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleContinueClick}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                icon="fa-solid fa-check"
+              >
+                {t('continue')}
+              </Button>
+            )}
+          </div>
         ) : null
       }
     >
       {stageReward ? (
-        <div className="px-4">
+        <div className="px-4 flex flex-col gap-4">
+          {stageReward.lastLlmReply ? (
+            <div>
+              <div className="max-h-36 overflow-y-auto rounded-lg bg-black/25 border border-white/10 px-3 py-2 text-sm text-gray-100 whitespace-pre-wrap hide-scroll">
+                {stageReward.lastLlmReply}
+              </div>
+            </div>
+          ) : null}
+
           {stageReward.rewardCase ? (
-            <div className="flex flex-col items-center gap-3 mb-3">
+            <div className="flex flex-col items-center gap-3">
               {(() => {
                 const c = stageReward.rewardCase;
                 const title = language === 'en' ? (c.nameEn || c.name) : c.name;
@@ -145,15 +213,19 @@ const StageRewardModal: React.FC = observer(() => {
             </div>
           ) : null}
 
-          <div
-            ref={gemSourceRef}
-            className="flex items-center justify-center gap-2"
-          >
-            <span className="text-4xl font-bold text-white">
-              +{stageReward.rewardAmount}
-            </span>
-            <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
-          </div>
+          {showGems ? (
+            <div
+              ref={gemSourceRef}
+              className="flex items-center justify-center gap-2"
+            >
+              <span className="text-4xl font-bold text-white">
+                +{stageReward.rewardAmount}
+              </span>
+              <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
+            </div>
+          ) : (
+            <div ref={gemSourceRef} className="h-1 w-1 opacity-0" aria-hidden />
+          )}
         </div>
       ) : null}
     </Modal>
@@ -258,4 +330,3 @@ const StageRewardModal: React.FC = observer(() => {
 });
 
 export default StageRewardModal;
-

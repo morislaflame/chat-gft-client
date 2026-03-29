@@ -17,7 +17,7 @@ export default class UserStore {
     serverErrorMessage = '';
     _language: 'ru' | 'en' = 'ru';
     _showOnboarding = false;
-    _onboardingInitialStep: 'welcome' | 'select' = 'welcome';
+    _onboardingInitialStep: 'welcome' | 'select' | 'missions' = 'welcome';
     _isHistorySelectionFromHeader = false;
 
     constructor() {
@@ -73,6 +73,12 @@ export default class UserStore {
         // Обновляем selectedHistoryName в объекте пользователя, если он существует
         if (this._user) {
             this._user = { ...this._user, selectedHistoryName: historyName };
+        }
+    }
+
+    setSelectedChatMissionId(missionId: number | null) {
+        if (this._user) {
+            this._user = { ...this._user, selectedChatMissionId: missionId };
         }
     }
 
@@ -353,13 +359,13 @@ export default class UserStore {
         this._showOnboarding = show;
     }
 
-    setOnboardingInitialStep(step: 'welcome' | 'select') {
+    setOnboardingInitialStep(step: 'welcome' | 'select' | 'missions') {
         this._onboardingInitialStep = step;
     }
 
     openHistorySelection() {
         runInAction(() => {
-            this._onboardingInitialStep = 'select';
+            this._onboardingInitialStep = 'missions';
             this._showOnboarding = true;
             this._isHistorySelectionFromHeader = true;
         });

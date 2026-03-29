@@ -6,6 +6,7 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import Button from '@/components/ui/button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
+import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -19,13 +20,22 @@ const ChatContainer: React.FC = observer(() => {
     const [inputValue, setInputValue] = useState('');
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
-    const [currentMissionVideo, setCurrentMissionVideo] = useState<{ video: MediaFile; mission: string | null } | null>(null);
+    const [currentMissionVideo, setCurrentMissionVideo] = useState<{
+        video: MediaFile;
+        mission: string | null;
+        beginReplay?: boolean;
+    } | null>(null);
     const [lastMissionCompleted, setLastMissionCompleted] = useState<{ mission: string; stage: number } | null>(null);
+    const [artifactUsePending, setArtifactUsePending] = useState<{
+        text: string;
+        suggestionId: string | null;
+        payGemsForSuggestionId: string | null;
+    } | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
 
-    // Загружаем историю только при монтировании или при изменении выбранной истории
+    // Загружаем историю при смене выбранной истории (смена миссии — через loadChatHistory в store)
     useEffect(() => {
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
@@ -41,6 +51,7 @@ const ChatContainer: React.FC = observer(() => {
         message: string,
         suggestionId?: string | null,
         payGemsForSuggestionId?: string | null,
+        beginReplay?: boolean,
     ): Promise<boolean> => {
         if (user.energy <= 0) {
             chat.setInsufficientEnergy(true);
@@ -52,6 +63,7 @@ const ChatContainer: React.FC = observer(() => {
             undefined,
             suggestionId ?? null,
             payGemsForSuggestionId ?? null,
+            beginReplay ? { beginReplay: true } : undefined,
         );
         // Проверяем, завершена ли миссия
         if (response && response.missionCompleted && response.mission) {
@@ -68,10 +80,16 @@ const ChatContainer: React.FC = observer(() => {
         const storyId = user.user?.selectedHistoryName || 'unknown';
         const mission = chat.missions.find((m) => m.orderIndex === orderIndex) || null;
         const missionId = mission?.id ?? null;
+        const progress = missionId != null ? chat.missionProgressFor(missionId) : null;
+        const beginReplay = progress?.status === 'completed';
 
         trackEvent('mission_start_click', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
         trackEvent('mission_start', { story_id: storyId, mission_id: missionId });
         if (missionId !== null) {
+            if (!chat.canSelectMission(missionId)) {
+                return;
+            }
+            chat.primeMissionThread(missionId);
             chat.setMissionStart(missionId);
         }
         chat.markMissionHasMessagesByOrder(orderIndex);
@@ -81,12 +99,12 @@ const ChatContainer: React.FC = observer(() => {
             trackEvent('mission_video_open', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
             setCurrentMissionVideo({
                 video: missionVideo,
-                mission: chat.mission
+                mission: chat.mission,
+                beginReplay,
             });
             setShowMissionVideoModal(true);
         } else {
-            console.log('No mission video found, sending start message directly');
-            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null);
+            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null, beginReplay);
         }
     };
 
@@ -95,7 +113,12 @@ const ChatContainer: React.FC = observer(() => {
         trackEvent('mission_video_close', { video_id: currentMissionVideo?.video?.id ?? null });
         setShowMissionVideoModal(false);
         if (currentMissionVideo) {
-            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null);
+            void handleSendMessage(
+                language === 'en' ? 'start' : 'старт',
+                null,
+                null,
+                currentMissionVideo.beginReplay === true,
+            );
             setCurrentMissionVideo(null);
         }
         // Очищаем lastMissionCompleted после показа видео новой миссии
@@ -139,6 +162,20 @@ const ChatContainer: React.FC = observer(() => {
     ) => {
         const trimmed = text.trim();
         if (!trimmed) return;
+
+        const sid = suggestionId ?? '';
+        const meta = chat.suggestionsMeta?.find((m) => m.id === sid);
+        if (
+            meta?.artifact_action === true &&
+            meta?.artifact_action_type === 'USE'
+        ) {
+            setArtifactUsePending({
+                text: trimmed,
+                suggestionId: sid || null,
+                payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+            });
+            return;
+        }
 
         trackEvent('chat_suggestion_click', {
             length: trimmed.length,
@@ -227,6 +264,32 @@ const ChatContainer: React.FC = observer(() => {
                 isOpen={showMissionVideoModal}
                 video={currentMissionVideo?.video || null}
                 onClose={handleMissionVideoClose}
+            />
+
+            <ArtifactUseConfirmModal
+                isOpen={artifactUsePending != null}
+                suggestionText={artifactUsePending?.text ?? ''}
+                willPayGems={Boolean(artifactUsePending?.payGemsForSuggestionId)}
+                onClose={() => setArtifactUsePending(null)}
+                onConfirm={() => {
+                    const p = artifactUsePending;
+                    setArtifactUsePending(null);
+                    if (!p) return;
+                    trackEvent('chat_suggestion_click', {
+                        length: p.text.length,
+                        payGems: !!p.payGemsForSuggestionId,
+                        artifact_use_confirmed: true,
+                    });
+                    void handleSendMessage(
+                        p.text,
+                        p.suggestionId,
+                        p.payGemsForSuggestionId,
+                    ).then((sent) => {
+                        if (sent) {
+                            hapticImpact('soft');
+                        }
+                    });
+                }}
             />
         </div>
     );

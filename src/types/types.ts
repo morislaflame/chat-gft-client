@@ -25,6 +25,8 @@ export interface UserArtifact {
 export interface UserInfo {
     id: number;
     username: string;
+    /** URL аватара Telegram (если отдаёт бэкенд) */
+    avatarUrl?: string | null;
     telegramId: number;
     balance: number;
     energy: number;
@@ -38,8 +40,35 @@ export interface UserInfo {
     referrals?: Referral[];
     lastBonuses?: Bonus[];
     selectedHistoryName?: string; // Выбранная история пользователя (по умолчанию "starwars")
+    /** Сохранённая на сервере выбранная миссия чата (missions.id) */
+    selectedChatMissionId?: number | null;
     /** Артефакты в инвентаре для выбранной истории: для проверки USE на фронте */
     artifacts?: UserArtifact[];
+}
+
+/** Элемент каталога артефактов на странице профиля */
+export interface ProfileInventoryArtifact {
+    id: number;
+    code: string;
+    name: string;
+    nameEn: string | null;
+    level: number;
+    description?: string | null;
+    descriptionEn?: string | null;
+    media: { id: number; url: string; mimeType: string } | null;
+}
+
+export interface ProfileInventoryStory {
+    historyName: string;
+    displayName: string | null;
+    displayNameEn: string | null;
+    artifacts: ProfileInventoryArtifact[];
+    /** code → количество в инвентаре для данной истории */
+    owned: Record<string, number>;
+}
+
+export interface ProfileInventoryResponse {
+    stories: ProfileInventoryStory[];
 }
 
 export interface Product {
@@ -93,6 +122,15 @@ export interface ApiMessageResponse {
     /** Актуальный инвентарь артефактов после ответа (для обновления UserStore) */
     artifacts?: Array<{ code: string; quantity: number }>;
     missionCompleted?: boolean;
+    /** Нет начисления наград (перепрохождение завершённой миссии) */
+    rewardsSuppressed?: boolean;
+    lastLlmReply?: string;
+    nextMission?: {
+        id: number;
+        title: string;
+        titleEn?: string | null;
+        orderIndex: number;
+    } | null;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
     stageReward?: {
@@ -146,8 +184,23 @@ export interface ApiMessageResponse {
         available_quantity?: number | null;
         missing_reason?: string | null;
         ui_label?: string | null;
+        /** С бэкенда при ACQUIRE — для модалки «получен артефакт» */
+        artifact_description?: string | null;
+        artifact_description_en?: string | null;
+        media?: { id: number; url: string; mimeType: string } | null;
     } | null;
     timestamp: string;
+}
+
+export interface MissionProgress {
+    missionId: number;
+    orderIndex: number;
+    status: 'locked' | 'in_progress' | 'completed';
+    mainStep?: number | null;
+    mainStepsTotal?: number | null;
+    beatsCompleted: number;
+    artifactsFound: number;
+    artifactsTotal: number;
 }
 
 export interface Mission {
@@ -159,14 +212,20 @@ export interface Mission {
     descriptionEn?: string | null;
     orderIndex: number;
     video?: MediaFile | null;
+    progress?: MissionProgress | null;
 }
 
 export interface ApiStatusResponse {
     stage: number;
     mission: string | null;
     status: string;
+    mainStep?: number | null;
+    mainStepsTotal?: number | null;
     agentId?: number | null;
     missions?: Mission[];
+    missionsProgress?: MissionProgress[];
+    /** С сервера: последняя сохранённая миссия чата */
+    selectedChatMissionId?: number | null;
 }
 
 export interface ApiHistoryItem {
@@ -180,7 +239,7 @@ export interface ApiHistoryItem {
 
 export interface StageRewardData {
     stageNumber: number;
-    rewardAmount: number;
+    rewardAmount: number | null;
     rewardCaseId?: number | null;
     rewardCase?: {
         id: number;
@@ -191,6 +250,13 @@ export interface StageRewardData {
         mediaFile?: { id: number; url: string; mimeType: string } | null;
     } | null;
     isOpen: boolean;
+    lastLlmReply?: string | null;
+    nextMission?: {
+        id: number;
+        title: string;
+        titleEn?: string | null;
+        orderIndex: number;
+    } | null;
 }
 
 export interface StepRewardData {

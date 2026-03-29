@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { publicRoutes, privateRoutes } from '@/router/routes';
-import { MAIN_ROUTE } from '@/utils/consts';
+import { MAIN_ROUTE, PROFILE_ROUTE } from '@/utils/consts';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 
 const AppRouter = () => {
@@ -9,6 +9,7 @@ const AppRouter = () => {
 
     return (
         <Routes>
+            <Route path="/store" element={<Navigate to={PROFILE_ROUTE} replace />} />
             {/* Публичные маршруты доступны всем */}
             {publicRoutes.map(({ path, Component }) => (
                 <Route key={path} path={path} element={<Component />} />

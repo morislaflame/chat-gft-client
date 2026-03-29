@@ -24,20 +24,36 @@ export const sendMessage = async (
     message: string,
     suggestionId?: string | null,
     payGemsForSuggestionId?: string | null,
+    missionId?: number | null,
+    beginReplay?: boolean,
 ): Promise<ApiMessageResponse> => {
-    const { data } = await $authHost.post('api/message/', {
+    const body: Record<string, unknown> = {
         message,
         suggestionId: suggestionId ?? null,
         payGemsForSuggestionId: payGemsForSuggestionId ?? null,
-    });
+    };
+    if (missionId != null && Number.isFinite(missionId)) {
+        body.missionId = missionId;
+    }
+    if (beginReplay) {
+        body.beginReplay = true;
+    }
+    const { data } = await $authHost.post('api/message/', body);
     return data;
 };
 
-export const getChatHistory = async (limit?: number, cursor?: number | null): Promise<ApiHistoryResponse> => {
-    const params: { limit?: number; cursor?: number } = {};
+export const getChatHistory = async (
+    limit?: number,
+    cursor?: number | null,
+    missionId?: number | null,
+): Promise<ApiHistoryResponse> => {
+    const params: { limit?: number; cursor?: number; missionId?: number } = {};
     if (limit !== undefined) params.limit = limit;
     if (cursor !== undefined && cursor !== null) params.cursor = cursor;
-    
+    if (missionId != null && Number.isFinite(missionId)) {
+        params.missionId = missionId;
+    }
+
     const { data } = await $authHost.get('api/message/history', { params });
     return data;
 };

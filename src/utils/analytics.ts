@@ -48,7 +48,7 @@ function getDefaultLabelRu(eventName: string, params: Record<string, unknown>): 
     tab === "quests" ? "Квесты" :
     tab === "friends" ? "Друзья" :
     tab === "rewards" ? "Лут" :
-    tab === "store" ? "Магазин" :
+    tab === "profile" ? "Профиль" :
     tab ? tab : null;
 
   switch (eventName) {

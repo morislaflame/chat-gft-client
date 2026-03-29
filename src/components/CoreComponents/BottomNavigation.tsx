@@ -1,11 +1,11 @@
 import { useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
-import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, PROFILE_ROUTE } from '@/utils/consts';
 import { trackEvent } from '@/utils/analytics';
 import { motion } from 'motion/react';
 
-type TabType = 'chat' | 'quests' | 'friends' | 'rewards' | 'store';
+type TabType = 'chat' | 'quests' | 'friends' | 'rewards' | 'profile';
 
 const BottomNavigation = () => {
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ const BottomNavigation = () => {
             'quests': QUESTS_ROUTE,
             'friends': FRIENDS_ROUTE,
             'rewards': REWARDS_ROUTE,
-            'store': STORE_ROUTE,
+            'profile': PROFILE_ROUTE,
         };
         
         const target = routeMap[tab];
@@ -47,8 +47,8 @@ const BottomNavigation = () => {
                 return 'friends';
             case REWARDS_ROUTE:
                 return 'rewards';
-            case STORE_ROUTE:
-                return 'store';
+            case PROFILE_ROUTE:
+                return 'profile';
             default:
                 return 'chat'; // По умолчанию активен чат
         }

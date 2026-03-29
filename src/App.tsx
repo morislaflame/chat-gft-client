@@ -9,6 +9,7 @@ import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import StepRewardModal from "./components/modals/StepRewardModal";
+import ArtifactAcquireModal from "./components/modals/ArtifactAcquireModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 import InsufficientGemsModal from "./components/modals/InsufficientGemsModal";
 import Onboarding from './components/modals/Onboarding';
@@ -58,6 +59,7 @@ const AppContent = () => {
       <DailyRewardModal />
       <StageRewardModal />
       <StepRewardModal />
+      <ArtifactAcquireModal />
       <InsufficientEnergyModal />
       <InsufficientGemsModal />
     </>

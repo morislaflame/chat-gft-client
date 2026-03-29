@@ -1,6 +1,15 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
-import type { Message, ApiMessageResponse, ApiHistoryItem, StageRewardData, StepRewardData, MediaFile, Mission } from "@/types/types";
+import { setSelectedChatMission } from "@/http/userAPI";
+import type {
+    Message,
+    ApiMessageResponse,
+    StageRewardData,
+    StepRewardData,
+    MediaFile,
+    Mission,
+    MissionProgress,
+} from "@/types/types";
 import type UserStore from "@/store/UserStore";
 import type CaseStore from "@/store/CaseStore";
 import type { UserCase } from "@/http/caseAPI";
@@ -15,6 +24,8 @@ export default class ChatStore {
     _suggestionsMeta: ApiMessageResponse['suggestionsMeta'] = undefined;
     _artifactAction: ApiMessageResponse['artifactAction'] = null;
     _loading = false;
+    /** Миссия, для которой сейчас грузится история (список миссий / смена треда) */
+    _switchingMissionId: number | null = null;
     _error = '';
     _userStore: UserStore | null = null;
     _caseStore: CaseStore | null = null;
@@ -29,7 +40,10 @@ export default class ChatStore {
     _avatar: MediaFile | null = null;
     _background: MediaFile | null = null;
     _missions: Mission[] = [];
+    _missionsProgress: MissionProgress[] = [];
+    _selectedMissionId: number | null = null;
     _loadedHistoryName: string | null = null; // Отслеживаем для какой истории загружены данные
+    _loadedMissionId: number | null = null;
     private _trackedMissionViews = new Set<string>();
     private _missionStartTs = new Map<number, number>();
 
@@ -193,9 +207,187 @@ export default class ChatStore {
         this._missions = missions;
     }
 
+    setMissionsProgress(progress: MissionProgress[]) {
+        this._missionsProgress = progress ?? [];
+    }
+
+    setSelectedMissionId(id: number | null) {
+        this._selectedMissionId = id;
+    }
+
+    /** Сохранить выбранную миссию на сервере (без текста; для восстановления после перезагрузки). */
+    private async persistSelectedChatMission(missionId: number | null) {
+        try {
+            await setSelectedChatMission(missionId);
+            if (this._userStore) {
+                this._userStore.setSelectedChatMissionId(missionId);
+            }
+        } catch (e) {
+            console.error("persistSelectedChatMission failed:", e);
+        }
+    }
+
+    /**
+     * Миссия по умолчанию для загрузки чата после /status.
+     * Сначала текущая in_progress — иначе после прохождения миссии 1 снова выбиралась бы миссия 1
+     * (canSelectMission true и для completed — реплей).
+     */
+    pickDefaultMissionId(missions: Mission[], mp: MissionProgress[]): number | null {
+        if (!missions.length) return null;
+        const sorted = [...missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const inProgress = [...mp]
+            .filter((p) => p.status === "in_progress")
+            .sort((a, b) => a.orderIndex - b.orderIndex)[0];
+        if (inProgress && sorted.some((m) => m.id === inProgress.missionId)) {
+            return inProgress.missionId;
+        }
+        for (const m of sorted) {
+            if (this.canSelectMission(m.id)) {
+                return m.id;
+            }
+        }
+        return sorted[0]?.id ?? null;
+    }
+
+    /**
+     * После награды за этап: без status/history и без авто-«старт».
+     * Локально синхронизируем цепочку прогресса (без запросов), затем плашка с кнопкой «Старт».
+     */
+    startNextMissionAfterReward(nm: {
+        id: number;
+        title: string;
+        titleEn?: string | null;
+        orderIndex: number;
+    }) {
+        this.closeStageReward();
+        this.setSelectedMissionId(nm.id);
+        this.patchMissionsProgressForUnlockedNext(nm.id);
+        this.primeMissionThread(nm.id);
+    }
+
+    /** Без GET /status: все миссии до следующей — completed, следующая — in_progress (для canSelectMission и «Старт»). */
+    private patchMissionsProgressForUnlockedNext(nextMissionId: number) {
+        const target = this._missions.find((x) => x.id === nextMissionId);
+        if (!target) return;
+        const sorted = [...this._missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const list = [...this._missionsProgress];
+        const upsert = (mission: Mission, status: MissionProgress["status"]) => {
+            const idx = list.findIndex((p) => p.missionId === mission.id);
+            const base: MissionProgress = {
+                missionId: mission.id,
+                orderIndex: mission.orderIndex,
+                status,
+                beatsCompleted: idx >= 0 ? list[idx].beatsCompleted : 0,
+                artifactsFound: idx >= 0 ? list[idx].artifactsFound : 0,
+                artifactsTotal: idx >= 0 ? list[idx].artifactsTotal : 0,
+            };
+            if (idx >= 0) {
+                list[idx] = { ...list[idx], ...base };
+            } else {
+                list.push(base);
+            }
+        };
+        for (const m of sorted) {
+            if (m.orderIndex < target.orderIndex) {
+                upsert(m, "completed");
+            }
+        }
+        upsert(target, "in_progress");
+        this.setMissionsProgress(list);
+    }
+
+    /** Прогресс миссии: из /status (missionsProgress) или вложенного mission.progress. */
+    missionProgressFor(missionId: number): MissionProgress | null {
+        const fromList = this._missionsProgress.find((x) => x.missionId === missionId);
+        if (fromList) return fromList;
+        const m = this._missions.find((x) => x.id === missionId);
+        return m?.progress ?? null;
+    }
+
+    /**
+     * Можно открыть чат по миссии (аналог assertMissionChatAllowed на бэке).
+     * Раньше UI считал locked только при p?.status === 'locked'; если progress не пришёл — все миссии были «открыты».
+     */
+    canSelectMission(missionId: number): boolean {
+        const sorted = [...this._missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const m = sorted.find((x) => x.id === missionId);
+        if (!m) return false;
+
+        const order = sorted.findIndex((x) => x.id === missionId);
+        for (let i = 0; i < order; i++) {
+            const pp = this.missionProgressFor(sorted[i].id);
+            if (!pp || pp.status !== "completed") {
+                return false;
+            }
+        }
+
+        const p = this.missionProgressFor(missionId);
+        if (!p) {
+            return order === 0;
+        }
+        if (p.status === "locked") {
+            return false;
+        }
+        return p.status === "in_progress" || p.status === "completed";
+    }
+
+    /**
+     * Смена активной миссии из списка.
+     * Завершённая — только стартовая плашка (реплей начнётся по кнопке «Старт» на карточке).
+     * Идущая — подгружаем историю треда.
+     */
+    async selectMissionForChat(missionId: number) {
+        if (!this.canSelectMission(missionId)) return;
+        this.setSwitchingMissionId(missionId);
+        try {
+            this.setSelectedMissionId(missionId);
+            await this.persistSelectedChatMission(missionId);
+            await this.loadChatHistory(true);
+        } finally {
+            this.setSwitchingMissionId(null);
+        }
+    }
+
+    setSwitchingMissionId(id: number | null) {
+        this._switchingMissionId = id;
+    }
+
     setMissionStart(missionId: number) {
         if (!missionId) return;
         this._missionStartTs.set(missionId, Date.now());
+    }
+
+    /**
+     * Локально переключить чат на миссию без запросов status/history (перед «старт» с карточки).
+     */
+    primeMissionThread(missionId: number) {
+        const m = this._missions.find((x) => x.id === missionId);
+        if (!m || !this.canSelectMission(missionId)) return;
+        this.setSelectedMissionId(missionId);
+        this.setMessages([
+            {
+                id: `mission-${m.id}-${Date.now()}`,
+                text: "",
+                isUser: false,
+                timestamp: new Date(),
+                isMissionCard: true,
+                mission: {
+                    id: m.id,
+                    title: m.title,
+                    titleEn: m.titleEn ?? null,
+                    description: m.description,
+                    descriptionEn: m.descriptionEn ?? null,
+                    orderIndex: m.orderIndex,
+                },
+                missionId: m.id,
+                missionHasMessages: false,
+            },
+        ]);
+        this.setSuggestions([]);
+        this.setSuggestionsMeta(undefined);
+        this._loadedHistoryName = this._userStore?.user?.selectedHistoryName ?? null;
+        this._loadedMissionId = missionId;
+        void this.persistSelectedChatMission(missionId);
     }
 
     getMissionVideoByOrderIndex(orderIndex: number): MediaFile | null {
@@ -215,6 +407,9 @@ export default class ChatStore {
         this._artifactAction = action ?? null;
     }
 
+    closeArtifactAcquireModal() {
+        this._artifactAction = null;
+    }
 
     setLoading(loading: boolean) {
         this._loading = loading;
@@ -229,6 +424,7 @@ export default class ChatStore {
         onEnergyUpdate?: (newEnergy: number) => void,
         suggestionId?: string | null,
         payGemsForSuggestionId?: string | null,
+        extra?: { beginReplay?: boolean },
     ) {
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -240,7 +436,8 @@ export default class ChatStore {
         this.addMessage(userMessage);
         this.setIsTyping(true);
         this.setError('');
-        
+        this.setArtifactAction(null);
+
         // Очищаем suggestions при отправке нового сообщения
         this.setSuggestions([]);
         this.setSuggestionsMeta(undefined);
@@ -272,6 +469,8 @@ export default class ChatStore {
                 messageText,
                 suggestionId ?? null,
                 payGemsForSuggestionId ?? null,
+                this._selectedMissionId,
+                extra?.beginReplay === true,
             );
             const aiMessage: Message = {
                 id: (Date.now() + 1).toString(),
@@ -310,17 +509,18 @@ export default class ChatStore {
             // Обновляем баланс пользователя из ответа сервера ПОСЛЕ обновления прогресса
             // чтобы правильно вычислить награду
             if (response.newBalance !== undefined && this._userStore) {
-                // Если миссия завершена (missionCompleted), вычисляем сумму награды
-                if (response.missionCompleted) {
+                if (response.missionCompleted && response.rewardsSuppressed) {
+                    this._userStore.setBalance(response.newBalance);
+                } else if (response.missionCompleted && !response.rewardsSuppressed) {
                     const stageNumber =
                         response.stageReward?.stageNumber ??
                         response.completedStage ??
                         (response.stage ? (response.stage === 1 ? 3 : response.stage - 1) : 1);
 
                     const rewardAmount =
-                        typeof response.stageReward?.rewardAmount === 'number'
+                        typeof response.stageReward?.rewardAmount === "number"
                             ? response.stageReward.rewardAmount
-                            : (response.newBalance - previousBalance);
+                            : response.newBalance - previousBalance;
 
                     this.setStageReward({
                         stageNumber,
@@ -328,82 +528,93 @@ export default class ChatStore {
                         rewardCaseId: response.stageReward?.rewardCaseId ?? null,
                         rewardCase: response.stageReward?.rewardCase ?? null,
                         isOpen: true,
+                        lastLlmReply: response.lastLlmReply ?? response.response ?? null,
+                        nextMission: response.nextMission ?? null,
                     });
 
-                    // If a case was granted, push it into CaseStore immediately (like purchase flow).
                     const createdCases: Array<
-                        Pick<UserCase, 'id' | 'userId' | 'caseId' | 'isOpened'> & Partial<UserCase>
+                        Pick<UserCase, "id" | "userId" | "caseId" | "isOpened"> & Partial<UserCase>
                     > = (response.userCases?.length
                         ? response.userCases
                         : response.userCase
-                            ? [response.userCase]
-                            : []
+                          ? [response.userCase]
+                          : []
                     ).map((uc) => ({
                         id: uc.id,
                         userId: uc.userId,
                         caseId: uc.caseId,
                         isOpened: uc.isOpened,
-                        // ensure required fields for UserCase exist for downstream consumers
                         resultType: uc.resultType ?? null,
                         resultRewardId: uc.resultRewardId ?? null,
                         createdAt: uc.createdAt,
                         updatedAt: uc.updatedAt,
                     }));
                     if (createdCases.length > 0 && this._caseStore) {
-                        // The message endpoint returns a subset of fields; normalize inside CaseStore.
                         this._caseStore.addUnopenedCasesFromExternal(createdCases);
                     } else if (response.stageReward?.rewardCaseId && this._caseStore) {
-                        // Fallback for older backend responses: refetch unopened cases.
                         void this._caseStore.fetchMyUnopenedCases(true);
                     }
 
-                    trackEvent('mission_completed', {
+                    trackEvent("mission_completed", {
                         stage: stageNumber,
                         reward_amount: rewardAmount,
                         selected_history: storyId,
                     });
 
                     const missionEntity = this._missions.find((m) => m.orderIndex === stageNumber) || null;
-                    const missionId = missionEntity?.id ?? null;
-                    const startedAt = missionId ? (this._missionStartTs.get(missionId) || null) : null;
-                    const timeToCompleteSec =
-                        startedAt ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : null;
+                    const missionIdTracked = missionEntity?.id ?? null;
+                    const startedAt = missionIdTracked
+                        ? this._missionStartTs.get(missionIdTracked) || null
+                        : null;
+                    const timeToCompleteSec = startedAt
+                        ? Math.max(0, Math.round((Date.now() - startedAt) / 1000))
+                        : null;
 
-                    trackEvent('mission_complete', {
+                    trackEvent("mission_complete", {
                         story_id: storyId,
-                        mission_id: missionId,
+                        mission_id: missionIdTracked,
                         attempts: 1,
                         time_to_complete_sec: timeToCompleteSec,
                     });
 
-                    trackEvent('scene_complete', {
+                    trackEvent("scene_complete", {
                         story_id: storyId,
-                        scene_id: missionId,
-                        completion_type: 'mission',
+                        scene_id: missionIdTracked,
+                        completion_type: "mission",
                     });
 
-                    trackEvent('gems_earned', {
+                    trackEvent("gems_earned", {
                         amount: rewardAmount,
                         balance_after: response.newBalance,
-                        source: 'mission',
+                        source: "mission",
                     });
-                } else if (response.stepReward && typeof response.stepReward.rewardGems === 'number') {
-                    // Correct step in mission 1 or 2: show step reward modal; balance updates on "Continue" (gems land)
+                } else if (
+                    !response.rewardsSuppressed &&
+                    response.stepReward &&
+                    typeof response.stepReward.rewardGems === "number"
+                ) {
                     this.setStepReward({
                         stepNumber: response.stepReward.stepNumber,
                         rewardGems: response.stepReward.rewardGems,
                         isOpen: true,
                     });
                 }
-                
-                if (!response.stepReward || response.missionCompleted) {
+
+                if (
+                    !response.stepReward ||
+                    (response.missionCompleted && !response.rewardsSuppressed)
+                ) {
                     this._userStore.setBalance(response.newBalance);
                 }
             }
 
-            // Если миссия завершена — добавляем карточку следующей миссии (если она есть и ещё не показана)
-            if (response.missionCompleted && this._missions.length > 0) {
-                const completedOrder = response.completedStage || (response.stage ? response.stage - 1 : 0);
+            if (
+                response.missionCompleted &&
+                !response.rewardsSuppressed &&
+                this._missions.length > 0
+            ) {
+                const completedOrder =
+                    response.completedStage || (response.stage ? response.stage - 1 : 0);
                 const nextOrder = completedOrder + 1;
                 const nextMission = this._missions.find((m) => m.orderIndex === nextOrder);
                 if (nextMission) {
@@ -422,6 +633,10 @@ export default class ChatStore {
             // Обновляем артефакты юзера из ответа (актуально после подбора/использования)
             if (response.artifacts && Array.isArray(response.artifacts) && this._userStore) {
                 this._userStore.setArtifacts(response.artifacts);
+            }
+
+            if (response.artifactAction?.action === 'ACQUIRE') {
+                this.setArtifactAction(response.artifactAction);
             }
 
             // Возвращаем response для использования в компонентах
@@ -458,122 +673,93 @@ export default class ChatStore {
 
     async loadChatHistory(forceReload = false) {
         const currentHistoryName = this._userStore?.user?.selectedHistoryName || null;
-        if (!forceReload && currentHistoryName === this._loadedHistoryName && this._messages.length > 0 && !this._loading) {
+        if (
+            !forceReload &&
+            currentHistoryName === this._loadedHistoryName &&
+            this._loadedMissionId === this._selectedMissionId &&
+            this._messages.length > 0 &&
+            !this._loading
+        ) {
             return;
         }
 
         this.setLoading(true);
-        this.setError('');
+        this.setError("");
 
         try {
-            // Грузим историю и статус параллельно
-            const [historyResponse, statusData] = await Promise.all([
-                getChatHistory(),
-                getStatus(),
-            ]);
-            const historyData = historyResponse.history ?? [];
-
+            const statusData = await getStatus();
             this.setCurrentStage(statusData.stage);
             this.setMission(statusData.mission);
             if (statusData.missions) {
                 this.setMissions(statusData.missions);
             }
+            const mp = statusData.missionsProgress ?? [];
+            this.setMissionsProgress(mp);
 
-            const missions = (statusData.missions || []).slice().sort((a, b) => a.orderIndex - b.orderIndex);
-            const missionsMap = new Map<number, Mission>();
-            missions.forEach((m) => missionsMap.set(m.id, m));
+            if (this._userStore?.user) {
+                this._userStore.setSelectedChatMissionId(statusData.selectedChatMissionId ?? null);
+            }
 
-            // Разбиваем сообщения по missionId (историю сортируем по времени ASC)
-            const missionMessages = new Map<number, ApiHistoryItem[]>();
+            const missions = (statusData.missions || [])
+                .slice()
+                .sort((a, b) => a.orderIndex - b.orderIndex);
+
+            let mid =
+                this._selectedMissionId ??
+                statusData.selectedChatMissionId ??
+                null;
+            const valid = mid != null && missions.some((m) => m.id === mid);
+            if (!valid) {
+                mid = this.pickDefaultMissionId(missions, mp);
+                this.setSelectedMissionId(mid);
+            } else {
+                this.setSelectedMissionId(mid);
+            }
+
+            const historyResponse = await getChatHistory(undefined, null, mid ?? undefined);
+            const historyData = historyResponse.history ?? [];
+
             const orderedHistory = historyData.slice().sort((a, b) => {
                 return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
             });
-            // Определяем минимальный orderIndex миссий, по которым есть сообщения в текущей порции истории
-            let minOrderWithMessages: number | null = null;
-            orderedHistory.forEach((item) => {
-                const mid = item.missionId ?? null;
-                if (mid !== null && missionsMap.has(mid)) {
-                    const mOrder = missionsMap.get(mid)!.orderIndex;
-                    if (minOrderWithMessages === null || mOrder < minOrderWithMessages) {
-                        minOrderWithMessages = mOrder;
-                    }
-                    if (!missionMessages.has(mid)) missionMessages.set(mid, []);
-                    missionMessages.get(mid)!.push(item);
-                }
-            });
 
+            const selected = mid != null ? missions.find((m) => m.id === mid) : null;
             const messages: Message[] = [];
 
-            // Добавляем миссии по порядку, показываем следующую только если предыдущая завершена или уже есть её сообщения
-            let prevMissionCompleted = false;
-
-            missions.forEach((mission, idx) => {
-                const msgs = missionMessages.get(mission.id) || [];
-                const hasMessages = msgs.length > 0;
-                const lastMsg = hasMessages ? msgs[msgs.length - 1] : null;
-                const missionCompleted = !!(lastMsg && lastMsg.isCongratulation);
-
-                // Правила отображения:
-                // - первая миссия всегда
-                // - иначе, если есть сообщения по миссии (значит пользователь дошёл)
-                // - или если предыдущая завершена
-                // Если истории нет совсем — показываем первую миссию
-                const noMessagesAtAll = orderedHistory.length === 0;
-
-                // Если сообщения есть только для более поздних миссий (из-за пагинации),
-                // не показываем карточки старых миссий без сообщений.
-                const isBeforeFirstLoaded =
-                    minOrderWithMessages !== null && mission.orderIndex < minOrderWithMessages;
-
-                const canShow =
-                    (noMessagesAtAll && idx === 0) || // свежий пользователь
-                    hasMessages ||
-                    prevMissionCompleted ||
-                    (!isBeforeFirstLoaded && idx === 0);
-
-                if (!canShow) {
-                    prevMissionCompleted = missionCompleted;
-                    return;
-                }
-
-                // Карточка миссии
+            if (selected) {
+                const hasMessages = orderedHistory.length > 0;
                 messages.push({
-                    id: `mission-${mission.id}`,
-                    text: '',
+                    id: `mission-${selected.id}`,
+                    text: "",
                     isUser: false,
-                    timestamp: new Date(msgs[0]?.createdAt || Date.now()),
+                    timestamp: new Date(orderedHistory[0]?.createdAt || Date.now()),
                     isMissionCard: true,
                     mission: {
-                        id: mission.id,
-                        title: mission.title,
-                        titleEn: mission.titleEn ?? null,
-                        description: mission.description,
-                        descriptionEn: mission.descriptionEn ?? null,
-                        orderIndex: mission.orderIndex,
+                        id: selected.id,
+                        title: selected.title,
+                        titleEn: selected.titleEn ?? null,
+                        description: selected.description,
+                        descriptionEn: selected.descriptionEn ?? null,
+                        orderIndex: selected.orderIndex,
                     },
-                    missionId: mission.id,
+                    missionId: selected.id,
                     missionHasMessages: hasMessages,
                 });
 
-                // Сообщения по миссии
-                msgs.forEach((item) => {
+                orderedHistory.forEach((item) => {
                     messages.push({
                         id: `${item.id}`,
                         text: item.content,
-                        isUser: item.role === 'user',
+                        isUser: item.role === "user",
                         timestamp: new Date(item.createdAt || Date.now()),
                         missionId: item.missionId ?? null,
                         isCongratulation: item.isCongratulation ?? false,
                     });
                 });
-
-                prevMissionCompleted = missionCompleted;
-            });
-
+            }
 
             this.setMessages(messages);
 
-            // Медиа агента
             if (historyResponse.video !== undefined) {
                 this.setVideo(historyResponse.video);
             }
@@ -584,7 +770,6 @@ export default class ChatStore {
                 this.setBackground(historyResponse.background);
             }
 
-            // Подсказки для последнего сообщения — с сервера (LastChatResponseMeta)
             if (historyResponse.lastSuggestions?.length) {
                 this.setSuggestions(historyResponse.lastSuggestions);
             } else {
@@ -597,9 +782,10 @@ export default class ChatStore {
             }
 
             this._loadedHistoryName = currentHistoryName;
+            this._loadedMissionId = mid;
         } catch (error) {
-            console.error('Error loading chat history:', error);
-            this.setError('Error loading chat history');
+            console.error("Error loading chat history:", error);
+            this.setError("Error loading chat history");
         } finally {
             this.setLoading(false);
         }
@@ -610,10 +796,10 @@ export default class ChatStore {
             const statusData = await getStatus();
             this.setCurrentStage(statusData.stage);
             this.setMission(statusData.mission);
-            // Сохраняем миссии с видео
             if (statusData.missions) {
                 this.setMissions(statusData.missions);
             }
+            this.setMissionsProgress(statusData.missionsProgress ?? []);
         } catch (error) {
             console.error('Error loading status:', error);
             // Устанавливаем дефолтные значения при ошибке
@@ -628,7 +814,10 @@ export default class ChatStore {
         this.setMission(null);
         this.setSuggestions([]);
         this.setSuggestionsMeta(undefined);
-        this._loadedHistoryName = null; // Сбрасываем отслеживание загруженной истории
+        this._loadedHistoryName = null;
+        this._loadedMissionId = null;
+        this._selectedMissionId = null;
+        this._missionsProgress = [];
         this._trackedMissionViews.clear();
         this._missionStartTs.clear();
     }
@@ -664,6 +853,10 @@ export default class ChatStore {
 
     get loading() {
         return this._loading;
+    }
+
+    get switchingMissionId() {
+        return this._switchingMissionId;
     }
 
     get error() {
@@ -704,5 +897,13 @@ export default class ChatStore {
 
     get missions() {
         return this._missions;
+    }
+
+    get missionsProgress() {
+        return this._missionsProgress;
+    }
+
+    get selectedMissionId() {
+        return this._selectedMissionId;
     }
 }

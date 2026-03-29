@@ -1,6 +1,6 @@
 import { $authHost, $host } from "./index";
 import { jwtDecode } from "jwt-decode";
-import type { Reward } from '@/types/types';
+import type { Reward, ProfileInventoryResponse } from '@/types/types';
 
 export const telegramAuth = async (initData: string) => {
     const { data } = await $host.post('api/user/auth/telegram', { initData });
@@ -36,6 +36,11 @@ export const check = async () => {
 
 export const fetchMyInfo = async () => {
     const { data } = await $authHost.get('api/user/me');
+    return data;
+};
+
+export const getProfileInventory = async (): Promise<ProfileInventoryResponse> => {
+    const { data } = await $authHost.get('api/user/me/profile-inventory');
     return data;
 };
 
@@ -83,8 +88,17 @@ export const setOnboarding = async (completed: boolean): Promise<void> => {
     await $authHost.post('api/user/me/onboarding', { seen: completed });
 };
 
-export const setSelectedHistoryName = async (historyName: string): Promise<{ success: boolean; selectedHistoryName: string }> => {
+export const setSelectedHistoryName = async (
+    historyName: string,
+): Promise<{ success: boolean; selectedHistoryName: string; selectedChatMissionId?: number | null }> => {
     const { data } = await $authHost.post('api/user/me/history', { historyName });
+    return data;
+};
+
+export const setSelectedChatMission = async (
+    missionId: number | null,
+): Promise<{ success: boolean; selectedChatMissionId: number | null }> => {
+    const { data } = await $authHost.post('api/user/me/selected-chat-mission', { missionId });
     return data;
 };
 

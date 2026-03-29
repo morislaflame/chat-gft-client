@@ -120,6 +120,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                         <span className="font-bold text-lg">4.</span>
                         <p className="text-white/90 text-md">{t('gameExplanation4')}</p>
                     </div>
+                    <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg">5.</span>
+                        <p className="text-white/90 text-md">{t('gameExplanation5')}</p>
+                    </div>
                 </div>
             </div>
 

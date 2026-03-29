@@ -7,7 +7,16 @@ import type { Message } from '@/types/types';
 interface MessageItemProps {
   message: Message;
   suggestions: string[];
-  suggestionsMeta?: Array<{ id: string; text: string; kind: 'core' | 'detour'; payable?: boolean; artifact_action?: boolean; artifact_code?: string }> | null;
+  suggestionsMeta?: Array<{
+    id: string;
+    text: string;
+    kind: 'core' | 'detour';
+    payable?: boolean;
+    artifact_action?: boolean;
+    artifact_code?: string;
+    artifact_action_type?: 'ACQUIRE' | 'USE';
+    artifact_amount?: number;
+  }> | null;
   showSuggestions: boolean;
   avatarUrl?: string;
   onSelectSuggestion: (text: string, suggestionId?: string | null, payGemsForSuggestionId?: string | null) => void;

@@ -362,6 +362,54 @@ type TranslationType = {
         ru: 'Gems тратятся в “Луте” — на подарки и коробки с шансом NFT',
         en: 'Gems are spent in “Rewards” — on gifts and boxes with a chance for an NFT'
     },
+    stageRewardLastReply: {
+        ru: 'Последний ответ',
+        en: 'Last reply'
+    },
+    nextMission: {
+        ru: 'Следующая миссия',
+        en: 'Next mission'
+    },
+    missionsList: {
+        ru: 'Миссии',
+        en: 'Missions'
+    },
+    missionsLoadingOrEmpty: {
+        ru: 'Загрузка миссий…',
+        en: 'Loading missions…'
+    },
+    backToMissions: {
+        ru: 'К миссиям',
+        en: 'Back to missions'
+    },
+    missionReplay: {
+        ru: 'Перепройти',
+        en: 'Replay'
+    },
+    missionLocked: {
+        ru: 'Недоступно',
+        en: 'Locked'
+    },
+    chooseStoryButton: {
+        ru: 'Выбрать историю',
+        en: 'Choose story'
+    },
+    missionsPickTitle: {
+        ru: 'Миссии',
+        en: 'Missions'
+    },
+    noMissionsForStory: {
+        ru: 'Для этой истории пока нет миссий',
+        en: 'No missions for this story yet'
+    },
+    missionBeatsShort: {
+        ru: 'Шаги',
+        en: 'Steps'
+    },
+    missionArtifactsShort: {
+        ru: 'Предметы',
+        en: 'Items'
+    },
     stepRewardTitle: {
         ru: 'Верный шаг!',
         en: 'Right step!'
@@ -635,6 +683,10 @@ type TranslationType = {
         ru: 'Энергию дают активные друзья и квесты',
         en: 'Active friends and quests give energy'
     },
+    gameExplanation5: {
+        ru: 'Ищите артефакты в миссиях и прокачивайте свой уровень!',
+        en: 'Find artifacts in missions and level up!'
+    },
     // Navigation
     chat: {
         ru: 'Чат',
@@ -651,6 +703,66 @@ type TranslationType = {
     store: {
         ru: 'Магазин',
         en: 'Store'
+    },
+    profile: {
+        ru: 'Профиль',
+        en: 'Profile'
+    },
+    profileCollections: {
+        ru: 'Коллекции',
+        en: 'Collections'
+    },
+    profileLoadError: {
+        ru: 'Не удалось загрузить профиль',
+        en: 'Could not load profile'
+    },
+    profileNoArtifactsInStory: {
+        ru: 'В этой истории пока нет артефактов в каталоге',
+        en: 'No catalog artifacts for this story yet'
+    },
+    profileNoName: {
+        ru: 'Игрок',
+        en: 'Player'
+    },
+    gemsModalEnergyPacks: {
+        ru: 'Энергия за звёзды',
+        en: 'Energy for Stars'
+    },
+    artifactCode: {
+        ru: 'Код',
+        en: 'Code'
+    },
+    artifactNoDescription: {
+        ru: 'Описание пока не добавлено.',
+        en: 'No description yet.'
+    },
+    artifactInInventory: {
+        ru: 'В инвентаре',
+        en: 'In inventory'
+    },
+    artifactNotInInventory: {
+        ru: 'Ещё не получено в этой истории',
+        en: 'Not obtained in this story yet'
+    },
+    artifactAcquiredTitle: {
+        ru: 'Артефакт получен',
+        en: 'Artifact acquired'
+    },
+    artifactAcquiredContinue: {
+        ru: 'Продолжить',
+        en: 'Continue'
+    },
+    artifactUseConfirmTitle: {
+        ru: 'Применить артефакт?',
+        en: 'Use this artifact?'
+    },
+    artifactUseConfirmAction: {
+        ru: 'Отправить',
+        en: 'Send'
+    },
+    artifactUseConfirmPayNote: {
+        ru: 'Будет списано',
+        en: 'This will cost'
     },
     loot: {
         ru: 'Лут',

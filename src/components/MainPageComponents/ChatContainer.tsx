@@ -3,21 +3,21 @@ import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import Button from '@/components/ui/button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
+import ArtifactUnavailableModal from '../modals/ArtifactUnavailableModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
 import GemsCaseProgress from './chat/GemsCaseProgress';
+import MissionStepGoalBar from './chat/MissionStepGoalBar';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
-    const { t, language } = useTranslate();
+    const { language } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
-    const [inputValue, setInputValue] = useState('');
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
     const [currentMissionVideo, setCurrentMissionVideo] = useState<{
@@ -31,6 +31,7 @@ const ChatContainer: React.FC = observer(() => {
         suggestionId: string | null;
         payGemsForSuggestionId: string | null;
     } | null>(null);
+    const [showArtifactUnavailableModal, setShowArtifactUnavailableModal] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
@@ -142,19 +143,6 @@ const ChatContainer: React.FC = observer(() => {
         }
     }, [chat.loading, chat.messages.length]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmed = inputValue.trim();
-        if (!trimmed) return;
-
-        handleSendMessage(trimmed, null, null).then((sent) => {
-            if (sent) {
-                hapticImpact('soft');
-                setInputValue('');
-            }
-        });
-    };
-
     const handleSelectSuggestion = (
         text: string,
         suggestionId?: string | null,
@@ -224,27 +212,13 @@ const ChatContainer: React.FC = observer(() => {
                 <div className="flex-1 px-4 pb-[150px]">
                     <ChatMessages
                         onStartMission={handleStartMission}
+                        onArtifactDisabledClick={() => setShowArtifactUnavailableModal(true)}
                         onSelectSuggestion={handleSelectSuggestion}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
+                        <MissionStepGoalBar />
                         <GemsCaseProgress />
-                        <form onSubmit={handleSubmit} className="flex space-x-2">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                placeholder={t('greeting')}
-                                className="flex-1 backdrop-blur-sm btn-default-silver-border-transparent rounded-full border border-primary-600 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
-                            />
-                            <Button
-                                type="submit"
-                                variant="gradient"
-                                size="icon"
-                                icon="fas fa-paper-plane"
-                                className="shrink-0 h-10 w-10"
-                            />
-                        </form>
                     </div>
                 </div>
             </div>
@@ -290,6 +264,11 @@ const ChatContainer: React.FC = observer(() => {
                         }
                     });
                 }}
+            />
+
+            <ArtifactUnavailableModal
+                isOpen={showArtifactUnavailableModal}
+                onClose={() => setShowArtifactUnavailableModal(false)}
             />
         </div>
     );

@@ -72,6 +72,8 @@ const Modal: React.FC<ModalProps> = ({
 
   const hasHeader = !!(title || description || headerIcon || (!hideCloseButton && !closeDisabled) || (!hideCloseButton && closeDisabled));
 
+  const isMobile = document.body.classList.contains('telegram-mobile');
+
   return (
     <Drawer
       open={isOpen}
@@ -166,7 +168,7 @@ const Modal: React.FC<ModalProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.4 }}
             >
-              <DrawerFooter className={cn('pb-4', footerClassName)}>
+              <DrawerFooter className={cn('pb-4', isMobile ? 'pb-8 pt-4' : 'pb-4 pt-4', footerClassName)}>
                 {footer}
               </DrawerFooter>
             </motion.div>

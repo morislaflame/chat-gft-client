@@ -260,8 +260,8 @@ type TranslationType = {
         en: 'Spend them in “Loot” on gifts and unique NFTs'
     },
     energyInfoTitle: {
-        ru: 'Зачем нужна энергия',
-        en: 'What energy is for'
+        ru: 'Пополнить энергию',
+        en: 'Top up energy'
     },
     energyInfoP1: {
         ru: 'Энергия — это действия в игре',
@@ -763,6 +763,26 @@ type TranslationType = {
     artifactUseConfirmPayNote: {
         ru: 'Будет списано',
         en: 'This will cost'
+    },
+    artifactMissingTitle: {
+        ru: 'Артефакт не найден',
+        en: 'Artifact not found'
+    },
+    artifactMissingDescription: {
+        ru: 'Чтобы применить этот предмет, сначала нужно найти его в миссии.',
+        en: 'To use this option, you first need to find the required artifact in the mission.'
+    },
+    artifactMissingHintLine1: {
+        ru: 'Исследуйте локации внимательнее: артефакты спрятаны в окружении и деталях.',
+        en: 'Explore locations carefully: artifacts are hidden in the environment and details.'
+    },
+    artifactMissingHintLine2: {
+        ru: 'Пробуйте разные шаги и развилки — нужный предмет может открываться не сразу.',
+        en: 'Try different steps and branches — the required item may not appear immediately.'
+    },
+    artifactMissingHintLine3: {
+        ru: 'Продвигайтесь по миссии, и артефакты будут встречаться чаще.',
+        en: 'Progress through the mission and artifacts will appear more often.'
     },
     loot: {
         ru: 'Лут',

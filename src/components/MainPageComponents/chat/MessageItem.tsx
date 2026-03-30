@@ -19,6 +19,7 @@ interface MessageItemProps {
   }> | null;
   showSuggestions: boolean;
   avatarUrl?: string;
+  onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (text: string, suggestionId?: string | null, payGemsForSuggestionId?: string | null) => void;
 }
 
@@ -28,6 +29,7 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
   suggestionsMeta,
   showSuggestions,
   avatarUrl,
+  onArtifactDisabledClick,
   onSelectSuggestion,
 }) => (
   <div className="message-container flex items-start mb-6">
@@ -67,6 +69,7 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
                 <SuggestionButtons
                   suggestions={suggestions}
                   suggestionsMeta={suggestionsMeta ?? undefined}
+                  onArtifactDisabledClick={onArtifactDisabledClick}
                   onSelectSuggestion={onSelectSuggestion}
                 />
               )}

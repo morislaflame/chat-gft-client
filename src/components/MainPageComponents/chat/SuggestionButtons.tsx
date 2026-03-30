@@ -20,6 +20,7 @@ interface SuggestionMeta {
 interface SuggestionButtonsProps {
   suggestions: string[];
   suggestionsMeta?: SuggestionMeta[] | null;
+  onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (
     text: string,
     suggestionId?: string | null,
@@ -30,6 +31,7 @@ interface SuggestionButtonsProps {
 const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
   suggestions,
   suggestionsMeta,
+  onArtifactDisabledClick,
   onSelectSuggestion,
 }) => {
   const { user, chat } = useContext(Context) as IStoreContext;
@@ -48,7 +50,12 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
     payGemsForSuggestionId: string | null,
     isArtifactAction: boolean,
     isArtifactUse: boolean,
+    isArtifactDisabled: boolean,
   ) => {
+    if (isArtifactDisabled) {
+      onArtifactDisabledClick?.();
+      return;
+    }
     if (payGemsForSuggestionId) {
       if (balance < PAYABLE_GEMS_COST) {
         chat.setInsufficientGems(true);
@@ -85,13 +92,14 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
             key={suggestionIndex}
             variant="default"
             size="sm"
-            disabled={isArtifactDisabled}
+            aria-disabled={isArtifactDisabled}
             onClick={() => handleSuggestionClick(
               suggestion,
               sid,
               isPayable ? sid : null,
               isArtifactAction,
               isArtifactUse,
+              isArtifactDisabled,
             )}
             className={[
               "rounded-lg px-2 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",

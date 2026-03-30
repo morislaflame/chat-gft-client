@@ -168,6 +168,8 @@ export interface ApiMessageResponse {
         updatedAt?: string;
     }>;
     mission?: string;
+    /** Текущий основной шаг миссии (beat) после ответа LLM — для UI целей */
+    mainStep?: number | null;
     /** Reward for completing key beats in mission 1 or 2 */
     stepReward?: {
         stepNumber: number;
@@ -203,6 +205,12 @@ export interface MissionProgress {
     artifactsTotal: number;
 }
 
+/** Цели ключевых шагов для UI (индекс = main_step / beat из LLM, с 1) */
+export interface MissionUiStepGoals {
+    version?: number;
+    steps: Array<{ index: number; text: string }>;
+}
+
 export interface Mission {
     id: number;
     agentId: number;
@@ -212,6 +220,8 @@ export interface Mission {
     descriptionEn?: string | null;
     orderIndex: number;
     video?: MediaFile | null;
+    /** С бэкенда (getStatus): цели шагов для нижней плашки в чате */
+    uiStepGoals?: MissionUiStepGoals | null;
     progress?: MissionProgress | null;
 }
 

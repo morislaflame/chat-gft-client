@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
 import { setSelectedChatMission } from "@/http/userAPI";
 import type {
@@ -209,6 +209,53 @@ export default class ChatStore {
 
     setMissionsProgress(progress: MissionProgress[]) {
         this._missionsProgress = progress ?? [];
+    }
+
+    /**
+     * После /message: синхронизирует main_step текущей миссии для плашки целей шагов.
+     */
+    patchMissionMainStep(missionId: number, mainStep: number | null) {
+        const m = this._missions.find((x) => x.id === missionId);
+        if (!m) return;
+
+        this._missions = this._missions.map((x) => {
+            if (x.id !== missionId) return x;
+            const p = x.progress;
+            if (!p) {
+                return {
+                    ...x,
+                    progress: {
+                        missionId,
+                        orderIndex: x.orderIndex,
+                        status: "in_progress" as const,
+                        mainStep,
+                        mainStepsTotal: null,
+                        beatsCompleted: 0,
+                        artifactsFound: 0,
+                        artifactsTotal: 0,
+                    },
+                };
+            }
+            return { ...x, progress: { ...p, mainStep } };
+        });
+
+        const list = [...this._missionsProgress];
+        const idx = list.findIndex((p) => p.missionId === missionId);
+        if (idx >= 0) {
+            list[idx] = { ...list[idx], mainStep };
+        } else {
+            list.push({
+                missionId,
+                orderIndex: m.orderIndex,
+                status: "in_progress",
+                mainStep,
+                mainStepsTotal: null,
+                beatsCompleted: 0,
+                artifactsFound: 0,
+                artifactsTotal: 0,
+            });
+        }
+        this._missionsProgress = list;
     }
 
     setSelectedMissionId(id: number | null) {
@@ -637,6 +684,10 @@ export default class ChatStore {
 
             if (response.artifactAction?.action === 'ACQUIRE') {
                 this.setArtifactAction(response.artifactAction);
+            }
+
+            if (response.mainStep !== undefined && this._selectedMissionId != null) {
+                this.patchMissionMainStep(this._selectedMissionId, response.mainStep ?? null);
             }
 
             // Возвращаем response для использования в компонентах

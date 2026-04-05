@@ -104,7 +104,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
             className={[
               "rounded-lg px-2 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",
               isPayable && "ring-1 ring-amber-400/60 bg-amber-500/20",
-              isArtifactAction && "ring-1 ring-yellow-400/70 bg-yellow-500/15",
+              isArtifactAction && "ring-1 ring-amber-400/40 bg-gradient-to-br from-amber-500/20 at-transparent to-transparent",
               isArtifactDisabled && "opacity-60 cursor-not-allowed",
             ].filter(Boolean).join(" ")}
           >
@@ -116,7 +116,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
               </span>
             )}
             {isArtifactAction && !isPayable && (
-              <span className={`shrink-0 ${isArtifactDisabled ? 'text-zinc-500' : 'text-yellow-400/90'}`}>
+              <span className={`shrink-0 ${isArtifactDisabled ? 'text-zinc-500' : 'text-amber-400/90'}`}>
                 <i className="fa-solid fa-wand-magic-sparkles text-sm" />
               </span>
             )}

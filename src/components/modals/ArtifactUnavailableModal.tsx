@@ -27,20 +27,19 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
         closeAriaLabel={t('close')}
         title={t('artifactMissingTitle')}
         description={
-          <span className="text-zinc-300">{t('artifactMissingDescription')}</span>
+          t('artifactMissingDescription')
         }
-        headerIcon={<i className="fa-solid fa-map-location-dot text-yellow-400 text-2xl" />}
-        headerIconContainerClassName="bg-yellow-500/15 border border-yellow-500/35"
+        // headerIcon={<i className="fa-solid fa-wand-magic-sparkles text-amber-400 text-2xl" />}
+        // headerIconContainerClassName="bg-amber-500/15 border border-amber-500/35"
         footer={
           <Button onClick={handleClose} variant="gradient" size="lg" className="w-full">
             {t('gotIt')}
           </Button>
         }
       >
-        <div className="text-zinc-400 text-sm leading-relaxed space-y-2 list-disc pl-5">
+        <div className="text-zinc-200 text-md leading-relaxed space-y-2 list-disc pl-2">
           <p>- {t('artifactMissingHintLine1')}</p>
           <p>- {t('artifactMissingHintLine2')}</p>
-          <p>- {t('artifactMissingHintLine3')}</p>
         </div>
       </Modal>
     );

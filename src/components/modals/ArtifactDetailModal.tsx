@@ -31,7 +31,11 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
         const isImage = Boolean(previewUrl && previewMime.startsWith('image/'));
         const isOwned = ownedQty > 0;
         const descriptionTrimmed = description.trim();
-        const modalDescription = descriptionTrimmed ? descriptionTrimmed : undefined;
+        const modalDescription = isOwned
+            ? descriptionTrimmed
+                ? descriptionTrimmed
+                : undefined
+            : t('artifactLockedMissionSubtitle');
 
         return (
             <Modal
@@ -40,34 +44,68 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 closeOnOverlayClick={true}
                 title={title}
                 description={modalDescription}
-                headerIcon={<i className="fa-solid fa-gem text-white text-2xl" />}
-                headerIconContainerClassName="bg-gradient-to-br from-amber-600 to-amber-900 border border-amber-500/30"
+                // headerIcon={<i className="fa-solid fa-gem text-white text-2xl" />}
+                // headerIconContainerClassName="bg-gradient-to-br from-amber-600 to-amber-900 border border-amber-500/30"
                 closeAriaLabel={t('close')}
                 contentClassName="max-h-[min(55vh,420px)] overflow-y-auto"
             >
                 {artifact ? (
-                    <div className="flex flex-col gap-4 px-1">
+                    <div className="flex flex-col gap-4 px-1 pb-4">
                         <div className="flex justify-center">
-                            <div className="w-44 h-44 flex items-center justify-center rounded-xl bg-primary-800/60 border border-primary-600/40 overflow-hidden">
+                            <div className="relative w-44 h-44 flex items-center justify-center rounded-xl bg-primary-800/60 border border-primary-600/40 overflow-hidden">
                                 {isImage ? (
-                                    <img
-                                        src={previewUrl}
-                                        alt=""
-                                        className={`max-w-full max-h-full object-contain ${isOwned ? '' : 'brightness-0'}`}
-                                    />
+                                    <>
+                                        <img
+                                            src={previewUrl}
+                                            alt=""
+                                            className={`max-w-full max-h-full object-contain ${
+                                                isOwned ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
+                                            }`}
+                                        />
+                                        {!isOwned && (
+                                            <>
+                                                <div
+                                                    className="absolute inset-0 bg-zinc-500/25 pointer-events-none"
+                                                    aria-hidden
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
+                                                        <i className="fa-solid fa-lock text-2xl" />
+                                                    </span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </>
                                 ) : (
-                                    <i
-                                        className={`fa-solid fa-gem text-6xl ${isOwned ? 'text-amber-400/90' : 'text-zinc-600'}`}
-                                    />
+                                    <div className="relative flex h-full w-full items-center justify-center">
+                                        <i
+                                            className={`fa-solid fa-gem text-6xl ${
+                                                isOwned ? 'text-amber-400/90' : 'text-zinc-600 opacity-80 grayscale'
+                                            }`}
+                                        />
+                                        {!isOwned && (
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
+                                                    <i className="fa-solid fa-lock text-2xl" />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        {!descriptionTrimmed ? (
+                        {isOwned && !descriptionTrimmed ? (
                             <p className="text-zinc-500 text-sm italic text-center">{t('artifactNoDescription')}</p>
                         ) : null}
 
-                        <div
+                        {!isOwned ? (
+                            <p className="text-zinc-300 text-sm text-center leading-relaxed">
+                                {t('artifactLockedMissionBody')}
+                            </p>
+                        ) : null}
+
+                        {/* <div
                             className={`text-center text-xs font-medium rounded-lg py-2 px-3 border ${
                                 isOwned
                                     ? 'text-amber-300 bg-amber-500/10 border-amber-500/25'
@@ -81,7 +119,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                             ) : (
                                 t('artifactNotInInventory')
                             )}
-                        </div>
+                        </div> */}
                     </div>
                 ) : null}
             </Modal>

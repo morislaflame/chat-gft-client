@@ -5,7 +5,22 @@ import MissionCard from '@/components/MainPageComponents/chat/MissionCard';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type ChatStore from '@/store/ChatStore';
-import type { MissionProgress } from '@/types/types';
+import type { Mission, MissionProgress } from '@/types/types';
+
+interface LevelGroup {
+    level: number;
+    missions: Mission[];
+}
+
+function buildLevelGroups(sorted: Mission[]): LevelGroup[] {
+    const byLevel = new Map<number, Mission[]>();
+    for (const m of sorted) {
+        const lvl = m.level ?? 1;
+        if (!byLevel.has(lvl)) byLevel.set(lvl, []);
+        byLevel.get(lvl)!.push(m);
+    }
+    return [...byLevel.entries()].sort(([a], [b]) => a - b).map(([level, missions]) => ({ level, missions }));
+}
 
 type MissionPathScreenProps = {
     chat: ChatStore;
@@ -17,18 +32,39 @@ type MissionPathScreenProps = {
 
 const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
     ({ chat, onChooseHistory, onMissionChosen, isFromHeader = false, onClose }) => {
-        const { t } = useTranslate();
         const { hapticImpact } = useHapticFeedback();
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLCanvasElement>(null);
         const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+        const { t } = useTranslate();
         const sorted = [...chat.missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const levelGroups = buildLevelGroups(sorted);
+
+        // Determine which levels are accessible (previous level fully completed)
+        const levelAccessible = new Map<number, boolean>();
+        for (let i = 0; i < levelGroups.length; i++) {
+            if (i === 0) {
+                levelAccessible.set(levelGroups[i].level, true);
+                continue;
+            }
+            const prevGroup = levelGroups[i - 1];
+            const allDone = prevGroup.missions.every((m) => {
+                const p = chat.missionsProgress.find((x) => x.missionId === m.id);
+                return p?.status === 'completed';
+            });
+            levelAccessible.set(levelGroups[i].level, allDone);
+        }
+
+        // Flat list of visible (accessible) missions for canvas path
+        const visibleMissions = levelGroups
+            .filter((g) => levelAccessible.get(g.level))
+            .flatMap((g) => g.missions);
 
         const redrawPath = useCallback(() => {
             const canvas = canvasRef.current;
             const container = containerRef.current;
-            if (!canvas || !container || sorted.length < 2) return;
+            if (!canvas || !container || visibleMissions.length < 2) return;
 
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
@@ -103,7 +139,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             buildWindingPath();
             ctx.stroke();
             ctx.setLineDash([]);
-        }, [sorted.length]);
+        }, [visibleMissions.length]);
 
         useLayoutEffect(() => {
             redrawPath();
@@ -141,8 +177,8 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                         onClick={handleChooseHistory}
                         className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex items-center gap-1.5 max-w-[min(56%,240px)] text-left text-sm font-medium text-zinc-200 hover:text-white pl-1 pr-2 py-2 rounded-lg hover:bg-white/10 transition-colors"
                     >
-                        <i className="fas fa-arrow-left text-xs opacity-90 shrink-0" aria-hidden />
-                        <span className="leading-tight truncate">{t('selectHistory')}</span>
+                        <i className="fas fa-arrow-left text-xl shrink-0" aria-hidden />
+                        {/* <span className="leading-tight truncate">{t('selectHistory')}</span> */}
                     </button>
                     <motion.h2
                         initial={{ opacity: 0 }}
@@ -173,36 +209,83 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                                 className="absolute inset-0 w-full h-full pointer-events-none z-0"
                                 aria-hidden
                             />
-                            {sorted.map((m, idx) => {
-                                const p: MissionProgress | undefined =
-                                    chat.missionsProgress.find((x) => x.missionId === m.id) ||
-                                    m.progress ||
-                                    undefined;
-                                const locked = !chat.canSelectMission(m.id);
-                                const completed = p?.status === 'completed';
-                                const isSelected = chat.selectedMissionId === m.id;
-                                const isLoadingMission = chat.switchingMissionId === m.id;
+                            {(() => {
+                                let missionIdx = 0;
+                                return levelGroups.map((group) => {
+                                    const accessible = levelAccessible.get(group.level) ?? false;
+                                    return (
+                                        <React.Fragment key={group.level}>
+                                            {/* Level banner */}
+                                            <div className="relative z-10 w-full flex items-center gap-3 px-4 mb-6">
+                                                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-zinc-700/60" />
+                                                <div
+                                                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border transition-colors ${
+                                                        accessible
+                                                            ? 'bg-user-message'
+                                                            : 'border-zinc-700/60 text-zinc-500 bg-zinc-800/60'
+                                                    }`}
+                                                >
+                                                    {!accessible && (
+                                                        <i className="fa-solid fa-lock text-[9px]" />
+                                                    )}
+                                                    {t('missionLevel')} {group.level}
+                                                </div>
+                                                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-zinc-700/60" />
+                                            </div>
 
-                                return (
-                                    <div
-                                        key={m.id}
-                                        ref={(el) => {
-                                            cardRefs.current[idx] = el;
-                                        }}
-                                        className="relative z-10 w-full flex justify-center mb-10 last:mb-4"
-                                    >
-                                        <MissionCard
-                                            mode="picker"
-                                            mission={m}
-                                            locked={locked}
-                                            completed={completed}
-                                            isSelected={isSelected}
-                                            isLoading={isLoadingMission}
-                                            onSelect={() => void handleMissionClick(m.id)}
-                                        />
-                                    </div>
-                                );
-                            })}
+                                            {/* Mission cards — hidden if level locked */}
+                                            {accessible ? (
+                                                group.missions.map((m) => {
+                                                    const idx = missionIdx++;
+                                                    const p: MissionProgress | undefined =
+                                                        chat.missionsProgress.find((x) => x.missionId === m.id) ||
+                                                        m.progress ||
+                                                        undefined;
+                                                    const locked = !chat.canSelectMission(m.id);
+                                                    const completed = p?.status === 'completed';
+                                                    const isSelected = chat.selectedMissionId === m.id;
+                                                    const isLoadingMission = chat.switchingMissionId === m.id;
+                                                    return (
+                                                        <div
+                                                            key={m.id}
+                                                            ref={(el) => {
+                                                                cardRefs.current[idx] = el;
+                                                            }}
+                                                            className="relative z-10 w-full flex justify-center mb-10 last:mb-4"
+                                                        >
+                                                            <MissionCard
+                                                                mode="picker"
+                                                                mission={m}
+                                                                locked={locked}
+                                                                completed={completed}
+                                                                isSelected={isSelected}
+                                                                isLoading={isLoadingMission}
+                                                                onSelect={() => void handleMissionClick(m.id)}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                /* Locked level placeholder */
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    className="relative z-10 w-full flex justify-center mb-10"
+                                                >
+                                                    <div className="max-w-md w-full mx-4 rounded-xl border border-zinc-700/50 bg-zinc-900/60 px-4 py-3 flex items-center gap-3">
+                                                        <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
+                                                            <i className="fa-solid fa-lock text-zinc-500" />
+                                                        </div>
+                                                        <p className="text-xs text-zinc-500 leading-snug">
+                                                            {t('missionLevelLocked')}
+                                                        </p>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                });
+                            })()}
                         </div>
                     )}
                 </div>

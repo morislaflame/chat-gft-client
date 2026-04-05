@@ -219,6 +219,8 @@ export interface Mission {
     description?: string | null;
     descriptionEn?: string | null;
     orderIndex: number;
+    /** Уровень миссии — к какому уровню принадлежит миссия (совпадает с уровнем артефактов) */
+    level?: number;
     video?: MediaFile | null;
     /** С бэкенда (getStatus): цели шагов для нижней плашки в чате */
     uiStepGoals?: MissionUiStepGoals | null;

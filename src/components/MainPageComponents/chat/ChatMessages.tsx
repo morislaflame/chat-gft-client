@@ -9,6 +9,7 @@ import type { RefObject } from 'react';
 
 interface ChatMessagesProps {
   onStartMission: (orderIndex: number) => void;
+  onOpenArtifactsExplainer?: () => void;
   onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (
     text: string,
@@ -20,6 +21,7 @@ interface ChatMessagesProps {
 
 const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   onStartMission,
+  onOpenArtifactsExplainer,
   onArtifactDisabledClick,
   onSelectSuggestion,
   messageEndRef,
@@ -52,6 +54,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
               key={message.id}
               message={message}
               onStartMission={onStartMission}
+              onOpenArtifactsExplainer={onOpenArtifactsExplainer}
             />
           );
         }

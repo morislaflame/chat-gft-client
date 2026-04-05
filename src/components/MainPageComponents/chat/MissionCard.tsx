@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { motion } from 'motion/react';
 import Button from '@/components/ui/button';
+import { PressableRippleSurface } from '@/components/ui/pressable-ripple-surface';
 import { cn } from '@/lib/utils';
 import { useTranslate } from '@/utils/useTranslate';
 import type { Message } from '@/types/types';
@@ -10,6 +11,8 @@ type MissionCardChatProps = {
     mode?: 'chat';
     message: Message;
     onStartMission: (orderIndex: number) => void;
+    /** Клик по названию и описанию — модалка про артефакты (в т.ч. после старта миссии) */
+    onOpenArtifactsExplainer?: () => void;
 };
 
 type MissionCardPickerProps = {
@@ -89,7 +92,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
         );
     }
 
-    const { message, onStartMission } = props;
+    const { message, onStartMission, onOpenArtifactsExplainer } = props;
     if (!message.mission) return null;
 
     const missionTitle =
@@ -101,6 +104,20 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
             ? (message.mission.descriptionEn ?? message.mission.description)
             : message.mission.description;
 
+    const titleAndDescription = (
+        <>
+            <div className="flex flex-col gap-1 mb-1">
+                <span className="text-sm font-semibold ">
+                    {t('mission')} {message.mission.orderIndex}
+                </span>
+                <span className="font-bold text-user-message-gradient text-lg italic">{missionTitle}</span>
+            </div>
+            {missionDescription ? (
+                <div className="text-sm text-gray-300 mt-1">{missionDescription}</div>
+            ) : null}
+        </>
+    );
+
     return (
         <div className="flex justify-center mb-6">
             <motion.div
@@ -108,14 +125,17 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="btn-default-silver-border rounded-xl px-4 py-3 inline-block max-w-md w-full"
             >
-                <div className="flex flex-col gap-1 mb-1">
-                    <span className="text-sm font-semibold ">
-                        {t('mission')} {message.mission.orderIndex}
-                    </span>
-                    <span className="font-bold text-user-message-gradient text-lg italic">{missionTitle}</span>
-                </div>
-                {missionDescription && (
-                    <div className="text-sm text-gray-300 mt-1">{missionDescription}</div>
+                {onOpenArtifactsExplainer ? (
+                    <PressableRippleSurface
+                        type="button"
+                        onClick={onOpenArtifactsExplainer}
+                        rippleClassName="bg-white/35"
+                        className="w-full rounded-lg border-0 bg-transparent p-0 text-left -mx-1 px-1 -mt-0.5 pt-0.5 hover:bg-white/[0.06]"
+                    >
+                        {titleAndDescription}
+                    </PressableRippleSurface>
+                ) : (
+                    titleAndDescription
                 )}
                 {!message.missionHasMessages && (
                     <div className="mt-3">

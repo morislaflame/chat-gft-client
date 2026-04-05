@@ -7,6 +7,7 @@ import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
 import ArtifactUnavailableModal from '../modals/ArtifactUnavailableModal';
+import ArtifactsExplainerModal from '../modals/ArtifactsExplainerModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -32,6 +33,7 @@ const ChatContainer: React.FC = observer(() => {
         payGemsForSuggestionId: string | null;
     } | null>(null);
     const [showArtifactUnavailableModal, setShowArtifactUnavailableModal] = useState(false);
+    const [artifactsExplainerOpen, setArtifactsExplainerOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
@@ -209,15 +211,24 @@ const ChatContainer: React.FC = observer(() => {
                 ref={chatContainerRef}
                 className="flex-1 flex flex-col min-h-0 h-full w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
             >
-                <div className="flex-1 px-4 pb-[150px]">
+                <div className="flex-1 px-4 pb-[164px]">
                     <ChatMessages
                         onStartMission={handleStartMission}
+                        onOpenArtifactsExplainer={() => {
+                            hapticImpact('soft');
+                            setArtifactsExplainerOpen(true);
+                        }}
                         onArtifactDisabledClick={() => setShowArtifactUnavailableModal(true)}
                         onSelectSuggestion={handleSelectSuggestion}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
-                        <MissionStepGoalBar />
+                        <MissionStepGoalBar
+                            onGoalBarClick={() => {
+                                hapticImpact('soft');
+                                setArtifactsExplainerOpen(true);
+                            }}
+                        />
                         <GemsCaseProgress />
                     </div>
                 </div>
@@ -269,6 +280,11 @@ const ChatContainer: React.FC = observer(() => {
             <ArtifactUnavailableModal
                 isOpen={showArtifactUnavailableModal}
                 onClose={() => setShowArtifactUnavailableModal(false)}
+            />
+
+            <ArtifactsExplainerModal
+                isOpen={artifactsExplainerOpen}
+                onClose={() => setArtifactsExplainerOpen(false)}
             />
         </div>
     );

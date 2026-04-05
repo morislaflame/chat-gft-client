@@ -3,13 +3,22 @@ import { observer } from 'mobx-react-lite';
 import { AnimatePresence, motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
+import { useTranslate } from '@/utils/useTranslate';
+import { PressableRippleSurface } from '@/components/ui/pressable-ripple-surface';
+import { cn } from '@/lib/utils';
+
+export type MissionStepGoalBarProps = {
+    /** Открыть модалку с объяснением про артефакты (клик по плашке «Цель») */
+    onGoalBarClick?: () => void;
+};
 
 /**
  * Нижняя плашка: одна цель текущего ключевого шага (main_step) с чекбоксом.
  * При увеличении main_step после ответа — короткая анимация «галочка» на завершённом шаге, затем текст следующего.
  */
-const MissionStepGoalBar: React.FC = observer(() => {
+const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoalBarClick }) => {
     const { chat } = useContext(Context) as IStoreContext;
+    const { t } = useTranslate();
     const mid = chat.selectedMissionId;
     const mission = mid != null ? chat.missions.find((m) => m.id === mid) : null;
     const progress = mid != null ? chat.missionProgressFor(mid) : null;
@@ -68,9 +77,27 @@ const MissionStepGoalBar: React.FC = observer(() => {
         return null;
     }
 
+    const barShellClass =
+        'rounded-xl border border-white/15 bg-black/40 backdrop-blur-md px-3 py-2.5 shadow-lg';
+
+    const wrapBar = (children: React.ReactNode) =>
+        onGoalBarClick ? (
+            <PressableRippleSurface
+                type="button"
+                onClick={() => onGoalBarClick()}
+                aria-label={t('missionGoalBarOpenExplainerAria')}
+                rippleClassName="bg-white/35"
+                className={cn(barShellClass, 'w-full text-left hover:bg-black/50')}
+            >
+                {children}
+            </PressableRippleSurface>
+        ) : (
+            <div className={barShellClass}>{children}</div>
+        );
+
     if (celebrate) {
-        return (
-            <div className="rounded-xl border border-white/15 bg-black/40 backdrop-blur-md px-3 py-2.5 shadow-lg">
+        return wrapBar(
+            <>
                 <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -105,7 +132,7 @@ const MissionStepGoalBar: React.FC = observer(() => {
                         <p className="min-w-0 flex-1 py-0.5 text-sm leading-snug text-zinc-100">{celebrate.text}</p>
                     </motion.div>
                 </AnimatePresence>
-            </div>
+            </>,
         );
     }
 
@@ -113,8 +140,8 @@ const MissionStepGoalBar: React.FC = observer(() => {
         return null;
     }
 
-    return (
-        <div className="rounded-xl border border-white/15 bg-black/40 backdrop-blur-md px-3 py-2.5 shadow-lg">
+    return wrapBar(
+        <>
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
             <AnimatePresence mode="wait">
                 <motion.div
@@ -133,7 +160,7 @@ const MissionStepGoalBar: React.FC = observer(() => {
                     <p className="min-w-0 flex-1 py-0.5 text-sm leading-snug text-zinc-100">{currentText}</p>
                 </motion.div>
             </AnimatePresence>
-        </div>
+        </>,
     );
 });
 

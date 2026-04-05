@@ -4,11 +4,11 @@ import type { ProfileInventoryArtifact } from '@/types/types';
 
 function getGradientClassByLevel(level: number): string {
     const l = level || 1;
-    if (l < 15) return 'bg-gradient-to-b from-red-500 to-transparent';
-    if (l < 35) return 'bg-gradient-to-b from-pink-500 to-transparent';
-    if (l < 55) return 'bg-gradient-to-b from-purple-500 to-transparent';
-    if (l < 75) return 'bg-gradient-to-b from-blue-500 to-transparent';
-    return 'bg-gradient-to-b from-white to-transparent';
+    if (l < 15) return 'bg-gradient-to-br from-amber-500/80 to-transparent/50';
+    if (l < 35) return 'bg-gradient-to-br from-pink-500/30 at-pink-500/10 to-transparent/50';
+    if (l < 55) return 'bg-gradient-to-br from-purple-500/30 at-purple-500/10 to-transparent/50';
+    if (l < 75) return 'bg-gradient-to-br from-blue-500/30 at-blue-500/10 to-transparent/50';
+    return 'bg-gradient-to-br from-white/30 at-white/10 to-transparent/50';
 }
 
 export type ProfileArtifactCardProps = {
@@ -48,18 +48,42 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
             </div>
             <div className="mb-2 flex items-center justify-center relative w-24 h-24 z-[1]">
                 {isPreviewImage ? (
-                    <img
-                        src={previewUrl}
-                        alt=""
-                        className={`w-24 h-24 object-contain ${isOwned ? '' : 'brightness-0'}`}
-                    />
+                    <>
+                        <img
+                            src={previewUrl}
+                            alt=""
+                            className={`w-24 h-24 object-contain ${
+                                isOwned ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
+                            }`}
+                        />
+                        {!isOwned && (
+                            <>
+                                <div
+                                    className="absolute inset-0 rounded-lg bg-zinc-500/25 pointer-events-none"
+                                    aria-hidden
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
+                                        <i className="fa-solid fa-lock text-lg" />
+                                    </span>
+                                </div>
+                            </>
+                        )}
+                    </>
                 ) : (
-                    <div
-                        className={`w-24 h-24 rounded-lg bg-primary-700/50 flex items-center justify-center ${
-                            isOwned ? '' : 'opacity-40'
-                        }`}
-                    >
-                        <i className="fa-solid fa-gem text-2xl text-amber-300/90" />
+                    <div className="relative w-24 h-24 rounded-lg bg-primary-700/50 flex items-center justify-center">
+                        <i
+                            className={`fa-solid fa-gem text-2xl text-amber-300/90 ${
+                                isOwned ? '' : 'opacity-40 grayscale'
+                            }`}
+                        />
+                        {!isOwned && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
+                                    <i className="fa-solid fa-lock text-lg" />
+                                </span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -712,6 +712,66 @@ type TranslationType = {
         ru: 'Коллекции',
         en: 'Collections'
     },
+    profileLevel: {
+        ru: 'Уровень',
+        en: 'Level'
+    },
+    profileLevelComplete: {
+        ru: 'Завершён',
+        en: 'Complete'
+    },
+    profileLevelLocked: {
+        ru: 'Заблокирован',
+        en: 'Locked'
+    },
+    profileLevelUnlockHint: {
+        ru: 'Соберите все артефакты уровня {{level}}, чтобы открыть следующий',
+        en: 'Collect all Level {{level}} artifacts to unlock the next level'
+    },
+    missionLevel: {
+        ru: 'Уровень',
+        en: 'Level'
+    },
+    missionLevelLocked: {
+        ru: 'Уровень заблокирован — пройдите предыдущий',
+        en: 'Level locked — complete the previous level first'
+    },
+    profileNftArtifactsBannerTitle: {
+        ru: 'NFT-Артефакты',
+        en: 'NFT-Artifacts'
+    },
+    profileNftArtifactsBanner: {
+        ru: 'Артефакты скоро будут в качестве NFT! Успевай собирать их уже сейчас — проходи миссии!',
+        en: 'Artifacts will soon become NFTs! Start collecting now — play missions!'
+    },
+    artifactsExplainerTitle: {
+        ru: 'Сюжет',
+        en: 'Story'
+    },
+    artifactsExplainerSubtitle: {
+        ru: 'Проходите миссии и получайте награды!',
+        en: 'Complete missions and get rewards!'
+    },
+    artifactsExplainerP1BeforeGems: {
+        ru: 'В каждой миссии у вас есть главная задача, достигнув которой вы получите ',
+        en: 'Each mission has a main task, completing which you will receive '
+    },
+    artifactsExplainerP1AfterGems: {
+        ru: '.',
+        en: '.'
+    },
+    artifactsExplainerP2: {
+        ru: ' Но полезно не забывать и про артефакты: это ценные предметы, которые можно найти в сюжете',
+        en: 'But it is also useful to keep an eye out for artifacts: valuable items you can find in the story'
+    },
+    artifactsExplainerP3: {
+        ru: 'Собранные артефакты помогают быстрее проходить миссии и получать Гемы. Скоро они станут NFT — ими можно будет торговать с другими игроками',
+        en: 'Collected artifacts help you get through missions faster and earn Gems. Soon they will become NFTs you can trade with other players'
+    },
+    missionGoalBarOpenExplainerAria: {
+        ru: 'Подробнее об артефактах в миссиях',
+        en: 'Learn more about artifacts in missions'
+    },
     profileLoadError: {
         ru: 'Не удалось загрузить профиль',
         en: 'Could not load profile'
@@ -744,6 +804,14 @@ type TranslationType = {
         ru: 'Ещё не получено в этой истории',
         en: 'Not obtained in this story yet'
     },
+    artifactLockedMissionSubtitle: {
+        ru: 'Найдите в миссиях этой истории',
+        en: 'Find it in this story\'s missions'
+    },
+    artifactLockedMissionBody: {
+        ru: 'Такие артефакты можно получить, проходя миссии: исследуйте сюжет и локации — предметы встречаются по ходу прохождения.',
+        en: 'You can obtain artifacts like this by playing missions — explore the story and locations; items appear as you progress.'
+    },
     artifactAcquiredTitle: {
         ru: 'Артефакт получен',
         en: 'Artifact acquired'
@@ -769,20 +837,16 @@ type TranslationType = {
         en: 'Artifact not found'
     },
     artifactMissingDescription: {
-        ru: 'Чтобы применить этот предмет, сначала нужно найти его в миссии.',
-        en: 'To use this option, you first need to find the required artifact in the mission.'
+        ru: 'Ищите артефакты в миссиях',
+        en: 'Find artifacts in missions'
     },
     artifactMissingHintLine1: {
-        ru: 'Исследуйте локации внимательнее: артефакты спрятаны в окружении и деталях.',
-        en: 'Explore locations carefully: artifacts are hidden in the environment and details.'
+        ru: 'Исследуйте локации внимательнее: артефакты можно найти где угодно.',
+        en: 'Explore locations carefully: artifacts can be found anywhere.'
     },
     artifactMissingHintLine2: {
-        ru: 'Пробуйте разные шаги и развилки — нужный предмет может открываться не сразу.',
-        en: 'Try different steps and branches — the required item may not appear immediately.'
-    },
-    artifactMissingHintLine3: {
-        ru: 'Продвигайтесь по миссии, и артефакты будут встречаться чаще.',
-        en: 'Progress through the mission and artifacts will appear more often.'
+        ru: 'Пробуйте разные шаги и развилки — нужный артефакт может быть в другом месте.',
+        en: 'Try different steps and branches — the required artifact may be in another place.'
     },
     loot: {
         ru: 'Лут',

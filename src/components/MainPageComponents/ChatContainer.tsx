@@ -8,6 +8,7 @@ import MissionVideoModal from '../modals/MissionVideoModal';
 import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
 import ArtifactUnavailableModal from '../modals/ArtifactUnavailableModal';
 import ArtifactsExplainerModal from '../modals/ArtifactsExplainerModal';
+import CompanionArtifactModal from '../modals/CompanionArtifactModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -286,6 +287,8 @@ const ChatContainer: React.FC = observer(() => {
                 isOpen={artifactsExplainerOpen}
                 onClose={() => setArtifactsExplainerOpen(false)}
             />
+
+            <CompanionArtifactModal />
         </div>
     );
 });

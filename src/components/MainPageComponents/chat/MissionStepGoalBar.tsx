@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AnimatePresence, motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
@@ -30,7 +30,7 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
     const lastMidRef = useRef<number | null>(null);
     const prevMainStepRef = useRef<number | null>(null);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (mid == null || !steps.length) {
             lastMidRef.current = null;
             prevMainStepRef.current = null;
@@ -50,7 +50,7 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
             const text = steps.find((s) => s.index === prev)?.text ?? '';
             if (text) {
                 setCelebrate({ text });
-                const timer = window.setTimeout(() => setCelebrate(null), 900);
+                const timer = window.setTimeout(() => setCelebrate(null), 3000);
                 prevMainStepRef.current = mainStep;
                 return () => window.clearTimeout(timer);
             }
@@ -98,40 +98,41 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
     if (celebrate) {
         return wrapBar(
             <>
-                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
-                <AnimatePresence mode="wait">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
+                {/* Без появления снизу: только перекраска круга в зелёный; текст и вёрстка статичны 3 с */}
+                <div className="flex items-center gap-2.5">
                     <motion.div
-                        key="celebrate"
-                        initial={{ opacity: 0.7, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.28 }}
-                        className="flex items-center gap-2.5"
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                        initial={{
+                            backgroundColor: 'rgba(255,255,255,0.07)',
+                            borderColor: 'rgba(255,255,255,0.4)',
+                            scale: 1,
+                        }}
+                        animate={{
+                            backgroundColor: 'rgba(16,185,129,1)',
+                            borderColor: 'rgba(52,211,153,0.95)',
+                            scale: [1, 1.08, 1],
+                        }}
+                        transition={{
+                            backgroundColor: { duration: 0.35, ease: 'easeOut' },
+                            borderColor: { duration: 0.35, ease: 'easeOut' },
+                            scale: {
+                                duration: 1.15,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                                delay: 0.38,
+                            },
+                        }}
                     >
-                        <motion.div
-                            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
-                            initial={{
-                                scale: 0.92,
-                                backgroundColor: 'rgba(255,255,255,0.07)',
-                                borderColor: 'rgba(255,255,255,0.4)',
-                            }}
-                            animate={{
-                                scale: 1,
-                                backgroundColor: 'rgba(16,185,129,1)',
-                                borderColor: 'rgba(52,211,153,0.95)',
-                            }}
-                            transition={{ duration: 0.26, ease: 'easeOut' }}
-                        >
-                            <motion.i
-                                className="fas fa-check text-[10px] leading-none text-white"
-                                initial={{ scale: 0.3, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ delay: 0.14, duration: 0.2 }}
-                            />
-                        </motion.div>
-                        <p className="min-w-0 flex-1 py-0.5 text-sm leading-snug text-zinc-100">{celebrate.text}</p>
+                        <motion.i
+                            className="fas fa-check text-[10px] leading-none text-white"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.18, duration: 0.2, ease: 'easeOut' }}
+                        />
                     </motion.div>
-                </AnimatePresence>
+                    <p className="min-w-0 flex-1 py-0.5 text-sm leading-snug text-zinc-100">{celebrate.text}</p>
+                </div>
             </>,
         );
     }

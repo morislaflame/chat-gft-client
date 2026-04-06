@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState, useCallback } from 'react';
+import React, { useContext, useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
@@ -9,6 +9,78 @@ import Button from '@/components/ui/button';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { FireworksBackground } from '@/components/ui/backgrounds/fireworks-background';
+import FormattedText from '@/components/MainPageComponents/FormattedText';
+
+/** Порог «доскроллили до низа» (px) */
+const SCROLL_AT_BOTTOM_PX = 8;
+
+type ScrollableFormattedTextProps = {
+  text: string;
+};
+
+/**
+ * Текст с ограничением высоты; внизу — плавающая стрелка, если есть скролл и не до конца.
+ */
+function ScrollableFormattedText({ text }: ScrollableFormattedTextProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  const syncScrollHint = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      setMoreBelow(false);
+      return;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const hasOverflow = scrollHeight > clientHeight + 1;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_AT_BOTTOM_PX;
+    setMoreBelow(hasOverflow && !atBottom);
+  }, []);
+
+  useLayoutEffect(() => {
+    syncScrollHint();
+  }, [text, syncScrollHint]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      syncScrollHint();
+    });
+    ro.observe(el);
+    window.addEventListener('resize', syncScrollHint);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', syncScrollHint);
+    };
+  }, [syncScrollHint]);
+
+  return (
+    <div className="relative text-md">
+      <div
+        ref={scrollRef}
+        onScroll={syncScrollHint}
+        className="max-h-[min(40vh,14rem)] overflow-y-auto hide-scroll"
+      >
+        <FormattedText text={text} />
+      </div>
+      {moreBelow ? (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center rounded-b-xl pb-1.5 pt-10"
+          aria-hidden
+        >
+          <motion.span
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-black/45 text-zinc-100 shadow-md ring-1 ring-white/15"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.25, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <i className="fa-solid fa-chevron-down text-xs opacity-90" />
+          </motion.span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 const GEM_POP_DURATION = 0.45;
 const GEM_FLY_DURATION = 1;
@@ -39,10 +111,12 @@ type NextMissionRef = {
 
 const StageRewardModal: React.FC = observer(() => {
   const { chat, user } = useContext(Context) as IStoreContext;
+  const hasPendingCompanion = () => chat.pendingCompanionArtifact !== null;
   const { t } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
   const language = user.user?.language || 'ru';
+  const avatarUrl = chat.avatar?.url;
   const gemSourceRef = useRef<HTMLDivElement>(null);
   const pendingAfterGemFlight = useRef<NextMissionRef>(null);
   const [flyingGem, setFlyingGem] = useState<FlyingGemCoords>(null);
@@ -128,7 +202,12 @@ const StageRewardModal: React.FC = observer(() => {
 
   const onFireworksComplete = useCallback(() => {
     setFireworksPlaying(false);
-  }, []);
+    // Открываем модалку компаньона после завершения фейерверка
+    if (hasPendingCompanion()) {
+      chat.openCompanionArtifact();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat]);
 
   const hasNextMission = !!(stageReward?.nextMission && stageReward.nextMission.id);
   const showGems =
@@ -177,9 +256,31 @@ const StageRewardModal: React.FC = observer(() => {
       {stageReward ? (
         <div className="px-4 flex flex-col gap-4">
           {stageReward.lastLlmReply ? (
-            <div>
-              <div className="max-h-36 overflow-y-auto rounded-lg bg-black/25 border border-white/10 px-3 py-2 text-sm text-gray-100 whitespace-pre-wrap hide-scroll">
-                {stageReward.lastLlmReply}
+            <div className="message-container flex items-start">
+              <div className="flex-1">
+                <div className="only-silver-border rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">
+                  <div
+                    className="absolute inset-0 bg-no-repeat bg-[length:20rem_20rem] bg-[position:top_-5rem_right_-5rem] rounded-xl rounded-tl-none opacity-20"
+                    style={{
+                      backgroundImage: avatarUrl ? `url(${avatarUrl})` : undefined,
+                    }}
+                    aria-hidden
+                  />
+                  {!avatarUrl && (
+                    <div
+                      className="absolute top-3 right-3 w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center opacity-20"
+                      aria-hidden
+                    >
+                      <i className="fas fa-mask text-lg" />
+                    </div>
+                  )}
+                  <div
+                    className="absolute inset-0 rounded-xl rounded-tl-none agent-message-gradient-2"
+                    aria-hidden
+                  />
+                  <div className="float-right w-20 h-20 shrink-0 ml-2 mb-1" aria-hidden />
+                  <ScrollableFormattedText text={stageReward.lastLlmReply} />
+                </div>
               </div>
             </div>
           ) : null}
@@ -216,7 +317,7 @@ const StageRewardModal: React.FC = observer(() => {
           {showGems ? (
             <div
               ref={gemSourceRef}
-              className="flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-2 mt-4"
             >
               <span className="text-4xl font-bold text-white">
                 +{stageReward.rewardAmount}

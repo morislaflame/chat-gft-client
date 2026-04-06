@@ -44,8 +44,6 @@ const ArtifactAcquireModal: React.FC = observer(() => {
           {name ? <span className="font-semibold text-white block mb-1">{name}</span> : null}
         </span>
       }
-      headerIcon={<i className="fa-solid fa-wand-magic-sparkles text-yellow-400 text-2xl" />}
-      headerIconContainerClassName="bg-yellow-500/15 border border-yellow-500/35"
       footer={
         <Button
           onClick={handleContinue}
@@ -60,7 +58,7 @@ const ArtifactAcquireModal: React.FC = observer(() => {
       contentClassName="pt-2"
     >
       {action?.media?.url ? (
-        <div className="rounded-xl overflow-hidden border border-white/10 bg-black/30 aspect-square max-h-[min(52vh,320px)] mx-auto flex items-center justify-center">
+        <div className="rounded-xl overflow-hidden btn-default-silver-border aspect-square max-h-[min(48vh,240px)] mx-auto flex items-center justify-center">
           <img
             src={action.media.url}
             alt=""

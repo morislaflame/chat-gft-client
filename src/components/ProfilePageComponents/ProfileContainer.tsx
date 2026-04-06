@@ -18,6 +18,19 @@ interface ArtifactLevelGroup {
     isComplete: boolean;
 }
 
+/** Полученные (qty > 0) — в начале списка, внутри группы порядок по id */
+function sortArtifactsOwnedFirst(
+    artifacts: ProfileInventoryArtifact[],
+    owned: Record<string, number>,
+): ProfileInventoryArtifact[] {
+    return [...artifacts].sort((a, b) => {
+        const ownedA = (owned[a.code] ?? 0) > 0 ? 1 : 0;
+        const ownedB = (owned[b.code] ?? 0) > 0 ? 1 : 0;
+        if (ownedB !== ownedA) return ownedB - ownedA;
+        return a.id - b.id;
+    });
+}
+
 function buildLevelGroups(
     artifacts: ProfileInventoryArtifact[],
     owned: Record<string, number>,
@@ -31,13 +44,14 @@ function buildLevelGroups(
     return [...byLevel.entries()]
         .sort(([a], [b]) => a - b)
         .map(([level, arts]) => {
-            const collected = arts.filter((a) => (owned[a.code] ?? 0) > 0).length;
+            const sorted = sortArtifactsOwnedFirst(arts, owned);
+            const collected = sorted.filter((a) => (owned[a.code] ?? 0) > 0).length;
             return {
                 level,
-                artifacts: arts,
+                artifacts: sorted,
                 collected,
-                total: arts.length,
-                isComplete: collected === arts.length && arts.length > 0,
+                total: sorted.length,
+                isComplete: collected === sorted.length && sorted.length > 0,
             };
         });
 }
@@ -104,7 +118,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
 
             {/* Artifact cards */}
             <div
-                className={`flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin transition-opacity duration-300 ${
+                className={`flex gap-3 overflow-x-auto py-3 -mx-1 px-1 scrollbar-thin transition-opacity duration-300 ${
                     isPrevComplete ? 'opacity-100' : 'opacity-40 pointer-events-none'
                 }`}
             >
@@ -135,7 +149,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
 };
 
 const ProfileContainer: React.FC = observer(() => {
-    const { user } = useContext(Context) as IStoreContext;
+    const { user, agent } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const [stories, setStories] = useState<ProfileInventoryStory[]>([]);
@@ -214,6 +228,17 @@ const ProfileContainer: React.FC = observer(() => {
         setDetailOpen(true);
     };
 
+    const handleStoryTitleOpenMissions = async (historyName: string) => {
+        hapticImpact('soft');
+        if (agent.saving) return;
+        try {
+            await agent.selectHistory(historyName);
+            user.openMissionPathFromProfile();
+        } catch {
+            /* selectHistory уже логирует ошибку */
+        }
+    };
+
     if (loading) {
         return (
             <div className="p-4 flex justify-center" style={{ marginTop: isMobile ? '158px' : '58px' }}>
@@ -265,9 +290,9 @@ const ProfileContainer: React.FC = observer(() => {
                     hapticImpact('soft');
                     setArtifactsExplainerOpen(true);
                 }}
-                className="w-full text-left flex flex-col gap-3 rounded-xl border border-amber-500/35 bg-gradient-to-br from-amber-500/30 at-transparent to-transparent/50 backdrop-blur-md px-4 py-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+                className="w-full text-left flex flex-col gap-3 rounded-xl btn-default-silver-border px-4 py-3 transition-colors focus:outline-nones"
             >   
-                <span className="text-xl text-zinc-100 leading-snug">
+                <span className="text-xl text-zinc-100 font-semibold">
                     {t('profileNftArtifactsBannerTitle')}
                 </span>
                 <p className="text-sm text-zinc-300 leading-snug">{t('profileNftArtifactsBanner')}</p>
@@ -278,7 +303,22 @@ const ProfileContainer: React.FC = observer(() => {
                 const levelGroups = buildLevelGroups(story.artifacts, story.owned);
                 return (
                     <section key={story.historyName} className="flex flex-col gap-4">
-                        <h3 className="text-2xl font-semibold text-white">{storyTitle(story)}</h3>
+                        <button
+                            type="button"
+                            onClick={() => void handleStoryTitleOpenMissions(story.historyName)}
+                            disabled={agent.saving}
+                            className="flex w-full min-w-0 justify-start rounded-lg py-1 text-left -mx-1 px-1 transition-colors hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/25 disabled:opacity-60"
+                        >
+                            <span className="flex min-w-0 max-w-full items-center gap-4">
+                                <span className="min-w-0 text-xl font-semibold leading-tight text-white">
+                                    {storyTitle(story)}
+                                </span>
+                                <i
+                                    className="fa-solid fa-chevron-right shrink-0 text-lg leading-none"
+                                    aria-hidden
+                                />
+                            </span>
+                        </button>
                         {story.artifacts.length === 0 ? (
                             <p className="text-xs text-zinc-500">{t('profileNoArtifactsInStory')}</p>
                         ) : (

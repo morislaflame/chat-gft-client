@@ -6,6 +6,7 @@ import type {
     ApiMessageResponse,
     StageRewardData,
     StepRewardData,
+    CompanionArtifactData,
     MediaFile,
     Mission,
     MissionProgress,
@@ -31,6 +32,7 @@ export default class ChatStore {
     _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
     _stepReward: StepRewardData | null = null;
+    _pendingCompanionArtifact: CompanionArtifactData | null = null;
     _balanceBeforeReward: number | null = null;
     _pendingGemsOnLand: number | null = null;
     _pendingProgressAnimation: { from: number; to: number } | null = null;
@@ -159,6 +161,22 @@ export default class ChatStore {
     closeStageReward() {
         if (this._stageReward) {
             this._stageReward = { ...this._stageReward, isOpen: false };
+        }
+    }
+
+    setPendingCompanionArtifact(artifact: Omit<CompanionArtifactData, 'isOpen'> | null) {
+        this._pendingCompanionArtifact = artifact ? { ...artifact, isOpen: false } : null;
+    }
+
+    openCompanionArtifact() {
+        if (this._pendingCompanionArtifact) {
+            this._pendingCompanionArtifact = { ...this._pendingCompanionArtifact, isOpen: true };
+        }
+    }
+
+    closeCompanionArtifact() {
+        if (this._pendingCompanionArtifact) {
+            this._pendingCompanionArtifact = { ...this._pendingCompanionArtifact, isOpen: false };
         }
     }
 
@@ -579,6 +597,11 @@ export default class ChatStore {
                         nextMission: response.nextMission ?? null,
                     });
 
+                    // Сохраняем компаньон-артефакт, если он был выдан (показ — после фейерверка)
+                    if (response?.companionArtifact !== undefined) {
+                        this.setPendingCompanionArtifact(response.companionArtifact);
+                    }
+
                     const createdCases: Array<
                         Pick<UserCase, "id" | "userId" | "caseId" | "isOpened"> & Partial<UserCase>
                     > = (response.userCases?.length
@@ -920,6 +943,10 @@ export default class ChatStore {
 
     get stepReward() {
         return this._stepReward;
+    }
+
+    get pendingCompanionArtifact() {
+        return this._pendingCompanionArtifact;
     }
 
     get pendingProgressAnimation() {

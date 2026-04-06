@@ -71,6 +71,7 @@
 
     --gradient-accent-color: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
     --gradient-secondary-color: linear-gradient(to right, #eab308, #f97316); 
+    --gradient-artifact-color: linear-gradient(to right bottom, #f97416be, transparent, transparent); 
   } 
 
   .dark {
@@ -122,6 +123,10 @@
 
   .bg-user-message {
     background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+  }
+
+  .bg-artifact-gradient {
+    background: var(--gradient-artifact-color);
   }
 
   .bg-secondary-gradient {
@@ -343,6 +348,16 @@
       to bottom left,
       transparent 0%,
       hsl(0, 0%, 12%) 40%,
+      var(--color-primary-700) 100%
+    );
+    pointer-events: none;
+  }
+
+  .agent-message-gradient-2 { 
+    background: linear-gradient(
+      to bottom left,
+      transparent 0%,
+      hsl(0, 0%, 12%) 60%,
       var(--color-primary-700) 100%
     );
     pointer-events: none;

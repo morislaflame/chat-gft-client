@@ -4,6 +4,7 @@ import Modal from '@/components/CoreComponents/Modal';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { ProfileInventoryArtifact } from '@/types/types';
+import Button from '../ui/button';
 
 type ArtifactDetailModalProps = {
     isOpen: boolean;
@@ -48,11 +49,16 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 // headerIconContainerClassName="bg-gradient-to-br from-amber-600 to-amber-900 border border-amber-500/30"
                 closeAriaLabel={t('close')}
                 contentClassName="max-h-[min(55vh,420px)] overflow-y-auto"
+                footer={
+                    <Button onClick={handleClose} variant="gradient" size="lg" className="w-full">
+                        {t('close')}
+                    </Button>
+                }
             >
                 {artifact ? (
                     <div className="flex flex-col gap-4 px-1 pb-4">
                         <div className="flex justify-center">
-                            <div className="relative w-44 h-44 flex items-center justify-center rounded-xl bg-primary-800/60 border border-primary-600/40 overflow-hidden">
+                            <div className="relative w-44 h-44 flex items-center justify-center rounded-xl border btn-default-silver-border overflow-hidden">
                                 {isImage ? (
                                     <>
                                         <img
@@ -65,7 +71,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                         {!isOwned && (
                                             <>
                                                 <div
-                                                    className="absolute inset-0 bg-zinc-500/25 pointer-events-none"
+                                                    className="absolute inset-0 pointer-events-none"
                                                     aria-hidden
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

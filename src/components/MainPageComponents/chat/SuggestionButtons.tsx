@@ -15,6 +15,7 @@ interface SuggestionMeta {
   artifact_code?: string;
   artifact_action_type?: 'ACQUIRE' | 'USE';
   artifact_amount?: number;
+  artifact_media?: { id: number; url: string; mimeType: string } | null;
 }
 
 interface SuggestionButtonsProps {
@@ -86,6 +87,9 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
     const isArtifactUse = meta?.artifact_action_type === 'USE';
         const artifactAmount = meta?.artifact_amount ?? 1;
         const artifactCode = (meta?.artifact_code || '').trim();
+        const artifactMedia = meta?.artifact_media;
+        const isArtifactImage =
+          Boolean(artifactMedia?.url && artifactMedia.mimeType?.startsWith('image/'));
         const isArtifactDisabled = Boolean(isArtifactUse && artifactCode && !hasArtifact(artifactCode, artifactAmount));
         return (
           <Button
@@ -116,8 +120,26 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
               </span>
             )}
             {isArtifactAction && !isPayable && (
-              <span className={`shrink-0 ${isArtifactDisabled ? 'text-zinc-500' : 'text-amber-400/90'}`}>
-                <i className="fa-solid fa-wand-magic-sparkles text-sm" />
+              <span
+                className={`shrink-0 flex h-12 w-12 items-center justify-center overflow-hidden rounded-md ${
+                  isArtifactDisabled ? 'opacity-60' : ''
+                }`}
+              >
+                {isArtifactImage ? (
+                  <img
+                    src={artifactMedia!.url}
+                    alt=""
+                    className={`h-full w-full object-contain ${
+                      isArtifactDisabled ? 'grayscale brightness-[0.75]' : ''
+                    }`}
+                  />
+                ) : (
+                  <i
+                    className={`fa-solid fa-wand-magic-sparkles text-sm ${
+                      isArtifactDisabled ? 'text-zinc-500' : 'text-amber-400/90'
+                    }`}
+                  />
+                )}
               </span>
             )}
           </Button>

@@ -16,6 +16,7 @@ interface MessageItemProps {
     artifact_code?: string;
     artifact_action_type?: 'ACQUIRE' | 'USE';
     artifact_amount?: number;
+    artifact_media?: { id: number; url: string; mimeType: string } | null;
   }> | null;
   showSuggestions: boolean;
   avatarUrl?: string;

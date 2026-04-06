@@ -813,8 +813,8 @@ type TranslationType = {
         en: 'You can obtain artifacts like this by playing missions — explore the story and locations; items appear as you progress.'
     },
     artifactAcquiredTitle: {
-        ru: 'Артефакт получен',
-        en: 'Artifact acquired'
+        ru: 'Артефакт найден!',
+        en: 'Artifact found!'
     },
     artifactAcquiredContinue: {
         ru: 'Продолжить',
@@ -859,6 +859,22 @@ type TranslationType = {
     lookWhatIWon: {
         ru: 'Смотри, что я выиграл!',
         en: 'Look what I won!'
+    },
+    companionReceived: {
+        ru: 'Компаньон получен!',
+        en: 'Companion received!'
+    },
+    companionReceivedSubtitle: {
+        ru: 'Теперь он будет сопровождать тебя в приключениях',
+        en: 'They will now accompany you on your adventures'
+    },
+    companionGoToProfile: {
+        ru: 'Посмотреть в профиле',
+        en: 'View in profile'
+    },
+    companionContinue: {
+        ru: 'Продолжить',
+        en: 'Continue'
     }
   };
   

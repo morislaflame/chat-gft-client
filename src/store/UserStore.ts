@@ -372,6 +372,16 @@ export default class UserStore {
         trackEvent("history_selection_opened", { source: "header" });
     }
 
+    /** Профиль: после выбора истории — тот же полноэкранный MissionPath, что из шапки */
+    openMissionPathFromProfile() {
+        runInAction(() => {
+            this._onboardingInitialStep = 'missions';
+            this._showOnboarding = true;
+            this._isHistorySelectionFromHeader = true;
+        });
+        trackEvent("history_selection_opened", { source: "profile" });
+    }
+
     get isHistorySelectionFromHeader() {
         return this._isHistorySelectionFromHeader;
     }

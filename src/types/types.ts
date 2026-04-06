@@ -53,6 +53,8 @@ export interface ProfileInventoryArtifact {
     name: string;
     nameEn: string | null;
     level: number;
+    /** COMPANION | KEY | WEAPON | ARMOR | TRINKET — для градиента карточки */
+    boostType?: string;
     description?: string | null;
     descriptionEn?: string | null;
     media: { id: number; url: string; mimeType: string } | null;
@@ -118,6 +120,8 @@ export interface ApiMessageResponse {
         /** ACQUIRE = поднять, USE = применить. Для USE: disable если нет артефакта */
         artifact_action_type?: 'ACQUIRE' | 'USE';
         artifact_amount?: number;
+        /** Превью артефакта с бэкенда (обогащение по artifact_code) */
+        artifact_media?: { id: number; url: string; mimeType: string } | null;
     }>;
     /** Актуальный инвентарь артефактов после ответа (для обновления UserStore) */
     artifacts?: Array<{ code: string; quantity: number }>;
@@ -191,6 +195,8 @@ export interface ApiMessageResponse {
         artifact_description_en?: string | null;
         media?: { id: number; url: string; mimeType: string } | null;
     } | null;
+    /** Выданный компаньон за первую миссию (если есть) */
+    companionArtifact?: Omit<CompanionArtifactData, 'isOpen'> | null;
     timestamp: string;
 }
 
@@ -274,6 +280,18 @@ export interface StageRewardData {
 export interface StepRewardData {
     stepNumber: number;
     rewardGems: number;
+    isOpen: boolean;
+}
+
+export interface CompanionArtifactData {
+    id: number;
+    code: string;
+    name: string;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionEn?: string | null;
+    boostType: string;
+    media?: { id: number; url: string; mimeType: string } | null;
     isOpen: boolean;
 }
 

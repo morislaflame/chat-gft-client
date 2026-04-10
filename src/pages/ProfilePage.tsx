@@ -5,7 +5,9 @@ import PageWrapper from '@/components/CoreComponents/PageWrapper';
 const ProfilePage: React.FC = () => {
     return (
         <PageWrapper>
-            <ProfileContainer />
+            <div className="flex flex-1 flex-col min-h-0 w-full overflow-hidden">
+                <ProfileContainer />
+            </div>
         </PageWrapper>
     );
 };

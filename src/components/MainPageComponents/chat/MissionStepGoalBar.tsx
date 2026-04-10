@@ -78,7 +78,7 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
     }
 
     const barShellClass =
-        'rounded-xl border border-white/15 bg-black/40 backdrop-blur-md px-3 py-2.5 shadow-lg';
+        'rounded-2xl border border-white/15 bg-black/40 backdrop-blur-md p-3';
 
     const wrapBar = (children: React.ReactNode) =>
         onGoalBarClick ? (
@@ -98,23 +98,20 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
     if (celebrate) {
         return wrapBar(
             <>
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
-                {/* Без появления снизу: только перекраска круга в зелёный; текст и вёрстка статичны 3 с */}
+                {/* <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p> */}
+                {/* Без появления снизу: круг переходит в accent-градиент как на прогрессбаре; текст статичен 3 с */}
                 <div className="flex items-center gap-2.5">
                     <motion.div
-                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                        className="relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full border"
                         initial={{
-                            backgroundColor: 'rgba(255,255,255,0.07)',
                             borderColor: 'rgba(255,255,255,0.4)',
                             scale: 1,
                         }}
                         animate={{
-                            backgroundColor: 'rgba(16,185,129,1)',
-                            borderColor: 'rgba(52,211,153,0.95)',
+                            borderColor: 'rgba(255,255,255,0.52)',
                             scale: [1, 1.08, 1],
                         }}
                         transition={{
-                            backgroundColor: { duration: 0.35, ease: 'easeOut' },
                             borderColor: { duration: 0.35, ease: 'easeOut' },
                             scale: {
                                 duration: 1.15,
@@ -124,8 +121,23 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
                             },
                         }}
                     >
+                        <motion.div
+                            className="absolute inset-0 bg-white/[0.07]"
+                            initial={{ opacity: 1 }}
+                            animate={{ opacity: 0 }}
+                            transition={{ duration: 0.35, ease: 'easeOut' }}
+                            aria-hidden
+                        />
+                        <motion.div
+                            className="absolute inset-0"
+                            style={{ background: 'var(--gradient-accent-color)' }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.35, ease: 'easeOut' }}
+                            aria-hidden
+                        />
                         <motion.i
-                            className="fas fa-check text-[10px] leading-none text-white"
+                            className="fas fa-check relative z-[1] text-[10px] leading-none text-white"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.18, duration: 0.2, ease: 'easeOut' }}
@@ -143,7 +155,7 @@ const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoal
 
     return wrapBar(
         <>
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p>
+            {/* <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">Цель</p> */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={String(currentIdx)}

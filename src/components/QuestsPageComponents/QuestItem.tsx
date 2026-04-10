@@ -76,7 +76,7 @@ const QuestItem: React.FC<QuestItemProps> = ({
                 disabled={isCompleted || isLoading}
                 variant={isCompleted ? 'outline' : 'default'}
                 size="sm"
-                className="rounded-lg shrink-0"
+                className="shrink-0"
             >
                 {isLoading ? t('loading') : isCompleted ? t('completed') : isReadyToCheck ? t('check') : t('complete')}
             </Button>

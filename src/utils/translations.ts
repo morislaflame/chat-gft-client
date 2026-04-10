@@ -12,6 +12,14 @@ type TranslationType = {
       ru: 'Баланс',
       en: 'Balance'
     },
+    artifactsFound: {
+      ru: 'Найдено артефактов',
+      en: 'Artifacts found'
+    },
+    missionProgress: {
+      ru: 'Прогресс миссии',
+      en: 'Mission progress'
+    },
     // ChatContainer
     greeting: {
       ru: 'Свой вариант истории',

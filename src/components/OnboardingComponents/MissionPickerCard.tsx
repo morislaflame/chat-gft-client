@@ -47,7 +47,7 @@ const MissionPickerCard: React.FC<MissionPickerCardProps> = memo(({ mission, loc
                         disabled={locked}
                         variant="gradient"
                         size="sm"
-                        className="w-full"
+                        className="w-full text-semibold"
                         icon={locked ? 'fas fa-lock' : 'fas fa-play'}
                     >
                         {locked ? t('missionLocked') : isCompleted ? t('missionReplay') : t('start')}

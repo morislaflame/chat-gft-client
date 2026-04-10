@@ -68,7 +68,7 @@ const EnergyInfoModal: React.FC<EnergyInfoModalProps> = observer(({ isOpen, onCl
         </Button>
       }
     >
-      <div className="rounded-lg px-4 space-y-6 pb-2">
+      <div className="rounded-lg space-y-6">
         {/* <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
           <li>{t('energyInfoP1')}</li>
           <li>{t('energyInfoP2')}</li>

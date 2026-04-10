@@ -60,7 +60,7 @@ function ScrollableFormattedText({ text }: ScrollableFormattedTextProps) {
       <div
         ref={scrollRef}
         onScroll={syncScrollHint}
-        className="max-h-[min(40vh,14rem)] overflow-y-auto hide-scroll"
+        className="max-h-[min(40vh,14rem)] overflow-y-auto hide-scrollbar ios-scroll"
       >
         <FormattedText text={text} />
       </div>
@@ -70,7 +70,7 @@ function ScrollableFormattedText({ text }: ScrollableFormattedTextProps) {
           aria-hidden
         >
           <motion.span
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-black/45 text-zinc-100 shadow-md ring-1 ring-white/15"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur-md text-zinc-100 shadow-md ring-1 ring-white/15"
             animate={{ y: [0, 4, 0] }}
             transition={{ duration: 1.25, repeat: Infinity, ease: 'easeInOut' }}
           >

@@ -115,7 +115,7 @@ const Header: React.FC = observer(() => {
         >
             {/* App Header */}
             <div className=" py-4 px-4 flex items-center justify-between gap-6 w-full">
-                <div className="relative flex items-center space-x-2 cursor-pointer backdrop-blur-sm btn-default-silver-border-transparent rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600"
+                <div className="relative flex items-center space-x-2 cursor-pointer backdrop-blur-sm btn-default-silver-border-transparent rounded-full p-1 px-3 active:outline-none active:border-secondary-500 hover:border-secondary-500 transition-all duration-200 hover:bg-primary-600/30"
                 style={glassStyle}
                 onClick={handleAvatarClick}
                 onPointerDown={avatarRipple.onPointerDown}>
@@ -148,7 +148,7 @@ const Header: React.FC = observer(() => {
                         key={gemsBurstTrigger}
                         data-gems-target
                         onClick={handleGemsClick}
-                        className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer overflow-visible"
+                        className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600/30 transition relative cursor-pointer overflow-visible"
                         style={{ ...glassStyle, overflow: 'visible' }}
                         onPointerDown={gemsRipple.onPointerDown}
                         initial={{ scale: 1 }}
@@ -186,7 +186,7 @@ const Header: React.FC = observer(() => {
                     </motion.button>
                         <button 
                             onClick={handleEnergyClick} 
-                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition relative cursor-pointer"
+                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600/30 transition relative cursor-pointer"
                             style={glassStyle}
                             onPointerDown={energyRipple.onPointerDown}
                         >
@@ -202,7 +202,7 @@ const Header: React.FC = observer(() => {
                         </button>
                         <button 
                             onClick={handleLanguageClick}
-                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600 transition flex items-center justify-center cursor-pointer"
+                            className="backdrop-blur-sm btn-default-silver-border-transparent rounded-full h-10 w-12 rounded-full hover:bg-primary-600/30 transition flex items-center justify-center cursor-pointer"
                             style={glassStyle}
                             title={t('language')}
                             onPointerDown={languageRipple.onPointerDown}

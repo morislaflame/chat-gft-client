@@ -53,7 +53,7 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
                     onOpenDetail();
                 }
             }}
-            className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center quest-item overflow-hidden btn-default-silver-border cursor-pointer hover:bg-primary-700/50 transition-colors"
+            className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center quest-item overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-colors"
         >
             {isOwned && <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
                 <div

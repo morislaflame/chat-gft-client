@@ -6,6 +6,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type ChatStore from '@/store/ChatStore';
 import type { Mission, MissionProgress } from '@/types/types';
+import { ProgressiveBlur } from '../ui/progressive-blur';
 
 interface LevelGroup {
     level: number;
@@ -169,13 +170,23 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             onMissionChosen();
         };
 
+        const isMobile = document.body.classList.contains('telegram-mobile');
+        const blurHeight = isMobile ? 124 : 56;
+
         return (
-            <div className="flex flex-col h-full min-h-0 p-4 pb-8 gap-2">
-                <div className="relative flex items-center justify-center shrink-0 min-h-[44px] px-1">
+            <div className="flex flex-col h-full min-h-0 gap-2">
+                <ProgressiveBlur
+                    className="pointer-events-none fixed left-0 right-0 top-0 z-15"
+                    containerStyle={{ height: `${blurHeight}px` }}
+                    blurIntensity={2}
+                    direction="top"
+                />
+
+                <div className="absolute top-0 left-0 right-0 z-1000 flex items-center justify-center shrink-0 min-h-[44px] px-4 pt-4">
                     <button
                         type="button"
                         onClick={handleChooseHistory}
-                        className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex items-center gap-1.5 max-w-[min(56%,240px)] text-left text-sm font-medium text-zinc-200 hover:text-white pl-1 pr-2 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                        className="absolute left-4 top-3 z-10 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                     >
                         <i className="fas fa-arrow-left text-xl shrink-0" aria-hidden />
                         {/* <span className="leading-tight truncate">{t('selectHistory')}</span> */}
@@ -191,7 +202,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="absolute right-0 top-1/2 z-10 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                            className="absolute right-4 top-3 z-10 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                             aria-label={t('close')}
                         >
                             <i className="fas fa-times text-white text-xl" />
@@ -199,15 +210,17 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                     ) : null}
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-y-auto ios-scroll hide-scrollbar">
+                <div className="flex-1 min-h-0 overflow-y-auto ios-scroll hide-scrollbar p-4 pt-16">
                     {sorted.length === 0 ? (
                         <p className="text-center text-zinc-400 text-sm py-8">{t('missionsLoadingOrEmpty')}</p>
                     ) : (
                         <div ref={containerRef} className="relative flex flex-col items-center pt-2 pb-6 min-h-[200px]">
-                            <canvas
+                            <motion.canvas
                                 ref={canvasRef}
                                 className="absolute inset-0 w-full h-full pointer-events-none z-0"
                                 aria-hidden
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
                             />
                             {(() => {
                                 let missionIdx = 0;
@@ -256,6 +269,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                                                             <MissionCard
                                                                 mode="picker"
                                                                 mission={m}
+                                                                progress={p}
                                                                 locked={locked}
                                                                 completed={completed}
                                                                 isSelected={isSelected}
@@ -289,6 +303,12 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                         </div>
                     )}
                 </div>
+                <ProgressiveBlur
+                    className="pointer-events-none fixed left-0 right-0 bottom-0 z-15"
+                    containerStyle={{ height: `44px` }}
+                    blurIntensity={2}
+                    direction="bottom"
+                />
             </div>
         );
     }

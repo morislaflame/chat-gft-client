@@ -124,7 +124,7 @@ const CompanionArtifactModal: React.FC = observer(() => {
                             >
                                 <span className="text-xl font-bold text-white">{name}</span>
                                 {description ? (
-                                    <span className="text-sm text-zinc-400 leading-relaxed max-w-[260px]">
+                                    <span className="text-sm text-zinc-400 leading-relaxed">
                                         {description}
                                     </span>
                                 ) : null}

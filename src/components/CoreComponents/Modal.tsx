@@ -96,7 +96,7 @@ const Modal: React.FC<ModalProps> = ({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="w-8 h-8 min-w-8 rounded-full absolute top-0 right-0"
+                      className="w-8 h-8 min-w-8 rounded-full absolute top-4 right-4"
                       aria-label={closeAriaLabel}
                       disabled
                       icon="fas fa-times"
@@ -106,7 +106,7 @@ const Modal: React.FC<ModalProps> = ({
                       <Button
                         variant="nav"
                         size="icon"
-                        className="w-8 h-8 min-w-8 rounded-full absolute top-2 right-2 text-white/50"
+                        className="w-8 h-8 min-w-8 rounded-full absolute top-4 right-4 text-white/50"
                         aria-label={closeAriaLabel}
                         icon="fas fa-times"
                       />

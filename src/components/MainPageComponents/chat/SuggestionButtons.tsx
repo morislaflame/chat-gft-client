@@ -106,7 +106,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
               isArtifactDisabled,
             )}
             className={[
-              "rounded-lg px-2 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",
+              "px-3 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",
               isPayable && "ring-1 ring-amber-400/60 bg-amber-500/20",
               isArtifactAction && "ring-1 ring-amber-400/40 bg-gradient-to-br from-amber-500/20 at-transparent to-transparent",
               isArtifactDisabled && "opacity-60 cursor-not-allowed",

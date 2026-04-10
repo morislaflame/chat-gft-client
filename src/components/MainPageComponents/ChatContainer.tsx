@@ -13,8 +13,8 @@ import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
-import GemsCaseProgress from './chat/GemsCaseProgress';
 import MissionStepGoalBar from './chat/MissionStepGoalBar';
+import MissionDynamicProgress from './chat/MissionDynamicProgress';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -188,7 +188,9 @@ const ChatContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
-    
+    /** Реальные сообщения треда (не синтетическая карточка миссии); локальные user/ai могут без missionId */
+    const hasMissionChatMessages = chat.messages.some((m) => !m.isMissionCard);
+
     const backgroundUrl = chat.background?.url;
 
     return (
@@ -224,13 +226,18 @@ const ChatContainer: React.FC = observer(() => {
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
-                        <MissionStepGoalBar
-                            onGoalBarClick={() => {
-                                hapticImpact('soft');
-                                setArtifactsExplainerOpen(true);
-                            }}
-                        />
-                        <GemsCaseProgress />
+                        {hasMissionChatMessages ? (
+                            <>
+                                <MissionStepGoalBar
+                                    onGoalBarClick={() => {
+                                        hapticImpact('soft');
+                                        setArtifactsExplainerOpen(true);
+                                    }}
+                                />
+                                <MissionDynamicProgress />
+                            </>
+                        ) : null}
+                        {/* <GemsCaseProgress /> */}
                     </div>
                 </div>
             </div>

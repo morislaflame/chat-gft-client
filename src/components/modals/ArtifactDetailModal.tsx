@@ -111,21 +111,6 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                             </p>
                         ) : null}
 
-                        {/* <div
-                            className={`text-center text-xs font-medium rounded-lg py-2 px-3 border ${
-                                isOwned
-                                    ? 'text-amber-300 bg-amber-500/10 border-amber-500/25'
-                                    : 'text-zinc-500 bg-primary-800/50 border-primary-600/40'
-                            }`}
-                        >
-                            {isOwned ? (
-                                <>
-                                    {t('artifactInInventory')}: ×{ownedQty}
-                                </>
-                            ) : (
-                                t('artifactNotInInventory')
-                            )}
-                        </div> */}
                     </div>
                 ) : null}
             </Modal>

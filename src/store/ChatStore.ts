@@ -301,7 +301,10 @@ export default class ChatStore {
         if (!missions.length) return null;
         const sorted = [...missions].sort((a, b) => a.orderIndex - b.orderIndex);
         const inProgress = [...mp]
-            .filter((p) => p.status === "in_progress")
+            .filter(
+                (p) =>
+                    p.status === "in_progress" || p.status === "replay_in_progress",
+            )
             .sort((a, b) => a.orderIndex - b.orderIndex)[0];
         if (inProgress && sorted.some((m) => m.id === inProgress.missionId)) {
             return inProgress.missionId;
@@ -381,7 +384,10 @@ export default class ChatStore {
         const order = sorted.findIndex((x) => x.id === missionId);
         for (let i = 0; i < order; i++) {
             const pp = this.missionProgressFor(sorted[i].id);
-            if (!pp || pp.status !== "completed") {
+            const prevUnlocked =
+                pp &&
+                (pp.status === "completed" || pp.status === "replay_in_progress");
+            if (!prevUnlocked) {
                 return false;
             }
         }
@@ -393,7 +399,11 @@ export default class ChatStore {
         if (p.status === "locked") {
             return false;
         }
-        return p.status === "in_progress" || p.status === "completed";
+        return (
+            p.status === "in_progress" ||
+            p.status === "completed" ||
+            p.status === "replay_in_progress"
+        );
     }
 
     /**

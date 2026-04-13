@@ -203,7 +203,7 @@ export interface ApiMessageResponse {
 export interface MissionProgress {
     missionId: number;
     orderIndex: number;
-    status: 'locked' | 'in_progress' | 'completed';
+    status: 'locked' | 'in_progress' | 'completed' | 'replay_in_progress';
     mainStep?: number | null;
     mainStepsTotal?: number | null;
     beatsCompleted: number;

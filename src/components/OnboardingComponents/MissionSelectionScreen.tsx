@@ -164,8 +164,6 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
                             missions.map((m, idx) => {
                                 const locked = !chat.canSelectMission(m.id);
                                 const p = progressFor(m.id);
-                                const completed = p?.status === 'completed';
-
                                 return (
                                     <div
                                         key={m.id}
@@ -176,7 +174,7 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
                                         <MissionPickerCard
                                             mission={m}
                                             locked={locked}
-                                            isCompleted={completed}
+                                            progressStatus={p?.status}
                                             onAction={() => void runMissionAction(m)}
                                         />
                                     </div>

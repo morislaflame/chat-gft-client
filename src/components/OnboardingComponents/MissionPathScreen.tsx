@@ -52,7 +52,9 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             const prevGroup = levelGroups[i - 1];
             const allDone = prevGroup.missions.every((m) => {
                 const p = chat.missionsProgress.find((x) => x.missionId === m.id);
-                return p?.status === 'completed';
+                return (
+                    p?.status === 'completed' || p?.status === 'replay_in_progress'
+                );
             });
             levelAccessible.set(levelGroups[i].level, allDone);
         }
@@ -255,7 +257,6 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                                                         m.progress ||
                                                         undefined;
                                                     const locked = !chat.canSelectMission(m.id);
-                                                    const completed = p?.status === 'completed';
                                                     const isSelected = chat.selectedMissionId === m.id;
                                                     const isLoadingMission = chat.switchingMissionId === m.id;
                                                     return (
@@ -271,7 +272,6 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                                                                 mission={m}
                                                                 progress={p}
                                                                 locked={locked}
-                                                                completed={completed}
                                                                 isSelected={isSelected}
                                                                 isLoading={isLoadingMission}
                                                                 onSelect={() => void handleMissionClick(m.id)}

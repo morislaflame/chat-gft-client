@@ -2,20 +2,20 @@ import React, { memo } from 'react';
 import { motion } from 'motion/react';
 import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
-import type { Mission } from '@/types/types';
+import type { Mission, MissionProgress } from '@/types/types';
 
 export type MissionPickerCardProps = {
     mission: Mission;
     locked: boolean;
-    /** Миссия уже пройдена — на кнопке «Перепройти» */
-    isCompleted: boolean;
+    /** Статус прогресса с сервера (подпись кнопки: старт / перепройти / продолжить реплей) */
+    progressStatus?: MissionProgress['status'];
     onAction: () => void;
 };
 
 /**
  * Карточка миссии для экрана выбора (оформление как у MissionCard в чате).
  */
-const MissionPickerCard: React.FC<MissionPickerCardProps> = memo(({ mission, locked, isCompleted, onAction }) => {
+const MissionPickerCard: React.FC<MissionPickerCardProps> = memo(({ mission, locked, progressStatus, onAction }) => {
     const { t, language } = useTranslate();
 
     const missionTitle =
@@ -24,6 +24,14 @@ const MissionPickerCard: React.FC<MissionPickerCardProps> = memo(({ mission, loc
         language === 'en'
             ? (mission.descriptionEn ?? mission.description)
             : mission.description;
+
+    const buttonLabel = locked
+        ? t('missionLocked')
+        : progressStatus === 'replay_in_progress'
+          ? t('missionReplayContinue')
+          : progressStatus === 'completed'
+            ? t('missionReplay')
+            : t('start');
 
     return (
         <div className="flex justify-center w-full max-w-md mx-auto relative z-[2]">
@@ -50,7 +58,7 @@ const MissionPickerCard: React.FC<MissionPickerCardProps> = memo(({ mission, loc
                         className="w-full text-semibold"
                         icon={locked ? 'fas fa-lock' : 'fas fa-play'}
                     >
-                        {locked ? t('missionLocked') : isCompleted ? t('missionReplay') : t('start')}
+                        {buttonLabel}
                     </Button>
                 </div>
             </motion.div>

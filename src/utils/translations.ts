@@ -394,6 +394,14 @@ type TranslationType = {
         ru: 'Перепройти',
         en: 'Replay'
     },
+    missionReplayContinue: {
+        ru: 'Продолжить перепрохождение',
+        en: 'Continue replay'
+    },
+    missionCompletedBadge: {
+        ru: 'Пройдена',
+        en: 'Completed'
+    },
     missionLocked: {
         ru: 'Недоступно',
         en: 'Locked'

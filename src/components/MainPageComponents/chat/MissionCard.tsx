@@ -22,7 +22,6 @@ type MissionCardPickerProps = {
     mission: Mission;
     progress?: MissionProgress;
     locked: boolean;
-    completed: boolean;
     isSelected?: boolean;
     /** История по этой миссии загружается (кнопка в состоянии loading) */
     isLoading?: boolean;
@@ -107,7 +106,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
     const { t, language } = useTranslate();
 
     if (isPicker(props)) {
-        const { mission, progress, locked, completed, isSelected, isLoading = false, onSelect } = props;
+        const { mission, progress, locked, isSelected, isLoading = false, onSelect } = props;
         const missionTitle =
             language === 'en' ? mission.titleEn ?? mission.title : mission.title;
         const missionDescription =
@@ -115,7 +114,19 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                 ? mission.descriptionEn ?? mission.description
                 : mission.description;
 
-        const buttonLabel = locked ? t('missionLocked') : completed ? t('missionReplay') : t('start');
+        const st = progress?.status;
+        const isIdleCompleted = st === 'completed';
+        const isReplayActive = st === 'replay_in_progress';
+        const showStepsProgress =
+            Boolean(progress) && !locked && (st === 'in_progress' || isReplayActive);
+
+        const buttonLabel = locked
+            ? t('missionLocked')
+            : isReplayActive
+              ? t('missionReplayContinue')
+              : isIdleCompleted
+                ? t('missionReplay')
+                : t('start');
         const artifactProgressLabel = `${progress?.artifactsFound ?? 0}/${progress?.artifactsTotal ?? 0}`;
         const uiStepsCount = listMissionUiStepGoals(mission.uiStepGoals ?? null).length;
         const totalSteps = Number(progress?.mainStepsTotal ?? 0) || uiStepsCount || 1;
@@ -133,9 +144,16 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                     )}
                 >
                     <div className="flex flex-col gap-1 mb-1">
-                        <span className="text-sm font-semibold text-zinc-200">
-                            {t('mission')} {mission.orderIndex}
-                        </span>
+                        <div className="flex items-start justify-between gap-2">
+                            <span className="text-sm font-semibold text-zinc-200">
+                                {t('mission')} {mission.orderIndex}
+                            </span>
+                            {isIdleCompleted ? (
+                                <span className="shrink-0 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-300">
+                                    {t('missionCompletedBadge')}
+                                </span>
+                            ) : null}
+                        </div>
                         <span className="font-bold text-user-message-gradient text-lg italic">{missionTitle}</span>
                     </div>
                     {missionDescription ? (
@@ -143,22 +161,24 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                     ) : null}
                     {progress && !locked ? (
                         <div className="mt-3 flex flex-col gap-2 text-xs">
-                            <div className="relative z-10 w-full flex items-center px-4">
-                                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-zinc-700/60" />
-                                    <div
-                                        className="flex items-center gap-1.5 px-3 py-1 text-xs text-zinc-400"
-                                    >
-                                        {t('missionProgress')}
+                            {showStepsProgress ? (
+                                <>
+                                    <div className="relative z-10 w-full flex items-center px-4">
+                                        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-zinc-700/60" />
+                                        <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-zinc-400">
+                                            {t('missionProgress')}
+                                        </div>
+                                        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-zinc-700/60" />
                                     </div>
-                                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-zinc-700/60" />
-                            </div>
-                                <div className="w-full">
-                                <MiniMissionProgressBar
-                                    currentStep={currentStep}
-                                    totalSteps={totalSteps}
-                                    isCompletedMission={completed}
-                                />
-                            </div>
+                                    <div className="w-full">
+                                        <MiniMissionProgressBar
+                                            currentStep={currentStep}
+                                            totalSteps={totalSteps}
+                                            isCompletedMission={false}
+                                        />
+                                    </div>
+                                </>
+                            ) : null}
                             <div className="flex items-center gap-2 justify-between">
                                 <span className="text-zinc-400">{t('artifactsFound')}:</span>
                                 <span className="text-artifact-gradient font-semibold">{artifactProgressLabel}</span>
@@ -178,7 +198,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                                     ? undefined
                                     : locked
                                       ? 'fas fa-lock'
-                                      : completed
+                                      : isIdleCompleted
                                         ? 'fas fa-rotate-right'
                                         : 'fas fa-play'
                             }

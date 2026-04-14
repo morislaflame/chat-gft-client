@@ -25,6 +25,22 @@ type TranslationType = {
       ru: 'Свой вариант истории',
       en: 'Your version of the story'
     },
+    chatLlmCouldNotProcess: {
+      ru: '(кажется, модель не смогла обработать сообщение)',
+      en: '(It seems the model could not process the message)',
+    },
+    chatSendMessageAgain: {
+      ru: 'Отправить сообщение ещё раз',
+      en: 'Send the message again',
+    },
+    chatReloadAppHint: {
+      ru: 'Произошла ошибка. Пожалуйста, перезагрузите приложение.',
+      en: 'Something went wrong. Please reload the app.',
+    },
+    chatReloadApp: {
+      ru: 'Перезагрузить',
+      en: 'Reload',
+    },
     mission: {
       ru: 'Миссия',
       en: 'Mission'
@@ -129,8 +145,8 @@ type TranslationType = {
         en: 'No Tasks Yet'
     },
     noTasksYetDesc: {
-        ru: 'У вас пока нет заданий. Заполните профиль или подождите появления новых заданий!',
-        en: "You don't have any tasks yet. Complete your profile or wait for new tasks to appear!"
+        ru: 'Задания временно отсутствуют. Скоро появятся новые!',
+        en: "Tasks are temporarily unavailable. New tasks will be available soon!"
     },
     reward: {
         ru: 'Награда',
@@ -292,12 +308,12 @@ type TranslationType = {
         en: 'There are no rewards available for purchase at the moment.'
     },
     noPurchasesYet: {
-        ru: 'Пока нет покупок',
-        en: 'No Purchases Yet'
+        ru: 'У вас пока нет наград',
+        en: 'No Rewards Yet'
     },
     noPurchasesYetDesc: {
-        ru: 'Вы еще не покупали награды. Посмотрите доступные награды!',
-        en: "You haven't purchased any rewards yet. Check out the available rewards!"
+        ru: 'Покупайте награды за гемы, или выигрывайте в боксах',
+        en: "Purchase rewards with gems, or win in boxes!"
     },
     withdrawn: {
         ru: 'Выведен',

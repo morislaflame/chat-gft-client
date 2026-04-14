@@ -5,6 +5,7 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import MissionCard from './MissionCard';
 import MessageItem from './MessageItem';
 import TypingIndicator from './TypingIndicator';
+import type { ChatRetryPayload } from '@/types/types';
 import type { RefObject } from 'react';
 
 interface ChatMessagesProps {
@@ -16,6 +17,8 @@ interface ChatMessagesProps {
     suggestionId?: string | null,
     payGemsForSuggestionId?: string | null,
   ) => void;
+  onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
+  onReloadApp?: () => void;
   messageEndRef: RefObject<HTMLDivElement | null>;
 }
 
@@ -24,6 +27,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   onOpenArtifactsExplainer,
   onArtifactDisabledClick,
   onSelectSuggestion,
+  onRetryLlmFormat,
+  onReloadApp,
   messageEndRef,
 }) => {
   const { chat } = React.useContext(Context) as IStoreContext;
@@ -60,7 +65,11 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
         }
 
         const isLastAIMessage = !message.isUser && index === messages.length - 1;
-        const showSuggestions = isLastAIMessage && suggestions.length > 0 && !chat.isTyping;
+        const showSuggestions =
+          isLastAIMessage &&
+          !message.chatErrorKind &&
+          suggestions.length > 0 &&
+          !chat.isTyping;
 
         return (
           <MessageItem
@@ -72,6 +81,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
             avatarUrl={avatarUrl}
             onArtifactDisabledClick={onArtifactDisabledClick}
             onSelectSuggestion={handleSelectSuggestion}
+            onRetryLlmFormat={onRetryLlmFormat}
+            onReloadApp={onReloadApp}
           />
         );
       })}

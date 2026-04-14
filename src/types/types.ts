@@ -80,6 +80,16 @@ export interface Product {
     starsPrice: number;
   }
 
+/** Ошибка чата: отдельный UI (повтор / перезагрузка). */
+export type ChatMessageErrorKind = 'llm_format' | 'reload_app';
+
+export interface ChatRetryPayload {
+    messageText: string;
+    suggestionId: string | null;
+    payGemsForSuggestionId: string | null;
+    beginReplay?: boolean;
+}
+
 export interface Message {
     id: string;
     text: string;
@@ -98,6 +108,8 @@ export interface Message {
     missionId?: number | null;
     missionHasMessages?: boolean;
     isCongratulation?: boolean;
+    chatErrorKind?: ChatMessageErrorKind;
+    chatRetryPayload?: ChatRetryPayload;
 }
 
 export interface ApiMessageResponse {

@@ -1,8 +1,10 @@
 import { makeAutoObservable } from "mobx";
 import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
 import { setSelectedChatMission } from "@/http/userAPI";
+import { translate } from "@/utils/translations";
 import type {
     Message,
+    ChatRetryPayload,
     ApiMessageResponse,
     StageRewardData,
     StepRewardData,
@@ -494,12 +496,27 @@ export default class ChatStore {
         this._error = error;
     }
 
+    /** Повтор последнего пользовательского сообщения после ошибки формата ответа LLM. */
+    retryAfterLlmFormatError(payload: ChatRetryPayload) {
+        this._messages = this._messages.filter((m) => m.chatErrorKind !== "llm_format");
+        void this.sendMessage(
+            payload.messageText,
+            undefined,
+            payload.suggestionId,
+            payload.payGemsForSuggestionId,
+            {
+                beginReplay: payload.beginReplay === true,
+                skipUserBubble: true,
+            },
+        );
+    }
+
     async sendMessage(
         messageText: string,
         onEnergyUpdate?: (newEnergy: number) => void,
         suggestionId?: string | null,
         payGemsForSuggestionId?: string | null,
-        extra?: { beginReplay?: boolean },
+        extra?: { beginReplay?: boolean; skipUserBubble?: boolean },
     ) {
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -508,7 +525,9 @@ export default class ChatStore {
             timestamp: new Date()
         };
 
-        this.addMessage(userMessage);
+        if (!extra?.skipUserBubble) {
+            this.addMessage(userMessage);
+        }
         this.setIsTyping(true);
         this.setError('');
         this.setArtifactAction(null);
@@ -727,10 +746,27 @@ export default class ChatStore {
             return response;
         } catch (error) {
             console.error('Error sending message:', error);
-            // Проверяем, если это ошибка недостаточного баланса
-            const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-            if (axiosError.response?.status === 400) {
-                const msg = axiosError.response?.data?.message ?? '';
+            const axiosError = error as {
+                response?: {
+                    status?: number;
+                    data?: { message?: string; code?: string; newEnergy?: number; newBalance?: number };
+                };
+                code?: string;
+            };
+            const status = axiosError.response?.status;
+            const data = axiosError.response?.data;
+
+            if (data?.newEnergy !== undefined && this._userStore) {
+                this._userStore.setEnergy(data.newEnergy);
+            }
+            if (data?.newBalance !== undefined && this._userStore) {
+                this._userStore.setBalance(data.newBalance);
+            }
+
+            const lang = this._userStore?.user?.language === "en" ? "en" : "ru";
+
+            if (status === 400) {
+                const msg = data?.message ?? '';
                 if (msg.includes('Insufficient energy')) {
                 this.setError('Insufficient energy. Please purchase more stars.');
                 this.setInsufficientEnergy(true);
@@ -744,10 +780,35 @@ export default class ChatStore {
                 } else {
                     this.setError(msg || 'Error: Unable to send message. Please try again.');
                 }
+            } else if (status === 422 && data?.code === 'LLM_INVALID_FORMAT') {
+                this.addMessage({
+                    id: `chat-err-llm-${Date.now()}`,
+                    text: translate('chatLlmCouldNotProcess', lang),
+                    isUser: false,
+                    timestamp: new Date(),
+                    chatErrorKind: 'llm_format',
+                    chatRetryPayload: {
+                        messageText,
+                        suggestionId: suggestionId ?? null,
+                        payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+                        beginReplay: extra?.beginReplay === true,
+                    },
+                });
+                trackEvent('chat_message_send_failed', { reason: 'llm_invalid_format' });
             } else {
-                this.setError('Error: Unable to send message. Please try again.');
-                trackEvent('chat_message_send_failed', { reason: 'unknown' });
-                trackEvent('mission_fail', { story_id: storyId, fail_reason: 'unknown' });
+                this.addMessage({
+                    id: `chat-err-reload-${Date.now()}`,
+                    text: translate('chatReloadAppHint', lang),
+                    isUser: false,
+                    timestamp: new Date(),
+                    chatErrorKind: 'reload_app',
+                });
+                const failReason =
+                    status === 503 && data?.code === 'CHAT_SERVICE_UNAVAILABLE'
+                        ? 'chat_service_unavailable'
+                        : 'fatal_reload';
+                trackEvent('chat_message_send_failed', { reason: failReason });
+                trackEvent('mission_fail', { story_id: storyId, fail_reason: failReason });
             }
             return null;
         } finally {

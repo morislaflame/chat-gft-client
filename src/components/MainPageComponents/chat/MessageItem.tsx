@@ -2,7 +2,8 @@ import React, { memo } from 'react';
 import { AnimatePresence } from 'motion/react';
 import FormattedText from '../FormattedText';
 import SuggestionButtons from './SuggestionButtons';
-import type { Message } from '@/types/types';
+import type { ChatRetryPayload, Message } from '@/types/types';
+import { useTranslate } from '@/utils/useTranslate';
 
 interface MessageItemProps {
   message: Message;
@@ -22,6 +23,8 @@ interface MessageItemProps {
   avatarUrl?: string;
   onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (text: string, suggestionId?: string | null, payGemsForSuggestionId?: string | null) => void;
+  onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
+  onReloadApp?: () => void;
 }
 
 const MessageItem: React.FC<MessageItemProps> = memo(({
@@ -32,7 +35,12 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
   avatarUrl,
   onArtifactDisabledClick,
   onSelectSuggestion,
-}) => (
+  onRetryLlmFormat,
+  onReloadApp,
+}) => {
+  const { t } = useTranslate();
+
+  return (
   <div className="message-container flex items-start mb-6">
     <div className={`flex-1 ${message.isUser ? 'flex justify-end' : ''}`}>
       {message.isUser ? (
@@ -40,6 +48,28 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
           <div className="text-md text-zinc">
             <span className="whitespace-pre-wrap">{message.text}</span>
           </div>
+        </div>
+      ) : message.chatErrorKind === 'llm_format' && message.chatRetryPayload ? (
+        <div className="bg-[#2a2318] border border-amber-700/40 rounded-xl rounded-tl-none px-4 py-3 max-w-sm">
+          <p className="text-md text-amber-100/95 whitespace-pre-wrap mb-3">{message.text}</p>
+          <button
+            type="button"
+            className="w-full rounded-lg bg-amber-600/90 hover:bg-amber-600 text-white text-sm font-medium py-2.5 px-3 transition-colors"
+            onClick={() => onRetryLlmFormat?.(message.chatRetryPayload!)}
+          >
+            {t('chatSendMessageAgain')}
+          </button>
+        </div>
+      ) : message.chatErrorKind === 'reload_app' ? (
+        <div className="bg-[#1f2328] border border-red-900/35 rounded-xl rounded-tl-none px-4 py-3 max-w-sm">
+          <p className="text-md text-zinc-200 whitespace-pre-wrap mb-3">{message.text}</p>
+          <button
+            type="button"
+            className="w-full rounded-lg bg-zinc-600 hover:bg-zinc-500 text-white text-sm font-medium py-2.5 px-3 transition-colors"
+            onClick={() => onReloadApp?.()}
+          >
+            {t('chatReloadApp')}
+          </button>
         </div>
       ) : (
         <div className="bg-[#1f1f1f] rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">
@@ -80,7 +110,8 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
       )}
     </div>
   </div>
-));
+  );
+});
 
 MessageItem.displayName = 'MessageItem';
 

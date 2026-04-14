@@ -9,14 +9,13 @@ const PAYABLE_GEMS_COST = 5;
 
 export type ArtifactUseConfirmModalProps = {
   isOpen: boolean;
-  suggestionText: string;
   willPayGems: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
 
 const ArtifactUseConfirmModal: React.FC<ArtifactUseConfirmModalProps> = observer(
-  ({ isOpen, suggestionText, willPayGems, onClose, onConfirm }) => {
+  ({ isOpen, willPayGems, onClose, onConfirm }) => {
     const { t } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
 

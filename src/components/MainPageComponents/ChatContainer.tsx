@@ -268,7 +268,6 @@ const ChatContainer: React.FC = observer(() => {
 
             <ArtifactUseConfirmModal
                 isOpen={artifactUsePending != null}
-                suggestionText={artifactUsePending?.text ?? ''}
                 willPayGems={Boolean(artifactUsePending?.payGemsForSuggestionId)}
                 onClose={() => setArtifactUsePending(null)}
                 onConfirm={() => {

@@ -161,6 +161,15 @@
     -webkit-text-fill-color: transparent;
   }
 
+  .ring-user-message-gradient {
+    border: 1px solid #b249f8;
+    background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
   /* Card-style blur + silver gradient border (same silver as btn-default-silver-border) */
   .bg-card-silver-border {
     border: 1px solid transparent;

@@ -4,7 +4,7 @@ import Button from '@/components/ui/button';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { trackEvent } from '@/utils/analytics';
 
-const PAYABLE_GEMS_COST = 5;
+const PAYABLE_EXTRA_ENERGY_COST = 5;
 
 interface SuggestionMeta {
   id: string;
@@ -36,7 +36,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
   onSelectSuggestion,
 }) => {
   const { user, chat } = useContext(Context) as IStoreContext;
-  const balance = user?.user?.balance ?? 0;
+  const energy = user?.user?.energy ?? 0;
   const userArtifacts = user?.user?.artifacts ?? [];
 
   // Для USE: disabled если у юзера нет артефакта или quantity < amount
@@ -58,8 +58,10 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
       return;
     }
     if (payGemsForSuggestionId) {
-      if (balance < PAYABLE_GEMS_COST) {
-        chat.setInsufficientGems(true);
+      // +1 — обычная цена отправки сообщения, +N — доплата за payable.
+      const requiredEnergy = 1 + PAYABLE_EXTRA_ENERGY_COST;
+      if (energy < requiredEnergy) {
+        chat.setInsufficientEnergy(true);
         return;
       }
     }
@@ -107,7 +109,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
             )}
             className={[
               "px-3 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",
-              isPayable && "ring-1 ring-amber-400/60 bg-amber-500/20",
+              isPayable && "ring-1 ring-[#b249f8]/60 bg-[#b249f8]/20",
               isArtifactAction && "ring-1 ring-amber-400/40 bg-gradient-to-br from-amber-500/20 at-transparent to-transparent",
               isArtifactDisabled && "opacity-60 cursor-not-allowed",
             ].filter(Boolean).join(" ")}
@@ -115,8 +117,8 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
             <span className="flex-1 text-left break-words min-w-0">{suggestion}</span>
             {isPayable && (
               <span className="flex items-center gap-1 shrink-0">
-                <i className="fa-solid fa-gem text-secondary-gradient text-sm"></i>
-                <span className="font-semibold text-secondary-gradient">{PAYABLE_GEMS_COST}</span>
+                <i className="fa-solid fa-bolt text-user-message-gradient text-sm"></i>
+                <span className="font-semibold text-user-message-gradient">{PAYABLE_EXTRA_ENERGY_COST}</span>
               </span>
             )}
             {isArtifactAction && !isPayable && (

@@ -36,9 +36,7 @@ const ArtifactUseConfirmModal: React.FC<ArtifactUseConfirmModalProps> = observer
         onClose={handleClose}
         closeAriaLabel={t('close')}
         title={t('artifactUseConfirmTitle')}
-        description={
-          <span className="text-zinc-300 whitespace-pre-wrap break-words">{suggestionText}</span>
-        }
+        description={t('artifactUseConfirmDescription')}
         headerIcon={<i className="fa-solid fa-wand-magic-sparkles text-yellow-400 text-2xl" />}
         headerIconContainerClassName="bg-yellow-500/15 border border-yellow-500/35"
         footer={
@@ -50,6 +48,7 @@ const ArtifactUseConfirmModal: React.FC<ArtifactUseConfirmModalProps> = observer
                   {PAYABLE_GEMS_COST}
                   <i className="fa-solid fa-gem text-secondary-gradient text-sm" />
                 </span>
+                
               </p>
             ) : null}
             <div className="flex gap-2 w-full">

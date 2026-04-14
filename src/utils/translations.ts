@@ -857,12 +857,16 @@ type TranslationType = {
         en: 'Use this artifact?'
     },
     artifactUseConfirmAction: {
-        ru: 'Отправить',
-        en: 'Send'
+        ru: 'Применить',
+        en: 'Use'
     },
     artifactUseConfirmPayNote: {
         ru: 'Будет списано',
         en: 'This will cost'
+    },
+    artifactUseConfirmDescription: {
+        ru: 'Артефакт останется найденным в профиле, однако использовать его повторно нельзя',
+        en: 'This artifact will remain in your profile, but you cannot use it again'
     },
     artifactMissingTitle: {
         ru: 'Артефакт не найден',

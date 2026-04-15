@@ -27,6 +27,7 @@ export type ProfileArtifactCardProps = {
     artifact: ProfileInventoryArtifact;
     displayName: string;
     ownedQty: number;
+    isFound: boolean;
     onOpenDetail: () => void;
 };
 
@@ -34,12 +35,14 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     artifact,
     displayName,
     ownedQty,
+    isFound,
     onOpenDetail,
 }) => {
     const previewUrl = artifact.media?.url;
     const previewMime = artifact.media?.mimeType ?? '';
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
     const isOwned = ownedQty > 0;
+    const isDiscovered = isFound;
     const gradientClass = artifactCardGradientClass(artifact.boostType);
 
     return (
@@ -55,7 +58,7 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
             }}
             className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center quest-item overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-colors"
         >
-            {isOwned && <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
+            {isDiscovered && <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
                 <div
                     className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
                 />
@@ -67,10 +70,10 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
                             src={previewUrl}
                             alt=""
                             className={`w-28 h-28 object-contain ${
-                                isOwned ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
+                                isDiscovered ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
                             }`}
                         />
-                        {!isOwned && (
+                        {!isDiscovered && (
                             <>
                                 <div
                                     className="absolute inset-0 rounded-lg pointer-events-none"
@@ -88,10 +91,10 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
                     <div className="relative w-28 h-28 rounded-lg bg-primary-700/50 flex items-center justify-center">
                         <i
                             className={`fa-solid fa-gem text-2xl text-amber-300/90 ${
-                                isOwned ? '' : 'opacity-40 grayscale'
+                                isDiscovered ? '' : 'opacity-40 grayscale'
                             }`}
                         />
-                        {!isOwned && (
+                        {!isDiscovered && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
                                     <i className="fa-solid fa-lock text-2xl" />

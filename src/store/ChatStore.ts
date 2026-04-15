@@ -401,6 +401,22 @@ export default class ChatStore {
         if (p.status === "locked") {
             return false;
         }
+        const missionLevel = m.level ?? 1;
+        if (missionLevel > 1) {
+            const previousLevel = missionLevel - 1;
+            const previousLevelMissions = sorted.filter((x) => (x.level ?? 1) === previousLevel);
+            const previousLevelArtifactsComplete = previousLevelMissions.every((pm) => {
+                const pp = this.missionProgressFor(pm.id);
+                if (!pp) return false;
+                const total = Number(pp.artifactsTotal ?? 0);
+                const found = Number(pp.artifactsFound ?? 0);
+                if (total <= 0) return true;
+                return found >= total;
+            });
+            if (!previousLevelArtifactsComplete) {
+                return false;
+            }
+        }
         return (
             p.status === "in_progress" ||
             p.status === "completed" ||

@@ -67,6 +67,8 @@ export interface ProfileInventoryStory {
     artifacts: ProfileInventoryArtifact[];
     /** code → количество в инвентаре для данной истории */
     owned: Record<string, number>;
+    /** code → сколько раз артефакт был найден (не уменьшается при использовании) */
+    found: Record<string, number>;
 }
 
 export interface ProfileInventoryResponse {

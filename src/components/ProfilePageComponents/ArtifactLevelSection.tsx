@@ -68,6 +68,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
             >
                 {group.artifacts.map((art) => {
                     const qty = owned[art.code] ?? 0;
+                    const isFound = Object.prototype.hasOwnProperty.call(owned, art.code);
                     const name = artifactName(art.code, art.name, art.nameEn);
                     return (
                         <ProfileArtifactCard
@@ -75,6 +76,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                             artifact={art}
                             displayName={name}
                             ownedQty={qty}
+                            isFound={isFound}
                             onOpenDetail={() => onOpenDetail(art, qty)}
                         />
                     );

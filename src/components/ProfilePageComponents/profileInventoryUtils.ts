@@ -14,8 +14,8 @@ export function sortArtifactsOwnedFirst(
     owned: Record<string, number>,
 ): ProfileInventoryArtifact[] {
     return [...artifacts].sort((a, b) => {
-        const ownedA = (owned[a.code] ?? 0) > 0 ? 1 : 0;
-        const ownedB = (owned[b.code] ?? 0) > 0 ? 1 : 0;
+        const ownedA = Object.prototype.hasOwnProperty.call(owned, a.code) ? 1 : 0;
+        const ownedB = Object.prototype.hasOwnProperty.call(owned, b.code) ? 1 : 0;
         if (ownedB !== ownedA) return ownedB - ownedA;
         return a.id - b.id;
     });
@@ -35,7 +35,7 @@ export function buildLevelGroups(
         .sort(([a], [b]) => a - b)
         .map(([level, arts]) => {
             const sorted = sortArtifactsOwnedFirst(arts, owned);
-            const collected = sorted.filter((a) => (owned[a.code] ?? 0) > 0).length;
+            const collected = sorted.filter((a) => Object.prototype.hasOwnProperty.call(owned, a.code)).length;
             return {
                 level,
                 artifacts: sorted,

@@ -41,6 +41,26 @@ type TranslationType = {
       ru: 'Перезагрузить',
       en: 'Reload',
     },
+    chatErrorReportHint: {
+      ru: 'Если перезагрузка не помогла, отправьте репорт об ошибке — мы с вами свяжемся.',
+      en: 'If reloading does not help, send an error report and we will get in touch.',
+    },
+    chatSendErrorReport: {
+      ru: 'Отправить репорт',
+      en: 'Send report',
+    },
+    chatErrorReportThanks: {
+      ru: 'Репорт отправлен. Спасибо!',
+      en: 'Report sent. Thank you!',
+    },
+    chatErrorReportSuccessful: {
+      ru: 'Успешно',
+      en: 'Successful',
+    },
+    chatErrorReportSending: {
+      ru: 'Отправка…',
+      en: 'Sending…',
+    },
     mission: {
       ru: 'Миссия',
       en: 'Mission'

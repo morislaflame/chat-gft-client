@@ -92,6 +92,21 @@ export interface ChatRetryPayload {
     beginReplay?: boolean;
 }
 
+/** Данные для POST /api/message/error-report (репорт после сбоя чата). */
+export interface ClientErrorReportPayload {
+    clientMessage: string;
+    httpStatus: number | null;
+    serverMessage: string | null;
+    serverCode: string | null;
+    suggestionId: string | null;
+    payGemsForSuggestionId: string | null;
+    historyName: string;
+    missionId: number | null;
+    beginReplay: boolean;
+    /** Доп. контекст (код axios, причина и т.д.). */
+    clientMeta?: Record<string, unknown>;
+}
+
 export interface Message {
     id: string;
     text: string;
@@ -112,6 +127,8 @@ export interface Message {
     isCongratulation?: boolean;
     chatErrorKind?: ChatMessageErrorKind;
     chatRetryPayload?: ChatRetryPayload;
+    /** Контекст для отправки репорта (блок «перезагрузка»). */
+    errorReportContext?: ClientErrorReportPayload;
 }
 
 export interface ApiMessageResponse {

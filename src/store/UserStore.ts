@@ -194,11 +194,16 @@ export default class UserStore {
             const referralInfo = await getReferralInfo();
             
             // Используем язык из данных пользователя или из localStorage
-            const userLanguage = (data as UserInfo).language || this._language;
+            const apiUser = data as UserInfo;
             const savedLanguage = localStorage.getItem('language') as 'ru' | 'en' | null;
-            const finalLanguage = savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en') 
-                ? savedLanguage 
-                : this.normalizeLanguage(userLanguage);
+            // Язык из БД — источник истины; localStorage мог быть записан ошибочно на первом логине (JWT без language).
+            const serverHasLanguage =
+                apiUser.language != null && String(apiUser.language).trim() !== '';
+            const finalLanguage = serverHasLanguage
+                ? this.normalizeLanguage(apiUser.language)
+                : savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en')
+                  ? savedLanguage
+                  : this.normalizeLanguage(this._language);
             
             runInAction(() => {
                 this.setLanguage(finalLanguage);

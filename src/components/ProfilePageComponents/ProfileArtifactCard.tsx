@@ -34,14 +34,13 @@ export type ProfileArtifactCardProps = {
 const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     artifact,
     displayName,
-    ownedQty,
+    ownedQty: _ownedQty,
     isFound,
     onOpenDetail,
 }) => {
     const previewUrl = artifact.media?.url;
     const previewMime = artifact.media?.mimeType ?? '';
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
-    const isOwned = ownedQty > 0;
     const isDiscovered = isFound;
     const gradientClass = artifactCardGradientClass(artifact.boostType);
 

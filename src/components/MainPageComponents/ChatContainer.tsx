@@ -230,6 +230,7 @@ const ChatContainer: React.FC = observer(() => {
                         onReloadApp={() => {
                             window.location.reload();
                         }}
+                        onSubmitErrorReport={(payload) => chat.submitClientErrorReport(payload)}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">

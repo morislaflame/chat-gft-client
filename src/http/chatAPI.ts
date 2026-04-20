@@ -1,5 +1,10 @@
 import { $authHost } from "./index";
-import type { ApiMessageResponse, ApiStatusResponse, MediaFile } from '@/types/types';
+import type {
+    ApiMessageResponse,
+    ApiStatusResponse,
+    ClientErrorReportPayload,
+    MediaFile,
+} from '@/types/types';
 
 export interface ApiHistoryResponse {
     history: Array<{
@@ -60,5 +65,23 @@ export const getChatHistory = async (
 
 export const getStatus = async (): Promise<ApiStatusResponse> => {
     const { data } = await $authHost.get('api/message/status');
+    return data;
+};
+
+export const submitClientErrorReport = async (
+    payload: ClientErrorReportPayload & { clientMeta?: Record<string, unknown> },
+): Promise<{ ok: boolean; id: string; llmTraceId: string | null }> => {
+    const { data } = await $authHost.post('api/message/error-report', {
+        clientMessage: payload.clientMessage,
+        historyName: payload.historyName,
+        missionId: payload.missionId,
+        httpStatus: payload.httpStatus,
+        serverMessage: payload.serverMessage,
+        serverCode: payload.serverCode,
+        suggestionId: payload.suggestionId,
+        payGemsForSuggestionId: payload.payGemsForSuggestionId,
+        beginReplay: payload.beginReplay,
+        clientMeta: payload.clientMeta ?? undefined,
+    });
     return data;
 };

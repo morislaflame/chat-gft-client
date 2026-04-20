@@ -1,10 +1,16 @@
 import { makeAutoObservable } from "mobx";
-import { sendMessage as apiSendMessage, getChatHistory, getStatus } from "@/http/chatAPI";
+import {
+    sendMessage as apiSendMessage,
+    getChatHistory,
+    getStatus,
+    submitClientErrorReport as postClientErrorReport,
+} from "@/http/chatAPI";
 import { setSelectedChatMission } from "@/http/userAPI";
 import { translate } from "@/utils/translations";
 import type {
     Message,
     ChatRetryPayload,
+    ClientErrorReportPayload,
     ApiMessageResponse,
     StageRewardData,
     StepRewardData,
@@ -513,6 +519,20 @@ export default class ChatStore {
     }
 
     /** Повтор последнего пользовательского сообщения после ошибки формата ответа LLM. */
+    async submitClientErrorReport(payload: ClientErrorReportPayload) {
+        await postClientErrorReport({
+            ...payload,
+            clientMeta: {
+                ...payload.clientMeta,
+                app: "chat-gft-client",
+            },
+        });
+        trackEvent("chat_error_report_submitted", {
+            story_id: payload.historyName,
+            http_status: payload.httpStatus,
+        });
+    }
+
     retryAfterLlmFormatError(payload: ChatRetryPayload) {
         this._messages = this._messages.filter((m) => m.chatErrorKind !== "llm_format");
         void this.sendMessage(
@@ -784,17 +804,43 @@ export default class ChatStore {
             if (status === 400) {
                 const msg = data?.message ?? '';
                 if (msg.includes('Insufficient energy')) {
-                this.setError('Insufficient energy. Please purchase more stars.');
-                this.setInsufficientEnergy(true);
-                trackEvent('chat_message_send_failed', { reason: 'insufficient_energy' });
-                trackEvent('energy_depleted', { balance: this._userStore?.user?.energy ?? null, context: 'story' });
-                trackEvent('mission_fail', { story_id: storyId, fail_reason: 'energy_depleted' });
-                } else if (msg.includes('Insufficient balance')) {
-                    this.setError('Недостаточно гемов для оплаты.');
-                } else if (msg.includes('Artifact') || msg.includes('artifact')) {
-                    this.setError(msg || 'Артефакт недоступен.');
+                    this.setError('Insufficient energy. Please purchase more stars.');
+                    this.setInsufficientEnergy(true);
+                    trackEvent('chat_message_send_failed', { reason: 'insufficient_energy' });
+                    trackEvent('energy_depleted', {
+                        balance: this._userStore?.user?.energy ?? null,
+                        context: 'story',
+                    });
+                    trackEvent('mission_fail', { story_id: storyId, fail_reason: 'energy_depleted' });
                 } else {
-                    this.setError(msg || 'Error: Unable to send message. Please try again.');
+                    // Остальные 400 (Invalid artifact, balance и т.д.): setError нигде не рендерится в чате —
+                    // показываем тот же блок с перезагрузкой, что и для 5xx/сети.
+                    const failReason = msg.toLowerCase().includes('artifact')
+                        ? 'bad_request_artifact'
+                        : msg.toLowerCase().includes('balance')
+                          ? 'bad_request_balance'
+                          : 'bad_request_other';
+                    this.addMessage({
+                        id: `chat-err-reload-${Date.now()}`,
+                        text: translate('chatReloadAppHint', lang),
+                        isUser: false,
+                        timestamp: new Date(),
+                        chatErrorKind: 'reload_app',
+                        errorReportContext: {
+                            clientMessage: messageText,
+                            httpStatus: 400,
+                            serverMessage: msg || null,
+                            serverCode: typeof data?.code === 'string' ? data.code : null,
+                            suggestionId: suggestionId ?? null,
+                            payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+                            historyName: storyId,
+                            missionId: this._selectedMissionId,
+                            beginReplay: extra?.beginReplay === true,
+                            clientMeta: { failReason },
+                        },
+                    });
+                    trackEvent('chat_message_send_failed', { reason: failReason });
+                    trackEvent('mission_fail', { story_id: storyId, fail_reason: failReason });
                 }
             } else if (status === 422 && data?.code === 'LLM_INVALID_FORMAT') {
                 this.addMessage({
@@ -812,17 +858,32 @@ export default class ChatStore {
                 });
                 trackEvent('chat_message_send_failed', { reason: 'llm_invalid_format' });
             } else {
+                const failReason =
+                    status === 503 && data?.code === 'CHAT_SERVICE_UNAVAILABLE'
+                        ? 'chat_service_unavailable'
+                        : 'fatal_reload';
                 this.addMessage({
                     id: `chat-err-reload-${Date.now()}`,
                     text: translate('chatReloadAppHint', lang),
                     isUser: false,
                     timestamp: new Date(),
                     chatErrorKind: 'reload_app',
+                    errorReportContext: {
+                        clientMessage: messageText,
+                        httpStatus: status ?? null,
+                        serverMessage: typeof data?.message === 'string' ? data.message : null,
+                        serverCode: typeof data?.code === 'string' ? data.code : null,
+                        suggestionId: suggestionId ?? null,
+                        payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+                        historyName: storyId,
+                        missionId: this._selectedMissionId,
+                        beginReplay: extra?.beginReplay === true,
+                        clientMeta: {
+                            failReason,
+                            axiosErrorCode: axiosError.code ?? null,
+                        },
+                    },
                 });
-                const failReason =
-                    status === 503 && data?.code === 'CHAT_SERVICE_UNAVAILABLE'
-                        ? 'chat_service_unavailable'
-                        : 'fatal_reload';
                 trackEvent('chat_message_send_failed', { reason: failReason });
                 trackEvent('mission_fail', { story_id: storyId, fail_reason: failReason });
             }

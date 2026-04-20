@@ -96,6 +96,8 @@ function getDefaultLabelRu(eventName: string, params: Record<string, unknown>): 
       return "Отправка сообщения";
     case "chat_message_send_failed":
       return "Ошибка отправки сообщения";
+    case "chat_error_report_submitted":
+      return "Отправлен репорт об ошибке чата";
     case "chat_suggestion_click":
       return "Клик по подсказке";
     case "mission_start_click":

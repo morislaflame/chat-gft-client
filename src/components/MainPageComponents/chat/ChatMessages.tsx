@@ -5,7 +5,7 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import MissionCard from './MissionCard';
 import MessageItem from './MessageItem';
 import TypingIndicator from './TypingIndicator';
-import type { ChatRetryPayload } from '@/types/types';
+import type { ChatRetryPayload, ClientErrorReportPayload } from '@/types/types';
 import type { RefObject } from 'react';
 
 interface ChatMessagesProps {
@@ -19,6 +19,7 @@ interface ChatMessagesProps {
   ) => void;
   onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
   onReloadApp?: () => void;
+  onSubmitErrorReport?: (payload: ClientErrorReportPayload) => Promise<void>;
   messageEndRef: RefObject<HTMLDivElement | null>;
 }
 
@@ -29,6 +30,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   onSelectSuggestion,
   onRetryLlmFormat,
   onReloadApp,
+  onSubmitErrorReport,
   messageEndRef,
 }) => {
   const { chat } = React.useContext(Context) as IStoreContext;
@@ -83,6 +85,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
             onSelectSuggestion={handleSelectSuggestion}
             onRetryLlmFormat={onRetryLlmFormat}
             onReloadApp={onReloadApp}
+            onSubmitErrorReport={onSubmitErrorReport}
           />
         );
       })}

@@ -1,8 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
+import Button from '@/components/ui/button';
 import FormattedText from '../FormattedText';
 import SuggestionButtons from './SuggestionButtons';
-import type { ChatRetryPayload, Message } from '@/types/types';
+import type { ChatRetryPayload, ClientErrorReportPayload, Message } from '@/types/types';
 import { useTranslate } from '@/utils/useTranslate';
 
 interface MessageItemProps {
@@ -25,6 +26,7 @@ interface MessageItemProps {
   onSelectSuggestion: (text: string, suggestionId?: string | null, payGemsForSuggestionId?: string | null) => void;
   onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
   onReloadApp?: () => void;
+  onSubmitErrorReport?: (payload: ClientErrorReportPayload) => Promise<void>;
 }
 
 const MessageItem: React.FC<MessageItemProps> = memo(({
@@ -37,8 +39,10 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
   onSelectSuggestion,
   onRetryLlmFormat,
   onReloadApp,
+  onSubmitErrorReport,
 }) => {
   const { t } = useTranslate();
+  const [reportStatus, setReportStatus] = useState<'idle' | 'loading' | 'sent'>('idle');
 
   return (
   <div className="message-container flex items-start mb-6">
@@ -52,24 +56,64 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
       ) : message.chatErrorKind === 'llm_format' && message.chatRetryPayload ? (
         <div className="bg-[#2a2318] border border-amber-700/40 rounded-xl rounded-tl-none px-4 py-3 max-w-sm">
           <p className="text-md text-amber-100/95 whitespace-pre-wrap mb-3">{message.text}</p>
-          <button
+          <Button
             type="button"
-            className="w-full rounded-lg bg-amber-600/90 hover:bg-amber-600 text-white text-sm font-medium py-2.5 px-3 transition-colors"
+            variant="gradient"
+            size="sm"
+            className="w-full ring-1 ring-amber-400/50"
             onClick={() => onRetryLlmFormat?.(message.chatRetryPayload!)}
           >
             {t('chatSendMessageAgain')}
-          </button>
+          </Button>
         </div>
       ) : message.chatErrorKind === 'reload_app' ? (
-        <div className="bg-[#1f2328] border border-red-900/35 rounded-xl rounded-tl-none px-4 py-3 max-w-sm">
+        <div className="btn-default-silver-border rounded-xl rounded-tl-none px-4 py-3 max-w-sm">
           <p className="text-md text-zinc-200 whitespace-pre-wrap mb-3">{message.text}</p>
-          <button
+          <Button
             type="button"
-            className="w-full rounded-lg bg-zinc-600 hover:bg-zinc-500 text-white text-sm font-medium py-2.5 px-3 transition-colors"
+            variant="default"
+            size="sm"
+            className="w-full"
             onClick={() => onReloadApp?.()}
           >
             {t('chatReloadApp')}
-          </button>
+          </Button>
+          {message.errorReportContext ? (
+            <div className="mt-4 pt-3 border-t border-white/10">
+              <p className="text-xs text-zinc-400 leading-snug mb-2">{t('chatErrorReportHint')}</p>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="w-full btn-destructive-gradient-border"
+                state={
+                  reportStatus === 'loading'
+                    ? 'loading'
+                    : reportStatus === 'sent'
+                      ? 'success'
+                      : 'default'
+                }
+                disabled={reportStatus === 'sent' || reportStatus === 'loading'}
+                onClick={async () => {
+                  if (!message.errorReportContext || !onSubmitErrorReport) return;
+                  if (reportStatus === 'sent') return;
+                  setReportStatus('loading');
+                  try {
+                    await onSubmitErrorReport(message.errorReportContext);
+                    setReportStatus('sent');
+                  } catch {
+                    setReportStatus('idle');
+                  }
+                }}
+              >
+                {reportStatus === 'sent'
+                  ? t('chatErrorReportSuccessful')
+                  : reportStatus === 'loading'
+                    ? t('chatErrorReportSending')
+                    : t('chatSendErrorReport')}
+              </Button>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="bg-[#1f1f1f] rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
@@ -25,22 +25,27 @@ const ProfileContainer: React.FC = observer(() => {
     const [detailDescription, setDetailDescription] = useState('');
     const [detailOwnedQty, setDetailOwnedQty] = useState(0);
     const [artifactsExplainerOpen, setArtifactsExplainerOpen] = useState(false);
+    const hasLoadedInventoryRef = useRef(false);
+    const userId = user.user?.id;
 
     useEffect(() => {
+        if (!userId) return;
         let cancelled = false;
         (async () => {
-            setLoading(true);
+            if (!hasLoadedInventoryRef.current) {
+                setLoading(true);
+            }
             setError(null);
             try {
-                await user.fetchMyInfo();
                 const data = await getProfileInventory();
                 if (!cancelled) {
                     setStories(data.stories ?? []);
+                    hasLoadedInventoryRef.current = true;
                 }
             } catch (e) {
                 console.error(e);
                 if (!cancelled) {
-                    setError(t('profileLoadError'));
+                    setError('profileLoadError');
                 }
             } finally {
                 if (!cancelled) setLoading(false);
@@ -49,7 +54,7 @@ const ProfileContainer: React.FC = observer(() => {
         return () => {
             cancelled = true;
         };
-    }, [user, t]);
+    }, [userId]);
 
     const isMobile = typeof document !== 'undefined' && document.body.classList.contains('telegram-mobile');
     const u = user.user;
@@ -117,7 +122,7 @@ const ProfileContainer: React.FC = observer(() => {
                 className="p-4 text-center text-red-300 text-sm"
                 style={{ marginTop: isMobile ? '158px' : '58px' }}
             >
-                {error}
+                {t(error)}
             </div>
         );
     }

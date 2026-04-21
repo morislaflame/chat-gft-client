@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode, setLanguage as setLanguageApi } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 import { trackEvent } from "@/utils/analytics";
 
@@ -110,13 +110,18 @@ export default class UserStore {
     }
 
     async changeLanguage(lang: 'ru' | 'en') {
+        const prevLanguage = this._language;
         try {
             runInAction(() => {
                 this.setLanguage(lang);
             });
+            setLanguageApi(lang);
             trackEvent("language_change", { language: lang });
         } catch (error) {
             console.error("Error changing language:", error);
+            runInAction(() => {
+                this.setLanguage(prevLanguage);
+            });
         }
     }
 

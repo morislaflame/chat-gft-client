@@ -34,7 +34,7 @@ export type ProfileArtifactCardProps = {
 const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     artifact,
     displayName,
-    ownedQty: _ownedQty,
+    ownedQty,
     isFound,
     onOpenDetail,
 }) => {
@@ -43,6 +43,7 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
     const isDiscovered = isFound;
     const gradientClass = artifactCardGradientClass(artifact.boostType);
+    const showQtyBadge = isDiscovered && ownedQty > 1;
 
     return (
         <Card
@@ -57,6 +58,11 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
             }}
             className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center quest-item overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-colors"
         >
+            {showQtyBadge && (
+                <div className="absolute top-2 right-2 z-[2] rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-semibold leading-none text-zinc-100 ring-1 ring-white/20">
+                    {`x${ownedQty}`}
+                </div>
+            )}
             {isDiscovered && <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
                 <div
                     className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}

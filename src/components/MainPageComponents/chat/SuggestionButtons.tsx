@@ -13,7 +13,7 @@ interface SuggestionMeta {
   payable?: boolean;
   artifact_action?: boolean;
   artifact_code?: string;
-  artifact_action_type?: 'ACQUIRE' | 'USE';
+  artifact_action_type?: 'RECEIVE' | 'USE';
   artifact_amount?: number;
   artifact_media?: { id: number; url: string; mimeType: string } | null;
 }

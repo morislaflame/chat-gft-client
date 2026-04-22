@@ -148,8 +148,8 @@ export interface ApiMessageResponse {
         payable?: boolean;
         artifact_action?: boolean;
         artifact_code?: string;
-        /** ACQUIRE = поднять, USE = применить. Для USE: disable если нет артефакта */
-        artifact_action_type?: 'ACQUIRE' | 'USE';
+        /** RECEIVE = получить, USE = применить. Для USE: disable если нет артефакта */
+        artifact_action_type?: 'RECEIVE' | 'USE';
         artifact_amount?: number;
         /** Превью артефакта с бэкенда (обогащение по artifact_code) */
         artifact_media?: { id: number; url: string; mimeType: string } | null;
@@ -213,7 +213,7 @@ export interface ApiMessageResponse {
     } | null;
     artifactAction?: {
         id: number;
-        action: 'ACQUIRE' | 'USE';
+        action: 'RECEIVE' | 'USE';
         artifact_code: string;
         artifact_name?: string | null;
         amount: number;
@@ -221,7 +221,7 @@ export interface ApiMessageResponse {
         available_quantity?: number | null;
         missing_reason?: string | null;
         ui_label?: string | null;
-        /** С бэкенда при ACQUIRE — для модалки «получен артефакт» */
+        /** С бэкенда при RECEIVE — для модалки «получен артефакт» */
         artifact_description?: string | null;
         artifact_description_en?: string | null;
         media?: { id: number; url: string; mimeType: string } | null;

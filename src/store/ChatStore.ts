@@ -770,7 +770,7 @@ export default class ChatStore {
                 this._userStore.setArtifacts(response.artifacts);
             }
 
-            if (response.artifactAction?.action === 'ACQUIRE') {
+            if (response.artifactAction?.action === 'RECEIVE') {
                 this.setArtifactAction(response.artifactAction);
             }
 

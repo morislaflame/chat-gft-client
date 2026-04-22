@@ -12,7 +12,7 @@ const ArtifactAcquireModal: React.FC = observer(() => {
   const { hapticImpact, hapticNotification } = useHapticFeedback();
 
   const action = chat.artifactAction;
-  const isOpen = Boolean(action?.action === 'ACQUIRE');
+  const isOpen = Boolean(action?.action === 'RECEIVE');
 
   const name = action?.artifact_name?.trim() || action?.artifact_code || '';
 

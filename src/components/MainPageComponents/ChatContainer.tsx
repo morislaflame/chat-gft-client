@@ -155,7 +155,7 @@ const ChatContainer: React.FC = observer(() => {
         if (!trimmed) return;
 
         const sid = suggestionId ?? '';
-        const meta = chat.suggestionsMeta?.find((m) => m.id === sid);
+        const meta = chat.suggestions?.find((m) => m.id === sid);
         if (
             meta?.artifact_action === true &&
             meta?.artifact_action_type === 'USE'

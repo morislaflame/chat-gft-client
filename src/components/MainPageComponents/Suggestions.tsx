@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import Button from '@/components/ui/button';
+import type { ChatSuggestion } from '@/types/types';
 
 interface SuggestionsProps {
-    suggestions: string[];
+    suggestions: ChatSuggestion[];
     onSelectSuggestion: (text: string) => void;
     isExpanded?: boolean; // Внешнее управление состоянием
     onToggle?: () => void; // Колбэк для изменения состояния
@@ -52,8 +53,8 @@ const Suggestions: React.FC<SuggestionsProps> = observer(({
         return null;
     }
 
-    const handleSuggestionClick = (text: string) => {
-        onSelectSuggestion(text);
+    const handleSuggestionClick = (suggestion: ChatSuggestion) => {
+        onSelectSuggestion(suggestion.text);
         if (externalOnToggle) {
             externalOnToggle();
         } else {
@@ -72,13 +73,13 @@ const Suggestions: React.FC<SuggestionsProps> = observer(({
             <div ref={contentRef} className="flex w-full overflow-x-auto scrollbar-thin">
                 {suggestions.map((suggestion, index) => (
                     <Button
-                        key={index}
+                        key={suggestion.id || index}
                         variant="default"
                         size="default"
                         onClick={() => handleSuggestionClick(suggestion)}
                         className="flex-shrink-0 m-2 text-left whitespace-normal text-balance"
                     >
-                        {suggestion}
+                        {suggestion.text}
                     </Button>
                 ))}
             </div>

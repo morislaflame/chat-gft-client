@@ -9,6 +9,7 @@ import { setSelectedChatMission } from "@/http/userAPI";
 import { translate } from "@/utils/translations";
 import type {
     Message,
+    ChatSuggestion,
     ChatRetryPayload,
     ClientErrorReportPayload,
     ApiMessageResponse,
@@ -29,8 +30,7 @@ export default class ChatStore {
     _isTyping = false;
     _currentStage = 1;
     _mission: string | null = null;
-    _suggestions: string[] = [];
-    _suggestionsMeta: ApiMessageResponse['suggestionsMeta'] = undefined;
+    _suggestions: ChatSuggestion[] = [];
     _artifactAction: ApiMessageResponse['artifactAction'] = null;
     _loading = false;
     /** Миссия, для которой сейчас грузится история (список миссий / смена треда) */
@@ -483,7 +483,6 @@ export default class ChatStore {
             },
         ]);
         this.setSuggestions([]);
-        this.setSuggestionsMeta(undefined);
         this._loadedHistoryName = this._userStore?.user?.selectedHistoryName ?? null;
         this._loadedMissionId = missionId;
         void this.persistSelectedChatMission(missionId);
@@ -494,12 +493,8 @@ export default class ChatStore {
         return mission?.video || null;
     }
 
-    setSuggestions(suggestions: string[]) {
+    setSuggestions(suggestions: ChatSuggestion[]) {
         this._suggestions = suggestions;
-    }
-
-    setSuggestionsMeta(meta: ApiMessageResponse['suggestionsMeta']) {
-        this._suggestionsMeta = meta ?? undefined;
     }
 
     setArtifactAction(action: ApiMessageResponse['artifactAction']) {
@@ -570,7 +565,6 @@ export default class ChatStore {
 
         // Очищаем suggestions при отправке нового сообщения
         this.setSuggestions([]);
-        this.setSuggestionsMeta(undefined);
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
@@ -763,7 +757,6 @@ export default class ChatStore {
             } else {
                 this.setSuggestions([]);
             }
-            this.setSuggestionsMeta(response.suggestionsMeta ?? undefined);
 
             // Обновляем артефакты юзера из ответа (актуально после подбора/использования)
             if (response.artifacts && Array.isArray(response.artifacts) && this._userStore) {
@@ -997,11 +990,6 @@ export default class ChatStore {
             } else {
                 this.setSuggestions([]);
             }
-            if (historyResponse.lastSuggestionsMeta) {
-                this.setSuggestionsMeta(historyResponse.lastSuggestionsMeta);
-            } else {
-                this.setSuggestionsMeta(undefined);
-            }
 
             this._loadedHistoryName = currentHistoryName;
             this._loadedMissionId = mid;
@@ -1035,7 +1023,6 @@ export default class ChatStore {
         this.setCurrentStage(1);
         this.setMission(null);
         this.setSuggestions([]);
-        this.setSuggestionsMeta(undefined);
         this._loadedHistoryName = null;
         this._loadedMissionId = null;
         this._selectedMissionId = null;
@@ -1062,10 +1049,6 @@ export default class ChatStore {
 
     get suggestions() {
         return this._suggestions;
-    }
-
-    get suggestionsMeta() {
-        return this._suggestionsMeta;
     }
 
     get artifactAction() {

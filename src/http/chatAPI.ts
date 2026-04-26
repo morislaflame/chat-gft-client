@@ -18,8 +18,7 @@ export interface ApiHistoryResponse {
     hasMore?: boolean;
     nextCursor?: number | null;
     /** Подсказки для последнего сообщения (с сервера, при перезагрузке) */
-    lastSuggestions?: string[];
-    lastSuggestionsMeta?: ApiMessageResponse['suggestionsMeta'];
+    lastSuggestions?: ApiMessageResponse['suggestions'];
     video?: MediaFile | null;
     avatar?: MediaFile | null;
     background?: MediaFile | null;

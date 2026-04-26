@@ -92,6 +92,20 @@ export interface ChatRetryPayload {
     beginReplay?: boolean;
 }
 
+export interface ChatSuggestion {
+    id: string;
+    text: string;
+    kind: 'core' | 'detour' | 'neutral' | 'side' | 'quit';
+    payable?: boolean;
+    artifact_action?: boolean;
+    artifact_code?: string;
+    /** RECEIVE = получить, USE = применить. Для USE: disable если нет артефакта */
+    artifact_action_type?: 'RECEIVE' | 'USE';
+    artifact_amount?: number;
+    /** Превью артефакта с бэкенда (обогащение по artifact_code) */
+    artifact_media?: { id: number; url: string; mimeType: string } | null;
+}
+
 /** Данные для POST /api/message/error-report (репорт после сбоя чата). */
 export interface ClientErrorReportPayload {
     clientMessage: string;
@@ -140,20 +154,7 @@ export interface ApiMessageResponse {
     messagesUntilCongratulation: number;
     newEnergy: number;
     newBalance?: number;
-    suggestions?: string[];
-    suggestionsMeta?: Array<{
-        id: string;
-        text: string;
-        kind: 'core' | 'detour';
-        payable?: boolean;
-        artifact_action?: boolean;
-        artifact_code?: string;
-        /** RECEIVE = получить, USE = применить. Для USE: disable если нет артефакта */
-        artifact_action_type?: 'RECEIVE' | 'USE';
-        artifact_amount?: number;
-        /** Превью артефакта с бэкенда (обогащение по artifact_code) */
-        artifact_media?: { id: number; url: string; mimeType: string } | null;
-    }>;
+    suggestions?: ChatSuggestion[];
     /** Актуальный инвентарь артефактов после ответа (для обновления UserStore) */
     artifacts?: Array<{ code: string; quantity: number }>;
     missionCompleted?: boolean;

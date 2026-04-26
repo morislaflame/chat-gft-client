@@ -3,23 +3,12 @@ import { AnimatePresence } from 'motion/react';
 import Button from '@/components/ui/button';
 import FormattedText from '../FormattedText';
 import SuggestionButtons from './SuggestionButtons';
-import type { ChatRetryPayload, ClientErrorReportPayload, Message } from '@/types/types';
+import type { ChatRetryPayload, ChatSuggestion, ClientErrorReportPayload, Message } from '@/types/types';
 import { useTranslate } from '@/utils/useTranslate';
 
 interface MessageItemProps {
   message: Message;
-  suggestions: string[];
-  suggestionsMeta?: Array<{
-    id: string;
-    text: string;
-    kind: 'core' | 'detour';
-    payable?: boolean;
-    artifact_action?: boolean;
-    artifact_code?: string;
-    artifact_action_type?: 'RECEIVE' | 'USE';
-    artifact_amount?: number;
-    artifact_media?: { id: number; url: string; mimeType: string } | null;
-  }> | null;
+  suggestions: ChatSuggestion[];
   showSuggestions: boolean;
   avatarUrl?: string;
   onArtifactDisabledClick?: () => void;
@@ -32,7 +21,6 @@ interface MessageItemProps {
 const MessageItem: React.FC<MessageItemProps> = memo(({
   message,
   suggestions,
-  suggestionsMeta,
   showSuggestions,
   avatarUrl,
   onArtifactDisabledClick,
@@ -143,7 +131,6 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
               {showSuggestions && (
                 <SuggestionButtons
                   suggestions={suggestions}
-                  suggestionsMeta={suggestionsMeta ?? undefined}
                   onArtifactDisabledClick={onArtifactDisabledClick}
                   onSelectSuggestion={onSelectSuggestion}
                 />

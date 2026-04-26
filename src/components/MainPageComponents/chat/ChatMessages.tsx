@@ -38,7 +38,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
 
   const messages = chat.messages ?? [];
   const suggestions = chat.suggestions ?? [];
-  const suggestionsMeta = chat.suggestionsMeta ?? null;
   const avatarUrl = chat.avatar?.url;
 
   const handleSelectSuggestion = (
@@ -78,7 +77,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
             key={message.id}
             message={message}
             suggestions={suggestions}
-            suggestionsMeta={suggestionsMeta}
             showSuggestions={showSuggestions}
             avatarUrl={avatarUrl}
             onArtifactDisabledClick={onArtifactDisabledClick}

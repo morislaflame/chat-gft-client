@@ -3,24 +3,12 @@ import { motion } from 'motion/react';
 import Button from '@/components/ui/button';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { trackEvent } from '@/utils/analytics';
+import type { ChatSuggestion } from '@/types/types';
 
 const PAYABLE_EXTRA_ENERGY_COST = 5;
 
-interface SuggestionMeta {
-  id: string;
-  text: string;
-  kind: 'core' | 'detour';
-  payable?: boolean;
-  artifact_action?: boolean;
-  artifact_code?: string;
-  artifact_action_type?: 'RECEIVE' | 'USE';
-  artifact_amount?: number;
-  artifact_media?: { id: number; url: string; mimeType: string } | null;
-}
-
 interface SuggestionButtonsProps {
-  suggestions: string[];
-  suggestionsMeta?: SuggestionMeta[] | null;
+  suggestions: ChatSuggestion[];
   onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (
     text: string,
@@ -31,7 +19,6 @@ interface SuggestionButtonsProps {
 
 const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
   suggestions,
-  suggestionsMeta,
   onArtifactDisabledClick,
   onSelectSuggestion,
 }) => {
@@ -82,14 +69,13 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
       className="mt-3 grid grid-cols-2 gap-2"
     >
       {suggestions.map((suggestion, suggestionIndex) => {
-        const sid = `s${suggestionIndex + 1}`;
-        const meta = suggestionsMeta?.find((m) => m.id === sid);
-        const isPayable = meta?.payable === true;
-    const isArtifactAction = meta?.artifact_action === true;
-    const isArtifactUse = meta?.artifact_action_type === 'USE';
-        const artifactAmount = meta?.artifact_amount ?? 1;
-        const artifactCode = (meta?.artifact_code || '').trim();
-        const artifactMedia = meta?.artifact_media;
+        const sid = suggestion.id || `s${suggestionIndex + 1}`;
+        const isPayable = suggestion.payable === true;
+        const isArtifactAction = suggestion.artifact_action === true;
+        const isArtifactUse = suggestion.artifact_action_type === 'USE';
+        const artifactAmount = suggestion.artifact_amount ?? 1;
+        const artifactCode = (suggestion.artifact_code || '').trim();
+        const artifactMedia = suggestion.artifact_media;
         const isArtifactImage =
           Boolean(artifactMedia?.url && artifactMedia.mimeType?.startsWith('image/'));
         const isArtifactDisabled = Boolean(isArtifactUse && artifactCode && !hasArtifact(artifactCode, artifactAmount));
@@ -100,7 +86,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
             size="sm"
             aria-disabled={isArtifactDisabled}
             onClick={() => handleSuggestionClick(
-              suggestion,
+              suggestion.text,
               sid,
               isPayable ? sid : null,
               isArtifactAction,
@@ -114,7 +100,7 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
               isArtifactDisabled && "opacity-60 cursor-not-allowed",
             ].filter(Boolean).join(" ")}
           >
-            <span className="flex-1 text-left break-words min-w-0">{suggestion}</span>
+            <span className="flex-1 text-left break-words min-w-0">{suggestion.text}</span>
             {isPayable && (
               <span className="flex items-center gap-1 shrink-0">
                 <i className="fa-solid fa-bolt text-user-message-gradient text-sm"></i>

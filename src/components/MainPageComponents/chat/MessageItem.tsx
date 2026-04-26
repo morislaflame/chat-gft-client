@@ -9,6 +9,8 @@ import { useTranslate } from '@/utils/useTranslate';
 interface MessageItemProps {
   message: Message;
   suggestions: ChatSuggestion[];
+  suggestionsFormatError?: boolean;
+  suggestionsFormatErrorReportContext?: ClientErrorReportPayload | null;
   showSuggestions: boolean;
   avatarUrl?: string;
   onArtifactDisabledClick?: () => void;
@@ -21,6 +23,8 @@ interface MessageItemProps {
 const MessageItem: React.FC<MessageItemProps> = memo(({
   message,
   suggestions,
+  suggestionsFormatError = false,
+  suggestionsFormatErrorReportContext,
   showSuggestions,
   avatarUrl,
   onArtifactDisabledClick,
@@ -131,6 +135,12 @@ const MessageItem: React.FC<MessageItemProps> = memo(({
               {showSuggestions && (
                 <SuggestionButtons
                   suggestions={suggestions}
+                  formatError={suggestionsFormatError}
+                  onReportFormatError={
+                    suggestionsFormatErrorReportContext && onSubmitErrorReport
+                      ? () => onSubmitErrorReport(suggestionsFormatErrorReportContext)
+                      : undefined
+                  }
                   onArtifactDisabledClick={onArtifactDisabledClick}
                   onSelectSuggestion={onSelectSuggestion}
                 />

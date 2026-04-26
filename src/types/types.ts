@@ -155,6 +155,7 @@ export interface ApiMessageResponse {
     newEnergy: number;
     newBalance?: number;
     suggestions?: ChatSuggestion[];
+    suggestionsFormatError?: boolean;
     /** Актуальный инвентарь артефактов после ответа (для обновления UserStore) */
     artifacts?: Array<{ code: string; quantity: number }>;
     missionCompleted?: boolean;

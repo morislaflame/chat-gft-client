@@ -31,6 +31,8 @@ export default class ChatStore {
     _currentStage = 1;
     _mission: string | null = null;
     _suggestions: ChatSuggestion[] = [];
+    _suggestionsFormatError = false;
+    _suggestionsFormatErrorReportContext: ClientErrorReportPayload | null = null;
     _artifactAction: ApiMessageResponse['artifactAction'] = null;
     _loading = false;
     /** Миссия, для которой сейчас грузится история (список миссий / смена треда) */
@@ -483,6 +485,8 @@ export default class ChatStore {
             },
         ]);
         this.setSuggestions([]);
+        this.setSuggestionsFormatError(false);
+        this.setSuggestionsFormatErrorReportContext(null);
         this._loadedHistoryName = this._userStore?.user?.selectedHistoryName ?? null;
         this._loadedMissionId = missionId;
         void this.persistSelectedChatMission(missionId);
@@ -495,6 +499,14 @@ export default class ChatStore {
 
     setSuggestions(suggestions: ChatSuggestion[]) {
         this._suggestions = suggestions;
+    }
+
+    setSuggestionsFormatError(value: boolean) {
+        this._suggestionsFormatError = value;
+    }
+
+    setSuggestionsFormatErrorReportContext(context: ClientErrorReportPayload | null) {
+        this._suggestionsFormatErrorReportContext = context;
     }
 
     setArtifactAction(action: ApiMessageResponse['artifactAction']) {
@@ -565,6 +577,8 @@ export default class ChatStore {
 
         // Очищаем suggestions при отправке нового сообщения
         this.setSuggestions([]);
+        this.setSuggestionsFormatError(false);
+        this.setSuggestionsFormatErrorReportContext(null);
 
         // Сохраняем баланс до отправки сообщения для вычисления награды
         const previousBalance = this._userStore?.user?.balance || 0;
@@ -757,6 +771,26 @@ export default class ChatStore {
             } else {
                 this.setSuggestions([]);
             }
+            const suggestionsFormatError = response.suggestionsFormatError === true;
+            this.setSuggestionsFormatError(suggestionsFormatError);
+            this.setSuggestionsFormatErrorReportContext(
+                suggestionsFormatError
+                    ? {
+                        clientMessage: messageText,
+                        httpStatus: 200,
+                        serverMessage: "LLM returned invalid suggestions; service fallback suggestions were used.",
+                        serverCode: "LLM_INVALID_SUGGESTIONS",
+                        suggestionId: suggestionId ?? null,
+                        payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+                        historyName: storyId,
+                        missionId: this._selectedMissionId,
+                        beginReplay: extra?.beginReplay === true,
+                        clientMeta: {
+                            failReason: "llm_invalid_suggestions",
+                        },
+                    }
+                    : null,
+            );
 
             // Обновляем артефакты юзера из ответа (актуально после подбора/использования)
             if (response.artifacts && Array.isArray(response.artifacts) && this._userStore) {
@@ -990,6 +1024,8 @@ export default class ChatStore {
             } else {
                 this.setSuggestions([]);
             }
+            this.setSuggestionsFormatError(false);
+            this.setSuggestionsFormatErrorReportContext(null);
 
             this._loadedHistoryName = currentHistoryName;
             this._loadedMissionId = mid;
@@ -1023,6 +1059,8 @@ export default class ChatStore {
         this.setCurrentStage(1);
         this.setMission(null);
         this.setSuggestions([]);
+        this.setSuggestionsFormatError(false);
+        this.setSuggestionsFormatErrorReportContext(null);
         this._loadedHistoryName = null;
         this._loadedMissionId = null;
         this._selectedMissionId = null;
@@ -1049,6 +1087,14 @@ export default class ChatStore {
 
     get suggestions() {
         return this._suggestions;
+    }
+
+    get suggestionsFormatError() {
+        return this._suggestionsFormatError;
+    }
+
+    get suggestionsFormatErrorReportContext() {
+        return this._suggestionsFormatErrorReportContext;
     }
 
     get artifactAction() {

@@ -82,26 +82,7 @@ const RewardsContainer: React.FC = observer(() => {
             : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }));
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
 
-    const telegramGiftBackgroundUrls = useMemo(() => {
-        const urls: string[] = [];
-        const seen = new Set<string>();
-        const sourceRewards = [
-            ...reward.myPurchases.map((purchase) => purchase.reward),
-            ...reward.availableRewards,
-        ];
-
-        for (const rewardItem of sourceRewards) {
-            const media = rewardItem.preview ?? rewardItem.mediaFile;
-            const url = media?.url?.trim();
-            const isImage = media?.mimeType?.startsWith('image/') ?? false;
-            if (!url || !isImage || seen.has(url)) continue;
-            seen.add(url);
-            urls.push(url);
-            if (urls.length >= 5) break;
-        }
-
-        return urls;
-    }, [reward.availableRewards, reward.myPurchases]);
+    
 
     const casesData: CaseBox[] = useMemo(() => cases.activeCases, [cases.activeCases]);
     const myUnopenedCases = useMemo(() => cases.myUnopenedCases, [cases.myUnopenedCases]);

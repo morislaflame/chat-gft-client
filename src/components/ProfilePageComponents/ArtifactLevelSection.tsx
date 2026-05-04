@@ -2,6 +2,7 @@ import React from 'react';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import ProfileArtifactCard from './ProfileArtifactCard';
 import type { ArtifactLevelGroup } from './profileInventoryUtils';
+import { motion, useReducedMotion } from 'motion/react';
 
 export type ArtifactLevelSectionProps = {
     group: ArtifactLevelGroup;
@@ -24,11 +25,13 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
 }) => {
     const pct = group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0;
 
+    const prefersReducedMotion = useReducedMotion();
+
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide">
+                    <span className="text-sm font-bold text-white uppercase tracking-wide">
                         {t('profileLevel')} {group.level}
                     </span>
                     {group.isComplete && (
@@ -37,29 +40,38 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                         </span>
                     )}
                     {!isPrevComplete && (
-                        <span className="text-[10px] font-bold text-zinc-500 bg-zinc-700/60 rounded-full px-1.5 py-0.5 leading-none shrink-0">
+                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded-full px-1.5 py-0.5 leading-none shrink-0">
                             <i className="fa-solid fa-lock text-[9px] mr-0.5" />
                             {t('profileLevelLocked')}
                         </span>
                     )}
                 </div>
                 <span className="text-xs text-zinc-500 shrink-0 ml-auto">
-                    {group.collected}/{group.total}
+                    {t('artifactsFound')}: {group.collected}/{group.total}
                 </span>
             </div>
 
-            <div className="relative h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-2">
-                <div
-                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${
-                        group.isComplete
-                            ? 'bg-emerald-500'
-                            : isPrevComplete
-                              ? 'bg-amber-500'
-                              : 'bg-zinc-600'
-                    }`}
-                    style={{ width: `${pct}%` }}
-                />
-            </div>
+            <div className="relative mt-1 h-2 w-full overflow-hidden rounded-full border border-white/15 bg-black/45">
+                        <motion.div
+                            className="absolute inset-y-0 left-0 z-[1] rounded-full"
+                            aria-hidden
+                            initial={prefersReducedMotion ? false : { width: '0%' }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{
+                                duration: prefersReducedMotion ? 0 : 0.52,
+                                ease: [0.22, 1, 0.36, 1],
+                                delay: prefersReducedMotion ? 0 : 0.06,
+                            }}
+                            style={{
+                                boxShadow:
+                                    pct > 0
+                                        ? '0 0 16px hsl(var(--primary) / 0.45), 0 0 8px hsl(var(--primary) / 0.3)'
+                                        : undefined,
+                                background: 'var(--gradient-accent-color)',
+                            }}
+                        />
+                    </div>
+
 
             <div
                 className={`flex gap-3 overflow-x-auto py-3 -mx-1 px-1 hide-scrollbar ios-scroll transition-opacity duration-300 ${
@@ -84,10 +96,12 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
             </div>
 
             {!group.isComplete && hasNextLevel && isPrevComplete && (
-                <p className="text-[11px] text-zinc-500 leading-snug">
-                    <i className="fa-solid fa-gem text-amber-400/70 mr-1 text-[9px]" />
-                    {t('profileLevelUnlockHint').replace('{{level}}', String(group.level))}
-                </p>
+                <motion.span
+                className=""
+            >
+                <i className="fa-solid fa-gem text-artifact-gradient mr-2 text-[12px]" />
+                <p className="text-sm inline text-zinc-400">{t('profileLevelUnlockHint').replace('{{level}}', String(group.level))}</p>
+                </motion.span>
             )}
         </div>
     );

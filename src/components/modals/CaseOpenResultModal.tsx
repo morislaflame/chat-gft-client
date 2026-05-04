@@ -100,7 +100,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           <>
             <Button
               onClick={onClose}
-              variant="default"
+              variant={isReward ? "default" : "gradient"}
               size="lg"
               className="w-full"
               icon="fas fa-check"

@@ -3,6 +3,12 @@ import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
 
+/** Безопасная подстановка пути в `url("…")` для inline style */
+function cssBackgroundImageUrl(src: string): React.CSSProperties {
+  const escaped = src.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+  return { backgroundImage: `url("${escaped}")` }
+}
+
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -35,12 +41,16 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 type DrawerContentProps = React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
   overlayClassName?: string
   overlayProps?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
+  /** Фон только внутри панели шторки (с закруглением сверху), под контентом */
+  backdropImageSrc?: string
+  backdropImageAlt?: string
+  backdropImageClassName?: string
 }
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   DrawerContentProps
->(({ className, children, overlayClassName, overlayProps, ...props }, ref) => (
+>(({ className, children, overlayClassName, overlayProps, backdropImageSrc, backdropImageAlt: _backdropAlt = "", backdropImageClassName, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay
       {...overlayProps}
@@ -48,6 +58,7 @@ const DrawerContent = React.forwardRef<
     />
     <DrawerPrimitive.Content
       ref={ref}
+      data-gft-drawer-has-backdrop={backdropImageSrc ? true : undefined}
       className={cn(
         "fixed inset-x-0 bottom-0 z-[10000] mt-24 flex h-auto flex-col rounded-t-4xl border-t border-white/15 bg-black/40 backdrop-blur-md outline-none",
         className
@@ -55,6 +66,16 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-white/10 mb-6" />
+      {backdropImageSrc ? (
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-t-4xl bg-cover bg-center bg-no-repeat opacity-20",
+            backdropImageClassName
+          )}
+          style={cssBackgroundImageUrl(backdropImageSrc)}
+        />
+      ) : null}
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

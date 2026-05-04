@@ -99,8 +99,8 @@ export interface ChatSuggestion {
     payable?: boolean;
     artifact_action?: boolean;
     artifact_code?: string;
-    /** RECEIVE = получить, USE = применить. Для USE: disable если нет артефакта */
-    artifact_action_type?: 'RECEIVE' | 'USE';
+    /** RECEIVE = получить, USE = применить, NONE = без действия с артефактом. Для USE: disable если нет артефакта */
+    artifact_action_type?: 'RECEIVE' | 'USE' | 'NONE';
     artifact_amount?: number;
     /** Превью артефакта с бэкенда (обогащение по artifact_code) */
     artifact_media?: { id: number; url: string; mimeType: string } | null;

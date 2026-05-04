@@ -5,6 +5,7 @@ import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
 import type { Reward, UserReward } from '@/http/rewardAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { getRewardBackdropSrcByPrice } from '@/utils/rewardBackdrop';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 
 interface RewardDetailModalProps {
@@ -140,10 +141,9 @@ const RewardDetailModal: React.FC<RewardDetailModalProps> = observer(({
       isOpen={isOpen}
       onClose={handleClose}
       closeOnOverlayClick={true}
+      backdropImageSrc={reward ? getRewardBackdropSrcByPrice(reward.price ?? 0) : undefined}
       title={reward?.name ?? ''}
       description={reward?.description ?? null}
-      headerIcon={<i className="fa-solid fa-gift text-white text-2xl"></i>}
-      headerIconContainerClassName={activeTab === 'purchased' ? 'bg-secondary-gradient shadow-lg' : 'bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg'}
       closeAriaLabel={t('close')}
       footer={reward ? getActionButton() : null}
     >

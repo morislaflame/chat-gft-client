@@ -104,7 +104,7 @@ const rippleClasses: Record<ButtonVariant, string> = {
 
 const SCALE_ANIMATION = {
   whileHover: {
-    scale: 1.03,
+    scale: 1.02,
     transition: { type: "spring", stiffness: 350, damping: 22, mass: 0.8 },
   },
   whileTap: {
@@ -112,6 +112,9 @@ const SCALE_ANIMATION = {
     transition: { duration: 1, ease: "easeInOut" },
   },
 } as const;
+
+/** Те же spring/tap, что у {@link Button} — для переиспользования на motion‑карточках профиля и т.п. */
+export const motionInteractiveSurfaceProps = SCALE_ANIMATION;
 
 const stateOverlayClasses: Record<Exclude<ButtonState, "default">, string> = {
   success: "bg-green-500",

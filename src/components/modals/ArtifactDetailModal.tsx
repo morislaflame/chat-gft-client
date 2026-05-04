@@ -4,6 +4,7 @@ import Modal from '@/components/CoreComponents/Modal';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { ProfileInventoryArtifact } from '@/types/types';
+import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 import Button from '../ui/button';
 
 type ArtifactDetailModalProps = {
@@ -43,6 +44,9 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 isOpen={isOpen}
                 onClose={handleClose}
                 closeOnOverlayClick={true}
+                backdropImageSrc={
+                    artifact ? getArtifactBackdropSrcByBoostType(artifact.boostType) : undefined
+                }
                 title={title}
                 description={modalDescription}
                 // headerIcon={<i className="fa-solid fa-gem text-white text-2xl" />}
@@ -50,7 +54,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 closeAriaLabel={t('close')}
                 contentClassName="max-h-[min(55vh,420px)] overflow-y-auto"
                 footer={
-                    <Button onClick={handleClose} variant="gradient" size="lg" className="w-full">
+                    <Button onClick={handleClose} variant="default" size="lg" className="w-full">
                         {t('close')}
                     </Button>
                 }

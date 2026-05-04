@@ -1,6 +1,7 @@
 import React from 'react';
 import { type CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { getCaseBoxBackdropSrc } from '@/utils/caseBoxBackdrop';
 import Button from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -38,28 +39,18 @@ const BoxCard: React.FC<BoxCardProps> = ({
     ((language === 'en' ? (box.descriptionEn || box.description) : box.description) ?? null) ||
     null;
 
-  const boxSize = (() => {
-    const n = (title || box.name || '').toUpperCase();
-    if (/\bS\b/.test(n) || n.endsWith(' S')) return 's';
-    if (/\bL\b/.test(n) || n.endsWith(' L')) return 'l';
-    return 'm';
-  })();
-
-  const gradientClass =
-    boxSize === 's'
-      ? 'bg-gradient-to-b from-red-500 to-transparent'
-      : boxSize === 'l'
-        ? 'bg-gradient-to-b from-gray-200 to-transparent'
-        : 'bg-gradient-to-b from-purple-500 to-transparent';
+  const boxBackdropSrc = getCaseBoxBackdropSrc(title || box.name || '');
 
   return (
     <Card
       onClick={() => onClick(box)}
-      className='quest-item hover:bg-primary-700/50 transition cursor-pointer overflow-hidden'
+      className="quest-item hover:bg-primary-700/50 relative cursor-pointer overflow-hidden transition"
     >
-      <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
-        <div
-          className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+        <img
+          src={boxBackdropSrc}
+          alt=""
+          className="absolute top-0 left-0 h-[100%] w-full object-cover object-top opacity-20"
         />
       </div>
       <div className="mb-2 flex items-center justify-center">

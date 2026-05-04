@@ -275,6 +275,30 @@ type TranslationType = {
         ru: 'Мои награды',
         en: 'My Rewards'
     },
+    telegramGiftsHelpAria: {
+        ru: 'Что такое Telegram Gifts и где их смотреть',
+        en: 'What Telegram Gifts are and where to browse them'
+    },
+    telegramGiftsModalTitle: {
+        ru: 'Telegram Gifts',
+        en: 'Telegram Gifts'
+    },
+    telegramGiftsModalSubtitle: {
+        ru: 'Цифровые подарки и площадки, где можно посмотреть предложения',
+        en: 'Digital gifts and marketplaces where you can browse listings'
+    },
+    telegramGiftsModalP1: {
+        ru: 'Telegram Gifts — это цифровые активы в Telegram: торгуются на площадках внутри экосистемы Ton и Telegram',
+        en: 'Telegram Gifts are digital assets in Telegram: traded on platforms within the Ton and Telegram ecosystems'
+    },
+    telegramGiftsModalP2: {
+        ru: 'Когда вы покупаете награду за гемы, вы можете получить ее на свой аккаунт Telegram в качестве подарка, запросив вывод в разделе "Мои награды"',
+        en: 'When you purchase a reward for gems, you can receive it on your Telegram account as a gift, by requesting a withdrawal in the "My Rewards" section'
+    },
+    telegramGiftsMarketplacesHeading: {
+        ru: 'Площадки в Telegram',
+        en: 'Telegram marketplaces'
+    },
     boxes: {
         ru: 'Боксы',
         en: 'Boxes'
@@ -415,8 +439,8 @@ type TranslationType = {
         en: 'Next mission'
     },
     missionsList: {
-        ru: 'Миссии',
-        en: 'Missions'
+        ru: 'Все миссии',
+        en: 'All missions'
     },
     missionsLoadingOrEmpty: {
         ru: 'Загрузка миссий…',
@@ -761,8 +785,8 @@ type TranslationType = {
         en: 'Profile'
     },
     profileCollections: {
-        ru: 'Коллекции',
-        en: 'Collections'
+        ru: 'Коллекции Артефактов',
+        en: 'Artifact Collections'
     },
     profileLevel: {
         ru: 'Уровень',
@@ -795,6 +819,22 @@ type TranslationType = {
     profileNftArtifactsBanner: {
         ru: 'Артефакты скоро будут в качестве NFT! Успевай собирать их уже сейчас — проходи миссии!',
         en: 'Artifacts will soon become NFTs! Start collecting now — play missions!'
+    },
+    profileNftInfoModalSubtitle: {
+        ru: 'Скоро ваши находки смогут стать NFT',
+        en: 'Your finds will soon be able to become NFTs'
+    },
+    profileNftInfoModalP1: {
+        ru: 'Ищите артефакты в миссиях: проходите сюжет в чате, выполняйте задачи миссии — часть наград появится в коллекции в профиле.',
+        en: 'Find artifacts in missions: play the story in chat, complete mission tasks — rewards will appear in your profile collections.'
+    },
+    profileNftInfoModalP2: {
+        ru: 'В профиле по каждой истории видна коллекция: сколько предметов собрано, по уровням и общий прогресс.',
+        en: 'In your profile each story shows a collection: how many pieces you’ve collected, by level, and overall progress.'
+    },
+    profileNftInfoModalP3: {
+        ru: 'Мы готовим вывод найденных артефактов в виде NFT и обмен с другими игроками — собирайте заранее, чтобы ничего не упустить.',
+        en: 'We’re preparing on-chain NFT minting and trading with other players — collect early so you don’t miss out.'
     },
     artifactsExplainerTitle: {
         ru: 'Сюжет',
@@ -835,6 +875,42 @@ type TranslationType = {
     profileNoName: {
         ru: 'Игрок',
         en: 'Player'
+    },
+    profileStoryLevelsCompleteLabel: {
+        ru: 'Уровней пройдено',
+        en: 'Levels completed'
+    },
+    profileStoryOverallProgress: {
+        ru: 'Общий прогресс',
+        en: 'Overall progress'
+    },
+    profileStorySummaryLine: {
+        ru: '{{pct}}% · {{owned}}/{{total}} · ур. {{lvDone}}/{{lvAll}}',
+        en: '{{pct}}% · {{owned}}/{{total}} · lv. {{lvDone}}/{{lvAll}}'
+    },
+    profileStoryOpenCollection: {
+        ru: 'Открыть коллекцию',
+        en: 'Open collection'
+    },
+    profileStoryNotFound: {
+        ru: 'Сюжет не найден',
+        en: 'Story not found'
+    },
+    profileBackToProfile: {
+        ru: 'К профилю',
+        en: 'Back to profile'
+    },
+    profileBackToProfileAria: {
+        ru: 'Назад к профилю',
+        en: 'Back to profile'
+    },
+    progressExplainer: {
+        ru: 'Соберите все артефакты на миссиях уровня, чтобы открыть следующий.',
+        en: 'Collect all artifacts on the level missions to open the next level'
+    },
+    progressExplainer2: {
+        ru: 'Найденные артефакты засчитываются в прогресс. Когда вы их тратите в миссиях - прогресс не пропадает.',
+        en: 'Found artifacts count towards progress. When you use them in missions - progress does not disappear.'
     },
     gemsModalEnergyPacks: {
         ru: 'Энергия за звёзды',

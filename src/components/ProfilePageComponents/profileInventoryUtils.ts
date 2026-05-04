@@ -1,4 +1,4 @@
-import type { ProfileInventoryArtifact } from '@/types/types';
+import type { ProfileInventoryArtifact, ProfileInventoryStory } from '@/types/types';
 
 export interface ArtifactLevelGroup {
     level: number;
@@ -44,4 +44,33 @@ export function buildLevelGroups(
                 isComplete: collected === sorted.length && sorted.length > 0,
             };
         });
+}
+
+/** Агрегаты для компактной карточки истории на профиле. */
+export function getStoryCollectionStats(
+    story: Pick<ProfileInventoryStory, 'artifacts' | 'owned'>,
+): {
+    catalogTotal: number;
+    ownedDistinctInCatalog: number;
+    levelsTotal: number;
+    levelsFullyComplete: number;
+    pctCollected: number;
+} {
+    const groups = buildLevelGroups(story.artifacts, story.owned);
+    const catalogTotal = story.artifacts.length;
+    const codesInCatalog = new Set(story.artifacts.map((a) => a.code));
+    let ownedDistinctInCatalog = 0;
+    for (const code of codesInCatalog) {
+        if (Object.prototype.hasOwnProperty.call(story.owned, code)) ownedDistinctInCatalog += 1;
+    }
+    const levelsFullyComplete = groups.filter((g) => g.isComplete).length;
+    const pctCollected =
+        catalogTotal > 0 ? Math.round((ownedDistinctInCatalog / catalogTotal) * 100) : 0;
+    return {
+        catalogTotal,
+        ownedDistinctInCatalog,
+        levelsTotal: groups.length,
+        levelsFullyComplete,
+        pctCollected,
+    };
 }

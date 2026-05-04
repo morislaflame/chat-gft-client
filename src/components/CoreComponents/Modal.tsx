@@ -37,6 +37,11 @@ interface ModalProps {
   hideCloseButton?: boolean;
   closeDisabled?: boolean;
   closeAriaLabel?: string;
+
+  /** Фон внутри панели модалки (под заголовком/контентом), поверх полупрозрачного blur-подложки панели */
+  backdropImageSrc?: string;
+  backdropImageAlt?: string;
+  backdropImageClassName?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -57,6 +62,9 @@ const Modal: React.FC<ModalProps> = ({
   hideCloseButton = false,
   closeDisabled = false,
   closeAriaLabel = 'Close',
+  backdropImageSrc,
+  backdropImageAlt = '',
+  backdropImageClassName,
 }) => {
   if (typeof document === 'undefined') return null;
 
@@ -89,6 +97,9 @@ const Modal: React.FC<ModalProps> = ({
       <DrawerContent
         overlayClassName={overlayClassName}
         overlayProps={overlayProps}
+        backdropImageSrc={backdropImageSrc}
+        backdropImageAlt={backdropImageAlt}
+        backdropImageClassName={backdropImageClassName}
         className={cn('max-h-[100vh] overflow-hidden', className)}
       >
         {!hideCloseButton ? (
@@ -113,7 +124,7 @@ const Modal: React.FC<ModalProps> = ({
                     </DrawerClose>
                   )
                 ) : null}
-        <div className="mx-auto w-full max-w-md h-full flex flex-col">
+        <div className="mx-auto flex w-full max-w-md min-h-0 flex-col">
           {hasHeader ? (
             <motion.div
               className="px-4 pb-4"

@@ -11,6 +11,7 @@ import RewardDetailModal from '../modals/RewardDetailModal';
 import WithdrawalResultModal from '../modals/WithdrawalResultModal';
 import CaseDetailModal from '../modals/CaseDetailModal';
 import CasePurchaseModal from '../modals/CasePurchaseModal';
+import TelegramGiftsInfoModal from '../modals/TelegramGiftsInfoModal';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -38,6 +39,7 @@ const RewardsContainer: React.FC = observer(() => {
     const [caseDetailOpen, setCaseDetailOpen] = useState(false);
     const [purchasedBox, setPurchasedBox] = useState<CaseBox | null>(null);
     const [purchasingBoxId, setPurchasingBoxId] = useState<number | null>(null);
+    const [telegramGiftsModalOpen, setTelegramGiftsModalOpen] = useState(false);
 
     useEffect(() => {
         // Loot screen view (custom product event)
@@ -79,6 +81,27 @@ const RewardsContainer: React.FC = observer(() => {
             ? reward.availableRewards.map((rewardItem) => ({ rewardItem, userReward: null as UserReward | null }))
             : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }));
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
+
+    const telegramGiftBackgroundUrls = useMemo(() => {
+        const urls: string[] = [];
+        const seen = new Set<string>();
+        const sourceRewards = [
+            ...reward.myPurchases.map((purchase) => purchase.reward),
+            ...reward.availableRewards,
+        ];
+
+        for (const rewardItem of sourceRewards) {
+            const media = rewardItem.preview ?? rewardItem.mediaFile;
+            const url = media?.url?.trim();
+            const isImage = media?.mimeType?.startsWith('image/') ?? false;
+            if (!url || !isImage || seen.has(url)) continue;
+            seen.add(url);
+            urls.push(url);
+            if (urls.length >= 5) break;
+        }
+
+        return urls;
+    }, [reward.availableRewards, reward.myPurchases]);
 
     const casesData: CaseBox[] = useMemo(() => cases.activeCases, [cases.activeCases]);
     const myUnopenedCases = useMemo(() => cases.myUnopenedCases, [cases.myUnopenedCases]);
@@ -304,6 +327,10 @@ const RewardsContainer: React.FC = observer(() => {
                     onOwnedCaseOpen={navigateToCase}
                     onPurchase={handlePurchase}
                     onWithdrawClick={handleWithdrawClickForModal}
+                    onTelegramGiftsInfo={() => {
+                        hapticImpact('soft');
+                        setTelegramGiftsModalOpen(true);
+                    }}
                     getPurchaseState={(rewardItem: Reward) => ({
                         isPurchasing: reward.isRewardPurchasing(rewardItem.id),
                         canAfford: (user.user?.balance || 0) >= rewardItem.price
@@ -401,6 +428,11 @@ const RewardsContainer: React.FC = observer(() => {
                 status={withdrawResult?.status || null}
                 message={withdrawResult?.message}
                 onClose={() => setWithdrawResult(null)}
+            />
+
+            <TelegramGiftsInfoModal
+                isOpen={telegramGiftsModalOpen}
+                onClose={() => setTelegramGiftsModalOpen(false)}
             />
         </div>
     );

@@ -1,27 +1,11 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Card } from '@/components/ui/card';
+import { motionInteractiveSurfaceProps } from '@/components/ui/button';
 import type { ProfileInventoryArtifact } from '@/types/types';
+import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 
-/**
- * Верхний градиент карточки — тот же паттерн, что у {@link BoxCard}:
- * `bg-gradient-to-b from-* to-transparent`, высота слоя и opacity задаются снаружи.
- */
-function artifactCardGradientClass(boostType: string | undefined): string {
-    switch (boostType) {
-        case 'WEAPON':
-            return 'bg-gradient-to-b from-red-500 to-transparent';
-        case 'ARMOR':
-            return 'bg-gradient-to-b from-blue-500 to-transparent';
-        case 'TRINKET':
-            return 'bg-gradient-to-b from-purple-500 to-transparent';
-        case 'KEY':
-            return 'bg-gradient-to-b from-amber-400 to-transparent';
-        case 'COMPANION':
-            return 'bg-gradient-to-b from-fuchsia-500 to-transparent';
-        default:
-            return 'bg-gradient-to-b from-purple-500 to-transparent';
-    }
-}
+const MotionCard = motion.create(Card);
 
 export type ProfileArtifactCardProps = {
     artifact: ProfileInventoryArtifact;
@@ -38,36 +22,53 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     isFound,
     onOpenDetail,
 }) => {
+    const prefersReducedMotion = useReducedMotion();
     const previewUrl = artifact.media?.url;
     const previewMime = artifact.media?.mimeType ?? '';
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
     const isDiscovered = isFound;
-    const gradientClass = artifactCardGradientClass(artifact.boostType);
+    const backdropSrc = getArtifactBackdropSrcByBoostType(artifact.boostType);
     const showQtyBadge = isDiscovered && ownedQty > 1;
 
+    const surfaceMotion = prefersReducedMotion
+        ? {}
+        : {
+              whileHover: {
+                  y: -1,
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  ...motionInteractiveSurfaceProps.whileHover,
+              },
+              whileTap: motionInteractiveSurfaceProps.whileTap,
+          };
+
     return (
-        <Card
+        <MotionCard
             role="button"
             tabIndex={0}
             onClick={onOpenDetail}
-            onKeyDown={(e) => {
+            onKeyDown={(e: React.KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     onOpenDetail();
                 }
             }}
-            className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center quest-item overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-colors"
+            {...surfaceMotion}
+            className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-[background-color,box-shadow,color] duration-400 ease-out"
         >
             {showQtyBadge && (
                 <div className="absolute top-2 right-2 z-[2] rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-semibold leading-none text-zinc-100 ring-1 ring-white/20">
                     {`x${ownedQty}`}
                 </div>
             )}
-            {isDiscovered && <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
-                <div
-                    className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+                <img
+                    src={backdropSrc}
+                    alt=""
+                    className={`absolute top-0 left-0 h-full w-full object-cover object-top ${
+                        isDiscovered ? 'opacity-20' : 'opacity-[0.12]'
+                    }`}
                 />
-            </div>}
+            </div>
             <div className="mb-4 flex items-center justify-center relative w-28 h-28 z-[1]">
                 {isPreviewImage ? (
                     <>
@@ -95,8 +96,10 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
                 ) : (
                     <div className="relative w-28 h-28 rounded-lg bg-primary-700/50 flex items-center justify-center">
                         <i
-                            className={`fa-solid fa-gem text-2xl text-amber-300/90 ${
-                                isDiscovered ? '' : 'opacity-40 grayscale'
+                            className={`fa-solid fa-gem text-2xl ${
+                                isDiscovered
+                                    ? 'text-secondary-400/90'
+                                    : 'text-zinc-600 opacity-40 grayscale'
                             }`}
                         />
                         {!isDiscovered && (
@@ -112,7 +115,7 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
             <div className="text-center flex-1 relative z-[1] w-full px-0.5">
                 <div className="text-xs font-semibold line-clamp-3 leading-tight text-zinc-100">{displayName}</div>
             </div>
-        </Card>
+        </MotionCard>
     );
 };
 

@@ -1,32 +1,56 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/StoreProvider';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
-import ArtifactDetailModal from '@/components/modals/ArtifactDetailModal';
-import ArtifactsExplainerModal from '@/components/modals/ArtifactsExplainerModal';
-import { getProfileInventory } from '@/http/userAPI';
-import type { ProfileInventoryArtifact, ProfileInventoryStory } from '@/types/types';
+import ProfileNftArtifactsModal from '@/components/modals/ProfileNftArtifactsModal';
+import type { ProfileInventoryStory } from '@/types/types';
 import ProfileNftArtifactsBanner from './ProfileNftArtifactsBanner';
-import ProfileStoryArtifactsSection from './ProfileStoryArtifactsSection';
+import { loadMergedProfileStories } from './profileInventoryMocks';
+import ProfileStorySummaryCard from './ProfileStorySummaryCard';
 import ProfileUserHeader from './ProfileUserHeader';
 
+/** Плавное появление блоков: easing ease-out. */
+const profileStaggerEase = [0.22, 1, 0.36, 1] as const;
+
+const profileStaggerChild = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.3,
+            ease: profileStaggerEase,
+        },
+    },
+};
+
 const ProfileContainer: React.FC = observer(() => {
-    const { user, agent } = useContext(Context) as IStoreContext;
+    const { user } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const [stories, setStories] = useState<ProfileInventoryStory[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [detailOpen, setDetailOpen] = useState(false);
-    const [detailArtifact, setDetailArtifact] = useState<ProfileInventoryArtifact | null>(null);
-    const [detailTitle, setDetailTitle] = useState('');
-    const [detailDescription, setDetailDescription] = useState('');
-    const [detailOwnedQty, setDetailOwnedQty] = useState(0);
-    const [artifactsExplainerOpen, setArtifactsExplainerOpen] = useState(false);
+    const [nftArtifactsModalOpen, setNftArtifactsModalOpen] = useState(false);
     const hasLoadedInventoryRef = useRef(false);
     const userId = user.user?.id;
+    const prefersReducedMotion = useReducedMotion();
+
+    const profileMainStaggerVariants = useMemo(
+        () => ({
+            hidden: {},
+            visible: {
+                transition: {
+                    staggerChildren: prefersReducedMotion ? 0 : 0.058,
+                    delayChildren: prefersReducedMotion ? 0 : 0.05,
+                },
+            },
+        }),
+        [prefersReducedMotion],
+    );
 
     useEffect(() => {
         if (!userId) return;
@@ -37,9 +61,9 @@ const ProfileContainer: React.FC = observer(() => {
             }
             setError(null);
             try {
-                const data = await getProfileInventory();
+                const list = await loadMergedProfileStories();
                 if (!cancelled) {
-                    setStories(data.stories ?? []);
+                    setStories(list);
                     hasLoadedInventoryRef.current = true;
                 }
             } catch (e) {
@@ -74,43 +98,11 @@ const ProfileContainer: React.FC = observer(() => {
         return s.displayName || s.historyName;
     };
 
-    const artifactName = (code: string, name: string, nameEn: string | null) => {
-        if (language === 'en') {
-            return nameEn || name || code;
-        }
-        return name || code;
-    };
-
-    const artifactDescription = (art: ProfileInventoryArtifact) => {
-        if (language === 'en') {
-            return (art.descriptionEn || art.description || '').trim();
-        }
-        return (art.description || art.descriptionEn || '').trim();
-    };
-
-    const openArtifactDetail = (art: ProfileInventoryArtifact, ownedQty: number) => {
-        hapticImpact('soft');
-        setDetailArtifact(art);
-        setDetailTitle(artifactName(art.code, art.name, art.nameEn));
-        setDetailDescription(artifactDescription(art));
-        setDetailOwnedQty(ownedQty);
-        setDetailOpen(true);
-    };
-
-    const handleStoryTitleOpenMissions = async (historyName: string) => {
-        hapticImpact('soft');
-        if (agent.saving) return;
-        try {
-            await agent.selectHistory(historyName);
-            user.openMissionPathFromProfile();
-        } catch {
-            /* selectHistory уже логирует ошибку */
-        }
-    };
+    const headerSafeOffset = isMobile ? '158px' : '58px';
 
     if (loading) {
         return (
-            <div className="p-4 flex justify-center" style={{ marginTop: isMobile ? '158px' : '58px' }}>
+            <div className="flex flex-1 min-h-0 w-full flex-col items-center justify-center p-4" style={{ marginTop: headerSafeOffset }}>
                 <LoadingIndicator />
             </div>
         );
@@ -119,8 +111,8 @@ const ProfileContainer: React.FC = observer(() => {
     if (error) {
         return (
             <div
-                className="p-4 text-center text-red-300 text-sm"
-                style={{ marginTop: isMobile ? '158px' : '58px' }}
+                className="flex flex-1 min-h-0 w-full flex-col items-center justify-center p-4 text-center text-sm text-red-300"
+                style={{ marginTop: headerSafeOffset }}
             >
                 {t(error)}
             </div>
@@ -128,48 +120,57 @@ const ProfileContainer: React.FC = observer(() => {
     }
 
     return (
-        <div className="flex-1 flex flex-col min-h-0 w-full overflow-y-auto overflow-x-hidden hide-scrollbar ios-scroll">
-            <div
-                className="flex-1 min-h-0  p-4 flex w-full flex-col gap-6 pb-32"
-                style={{ marginTop: isMobile ? '158px' : '58px' }}
-            >
-                <ProfileUserHeader user={u} displayNickname={displayNickname} />
+        <div className="flex flex-1 flex-col min-h-0 w-full">
+            <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto hide-scrollbar ios-scroll touch-manipulation">
+                <motion.main
+                    variants={profileMainStaggerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="flex w-full flex-col gap-8 p-4 pb-[8.5rem]"
+                    style={{ marginTop: headerSafeOffset }}
+                >
+                    <motion.div
+                        variants={profileStaggerChild}
+                        className="mx-auto flex w-full max-w-2xl flex-col gap-4"
+                    >
+                        <ProfileUserHeader eyebrow={t('profile')} user={u} displayNickname={displayNickname} />
+                        <ProfileNftArtifactsBanner
+                            title={t('profileNftArtifactsBannerTitle')}
+                            description={t('profileNftArtifactsBanner')}
+                            onOpen={() => {
+                                hapticImpact('soft');
+                                setNftArtifactsModalOpen(true);
+                            }}
+                        />
+                    </motion.div>
 
-                <ProfileNftArtifactsBanner
-                    title={t('profileNftArtifactsBannerTitle')}
-                    description={t('profileNftArtifactsBanner')}
-                    onOpen={() => {
-                        hapticImpact('soft');
-                        setArtifactsExplainerOpen(true);
-                    }}
-                />
-
-                {stories.map((story) => (
-                    <ProfileStoryArtifactsSection
-                        key={story.historyName}
-                        story={story}
-                        displayTitle={storyTitle(story)}
-                        missionsDisabled={agent.saving}
-                        onOpenMissions={() => void handleStoryTitleOpenMissions(story.historyName)}
-                        onOpenArtifactDetail={openArtifactDetail}
-                        artifactName={artifactName}
-                        t={t}
-                    />
-                ))}
+                    <motion.section
+                        variants={profileStaggerChild}
+                        aria-labelledby="profile-collections-heading"
+                        className="mx-auto flex w-full max-w-2xl flex-col gap-2"
+                    >
+                        <div className="flex items-end justify-between gap-3 pb-1">
+                            <h2 id="profile-collections-heading" className="text-sm font-semibold tracking-wide text-zinc-400">
+                                {t('profileCollections')}
+                            </h2>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            {stories.map((story) => (
+                                <ProfileStorySummaryCard
+                                    key={story.historyName}
+                                    story={story}
+                                    displayTitle={storyTitle(story)}
+                                    t={t}
+                                />
+                            ))}
+                        </div>
+                    </motion.section>
+                </motion.main>
             </div>
 
-            <ArtifactDetailModal
-                isOpen={detailOpen}
-                onClose={() => setDetailOpen(false)}
-                artifact={detailArtifact}
-                title={detailTitle}
-                description={detailDescription}
-                ownedQty={detailOwnedQty}
-            />
-
-            <ArtifactsExplainerModal
-                isOpen={artifactsExplainerOpen}
-                onClose={() => setArtifactsExplainerOpen(false)}
+            <ProfileNftArtifactsModal
+                isOpen={nftArtifactsModalOpen}
+                onClose={() => setNftArtifactsModalOpen(false)}
             />
         </div>
     );

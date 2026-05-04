@@ -50,7 +50,11 @@ const BottomNavigation = () => {
             case PROFILE_ROUTE:
                 return 'profile';
             default:
-                return 'chat'; // По умолчанию активен чат
+                /* Подразделы профиля (/profile/story/...) и т.п. */
+                if (location.pathname.startsWith(PROFILE_ROUTE + '/') || location.pathname === PROFILE_ROUTE) {
+                    return 'profile';
+                }
+                return 'chat';
         }
     };
 

@@ -5,8 +5,9 @@ import QuestsPage from '@/pages/QuestsPage';
 import FriendsPage from '@/pages/FriendsPage';
 import RewardsPage from '@/pages/RewardsPage';
 import ProfilePage from '@/pages/ProfilePage';
-import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE, CASE_ROUTE } from '@/utils/consts';
+import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE, CASE_ROUTE, PROFILE_STORY_ROUTE } from '@/utils/consts';
 import CasePage from '@/pages/CasePage';
+import ProfileStoryPage from '@/pages/ProfileStoryPage';
 
 interface Route {
   path: string;
@@ -18,6 +19,7 @@ export const publicRoutes: Route[] = [
   { path: QUESTS_ROUTE, Component: QuestsPage },
   { path: FRIENDS_ROUTE, Component: FriendsPage },
   { path: REWARDS_ROUTE, Component: RewardsPage },
+  { path: PROFILE_STORY_ROUTE, Component: ProfileStoryPage },
   { path: STORE_ROUTE, Component: ProfilePage },
   { path: CASE_ROUTE, Component: CasePage },
 ];

@@ -426,6 +426,15 @@ body.telegram-mobile .telegram-padding {
     padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
 }
 
+/*
+ * Vaul рисует ::after под жест свайпа (background: inherit у панели).
+ * При прозрачном корне и отдельных слоях с фоном в части WebView псевдоэлемент может
+ * закрыть весь контент — при фото-фоне отключаем.
+ */
+[data-vaul-drawer][data-gft-drawer-has-backdrop]::after {
+    display: none;
+}
+
 /* Quest item hover effects */
 .quest-item:hover {
     transform: translateY(-1px);

@@ -6,18 +6,22 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { motion } from 'motion/react';
 
 export type TelegramGiftsMarketplace = {
-    /** Без ведущего @ */
-    telegramUsername: string;
-    /** Отображаемая подпись, напр. @Portals */
+    /** Полная ссылка https://t.me/... для Mini App / бота */
+    href: string;
+    /** Отображаемая подпись */
     label: string;
     /** Иконка в public, напр. /portals.jpg */
     iconSrc: string;
 };
 
 export const TELEGRAM_GIFT_MARKETPLACES: TelegramGiftsMarketplace[] = [
-    { telegramUsername: 'Portals', label: 'Portals', iconSrc: '/portals.jpg' },
-    { telegramUsername: 'Tonnel_Network_bot', label: 'TonnelMarket', iconSrc: '/tonnel.jpg' },
-    { telegramUsername: 'mrkt', label: 'mrkt', iconSrc: '/mrkt.jpg' },
+    { href: 'https://t.me/mrkt/app?startapp=8036659989', label: 'mrkt', iconSrc: '/mrkt.jpg' },
+    {
+        href: 'https://t.me/tonnel_network_bot/gifts?startapp=ref_8036659989',
+        label: 'TonnelMarket',
+        iconSrc: '/tonnel.jpg',
+    },
+    { href: 'https://t.me/portals/market?startapp=iiz7xy', label: 'Portals', iconSrc: '/portals.jpg' },
 ];
 
 export type TelegramGiftsInfoModalProps = {
@@ -34,9 +38,8 @@ const TelegramGiftsInfoModal: React.FC<TelegramGiftsInfoModalProps> = ({ isOpen,
         onClose();
     };
 
-    const openMarketUsername = (username: string) => {
+    const openTelegramHref = (url: string) => {
         hapticImpact('soft');
-        const url = `https://t.me/${username.replace(/^@/, '')}`;
         const tg = window.Telegram?.WebApp;
         if (tg?.openTelegramLink) tg.openTelegramLink(url);
         else window.open(url, '_blank', 'noopener,noreferrer');
@@ -64,10 +67,10 @@ const TelegramGiftsInfoModal: React.FC<TelegramGiftsInfoModalProps> = ({ isOpen,
                 </p>
                 <ul className="flex flex-col gap-2">
                     {TELEGRAM_GIFT_MARKETPLACES.map((m) => (
-                        <li key={m.telegramUsername}>
+                        <li key={m.href}>
                             <motion.button
                                 type="button"
-                                onClick={() => openMarketUsername(m.telegramUsername)}
+                                onClick={() => openTelegramHref(m.href)}
                                 className="flex w-full items-center gap-3 text-left text-sm font-semibold cursor-pointer"
                                 {...motionInteractiveSurfaceProps}
                                 whileHover={{ scale: 1.02 }}

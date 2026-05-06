@@ -8,7 +8,7 @@ import {
 } from "@/http/questAPI";
 import type { Task } from "@/types/types";
 import { getTaskHandler } from "@/utils/taskHandlers";
-import { getStore } from "./StoreProvider";
+import { getStore } from "@/store/storeSingleton";
 import { trackEvent } from "@/utils/analytics";
 
 // Получаем доступ к телеграм объекту

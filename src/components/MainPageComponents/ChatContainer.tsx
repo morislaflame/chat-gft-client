@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import AgentVideoModal from '../modals/AgentVideoModal';

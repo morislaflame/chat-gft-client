@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import MissionCard from './MissionCard';
 import MessageItem from './MessageItem';

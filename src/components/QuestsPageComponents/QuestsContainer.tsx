@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useCallback, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Task } from '@/types/types';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import TaskCompletionModal from '../modals/TaskCompletionModal';

@@ -1,28 +1,11 @@
 import React from 'react';
 import Modal from '@/components/CoreComponents/Modal';
-import Button, { motionInteractiveSurfaceProps } from '@/components/ui/button';
+import Button from '@/components/ui/button';
+import { motionInteractiveSurfaceProps } from '@/components/ui/motionInteractiveSurface';
+import { TELEGRAM_GIFT_MARKETPLACES } from '@/constants/telegramGiftMarketplaces';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { motion } from 'motion/react';
-
-export type TelegramGiftsMarketplace = {
-    /** Полная ссылка https://t.me/... для Mini App / бота */
-    href: string;
-    /** Отображаемая подпись */
-    label: string;
-    /** Иконка в public, напр. /portals.jpg */
-    iconSrc: string;
-};
-
-export const TELEGRAM_GIFT_MARKETPLACES: TelegramGiftsMarketplace[] = [
-    { href: 'https://t.me/mrkt/app?startapp=8036659989', label: 'mrkt', iconSrc: '/mrkt.jpg' },
-    {
-        href: 'https://t.me/tonnel_network_bot/gifts?startapp=ref_8036659989',
-        label: 'TonnelMarket',
-        iconSrc: '/tonnel.jpg',
-    },
-    { href: 'https://t.me/portals/market?startapp=iiz7xy', label: 'Portals', iconSrc: '/portals.jpg' },
-];
 
 export type TelegramGiftsInfoModalProps = {
     isOpen: boolean;

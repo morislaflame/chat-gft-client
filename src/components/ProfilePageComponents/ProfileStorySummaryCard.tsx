@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { motionInteractiveSurfaceProps } from '@/components/ui/button';
+import { motionInteractiveSurfaceProps } from '@/components/ui/motionInteractiveSurface';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { getStoryCollectionStats } from './profileInventoryUtils';
 import type { ProfileInventoryStory } from '@/types/types';

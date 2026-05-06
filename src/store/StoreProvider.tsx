@@ -1,5 +1,7 @@
-import { createContext, useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import LoadingIndicator from "../components/CoreComponents/LoadingIndicator";
+import { Context } from "@/store/context";
+import { registerStoreInstance } from "@/store/storeSingleton";
 import UserStore from "@/store/UserStore";
 import ChatStore from "@/store/ChatStore";
 import QuestStore from "@/store/QuestStore";
@@ -9,33 +11,7 @@ import RewardStore from "@/store/RewardStore";
 import CaseStore from "@/store/CaseStore";
 import DailyRewardStore from "@/store/DailyRewardStore";
 import AgentStore from "@/store/AgentStore";
-// Определяем интерфейс для нашего контекста
-export interface IStoreContext {
-  user: UserStore;
-  chat: ChatStore;
-  quest: QuestStore;
-  shop: ShopStore;
-  product: ProductStore;
-  reward: RewardStore;
-  cases: CaseStore;
-  dailyReward: DailyRewardStore;
-  agent: AgentStore;
-}
 
-let storeInstance: IStoreContext | null = null;
-
-// Функция для получения экземпляра хранилища
-export function getStore(): IStoreContext {
-  if (!storeInstance) {
-    throw new Error("Store not initialized");
-  }
-  return storeInstance;
-}
-
-// Создаем контекст с начальным значением null, но указываем правильный тип
-export const Context = createContext<IStoreContext | null>(null);
-
-// Добавляем типы для пропсов
 interface StoreProviderProps {
   children: ReactNode;
 }
@@ -51,7 +27,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     cases: CaseStore;
     dailyReward: DailyRewardStore;
     agent: AgentStore;
-    } | null>(null);
+  } | null>(null);
 
   useEffect(() => {
     const loadStores = async () => {
@@ -94,27 +70,25 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
   }, []);
 
   useEffect(() => {
-    // После создания stores, устанавливаем UserStore в ChatStore и DailyRewardStore
-    // и ChatStore в AgentStore для загрузки истории после выбора
-    if (stores) {
-      stores.chat.setUserStore(stores.user);
-      stores.chat.setCaseStore(stores.cases);
-      stores.dailyReward.setUserStore(stores.user);
-      stores.agent.setUserStore(stores.user);
-      stores.agent.setChatStore(stores.chat);
-      stores.cases.setUserStore(stores.user);
-      stores.cases.setRewardStore(stores.reward);
-    }
+    if (!stores) return;
+    stores.chat.setUserStore(stores.user);
+    stores.chat.setCaseStore(stores.cases);
+    stores.dailyReward.setUserStore(stores.user);
+    stores.agent.setUserStore(stores.user);
+    stores.agent.setChatStore(stores.chat);
+    stores.cases.setUserStore(stores.user);
+    stores.cases.setRewardStore(stores.reward);
   }, [stores]);
 
   if (!stores) {
-    return <div className="flex items-center justify-center h-screen w-screen">
-      <LoadingIndicator />
-    </div>; // Use custom loading indicator
+    return (
+      <div className="flex items-center justify-center h-screen w-screen">
+        <LoadingIndicator />
+      </div>
+    );
   }
 
-  // Сохраняем экземпляр хранилища для доступа из других модулей
-  storeInstance = stores;
+  registerStoreInstance(stores);
 
   return <Context.Provider value={stores}>{children}</Context.Provider>;
 };

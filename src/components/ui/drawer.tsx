@@ -50,7 +50,9 @@ type DrawerContentProps = React.ComponentPropsWithoutRef<typeof DrawerPrimitive.
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   DrawerContentProps
->(({ className, children, overlayClassName, overlayProps, backdropImageSrc, backdropImageAlt: _backdropAlt = "", backdropImageClassName, ...props }, ref) => (
+>(({ className, children, overlayClassName, overlayProps, backdropImageSrc, backdropImageAlt = "", backdropImageClassName, ...props }, ref) => {
+  void backdropImageAlt
+  return (
   <DrawerPortal>
     <DrawerOverlay
       {...overlayProps}
@@ -79,7 +81,8 @@ const DrawerContent = React.forwardRef<
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
-))
+  )
+})
 DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = ({

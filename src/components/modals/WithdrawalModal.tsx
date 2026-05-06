@@ -7,7 +7,7 @@ import Button from '@/components/ui/button';
 import type { UserReward } from '@/http/rewardAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 
 const STORY_DELAY_MS = 7000;
 

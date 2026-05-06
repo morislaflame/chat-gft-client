@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Button from '@/components/ui/button';
 import { TransitionPanel } from '@/components/ui/transitionPanel';

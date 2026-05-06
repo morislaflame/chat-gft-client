@@ -93,6 +93,15 @@ export default class ChatStore {
         });
     }
 
+    markMissionHasMessagesByMissionId(missionId: number) {
+        this._messages = this._messages.map((m) => {
+            if (m.isMissionCard && m.missionId === missionId && !m.missionHasMessages) {
+                return { ...m, missionHasMessages: true };
+            }
+            return m;
+        });
+    }
+
     private appendMissionCardIfNeeded(mission: Mission) {
         const existing = this._messages.some(
             (m) => m.isMissionCard && m.missionId === mission.id
@@ -501,6 +510,11 @@ export default class ChatStore {
     getMissionVideoByOrderIndex(orderIndex: number): MediaFile | null {
         const mission = this._missions.find(m => m.orderIndex === orderIndex);
         return mission?.video || null;
+    }
+
+    getMissionVideoByMissionId(missionId: number): MediaFile | null {
+        const mission = this._missions.find((m) => m.id === missionId);
+        return mission?.video ?? null;
     }
 
     setSuggestions(suggestions: ChatSuggestion[]) {

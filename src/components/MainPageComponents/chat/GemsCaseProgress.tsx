@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';

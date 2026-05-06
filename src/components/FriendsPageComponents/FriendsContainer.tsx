@@ -1,6 +1,6 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';

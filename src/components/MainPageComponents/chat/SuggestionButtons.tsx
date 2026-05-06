@@ -1,7 +1,7 @@
 import React, { memo, useContext, useState } from 'react';
 import { motion } from 'motion/react';
 import Button from '@/components/ui/button';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { trackEvent } from '@/utils/analytics';
 import type { ChatSuggestion } from '@/types/types';
 

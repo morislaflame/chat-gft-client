@@ -2,6 +2,7 @@ import * as React from "react";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { motionInteractiveSurfaceProps } from "@/components/ui/motionInteractiveSurface";
 import { useHapticFeedback } from "@/utils/useHapticFeedback";
 
 type ButtonVariant =
@@ -101,20 +102,6 @@ const rippleClasses: Record<ButtonVariant, string> = {
   glass: "bg-white/40",
   nav: "bg-black/80",
 };
-
-const SCALE_ANIMATION = {
-  whileHover: {
-    scale: 1.02,
-    transition: { type: "spring", stiffness: 350, damping: 22, mass: 0.8 },
-  },
-  whileTap: {
-    scale: 0.95,
-    transition: { duration: 1, ease: "easeInOut" },
-  },
-} as const;
-
-/** Те же spring/tap, что у {@link Button} — для переиспользования на motion‑карточках профиля и т.п. */
-export const motionInteractiveSurfaceProps = SCALE_ANIMATION;
 
 const stateOverlayClasses: Record<Exclude<ButtonState, "default">, string> = {
   success: "bg-green-500",
@@ -225,7 +212,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled}
         onPointerDown={handlePointerDown}
         onClick={handleClick}
-        {...SCALE_ANIMATION}
+        {...motionInteractiveSurfaceProps}
         {...props}
       >
         {ripple && (

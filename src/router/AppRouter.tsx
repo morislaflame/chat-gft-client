@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { publicRoutes, privateRoutes } from '@/router/routes';
 import { MAIN_ROUTE, PROFILE_ROUTE } from '@/utils/consts';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 
 const AppRouter = () => {
     const { user } = useContext(Context) as IStoreContext;

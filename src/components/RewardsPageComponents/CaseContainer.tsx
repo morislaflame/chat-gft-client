@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import EmptyPage from '@/components/CoreComponents/EmptyPage';
 import { useTranslate } from '@/utils/useTranslate';

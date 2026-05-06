@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Card } from '@/components/ui/card';
-import { motionInteractiveSurfaceProps } from '@/components/ui/button';
+import { motionInteractiveSurfaceProps } from '@/components/ui/motionInteractiveSurface';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 

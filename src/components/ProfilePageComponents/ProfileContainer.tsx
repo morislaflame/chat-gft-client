@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';

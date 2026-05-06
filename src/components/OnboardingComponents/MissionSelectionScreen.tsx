@@ -1,6 +1,6 @@
-import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import Button from '@/components/ui/button';
@@ -8,6 +8,7 @@ import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import MissionPickerCard from './MissionPickerCard';
 import MissionPathCanvas from './MissionPathCanvas';
 import type { MediaFile, Mission, MissionProgress } from '@/types/types';
+import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
 import { trackEvent } from '@/utils/analytics';
 
 type MissionSelectionScreenProps = {
@@ -32,14 +33,18 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
             void chat.loadChatHistory(true);
         }, [chat, user.user?.selectedHistoryName]);
 
-        const missions = [...chat.missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const missions = useMemo(
+            () => [...chat.missions].sort(compareMissionsByStoryOrder),
+            [chat.missions],
+        );
 
-        const measurePath = () => {
+        const measurePath = useCallback(() => {
             const root = scrollRef.current;
             if (!root) return;
             const rect = root.getBoundingClientRect();
             const pts: { x: number; y: number }[] = [];
-            for (let i = 0; i < missions.length; i++) {
+            const listLen = missions.length;
+            for (let i = 0; i < listLen; i++) {
                 const el = cardRefs.current[i];
                 if (!el) continue;
                 const r = el.getBoundingClientRect();
@@ -50,12 +55,12 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
             }
             setPathPoints(pts);
             setPathSize({ w: rect.width, h: rect.height });
-        };
+        }, [missions]);
 
         useLayoutEffect(() => {
             cardRefs.current.length = missions.length;
             measurePath();
-        }, [missions.length, chat.loading, missions.map((m) => m.id).join(',')]);
+        }, [missions, measurePath, chat.loading]);
 
         useLayoutEffect(() => {
             const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => measurePath()) : null;
@@ -66,7 +71,7 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
                 ro?.disconnect();
                 window.removeEventListener('resize', measurePath);
             };
-        }, [missions.length]);
+        }, [measurePath]);
 
         const progressFor = (missionId: number): MissionProgress | undefined => {
             const p = chat.missionsProgress.find((x) => x.missionId === missionId);
@@ -106,7 +111,7 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
                     undefined,
                     null,
                     null,
-                    { beginReplay, explicitMissionId: m.id },
+                    { beginReplay },
                 );
                 onMissionFlowFinished();
             }

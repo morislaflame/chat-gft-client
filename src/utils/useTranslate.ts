@@ -1,5 +1,5 @@
 import { useCallback, useContext, useMemo } from 'react';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { translate } from '@/utils/translations';
 
 export const useTranslate = () => {

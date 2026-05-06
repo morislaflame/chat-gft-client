@@ -2,7 +2,7 @@ import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { observer } from 'mobx-react-lite';
 import { useTelegramApp } from '@/utils/useTelegramApp';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';

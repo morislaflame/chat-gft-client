@@ -9,7 +9,7 @@ import StoreList from '@/components/StorePageComponents/StoreList';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { QUESTS_ROUTE } from '@/utils/consts';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 
 type EnergyInfoModalProps = {
   isOpen: boolean;

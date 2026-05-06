@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AnimatePresence, motion } from 'motion/react';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
 import { useTranslate } from '@/utils/useTranslate';
 import { PressableRippleSurface } from '@/components/ui/pressable-ripple-surface';

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
 
 const SEGMENT_FILL_MS = 620;

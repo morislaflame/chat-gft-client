@@ -10,11 +10,16 @@ const DOT_WIDTH = 12;
 const CYCLE = 0.45;
 
 const OVERLAY_ROOT_ID = 'global-loading-indicator-root';
+/** Сколько мс держим overlay смонтированным после того, как refCount упал до 0.
+ * Если за это время лоадер снова понадобится — переиспользуем уже существующий root,
+ * иначе размонтируем canvas/RAF и освобождаем CPU. */
+const OVERLAY_TEARDOWN_DELAY_MS = 250;
 
 let overlayRoot: Root | null = null;
 let overlayHostEl: HTMLElement | null = null;
 let overlayRefCount = 0;
 let overlayVisible = false;
+let teardownTimer: ReturnType<typeof setTimeout> | null = null;
 
 function ensureOverlayRoot() {
     if (typeof document === 'undefined') return;
@@ -30,18 +35,44 @@ function ensureOverlayRoot() {
 
     if (!overlayRoot && overlayHostEl) {
         overlayRoot = createRoot(overlayHostEl);
-        overlayRoot.render(<LoadingOverlay visible={false} />);
+        overlayRoot.render(<LoadingOverlay visible={overlayVisible} />);
     }
+}
+
+function teardownOverlay() {
+    teardownTimer = null;
+    if (overlayRefCount > 0 || overlayVisible) return;
+    if (overlayRoot) {
+        overlayRoot.unmount();
+        overlayRoot = null;
+    }
+    if (overlayHostEl && overlayHostEl.parentNode) {
+        overlayHostEl.parentNode.removeChild(overlayHostEl);
+    }
+    overlayHostEl = null;
 }
 
 function setOverlayVisible(nextVisible: boolean) {
     if (typeof document === 'undefined') return;
-    ensureOverlayRoot();
-    if (!overlayRoot) return;
-    if (overlayVisible === nextVisible) return;
+    if (overlayVisible === nextVisible && (nextVisible ? overlayRoot !== null : true)) return;
 
     overlayVisible = nextVisible;
-    overlayRoot.render(<LoadingOverlay visible={overlayVisible} />);
+
+    if (nextVisible) {
+        if (teardownTimer) {
+            clearTimeout(teardownTimer);
+            teardownTimer = null;
+        }
+        ensureOverlayRoot();
+        overlayRoot?.render(<LoadingOverlay visible={true} />);
+        return;
+    }
+
+    if (overlayRoot) {
+        overlayRoot.render(<LoadingOverlay visible={false} />);
+    }
+    if (teardownTimer) clearTimeout(teardownTimer);
+    teardownTimer = setTimeout(teardownOverlay, OVERLAY_TEARDOWN_DELAY_MS);
 }
 
 /** Та же анимация, что у глобального лоадера: звёздное поле + прыгающие точки. */
@@ -99,15 +130,11 @@ export function LoadingIndicatorContent({
 }
 
 function LoadingOverlay({ visible }: { visible: boolean }) {
+    if (!visible) return null;
     return (
         <div
-            className={[
-                // Keep loader under Header/BottomNavigation (they are z-20)
-                'fixed inset-0 z-[19] transition-opacity duration-200',
-                visible ? 'opacity-100' : 'opacity-0 pointer-events-none',
-            ].join(' ')}
-            style={{ visibility: visible ? 'visible' : 'hidden' }}
-            aria-hidden={!visible}
+            className="fixed inset-0 z-[19] transition-opacity duration-200 opacity-100"
+            aria-hidden={false}
         >
             <LoadingIndicatorContent layout="overlay" />
         </div>

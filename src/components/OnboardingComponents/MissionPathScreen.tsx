@@ -145,16 +145,30 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             ctx.setLineDash([]);
         }, [visibleMissions.length]);
 
+        // Держим всегда актуальную ссылку на redrawPath, чтобы observer/resize
+        // подписывались один раз и не пересоздавались на каждом изменении observable.
+        const redrawPathRef = useRef(redrawPath);
         useLayoutEffect(() => {
-            redrawPath();
-            const ro = new ResizeObserver(() => redrawPath());
-            if (containerRef.current) ro.observe(containerRef.current);
-            window.addEventListener('resize', redrawPath);
+            redrawPathRef.current = redrawPath;
+        }, [redrawPath]);
+
+        // Перерисовываем при значимых изменениях, не трогая обзёрверы.
+        useLayoutEffect(() => {
+            redrawPathRef.current();
+        }, [redrawPath, chat.missions.length, chat.missionsProgress.length]);
+
+        // ResizeObserver и window 'resize' вешаем один раз.
+        useLayoutEffect(() => {
+            const handler = () => redrawPathRef.current();
+            const ro = new ResizeObserver(handler);
+            const el = containerRef.current;
+            if (el) ro.observe(el);
+            window.addEventListener('resize', handler);
             return () => {
                 ro.disconnect();
-                window.removeEventListener('resize', redrawPath);
+                window.removeEventListener('resize', handler);
             };
-        }, [redrawPath, chat.missions, chat.missionsProgress]);
+        }, []);
 
         const handleClose = () => {
             hapticImpact('soft');

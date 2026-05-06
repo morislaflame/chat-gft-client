@@ -80,6 +80,15 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     stores.cases.setRewardStore(stores.reward);
   }, [stores]);
 
+  // Регистрируем синглтон один раз — раньше это делалось прямо в теле компонента,
+  // и при каждом ререндере stores «перерегистрировались», что приводило к
+  // лишним обращениям и потенциально удерживало старые ссылки.
+  useEffect(() => {
+    if (stores) {
+      registerStoreInstance(stores);
+    }
+  }, [stores]);
+
   if (!stores) {
     return (
       <div className="flex items-center justify-center h-screen w-screen">
@@ -87,8 +96,6 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
       </div>
     );
   }
-
-  registerStoreInstance(stores);
 
   return <Context.Provider value={stores}>{children}</Context.Provider>;
 };

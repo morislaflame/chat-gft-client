@@ -1,9 +1,22 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { cn } from "@/lib/utils"
 
 // Utility functions
 const rand = (min: number, max: number) => Math.random() * (max - min) + min
 const randInt = (min: number, max: number) => Math.floor(rand(min, max))
+
+const DEFAULT_COLORS = [
+  "#ff595e",
+  "#ffca3a",
+  "#8ac926",
+  "#1982c4",
+  "#6a4c93",
+  "#f72585",
+  "#4cc9f0",
+  "#80ed99",
+  "#ffd166",
+  "#ef476f",
+] as const
 
 interface Particle {
   x: number
@@ -46,18 +59,7 @@ export interface FireworksBackgroundProps {
 export function FireworksBackground({
   className,
   children,
-  colors = [
-    "#ff595e",
-    "#ffca3a",
-    "#8ac926",
-    "#1982c4",
-    "#6a4c93",
-    "#f72585",
-    "#4cc9f0",
-    "#80ed99",
-    "#ffd166",
-    "#ef476f",
-  ],
+  colors,
   autoLaunchInterval = 600,
   particleCount = 80,
   transparent = false,
@@ -69,83 +71,26 @@ export function FireworksBackground({
   const particlesRef = useRef<Particle[]>([])
   const fireworksRef = useRef<Firework[]>([])
   const animationRef = useRef<number | undefined>(undefined)
-  const launchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-  const burstTimeoutsRef = useRef<NodeJS.Timeout[]>([])
+  const launchTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const burstTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const clickHandlerRef = useRef<((e: MouseEvent) => void) | null>(null)
   const scaleRef = useRef(1)
 
-  const getRandomColor = useCallback(() => {
-    return colors[randInt(0, colors.length)] || `hsl(${randInt(0, 360)}, 100%, 60%)`
+  // Все «изменчивые» пропсы держим в ref, чтобы не дёргать главный useEffect
+  // (RAF + ResizeObserver) на каждом ререндере родителя.
+  const colorsRef = useRef<readonly string[]>(colors ?? DEFAULT_COLORS)
+  const particleCountRef = useRef(particleCount)
+  const onBurstCompleteRef = useRef(onBurstComplete)
+
+  useEffect(() => {
+    colorsRef.current = colors ?? DEFAULT_COLORS
   }, [colors])
-
-  const createExplosion = useCallback(
-    (x: number, y: number, color: string) => {
-      const scale = scaleRef.current
-      const particles: Particle[] = []
-      // Scale particle count with screen size
-      const count = Math.floor(particleCount * Math.max(1, scale * 0.8))
-
-      for (let i = 0; i < count; i++) {
-        const angle = rand(0, Math.PI * 2)
-        const speed = rand(2, 8) * scale
-        particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          alpha: 1,
-          decay: rand(0.008, 0.018),
-          color,
-          size: rand(2, 5),
-        })
-      }
-      particlesRef.current.push(...particles)
-    },
-    [particleCount],
-  )
-
-  const launchFirework = useCallback(
-    (targetX?: number, targetY?: number) => {
-      const container = containerRef.current
-      if (!container) return
-
-      const width = container.offsetWidth
-      const height = container.offsetHeight
-      const scale = scaleRef.current
-
-      const x = targetX ?? rand(width * 0.1, width * 0.9)
-      const startY = height
-      // Target explosion in upper half of screen (small Y = top); avoid lower part
-      const endY = targetY ?? rand(height * 0.08, height * 0.5)
-      const color = getRandomColor()
-
-      // Higher initial speed so rockets reach top targets before apex
-      const angle = Math.atan2(endY - startY, x - (targetX ?? x)) - Math.PI / 2
-      const speed = rand(24, 36) * scale
-
-      fireworksRef.current.push({
-        x,
-        y: startY,
-        targetY: endY,
-        vx: Math.cos(angle + Math.PI / 2) * speed * 0.15,
-        vy: -speed,
-        color,
-        trail: [],
-      })
-    },
-    [getRandomColor],
-  )
-
-  const scheduleNextLaunch = useCallback(() => {
-    if (autoLaunchInterval <= 0) return
-    launchTimeoutRef.current = setTimeout(
-      () => {
-        launchFirework()
-        scheduleNextLaunch()
-      },
-      rand(autoLaunchInterval * 0.5, autoLaunchInterval * 1.5),
-    )
-  }, [autoLaunchInterval, launchFirework])
+  useEffect(() => {
+    particleCountRef.current = particleCount
+  }, [particleCount])
+  useEffect(() => {
+    onBurstCompleteRef.current = onBurstComplete
+  }, [onBurstComplete])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -174,6 +119,67 @@ export function FireworksBackground({
 
     const resizeObserver = new ResizeObserver(updateSize)
     resizeObserver.observe(container)
+
+    const getRandomColor = () => {
+      const palette = colorsRef.current
+      return palette[randInt(0, palette.length)] || `hsl(${randInt(0, 360)}, 100%, 60%)`
+    }
+
+    const createExplosion = (x: number, y: number, color: string) => {
+      const s = scaleRef.current
+      const particles: Particle[] = []
+      const count = Math.floor(particleCountRef.current * Math.max(1, s * 0.8))
+      for (let i = 0; i < count; i++) {
+        const angle = rand(0, Math.PI * 2)
+        const speed = rand(2, 8) * s
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: 1,
+          decay: rand(0.008, 0.018),
+          color,
+          size: rand(2, 5),
+        })
+      }
+      particlesRef.current.push(...particles)
+    }
+
+    const launchFirework = (targetX?: number, targetY?: number) => {
+      const w = container.offsetWidth
+      const h = container.offsetHeight
+      const s = scaleRef.current
+
+      const x = targetX ?? rand(w * 0.1, w * 0.9)
+      const startY = h
+      const endY = targetY ?? rand(h * 0.08, h * 0.5)
+      const color = getRandomColor()
+
+      const angle = Math.atan2(endY - startY, x - (targetX ?? x)) - Math.PI / 2
+      const speed = rand(24, 36) * s
+
+      fireworksRef.current.push({
+        x,
+        y: startY,
+        targetY: endY,
+        vx: Math.cos(angle + Math.PI / 2) * speed * 0.15,
+        vy: -speed,
+        color,
+        trail: [],
+      })
+    }
+
+    const scheduleNextLaunch = () => {
+      if (autoLaunchInterval <= 0) return
+      launchTimeoutRef.current = setTimeout(
+        () => {
+          launchFirework()
+          scheduleNextLaunch()
+        },
+        rand(autoLaunchInterval * 0.5, autoLaunchInterval * 1.5),
+      )
+    }
 
     // Animation loop
     const animate = () => {
@@ -280,7 +286,7 @@ export function FireworksBackground({
       }
       const finishAt = burstCount * delayBetween + 3800
       const doneT = setTimeout(() => {
-        onBurstComplete?.()
+        onBurstCompleteRef.current?.()
       }, finishAt)
       burstTimeoutsRef.current.push(doneT)
     } else {
@@ -309,7 +315,10 @@ export function FireworksBackground({
         clickHandlerRef.current = null
       }
     }
-  }, [createExplosion, launchFirework, scheduleNextLaunch, autoLaunchInterval, transparent, burstCount, onBurstComplete])
+    // Намеренно зависим только от структурно значимых пропсов:
+    // colors/particleCount/onBurstComplete читаем через refs, чтобы не пересоздавать
+    // RAF/ResizeObserver/таймеры на каждом ререндере родителя.
+  }, [autoLaunchInterval, transparent, burstCount])
 
   return (
     <div

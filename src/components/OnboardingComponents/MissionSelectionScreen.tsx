@@ -62,16 +62,24 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
             measurePath();
         }, [missions, measurePath, chat.loading]);
 
+        // Актуальная ссылка на measurePath — чтобы не пересоздавать observer
+        // на каждом изменении массива миссий.
+        const measurePathRef = useRef(measurePath);
         useLayoutEffect(() => {
-            const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => measurePath()) : null;
+            measurePathRef.current = measurePath;
+        }, [measurePath]);
+
+        useLayoutEffect(() => {
+            const handler = () => measurePathRef.current();
+            const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handler) : null;
             const el = scrollRef.current;
             if (el && ro) ro.observe(el);
-            window.addEventListener('resize', measurePath);
+            window.addEventListener('resize', handler);
             return () => {
                 ro?.disconnect();
-                window.removeEventListener('resize', measurePath);
+                window.removeEventListener('resize', handler);
             };
-        }, [measurePath]);
+        }, []);
 
         const progressFor = (missionId: number): MissionProgress | undefined => {
             const p = chat.missionsProgress.find((x) => x.missionId === missionId);

@@ -118,13 +118,22 @@ const App = observer(() => {
     const dl = window.dataLayer;
     if (!dl || typeof dl.push !== 'function') return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalPush = dl.push.bind(dl) as (...args: any[]) => number;
+    type PatchedPush = ((...args: unknown[]) => number) & {
+      __chatgftSessionPatched?: boolean;
+      __chatgftOriginal?: (...args: unknown[]) => number;
+    };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (dl as any).push = (...args: any[]) => {
+    const currentPush = dl.push as PatchedPush;
+    // Идемпотентность: если хук уже навешен (Strict Mode / повторный mount),
+    // не оборачиваем повторно — иначе будет двойной/тройной счёт событий
+    // и удержание замыканий старых обёрток.
+    if (currentPush.__chatgftSessionPatched) return;
+
+    const originalPush = currentPush.bind(dl) as (...args: unknown[]) => number;
+
+    const patched: PatchedPush = ((...args: unknown[]) => {
       try {
-        const payload = args?.[0];
+        const payload = args?.[0] as unknown[] | undefined;
         // payload is "arguments" object: ["event", eventName, params]
         if (payload && payload[0] === 'event') {
           const eventName = payload[1] as string;
@@ -147,7 +156,11 @@ const App = observer(() => {
         // ignore
       }
       return originalPush(...args);
-    };
+    }) as PatchedPush;
+    patched.__chatgftSessionPatched = true;
+    patched.__chatgftOriginal = originalPush;
+
+    (dl as { push: PatchedPush }).push = patched;
 
     const flushSession = () => {
       const durationSec = Math.max(0, Math.round((Date.now() - sessionStartRef.current) / 1000));
@@ -170,9 +183,12 @@ const App = observer(() => {
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      // restore push
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (dl as any).push = originalPush;
+      // Восстанавливаем оригинал только если на месте именно наша обёртка
+      // (иначе можем затереть чужой/более свежий патч).
+      const now = (window.dataLayer as { push: PatchedPush } | undefined)?.push;
+      if (now && now.__chatgftSessionPatched && window.dataLayer) {
+        (window.dataLayer as { push: PatchedPush }).push = originalPush as PatchedPush;
+      }
     };
   }, []);
 

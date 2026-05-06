@@ -24,6 +24,7 @@ import type UserStore from "@/store/UserStore";
 import type CaseStore from "@/store/CaseStore";
 import type { UserCase } from "@/http/caseAPI";
 import { trackEvent } from "@/utils/analytics";
+import { compareMissionsByStoryOrder } from "@/utils/missionStoryOrder";
 
 export default class ChatStore {
     _messages: Message[] = [];
@@ -309,13 +310,18 @@ export default class ChatStore {
      */
     pickDefaultMissionId(missions: Mission[], mp: MissionProgress[]): number | null {
         if (!missions.length) return null;
-        const sorted = [...missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const sorted = [...missions].sort(compareMissionsByStoryOrder);
         const inProgress = [...mp]
             .filter(
                 (p) =>
                     p.status === "in_progress" || p.status === "replay_in_progress",
             )
-            .sort((a, b) => a.orderIndex - b.orderIndex)[0];
+            .sort((a, b) => {
+                const ma = sorted.find((m) => m.id === a.missionId);
+                const mb = sorted.find((m) => m.id === b.missionId);
+                if (!ma || !mb) return 0;
+                return compareMissionsByStoryOrder(ma, mb);
+            })[0];
         if (inProgress && sorted.some((m) => m.id === inProgress.missionId)) {
             return inProgress.missionId;
         }
@@ -347,7 +353,7 @@ export default class ChatStore {
     private patchMissionsProgressForUnlockedNext(nextMissionId: number) {
         const target = this._missions.find((x) => x.id === nextMissionId);
         if (!target) return;
-        const sorted = [...this._missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const sorted = [...this._missions].sort(compareMissionsByStoryOrder);
         const list = [...this._missionsProgress];
         const upsert = (mission: Mission, status: MissionProgress["status"]) => {
             const idx = list.findIndex((p) => p.missionId === mission.id);
@@ -366,7 +372,7 @@ export default class ChatStore {
             }
         };
         for (const m of sorted) {
-            if (m.orderIndex < target.orderIndex) {
+            if (compareMissionsByStoryOrder(m, target) < 0) {
                 upsert(m, "completed");
             }
         }
@@ -387,7 +393,7 @@ export default class ChatStore {
      * Раньше UI считал locked только при p?.status === 'locked'; если progress не пришёл — все миссии были «открыты».
      */
     canSelectMission(missionId: number): boolean {
-        const sorted = [...this._missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const sorted = [...this._missions].sort(compareMissionsByStoryOrder);
         const m = sorted.find((x) => x.id === missionId);
         if (!m) return false;
 
@@ -951,7 +957,7 @@ export default class ChatStore {
 
             const missions = (statusData.missions || [])
                 .slice()
-                .sort((a, b) => a.orderIndex - b.orderIndex);
+                .sort(compareMissionsByStoryOrder);
 
             let mid =
                 this._selectedMissionId ??

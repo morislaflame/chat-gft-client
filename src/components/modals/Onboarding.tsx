@@ -14,6 +14,8 @@ import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboard
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
+import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
+import { LoadingIndicatorContent } from '@/components/CoreComponents/LoadingIndicator';
 
 type Step = 'welcome' | 'select' | 'missions';
 
@@ -35,6 +37,8 @@ const Onboarding: React.FC<OnboardingProps> = observer(
         const [direction, setDirection] = useState(1);
         const [selectedVideo, setSelectedVideo] = useState<MediaFile | null>(null);
         const [showVideoModal, setShowVideoModal] = useState(false);
+        /** Пока грузим чат после выбора истории — не показывать снова экран выбора (мигание после закрытия видео). */
+        const [finishingOnboardingToChat, setFinishingOnboardingToChat] = useState(false);
         const { hapticImpact, hapticNotification } = useHapticFeedback();
         const startTsRef = useRef<number>(Date.now());
         const lastStepRef = useRef<Step | null>(null);
@@ -66,6 +70,34 @@ const Onboarding: React.FC<OnboardingProps> = observer(
             setActiveIndex(newIndex);
         };
 
+        const finalizeFirstTimeOnboardingToChat = async () => {
+            if (!isFromHeader) {
+                setFinishingOnboardingToChat(true);
+            }
+            try {
+                const sorted = chat.missions.slice().sort(compareMissionsByStoryOrder);
+                let chosenId: number | null = null;
+                for (const m of sorted) {
+                    if (chat.canSelectMission(m.id)) {
+                        chosenId = m.id;
+                        break;
+                    }
+                }
+                if (chosenId != null) {
+                    await chat.selectMissionForChat(chosenId);
+                } else {
+                    await chat.loadChatHistory(true);
+                }
+            } catch (error) {
+                console.error('Failed to open chat after onboarding history pick:', error);
+            }
+            trackEvent('onboarding_complete', {
+                variant: isFromHeader ? 'header' : 'default',
+                time_spent_sec: Math.max(0, Math.round((Date.now() - startTsRef.current) / 1000)),
+            });
+            onComplete();
+        };
+
         const handleSelectHistory = async (historyName: string) => {
             if (agent.saving) return;
 
@@ -74,11 +106,19 @@ const Onboarding: React.FC<OnboardingProps> = observer(
 
                 const selectedAgent = agent.getAgentByHistoryName(historyName);
 
+                const afterHistoryPick = async () => {
+                    if (!isFromHeader) {
+                        await finalizeFirstTimeOnboardingToChat();
+                    } else {
+                        setStep('missions');
+                    }
+                };
+
                 if (selectedAgent?.video?.url) {
                     setSelectedVideo(selectedAgent.video);
                     setShowVideoModal(true);
                 } else {
-                    setStep('missions');
+                    await afterHistoryPick();
                 }
             } catch (error) {
                 console.error('Failed to select history:', error);
@@ -89,7 +129,11 @@ const Onboarding: React.FC<OnboardingProps> = observer(
             hapticNotification('success');
             setShowVideoModal(false);
             setSelectedVideo(null);
-            setStep('missions');
+            if (!isFromHeader) {
+                void finalizeFirstTimeOnboardingToChat();
+            } else {
+                setStep('missions');
+            }
         };
 
         const getHistoryName = (historyName: string) => {
@@ -149,7 +193,11 @@ const Onboarding: React.FC<OnboardingProps> = observer(
                 />
 
                 <div className="relative z-10 flex flex-col h-full min-h-0">
-                    {step === 'welcome' ? (
+                    {finishingOnboardingToChat && !isFromHeader ? (
+                        <div className="relative flex flex-1 flex-col min-h-0 min-w-0">
+                            <LoadingIndicatorContent layout="contained" />
+                        </div>
+                    ) : step === 'welcome' ? (
                         <WelcomeScreen
                             joinAdventureText={t('joinAdventure')}
                             onJoinAdventure={() => setStep('select')}

@@ -30,7 +30,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0 justify-between w-full">
                     <span className="text-sm font-bold text-white uppercase tracking-wide">
                         {t('profileLevel')} {group.level}
                     </span>
@@ -40,15 +40,17 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                         </span>
                     )}
                     {!isPrevComplete && (
-                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded-full px-1.5 py-0.5 leading-none shrink-0">
+                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded- sfull px-1.5 py-0.5 leading-none shrink-0">
                             <i className="fa-solid fa-lock text-[9px] mr-0.5" />
                             {t('profileLevelLocked')}
                         </span>
                     )}
                 </div>
-                <span className="text-xs text-zinc-500 shrink-0 ml-auto">
-                    {t('artifactsFound')}: {group.collected}/{group.total}
-                </span>
+                {isPrevComplete && (
+                    <span className="text-xs text-zinc-500 shrink-0 ml-auto">
+                        {t('artifactsFound')}: {group.collected}/{group.total}
+                    </span>
+                )}
             </div>
 
             <div className="relative mt-1 h-2 w-full overflow-hidden rounded-full border border-white/15 bg-black/45">

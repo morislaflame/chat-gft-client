@@ -6,6 +6,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type ChatStore from '@/store/ChatStore';
 import type { Mission, MissionProgress } from '@/types/types';
+import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
 import { ProgressiveBlur } from '../ui/progressive-blur';
 
 interface LevelGroup {
@@ -39,7 +40,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
         const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
         const { t } = useTranslate();
-        const sorted = [...chat.missions].sort((a, b) => a.orderIndex - b.orderIndex);
+        const sorted = [...chat.missions].sort(compareMissionsByStoryOrder);
         const levelGroups = buildLevelGroups(sorted);
 
         // Determine which levels are accessible (previous level fully completed)

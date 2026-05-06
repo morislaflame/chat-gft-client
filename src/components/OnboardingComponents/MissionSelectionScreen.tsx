@@ -95,9 +95,9 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
 
             chat.primeMissionThread(m.id);
             chat.setMissionStart(m.id);
-            chat.markMissionHasMessagesByOrder(m.orderIndex);
+            chat.markMissionHasMessagesByMissionId(m.id);
 
-            const missionVideo = chat.getMissionVideoByOrderIndex(m.orderIndex);
+            const missionVideo = chat.getMissionVideoByMissionId(m.id);
             if (missionVideo) {
                 onShowMissionVideo({ video: missionVideo, beginReplay });
             } else {
@@ -106,7 +106,7 @@ const MissionSelectionScreen: React.FC<MissionSelectionScreenProps> = observer(
                     undefined,
                     null,
                     null,
-                    { beginReplay },
+                    { beginReplay, explicitMissionId: m.id },
                 );
                 onMissionFlowFinished();
             }

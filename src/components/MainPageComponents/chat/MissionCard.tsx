@@ -12,7 +12,7 @@ import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
 type MissionCardChatProps = {
     mode?: 'chat';
     message: Message;
-    onStartMission: (orderIndex: number) => void;
+    onStartMission: (missionId: number) => void;
     /** Клик по названию и описанию — модалка про артефакты (в т.ч. после старта миссии) */
     onOpenArtifactsExplainer?: () => void;
 };
@@ -259,7 +259,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
                 {!message.missionHasMessages && (
                     <div className="mt-3">
                         <Button
-                            onClick={() => onStartMission(message.mission!.orderIndex)}
+                            onClick={() => onStartMission(message.mission!.id)}
                             variant="gradient"
                             size="sm"
                             className="w-full text-semibold"

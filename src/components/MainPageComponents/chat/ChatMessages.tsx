@@ -9,7 +9,7 @@ import type { ChatRetryPayload, ClientErrorReportPayload } from '@/types/types';
 import type { RefObject } from 'react';
 
 interface ChatMessagesProps {
-  onStartMission: (orderIndex: number) => void;
+  onStartMission: (missionId: number) => void;
   onOpenArtifactsExplainer?: () => void;
   onArtifactDisabledClick?: () => void;
   onSelectSuggestion: (

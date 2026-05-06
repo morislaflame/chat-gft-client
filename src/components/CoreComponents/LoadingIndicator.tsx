@@ -44,6 +44,60 @@ function setOverlayVisible(nextVisible: boolean) {
     overlayRoot.render(<LoadingOverlay visible={overlayVisible} />);
 }
 
+/** Та же анимация, что у глобального лоадера: звёздное поле + прыгающие точки. */
+export function LoadingIndicatorContent({
+    layout = 'overlay',
+}: {
+    /** overlay — как в fullscreen-лоадере (fixed starfield); contained — заполняет position:relative родителя */
+    layout?: 'overlay' | 'contained';
+}) {
+    const isContained = layout === 'contained';
+    return (
+        <StarfieldBackground
+            className={isContained ? 'absolute inset-0 h-full w-full' : '!fixed inset-0 h-full'}
+            starColor="#b249f8"
+            count={100}
+            speed={0.5}
+            twinkle
+        >
+            <div
+                className={
+                    isContained
+                        ? 'flex items-center justify-center h-full w-full min-h-0'
+                        : 'flex items-center justify-center h-full w-full min-h-[100vh]'
+                }
+            >
+                <div className="flex flex-col gap-4 items-center relative">
+                    <div className="flex items-end gap-3" style={{ height: DOT_HEIGHT + JUMP_HEIGHT }}>
+                        {[0, 1, 2].map((i) => (
+                            <motion.div
+                                key={i}
+                                className="rounded-full origin-bottom"
+                                style={{
+                                    width: DOT_WIDTH,
+                                    height: DOT_HEIGHT,
+                                    background: GRADIENT,
+                                    boxShadow: '0 0 14px #b249f8',
+                                }}
+                                animate={{
+                                    y: [0, -JUMP_HEIGHT, 0],
+                                    scale: [1, 1.6, 1],
+                                }}
+                                transition={{
+                                    duration: CYCLE * 3,
+                                    repeat: Infinity,
+                                    ease: [0.33, 1, 0.68, 1],
+                                    delay: i * CYCLE,
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </StarfieldBackground>
+    );
+}
+
 function LoadingOverlay({ visible }: { visible: boolean }) {
     return (
         <div
@@ -55,42 +109,7 @@ function LoadingOverlay({ visible }: { visible: boolean }) {
             style={{ visibility: visible ? 'visible' : 'hidden' }}
             aria-hidden={!visible}
         >
-            <StarfieldBackground
-                className="!fixed inset-0 h-full"
-                starColor="#b249f8"
-                count={100}
-                speed={0.5}
-                twinkle
-            >
-                <div className="flex items-center justify-center h-full w-full min-h-[100vh]">
-                    <div className="flex flex-col gap-4 items-center relative">
-                        <div className="flex items-end gap-3" style={{ height: DOT_HEIGHT + JUMP_HEIGHT }}>
-                            {[0, 1, 2].map((i) => (
-                                <motion.div
-                                    key={i}
-                                    className="rounded-full origin-bottom"
-                                    style={{
-                                        width: DOT_WIDTH,
-                                        height: DOT_HEIGHT,
-                                        background: GRADIENT,
-                                        boxShadow: '0 0 14px #b249f8',
-                                    }}
-                                    animate={{
-                                        y: [0, -JUMP_HEIGHT, 0],
-                                        scale: [1, 1.6, 1],
-                                    }}
-                                    transition={{
-                                        duration: CYCLE * 3,
-                                        repeat: Infinity,
-                                        ease: [0.33, 1, 0.68, 1],
-                                        delay: i * CYCLE,
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </StarfieldBackground>
+            <LoadingIndicatorContent layout="overlay" />
         </div>
     );
 }

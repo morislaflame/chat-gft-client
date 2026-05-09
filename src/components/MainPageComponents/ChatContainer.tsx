@@ -79,25 +79,28 @@ const ChatContainer: React.FC = observer(() => {
         return true;
     };
 
-    const handleStartMission = (orderIndex: number) => {
+    const handleStartMission = (missionId: number) => {
         hapticImpact('soft');
         const storyId = user.user?.selectedHistoryName || 'unknown';
-        const mission = chat.missions.find((m) => m.orderIndex === orderIndex) || null;
-        const missionId = mission?.id ?? null;
-        const progress = missionId != null ? chat.missionProgressFor(missionId) : null;
+        const mission = chat.missions.find((m) => m.id === missionId) || null;
+        const progress = chat.missionProgressFor(missionId);
         const beginReplay = progress?.status === 'completed';
+        const orderIndex = mission?.orderIndex ?? null;
 
-        trackEvent('mission_start_click', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
+        trackEvent('mission_start_click', {
+            order_index: orderIndex,
+            mission_id: missionId,
+            story_id: storyId,
+        });
         trackEvent('mission_start', { story_id: storyId, mission_id: missionId });
-        if (missionId !== null) {
-            if (!chat.canSelectMission(missionId)) {
-                return;
-            }
-            chat.primeMissionThread(missionId);
-            chat.setMissionStart(missionId);
+        if (!chat.canSelectMission(missionId)) {
+            return;
         }
-        chat.markMissionHasMessagesByOrder(orderIndex);
-        const missionVideo = chat.getMissionVideoByOrderIndex(orderIndex);
+        chat.primeMissionThread(missionId);
+        chat.setMissionStart(missionId);
+
+        chat.markMissionHasMessagesByMissionId(missionId);
+        const missionVideo = chat.getMissionVideoByMissionId(missionId);
         
         if (missionVideo) {
             trackEvent('mission_video_open', { order_index: orderIndex, mission_id: missionId, story_id: storyId });

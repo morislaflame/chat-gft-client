@@ -724,8 +724,8 @@ export default class ChatStore {
                         selected_history: storyId,
                     });
 
-                    const missionEntity = this._missions.find((m) => m.orderIndex === stageNumber) || null;
-                    const missionIdTracked = missionEntity?.id ?? null;
+                    /** Активная миссия чата; не сопоставлять с orderIndex награды/stage — id могут расходиться. */
+                    const missionIdTracked = this._selectedMissionId ?? null;
                     const startedAt = missionIdTracked
                         ? this._missionStartTs.get(missionIdTracked) || null
                         : null;
@@ -776,10 +776,22 @@ export default class ChatStore {
                 !response.rewardsSuppressed &&
                 this._missions.length > 0
             ) {
-                const completedOrder =
-                    response.completedStage || (response.stage ? response.stage - 1 : 0);
-                const nextOrder = completedOrder + 1;
-                const nextMission = this._missions.find((m) => m.orderIndex === nextOrder);
+                let nextMission: Mission | null = null;
+                const apiNext = response.nextMission;
+                if (
+                    apiNext &&
+                    typeof apiNext.id === "number" &&
+                    Number.isFinite(apiNext.id)
+                ) {
+                    nextMission = this._missions.find((m) => m.id === apiNext.id) ?? null;
+                }
+                if (!nextMission && this._selectedMissionId != null) {
+                    const sorted = [...this._missions].sort(compareMissionsByStoryOrder);
+                    const idx = sorted.findIndex((m) => m.id === this._selectedMissionId);
+                    if (idx >= 0 && idx + 1 < sorted.length) {
+                        nextMission = sorted[idx + 1];
+                    }
+                }
                 if (nextMission) {
                     this.appendMissionCardIfNeeded(nextMission);
                 }

@@ -46,6 +46,18 @@ export function buildLevelGroups(
         });
 }
 
+/** Совпадает с гейтом на бэке: все артефакты уровня из каталога сюжета найдены. */
+export function isArtifactCatalogLevelComplete(
+    story: Pick<ProfileInventoryStory, 'artifacts' | 'owned'> | null | undefined,
+    level: number,
+): boolean {
+    if (!story?.artifacts?.length) return true;
+    const groups = buildLevelGroups(story.artifacts, story.owned);
+    const g = groups.find((x) => x.level === level);
+    if (!g || g.total === 0) return true;
+    return g.isComplete;
+}
+
 /** Агрегаты для компактной карточки истории на профиле. */
 export function getStoryCollectionStats(
     story: Pick<ProfileInventoryStory, 'artifacts' | 'owned'>,

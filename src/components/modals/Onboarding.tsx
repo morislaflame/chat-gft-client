@@ -16,6 +16,8 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
 import { LoadingIndicatorContent } from '@/components/CoreComponents/LoadingIndicator';
+import { useNavigate } from 'react-router-dom';
+import { MAIN_ROUTE } from '@/utils/consts';
 
 type Step = 'welcome' | 'select' | 'missions';
 
@@ -29,6 +31,7 @@ interface OnboardingProps {
 const Onboarding: React.FC<OnboardingProps> = observer(
     ({ onComplete, initialStep = 'welcome', isFromHeader = false, onClose }) => {
         const { agent, chat } = useContext(Context) as IStoreContext;
+        const navigate = useNavigate();
         const { t, language } = useTranslate();
         const [step, setStep] = useState<Step>(() =>
             initialStep === 'missions' || initialStep === 'select' ? initialStep : 'welcome',
@@ -230,7 +233,10 @@ const Onboarding: React.FC<OnboardingProps> = observer(
                                         Math.round((Date.now() - startTsRef.current) / 1000),
                                     ),
                                 });
-                                onComplete();
+                                if (isFromHeader) {
+                                    navigate(MAIN_ROUTE, { replace: true });
+                                }
+                                void onComplete();
                             }}
                             isFromHeader={isFromHeader}
                             onClose={onClose}

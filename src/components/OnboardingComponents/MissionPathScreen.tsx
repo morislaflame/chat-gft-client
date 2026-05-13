@@ -1,13 +1,16 @@
-import React, { useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useLayoutEffect, useCallback, useEffect, useState, useContext } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import MissionCard from '@/components/MainPageComponents/chat/MissionCard';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type ChatStore from '@/store/ChatStore';
-import type { Mission, MissionProgress } from '@/types/types';
+import type { Mission, MissionProgress, ProfileInventoryStory } from '@/types/types';
 import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
 import { ProgressiveBlur } from '../ui/progressive-blur';
+import { Context, type IStoreContext } from '@/store/context';
+import { loadMergedProfileStories } from '@/components/ProfilePageComponents/profileInventoryMocks';
+import { isArtifactCatalogLevelComplete } from '@/components/ProfilePageComponents/profileInventoryUtils';
 
 interface LevelGroup {
     level: number;
@@ -34,6 +37,29 @@ type MissionPathScreenProps = {
 
 const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
     ({ chat, onChooseHistory, onMissionChosen, isFromHeader = false, onClose }) => {
+        const { user } = useContext(Context) as IStoreContext;
+        const historyName = user.user?.selectedHistoryName ?? null;
+        /** `undefined` — инвентарь ещё грузится (не открываем следующий уровень до проверки артефактов). */
+        const [inventoryStory, setInventoryStory] = useState<
+            ProfileInventoryStory | null | undefined
+        >(undefined);
+
+        useEffect(() => {
+            if (!historyName) {
+                setInventoryStory(null);
+                return;
+            }
+            let cancelled = false;
+            setInventoryStory(undefined);
+            void loadMergedProfileStories().then((list) => {
+                if (cancelled) return;
+                setInventoryStory(list.find((s) => s.historyName === historyName) ?? null);
+            });
+            return () => {
+                cancelled = true;
+            };
+        }, [historyName]);
+
         const { hapticImpact } = useHapticFeedback();
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,7 +69,9 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
         const sorted = [...chat.missions].sort(compareMissionsByStoryOrder);
         const levelGroups = buildLevelGroups(sorted);
 
-        // Determine which levels are accessible (previous level fully completed)
+        const inventoryReady = inventoryStory !== undefined;
+
+        // Determine which levels are accessible (previous level fully completed + артефакты уровня в каталоге)
         const levelAccessible = new Map<number, boolean>();
         for (let i = 0; i < levelGroups.length; i++) {
             if (i === 0) {
@@ -57,7 +85,13 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                     p?.status === 'completed' || p?.status === 'replay_in_progress'
                 );
             });
-            levelAccessible.set(levelGroups[i].level, allDone);
+            const prevLevel = prevGroup.level;
+            const artifactsOk =
+                !historyName ||
+                !inventoryReady ||
+                inventoryStory === null ||
+                isArtifactCatalogLevelComplete(inventoryStory, prevLevel);
+            levelAccessible.set(levelGroups[i].level, allDone && artifactsOk);
         }
 
         // Flat list of visible (accessible) missions for canvas path
@@ -155,7 +189,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
         // Перерисовываем при значимых изменениях, не трогая обзёрверы.
         useLayoutEffect(() => {
             redrawPathRef.current();
-        }, [redrawPath, chat.missions.length, chat.missionsProgress.length]);
+        }, [redrawPath, chat.missions.length, chat.missionsProgress.length, inventoryStory]);
 
         // ResizeObserver и window 'resize' вешаем один раз.
         useLayoutEffect(() => {

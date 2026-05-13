@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
@@ -15,6 +15,7 @@ import { motion, useReducedMotion } from 'motion/react';
 
 const ProfileStoryDetailContainer: React.FC = observer(() => {
     const { historyName } = useParams<{ historyName: string }>();
+    const location = useLocation();
     const navigate = useNavigate();
     const { user, agent } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
@@ -56,6 +57,18 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
     }, [userId]);
 
     const story = stories?.find((s) => s.historyName === historyKey);
+
+    useEffect(() => {
+        const raw = (location.hash || '').replace(/^#/, '');
+        if (!raw.startsWith('artifact-level-')) return;
+        const levelSuffix = raw.slice('artifact-level-'.length).trim();
+        if (!levelSuffix) return;
+        const id = `profile-artifact-level-${levelSuffix}`;
+        const scrollTimer = window.setTimeout(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+        return () => window.clearTimeout(scrollTimer);
+    }, [location.hash, story?.historyName, loading]);
 
     const storyTitle = (s: ProfileInventoryStory) => {
         if (language === 'en') {

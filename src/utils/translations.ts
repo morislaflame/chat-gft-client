@@ -438,6 +438,26 @@ type TranslationType = {
         ru: 'Следующая миссия',
         en: 'Next mission'
     },
+    stageReplayRewardHint: {
+        ru: 'При перепрохождении гемы не начисляются; можно перейти к следующей миссии.',
+        en: 'No gems on replay; you can continue to the next mission.',
+    },
+    nextLevelArtifactsGateTitle: {
+        ru: 'Артефакты не собраны!',
+        en: 'Artifacts not collected!',
+    },
+    nextLevelArtifactsGateBody: {
+        ru: 'Чтобы перейти на следующий уровень, соберите все артефакты уровня {level}',
+        en: 'To unlock the next level, collect all artifacts from level {level}',
+    },
+    nextLevelArtifactsGateBody2: {
+        ru: 'Отслеживайте прогресс в профиле',
+        en: 'Track progress in your profile',
+    },
+    openProfileForArtifacts: {
+        ru: 'Открыть профиль',
+        en: 'Open profile',
+    },
     missionsList: {
         ru: 'Все миссии',
         en: 'All missions'
@@ -809,7 +829,7 @@ type TranslationType = {
         en: 'Level'
     },
     missionLevelLocked: {
-        ru: 'Уровень заблокирован — пройдите предыдущий',
+        ru: 'Уровень заблокирован — пройдите предыдущий и соберите все нужные артефакты',
         en: 'Level locked — complete the previous level first'
     },
     profileNftArtifactsBannerTitle: {

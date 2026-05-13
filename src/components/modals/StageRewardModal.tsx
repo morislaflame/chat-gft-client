@@ -119,6 +119,7 @@ const StageRewardModal: React.FC = observer(() => {
   const avatarUrl = chat.avatar?.url;
   const gemSourceRef = useRef<HTMLDivElement>(null);
   const pendingAfterGemFlight = useRef<NextMissionRef>(null);
+  const pendingArtifactsGateLevelAfterGems = useRef<number | null>(null);
   const [flyingGem, setFlyingGem] = useState<FlyingGemCoords>(null);
   const [fireworksPlaying, setFireworksPlaying] = useState(false);
 
@@ -154,6 +155,7 @@ const StageRewardModal: React.FC = observer(() => {
 
   const handleContinueClick = () => {
     pendingAfterGemFlight.current = null;
+    pendingArtifactsGateLevelAfterGems.current = null;
     const ra = stageReward?.rewardAmount;
     if (ra != null && ra > 0) {
       chat.setPendingGemsOnLand(ra);
@@ -169,6 +171,7 @@ const StageRewardModal: React.FC = observer(() => {
   };
 
   const handleNextMissionClick = () => {
+    pendingArtifactsGateLevelAfterGems.current = null;
     const nm = stageReward?.nextMission;
     if (!nm) return;
     const ra = stageReward?.rewardAmount;
@@ -198,6 +201,11 @@ const StageRewardModal: React.FC = observer(() => {
     if (nm) {
       void chat.startNextMissionAfterReward(nm);
     }
+    const gateLv = pendingArtifactsGateLevelAfterGems.current;
+    pendingArtifactsGateLevelAfterGems.current = null;
+    if (gateLv != null && Number.isFinite(gateLv)) {
+      chat.openNextLevelArtifactsGate(gateLv);
+    }
   };
 
   const onFireworksComplete = useCallback(() => {
@@ -210,6 +218,35 @@ const StageRewardModal: React.FC = observer(() => {
   }, [chat]);
 
   const hasNextMission = !!(stageReward?.nextMission && stageReward.nextMission.id);
+  const gateLevelRaw = stageReward?.artifactsGate?.completedLevel;
+  const hasArtifactsGate =
+    gateLevelRaw != null && Number.isFinite(Number(gateLevelRaw));
+  const gateLevel = hasArtifactsGate ? Number(gateLevelRaw) : null;
+  const showAdvanceMissionButton = hasNextMission || hasArtifactsGate;
+
+  const handleAdvanceMissionClick = () => {
+    if (hasArtifactsGate && gateLevel != null && !hasNextMission) {
+      pendingAfterGemFlight.current = null;
+      const ra = stageReward?.rewardAmount;
+      if (ra != null && ra > 0) {
+        chat.setPendingGemsOnLand(ra);
+        pendingArtifactsGateLevelAfterGems.current = gateLevel;
+        const ok = startGemFlight();
+        if (!ok) {
+          chat.closeStageReward();
+          chat.openNextLevelArtifactsGate(gateLevel);
+          return;
+        }
+        handleClose();
+        return;
+      }
+      chat.closeStageReward();
+      chat.openNextLevelArtifactsGate(gateLevel);
+      return;
+    }
+    handleNextMissionClick();
+  };
+
   const showGems =
     stageReward?.rewardAmount != null && Number(stageReward.rewardAmount) > 0;
 
@@ -222,15 +259,15 @@ const StageRewardModal: React.FC = observer(() => {
       swipeToClose={false}
       hideCloseButton
       title={t('stageCompleted')}
-      description={t('stageRewardGemsHint')}
+      description={showGems ? t('stageRewardGemsHint') : t('stageReplayRewardHint')}
       headerIcon={<i className="fa-solid fa-trophy text-white text-2xl"></i>}
       headerIconContainerClassName="bg-user-message"
       footer={
         stageReward ? (
           <div className="flex flex-col gap-2 w-full">
-            {hasNextMission ? (
+            {showAdvanceMissionButton ? (
               <Button
-                onClick={handleNextMissionClick}
+                onClick={handleAdvanceMissionClick}
                 variant="gradient"
                 size="lg"
                 className="w-full"

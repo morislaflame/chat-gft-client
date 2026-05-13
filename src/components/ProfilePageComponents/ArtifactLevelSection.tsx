@@ -28,7 +28,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
     const prefersReducedMotion = useReducedMotion();
 
     return (
-        <div className="flex flex-col gap-2">
+        <div id={`profile-artifact-level-${group.level}`} className="flex flex-col gap-2 scroll-mt-28">
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5 min-w-0 justify-between w-full">
                     <span className="text-sm font-bold text-white uppercase tracking-wide">
@@ -40,7 +40,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                         </span>
                     )}
                     {!isPrevComplete && (
-                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded- sfull px-1.5 py-0.5 leading-none shrink-0">
+                        <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded-full px-1.5 py-0.5 leading-none shrink-0">
                             <i className="fa-solid fa-lock text-[9px] mr-0.5" />
                             {t('profileLevelLocked')}
                         </span>

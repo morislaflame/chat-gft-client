@@ -42,6 +42,7 @@ export default class ChatStore {
     _userStore: UserStore | null = null;
     _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
+    _nextLevelArtifactsGate: { completedLevel: number } | null = null;
     _stepReward: StepRewardData | null = null;
     _pendingCompanionArtifact: CompanionArtifactData | null = null;
     _balanceBeforeReward: number | null = null;
@@ -184,6 +185,14 @@ export default class ChatStore {
         }
     }
 
+    openNextLevelArtifactsGate(completedLevel: number) {
+        this._nextLevelArtifactsGate = { completedLevel };
+    }
+
+    closeNextLevelArtifactsGate() {
+        this._nextLevelArtifactsGate = null;
+    }
+
     setPendingCompanionArtifact(artifact: Omit<CompanionArtifactData, 'isOpen'> | null) {
         this._pendingCompanionArtifact = artifact ? { ...artifact, isOpen: false } : null;
     }
@@ -292,6 +301,51 @@ export default class ChatStore {
                 artifactsFound: 0,
                 artifactsTotal: 0,
             });
+        }
+        this._missionsProgress = list;
+    }
+
+    /**
+     * Сразу после отправки сообщения с beginReplay: до ответа LLM статус ещё «completed»
+     * и main_step максимальный — прогрессбар показывал все шаги пройденными. Приводим к началу реплея.
+     */
+    patchMissionReplayStarted(missionId: number) {
+        const m = this._missions.find((x) => x.id === missionId);
+        if (!m) return;
+
+        const applyProgress = (base: MissionProgress | undefined): MissionProgress => {
+            const prev = base ?? {
+                missionId,
+                orderIndex: m.orderIndex,
+                status: "completed" as const,
+                mainStep: 1,
+                mainStepsTotal: null,
+                beatsCompleted: 0,
+                artifactsFound: 0,
+                artifactsTotal: 0,
+            };
+            return {
+                ...prev,
+                missionId,
+                orderIndex: m.orderIndex,
+                status: "replay_in_progress",
+                mainStep: 1,
+                beatsCompleted: 0,
+            };
+        };
+
+        this._missions = this._missions.map((x) => {
+            if (x.id !== missionId) return x;
+            const p = x.progress;
+            return { ...x, progress: applyProgress(p ?? undefined) };
+        });
+
+        const list = [...this._missionsProgress];
+        const idx = list.findIndex((p) => p.missionId === missionId);
+        if (idx >= 0) {
+            list[idx] = applyProgress(list[idx]);
+        } else {
+            list.push(applyProgress(undefined));
         }
         this._missionsProgress = list;
     }
@@ -591,6 +645,9 @@ export default class ChatStore {
         if (!extra?.skipUserBubble) {
             this.addMessage(userMessage);
         }
+        if (extra?.beginReplay === true && this._selectedMissionId != null) {
+            this.patchMissionReplayStarted(this._selectedMissionId);
+        }
         this.setIsTyping(true);
         this.setError('');
         this.setArtifactAction(null);
@@ -669,6 +726,25 @@ export default class ChatStore {
             if (response.newBalance !== undefined && this._userStore) {
                 if (response.missionCompleted && response.rewardsSuppressed) {
                     this._userStore.setBalance(response.newBalance);
+                    if (response.stageReward) {
+                        const stageNumberReplay =
+                            response.stageReward.stageNumber ??
+                            response.completedStage ??
+                            (response.stage ? (response.stage === 1 ? 3 : response.stage - 1) : 1);
+                        this.setStageReward({
+                            stageNumber: stageNumberReplay,
+                            rewardAmount:
+                                typeof response.stageReward.rewardAmount === "number"
+                                    ? response.stageReward.rewardAmount
+                                    : null,
+                            rewardCaseId: response.stageReward.rewardCaseId ?? null,
+                            rewardCase: response.stageReward.rewardCase ?? null,
+                            isOpen: true,
+                            lastLlmReply: response.lastLlmReply ?? response.response ?? null,
+                            nextMission: response.nextMission ?? null,
+                            artifactsGate: response.artifactsGate ?? null,
+                        });
+                    }
                 } else if (response.missionCompleted && !response.rewardsSuppressed) {
                     const stageNumber =
                         response.stageReward?.stageNumber ??
@@ -688,6 +764,7 @@ export default class ChatStore {
                         isOpen: true,
                         lastLlmReply: response.lastLlmReply ?? response.response ?? null,
                         nextMission: response.nextMission ?? null,
+                        artifactsGate: response.artifactsGate ?? null,
                     });
 
                     // Сохраняем компаньон-артефакт, если он был выдан (показ — после фейерверка)
@@ -771,11 +848,7 @@ export default class ChatStore {
                 }
             }
 
-            if (
-                response.missionCompleted &&
-                !response.rewardsSuppressed &&
-                this._missions.length > 0
-            ) {
+            if (response.missionCompleted && this._missions.length > 0) {
                 let nextMission: Mission | null = null;
                 const apiNext = response.nextMission;
                 if (
@@ -785,7 +858,14 @@ export default class ChatStore {
                 ) {
                     nextMission = this._missions.find((m) => m.id === apiNext.id) ?? null;
                 }
-                if (!nextMission && this._selectedMissionId != null) {
+                const artifactsGateBlocksNext =
+                    response.artifactsGate != null &&
+                    typeof response.artifactsGate.completedLevel === "number";
+                if (
+                    !nextMission &&
+                    !artifactsGateBlocksNext &&
+                    this._selectedMissionId != null
+                ) {
                     const sorted = [...this._missions].sort(compareMissionsByStoryOrder);
                     const idx = sorted.findIndex((m) => m.id === this._selectedMissionId);
                     if (idx >= 0 && idx + 1 < sorted.length) {
@@ -1148,6 +1228,10 @@ export default class ChatStore {
 
     get stageReward() {
         return this._stageReward;
+    }
+
+    get nextLevelArtifactsGate() {
+        return this._nextLevelArtifactsGate;
     }
 
     get stepReward() {

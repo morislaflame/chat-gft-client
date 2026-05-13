@@ -8,6 +8,7 @@ import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
+import NextLevelArtifactsGateModal from "./components/modals/NextLevelArtifactsGateModal";
 import StepRewardModal from "./components/modals/StepRewardModal";
 import ArtifactAcquireModal from "./components/modals/ArtifactAcquireModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
@@ -58,6 +59,7 @@ const AppContent = () => {
       <BottomNavigation />
       <DailyRewardModal />
       <StageRewardModal />
+      <NextLevelArtifactsGateModal />
       <StepRewardModal />
       <ArtifactAcquireModal />
       <InsufficientEnergyModal />

@@ -168,6 +168,9 @@ export interface ApiMessageResponse {
         titleEn?: string | null;
         orderIndex: number;
     } | null;
+    artifactsGate?: {
+        completedLevel: number;
+    } | null;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
     stageReward?: {
@@ -307,6 +310,9 @@ export interface StageRewardData {
         title: string;
         titleEn?: string | null;
         orderIndex: number;
+    } | null;
+    artifactsGate?: {
+        completedLevel: number;
     } | null;
 }
 

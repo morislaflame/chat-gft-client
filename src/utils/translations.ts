@@ -738,6 +738,10 @@ type TranslationType = {
         ru: 'Истории недоступны',
         en: 'No histories available'
     },
+    storiesComingSoon: {
+        ru: 'Новые истории скоро добавятся!',
+        en: 'New stories coming soon!'
+    },
     startYourAdventure: {
         ru: 'Начните свое приключение в этой удивительной истории!',
         en: 'Start your adventure in this amazing story!'

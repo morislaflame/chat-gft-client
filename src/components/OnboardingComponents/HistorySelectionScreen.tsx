@@ -6,6 +6,7 @@ import { useSwipe } from '@/utils/useSwipe';
 import useMeasure from 'react-use-measure';
 import type { Agent } from '@/http/agentAPI';
 import HistoryCard from './HistoryCard';
+import ComingSoonStoryCard from './ComingSoonStoryCard';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 
@@ -23,6 +24,7 @@ interface HistorySelectionScreenProps {
     onSelectHistory: (historyName: string) => void;
     isFromHeader?: boolean;
     onClose?: () => void;
+    showComingSoonCard?: boolean;
 }
 
 const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
@@ -39,11 +41,14 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
     onSelectHistory,
     isFromHeader = false,
     onClose,
+    showComingSoonCard = false,
 }) => {
     const { t, language } = useTranslate();
     const [ref, bounds] = useMeasure();
     const {hapticImpact} = useHapticFeedback();
     const hasTrackedViewRef = React.useRef(false);
+    const slideCount = showComingSoonCard ? histories.length + 1 : histories.length;
+    const comingSoonIndex = showComingSoonCard ? histories.length : -1;
 
     React.useEffect(() => {
         if (hasTrackedViewRef.current) return;
@@ -58,7 +63,7 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
 
     const handleSwipeLeft = () => {
         hapticImpact('soft');
-        if (activeIndex < histories.length - 1) {
+        if (activeIndex < slideCount - 1) {
             onSetActiveIndex(activeIndex + 1);
         }
     };
@@ -169,7 +174,9 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                         isSaving={saving}
                                         preview={agent.preview}
                                         showLeftSwipeHint={idx === activeIndex && activeIndex > 0}
-                                        showRightSwipeHint={idx === activeIndex && activeIndex < histories.length - 1}
+                                        showRightSwipeHint={
+                                            idx === activeIndex && activeIndex < slideCount - 1
+                                        }
                                         onPrev={() => {
                                             if (idx !== activeIndex) return;
                                             hapticImpact('soft');
@@ -178,19 +185,38 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
                                         onNext={() => {
                                             if (idx !== activeIndex) return;
                                             hapticImpact('soft');
-                                            if (activeIndex < histories.length - 1) onSetActiveIndex(activeIndex + 1);
+                                            if (activeIndex < slideCount - 1) onSetActiveIndex(activeIndex + 1);
                                         }}
                                         onSelect={() => onSelectHistory(agent.historyName)}
                                     />
                                 </div>
                             ))}
+                            {showComingSoonCard ? (
+                                <div
+                                    key="coming-soon"
+                                    ref={activeIndex === comingSoonIndex ? ref : undefined}
+                                    className="flex flex-col w-full justify-center items-center"
+                                >
+                                    <ComingSoonStoryCard
+                                        title={t('storiesComingSoon')}
+                                        showLeftSwipeHint={
+                                            activeIndex === comingSoonIndex && activeIndex > 0
+                                        }
+                                        onPrev={() => {
+                                            if (activeIndex !== comingSoonIndex) return;
+                                            hapticImpact('soft');
+                                            if (activeIndex > 0) onSetActiveIndex(activeIndex - 1);
+                                        }}
+                                    />
+                                </div>
+                            ) : null}
                         </TransitionPanel>
                     </div>
 
                     {/* Navigation Controls */}
-                    {histories.length > 1 && (
+                    {slideCount > 1 && (
                         <div className="flex justify-center gap-2 mt-4">
-                            {histories.map((_, idx) => (
+                            {Array.from({ length: slideCount }, (_, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => {
@@ -216,4 +242,3 @@ const HistorySelectionScreen: React.FC<HistorySelectionScreenProps> = ({
 };
 
 export default HistorySelectionScreen;
-

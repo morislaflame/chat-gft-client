@@ -10,7 +10,7 @@ import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
 import MissionPathScreen from '@/components/OnboardingComponents/MissionPathScreen';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
-import { getHistoryDisplayName } from '@/components/OnboardingComponents/onboardingUtils';
+import { getHistoryDisplayName, DEFAULT_ONBOARDING_HISTORY } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -66,9 +66,12 @@ const Onboarding: React.FC<OnboardingProps> = observer(
             });
         }, [step, isFromHeader]);
 
+        const historySlideCount =
+            step === 'select' && isFromHeader ? agent.agents.length + 1 : agent.agents.length;
+
         const handleSetActiveIndex = (newIndex: number) => {
             hapticImpact('soft');
-            if (newIndex < 0 || newIndex >= agent.agents.length) return;
+            if (newIndex < 0 || newIndex >= historySlideCount) return;
             setDirection(newIndex > activeIndex ? 1 : -1);
             setActiveIndex(newIndex);
         };
@@ -148,6 +151,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(
         };
 
         const goToHistorySelectionFromMissions = () => {
+            setActiveIndex(0);
             setStep('select');
         };
 
@@ -203,7 +207,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(
                     ) : step === 'welcome' ? (
                         <WelcomeScreen
                             joinAdventureText={t('joinAdventure')}
-                            onJoinAdventure={() => setStep('select')}
+                            onJoinAdventure={() => void handleSelectHistory(DEFAULT_ONBOARDING_HISTORY)}
                         />
                     ) : step === 'select' ? (
                         <HistorySelectionScreen
@@ -220,6 +224,7 @@ const Onboarding: React.FC<OnboardingProps> = observer(
                             onSelectHistory={handleSelectHistory}
                             isFromHeader={isFromHeader}
                             onClose={onClose}
+                            showComingSoonCard={isFromHeader}
                         />
                     ) : (
                         <MissionPathScreen

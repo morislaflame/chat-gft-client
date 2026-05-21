@@ -6,6 +6,9 @@ import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 import Button from '../ui/button';
+import ArtifactMarketActions, {
+    type ArtifactTradeSuccessPayload,
+} from '@/components/ProfilePageComponents/ArtifactMarketActions';
 
 type ArtifactDetailModalProps = {
     isOpen: boolean;
@@ -16,10 +19,14 @@ type ArtifactDetailModalProps = {
     /** Локализованное описание (передаётся снаружи) */
     description: string;
     ownedQty: number;
+    isFound: boolean;
+    historyName: string;
+    userBalance: number;
+    onTradeSuccess: (payload: ArtifactTradeSuccessPayload) => void;
 };
 
 const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
-    ({ isOpen, onClose, artifact, title, description, ownedQty }) => {
+    ({ isOpen, onClose, artifact, title, description, ownedQty, isFound, historyName, userBalance, onTradeSuccess }) => {
         const { t } = useTranslate();
         const { hapticImpact } = useHapticFeedback();
 
@@ -31,9 +38,9 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
         const previewUrl = artifact?.media?.url;
         const previewMime = artifact?.media?.mimeType ?? '';
         const isImage = Boolean(previewUrl && previewMime.startsWith('image/'));
-        const isOwned = ownedQty > 0;
+        const isDiscovered = isFound;
         const descriptionTrimmed = description.trim();
-        const modalDescription = isOwned
+        const modalDescription = isDiscovered
             ? descriptionTrimmed
                 ? descriptionTrimmed
                 : undefined
@@ -54,9 +61,21 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 closeAriaLabel={t('close')}
                 contentClassName="max-h-[min(55vh,420px)] overflow-y-auto"
                 footer={
-                    <Button onClick={handleClose} variant="default" size="lg" className="w-full">
-                        {t('close')}
-                    </Button>
+                    <div className="flex w-full flex-col gap-2">
+                        {artifact ? (
+                            <ArtifactMarketActions
+                                artifact={artifact}
+                                historyName={historyName}
+                                ownedQty={ownedQty}
+                                userBalance={userBalance}
+                                layout="modal"
+                                onSuccess={onTradeSuccess}
+                            />
+                        ) : null}
+                        <Button onClick={handleClose} variant="default" size="lg" className="w-full">
+                            {t('close')}
+                        </Button>
+                    </div>
                 }
             >
                 {artifact ? (
@@ -69,10 +88,10 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                             src={previewUrl}
                                             alt=""
                                             className={`max-w-full max-h-full object-contain ${
-                                                isOwned ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
+                                                isDiscovered ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
                                             }`}
                                         />
-                                        {!isOwned && (
+                                        {!isDiscovered && (
                                             <>
                                                 <div
                                                     className="absolute inset-0 pointer-events-none"
@@ -90,10 +109,10 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                     <div className="relative flex h-full w-full items-center justify-center">
                                         <i
                                             className={`fa-solid fa-gem text-6xl ${
-                                                isOwned ? 'text-amber-400/90' : 'text-zinc-600 opacity-80 grayscale'
+                                                isDiscovered ? 'text-amber-400/90' : 'text-zinc-600 opacity-80 grayscale'
                                             }`}
                                         />
-                                        {!isOwned && (
+                                        {!isDiscovered && (
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
                                                     <i className="fa-solid fa-lock text-2xl" />
@@ -105,11 +124,11 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                             </div>
                         </div>
 
-                        {isOwned && !descriptionTrimmed ? (
+                        {isDiscovered && !descriptionTrimmed ? (
                             <p className="text-zinc-500 text-sm italic text-center">{t('artifactNoDescription')}</p>
                         ) : null}
 
-                        {!isOwned ? (
+                        {!isDiscovered ? (
                             <p className="text-zinc-300 text-sm text-center leading-relaxed">
                                 {t('artifactLockedMissionBody')}
                             </p>

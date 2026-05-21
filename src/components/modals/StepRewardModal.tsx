@@ -45,6 +45,10 @@ const StepRewardModal: React.FC = observer(() => {
     const sourceEl = gemSourceRef.current;
     const targetEl = document.querySelector('[data-gems-target]');
     if (!sourceEl || !targetEl) {
+      if (stepReward?.rewardGems != null && stepReward.rewardGems > 0) {
+        chat.setPendingGemsOnLand(stepReward.rewardGems);
+        chat.onGemsLanded();
+      }
       handleClose();
       return;
     }

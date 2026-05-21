@@ -163,11 +163,16 @@ export default class ChatStore {
         this._pendingGemsOnLand = amount;
     }
 
+    /** Перед анимацией полёта гема: фиксируем баланс «до» и сумму, которая прилетит в хэдер. */
+    prepareGemsLanding(fromBalance: number, gemsAmount: number) {
+        this._balanceBeforeReward = fromBalance;
+        this._pendingGemsOnLand = gemsAmount;
+    }
+
     onGemsLanded() {
         if (this._pendingGemsOnLand == null || this._balanceBeforeReward == null) return;
         const to = this._balanceBeforeReward + this._pendingGemsOnLand;
-        const currentBalance = this._userStore?.user?.balance ?? 0;
-        if (currentBalance === this._balanceBeforeReward && this._userStore) {
+        if (this._userStore) {
             this._userStore.setBalance(to);
         }
         this._pendingProgressAnimation = { from: this._balanceBeforeReward, to };
@@ -840,10 +845,21 @@ export default class ChatStore {
                     });
                 }
 
-                if (
-                    !response.stepReward ||
-                    (response.missionCompleted && !response.rewardsSuppressed)
-                ) {
+                const stageGemReward =
+                    response.missionCompleted && !response.rewardsSuppressed
+                        ? typeof response.stageReward?.rewardAmount === "number"
+                            ? response.stageReward.rewardAmount
+                            : response.newBalance - previousBalance
+                        : 0;
+                const hasStageGemAnimation = stageGemReward > 0;
+                const hasStepGemAnimation =
+                    !response.missionCompleted &&
+                    !response.rewardsSuppressed &&
+                    response.stepReward != null &&
+                    typeof response.stepReward.rewardGems === "number" &&
+                    response.stepReward.rewardGems > 0;
+
+                if (!hasStageGemAnimation && !hasStepGemAnimation) {
                     this._userStore.setBalance(response.newBalance);
                 }
             }

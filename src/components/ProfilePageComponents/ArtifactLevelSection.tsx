@@ -2,6 +2,7 @@ import React from 'react';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import ProfileArtifactCard from './ProfileArtifactCard';
 import type { ArtifactLevelGroup } from './profileInventoryUtils';
+import { isArtifactFoundInStory } from './profileInventoryUtils';
 import { motion, useReducedMotion } from 'motion/react';
 
 export type ArtifactLevelSectionProps = {
@@ -9,6 +10,7 @@ export type ArtifactLevelSectionProps = {
     isPrevComplete: boolean;
     hasNextLevel: boolean;
     owned: Record<string, number>;
+    found: Record<string, number>;
     onOpenDetail: (art: ProfileInventoryArtifact, qty: number) => void;
     artifactName: (code: string, name: string, nameEn: string | null) => string;
     t: (key: string) => string;
@@ -19,6 +21,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
     isPrevComplete,
     hasNextLevel,
     owned,
+    found,
     onOpenDetail,
     artifactName,
     t,
@@ -74,6 +77,9 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                         />
                     </div>
 
+            {isPrevComplete ? (
+                <p className="text-xs text-zinc-500 leading-relaxed">{t('artifactMarketTapHint')}</p>
+            ) : null}
 
             <div
                 className={`flex gap-3 overflow-x-auto py-3 -mx-1 px-1 hide-scrollbar ios-scroll transition-opacity duration-300 ${
@@ -82,7 +88,7 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
             >
                 {group.artifacts.map((art) => {
                     const qty = owned[art.code] ?? 0;
-                    const isFound = Object.prototype.hasOwnProperty.call(owned, art.code);
+                    const isFound = isArtifactFoundInStory(found, art.code);
                     const name = artifactName(art.code, art.name, art.nameEn);
                     return (
                         <ProfileArtifactCard

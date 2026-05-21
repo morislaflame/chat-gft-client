@@ -56,10 +56,13 @@ const Header: React.FC = observer(() => {
     const avatarRipple = useRipple();
 
     useEffect(() => {
-        const onGemsLand = () => setGemsBurstTrigger((t) => t + 1);
+        const onGemsLand = () => {
+            setGemsBurstTrigger((t) => t + 1);
+            chat.onGemsLanded();
+        };
         document.addEventListener('gems-button-land', onGemsLand);
         return () => document.removeEventListener('gems-button-land', onGemsLand);
-    }, []);
+    }, [chat]);
     const gemsRipple = useRipple();
     const energyRipple = useRipple();
     const languageRipple = useRipple();

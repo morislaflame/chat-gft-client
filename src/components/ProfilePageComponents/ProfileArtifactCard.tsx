@@ -28,7 +28,7 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
     const isDiscovered = isFound;
     const backdropSrc = getArtifactBackdropSrcByBoostType(artifact.boostType);
-    const showQtyBadge = isDiscovered && ownedQty > 1;
+    const showOwnedQty = ownedQty > 0 && artifact.boostType !== 'COMPANION';
 
     const surfaceMotion = prefersReducedMotion
         ? {}
@@ -55,11 +55,11 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
             {...surfaceMotion}
             className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-[background-color,box-shadow,color] duration-400 ease-out"
         >
-            {showQtyBadge && (
-                <div className="absolute top-2 right-2 z-[2] rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-semibold leading-none text-zinc-100 ring-1 ring-white/20">
-                    {`x${ownedQty}`}
+            {showOwnedQty ? (
+                <div className="absolute top-2 right-2 z-[2] rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-semibold leading-none ring-1 ring-white/20">
+                    <span className="text-secondary-gradient">{`x${ownedQty}`}</span>
                 </div>
-            )}
+            ) : null}
             <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
                 <img
                     src={backdropSrc}

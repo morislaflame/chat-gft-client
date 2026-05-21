@@ -44,13 +44,6 @@ const ChatContainer: React.FC = observer(() => {
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
 
-    // When gems land in the header — update balance (temp) and run case-bar fill animation
-    useEffect(() => {
-        const onGemsLand = () => chat.onGemsLanded();
-        document.addEventListener('gems-button-land', onGemsLand);
-        return () => document.removeEventListener('gems-button-land', onGemsLand);
-    }, [chat]);
-
     const handleSendMessage = async (
         message: string,
         suggestionId?: string | null,

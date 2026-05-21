@@ -58,6 +58,10 @@ export interface ProfileInventoryArtifact {
     description?: string | null;
     descriptionEn?: string | null;
     media: { id: number; url: string; mimeType: string } | null;
+    /** Цена покупки за 1 шт. (gems). null = нельзя купить */
+    buyPrice?: number | null;
+    /** Цена продажи за 1 шт. (gems). null = нельзя продать */
+    sellPrice?: number | null;
 }
 
 export interface ProfileInventoryStory {

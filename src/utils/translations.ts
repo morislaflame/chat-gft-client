@@ -1000,6 +1000,54 @@ type TranslationType = {
         ru: 'Пробуйте разные шаги и развилки — нужный артефакт может быть в другом месте.',
         en: 'Try different steps and branches — the required artifact may be in another place.'
     },
+    artifactMissingBuyOnProfile: {
+        ru: 'Вы можете купить артефакт за',
+        en: 'You can buy the artifact for'
+    },
+    artifactBuy: {
+        ru: 'Купить',
+        en: 'Buy'
+    },
+    artifactSell: {
+        ru: 'Продать',
+        en: 'Sell'
+    },
+    artifactBuyFor: {
+        ru: 'Купить за {price}',
+        en: 'Buy for {price}'
+    },
+    artifactSellFor: {
+        ru: 'Продать за {price}',
+        en: 'Sell for {price}'
+    },
+    artifactInsufficientBalance: {
+        ru: 'Недостаточно gems',
+        en: 'Not enough gems'
+    },
+    artifactNothingToSell: {
+        ru: 'Нет артефакта для продажи',
+        en: 'No artifact to sell'
+    },
+    artifactCompanionNotSellable: {
+        ru: 'Компаньона нельзя продать',
+        en: 'Companion cannot be sold'
+    },
+    artifactMarketError: {
+        ru: 'Не удалось выполнить операцию',
+        en: 'Could not complete the transaction'
+    },
+    artifactMarketTapHint: {
+        ru: 'Нажмите на артефакт, чтобы купить или продать его',
+        en: 'Tap an artifact to buy or sell it'
+    },
+    artifactPurchaseSuccessTitle: {
+        ru: 'Артефакт куплен!',
+        en: 'Artifact purchased!'
+    },
+    artifactPurchaseSuccessSubtitle: {
+        ru: 'Предмет добавлен в ваш инвентарь',
+        en: 'The item has been added to your inventory'
+    },
     loot: {
         ru: 'Лут',
         en: 'Rewards'

@@ -6,18 +6,26 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import ArtifactDetailModal from '@/components/modals/ArtifactDetailModal';
+import ArtifactPurchaseSuccessModal from '@/components/modals/ArtifactPurchaseSuccessModal';
 import type { ProfileInventoryArtifact, ProfileInventoryStory } from '@/types/types';
+import type { ArtifactTradeSuccessPayload } from '@/components/ProfilePageComponents/ArtifactMarketActions';
 import ProfileStoryArtifactsSection from '@/components/ProfilePageComponents/ProfileStoryArtifactsSection';
+import {
+    FlyingGemOverlay,
+    startGemFlightFromRect,
+    type FlyingGemCoords,
+} from '@/components/ui/FlyingGemOverlay';
 import Button from '@/components/ui/button';
 import { PROFILE_ROUTE } from '@/utils/consts';
 import { loadMergedProfileStories } from '@/components/ProfilePageComponents/profileInventoryMocks';
+import { isArtifactFoundInStory } from '@/components/ProfilePageComponents/profileInventoryUtils';
 import { motion, useReducedMotion } from 'motion/react';
 
 const ProfileStoryDetailContainer: React.FC = observer(() => {
     const { historyName } = useParams<{ historyName: string }>();
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, agent } = useContext(Context) as IStoreContext;
+    const { user, agent, chat } = useContext(Context) as IStoreContext;
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
     const prefersReducedMotion = useReducedMotion();
@@ -31,6 +39,13 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
     const [detailTitle, setDetailTitle] = useState('');
     const [detailDescription, setDetailDescription] = useState('');
     const [detailOwnedQty, setDetailOwnedQty] = useState(0);
+
+    const [purchaseSuccess, setPurchaseSuccess] = useState<{
+        artifact: ProfileInventoryArtifact;
+        title: string;
+        ownedQty: number;
+    } | null>(null);
+    const [flyingGem, setFlyingGem] = useState<FlyingGemCoords | null>(null);
 
     const userId = user.user?.id;
     const historyKey = historyName ?? '';
@@ -115,6 +130,96 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
     const isMobile =
         typeof document !== 'undefined' && document.body.classList.contains('telegram-mobile');
     const headerSafeOffset = isMobile ? '158px' : '58px';
+
+    const applyTradeInventoryUpdate = (
+        payload: Pick<ArtifactTradeSuccessPayload, 'artifactCode' | 'ownedQty' | 'newBalance'>,
+        options?: { updateBalance?: boolean },
+    ) => {
+        if (options?.updateBalance !== false) {
+            user.setBalance(payload.newBalance);
+        }
+        setStories((prev) => {
+            if (!prev) return prev;
+            return prev.map((s) => {
+                if (s.historyName !== historyKey) return s;
+                const nextOwned = { ...s.owned };
+                if (payload.ownedQty > 0) {
+                    nextOwned[payload.artifactCode] = payload.ownedQty;
+                } else {
+                    delete nextOwned[payload.artifactCode];
+                }
+                return { ...s, owned: nextOwned };
+            });
+        });
+        if (detailArtifact?.code === payload.artifactCode) {
+            setDetailOwnedQty(payload.ownedQty);
+        }
+        if (user.user?.selectedHistoryName === historyKey && user.user.artifacts) {
+            const prevArtifacts = user.user.artifacts;
+            const idx = prevArtifacts.findIndex((a) => a.code === payload.artifactCode);
+            let nextArtifacts;
+            if (payload.ownedQty > 0) {
+                if (idx >= 0) {
+                    nextArtifacts = prevArtifacts.map((a, i) =>
+                        i === idx ? { ...a, quantity: payload.ownedQty } : a,
+                    );
+                } else {
+                    nextArtifacts = [
+                        ...prevArtifacts,
+                        {
+                            code: payload.artifactCode,
+                            name: detailArtifact?.name || payload.artifactCode,
+                            quantity: payload.ownedQty,
+                        },
+                    ];
+                }
+            } else if (idx >= 0) {
+                nextArtifacts = prevArtifacts.filter((a) => a.code !== payload.artifactCode);
+            } else {
+                nextArtifacts = prevArtifacts;
+            }
+            user.setArtifacts(nextArtifacts);
+        }
+    };
+
+    const handleTradeSuccess = (payload: ArtifactTradeSuccessPayload) => {
+        if (payload.action === 'buy') {
+            applyTradeInventoryUpdate(payload);
+            if (detailArtifact) {
+                setDetailOpen(false);
+                setPurchaseSuccess({
+                    artifact: detailArtifact,
+                    title: detailTitle,
+                    ownedQty: payload.ownedQty,
+                });
+            }
+            return;
+        }
+
+        if (payload.action === 'sell') {
+            const balanceBefore = user.user?.balance ?? 0;
+            applyTradeInventoryUpdate(payload, { updateBalance: false });
+            setDetailOpen(false);
+            if (payload.sourceRect) {
+                const coords = startGemFlightFromRect(payload.sourceRect);
+                if (coords) {
+                    chat.prepareGemsLanding(balanceBefore, payload.price);
+                    setFlyingGem(coords);
+                    return;
+                }
+            }
+            user.setBalance(payload.newBalance);
+        }
+    };
+
+    const onFlyingGemComplete = () => {
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('gems-button-land'));
+        }
+        setFlyingGem(null);
+    };
+
+    const userBalance = user.user?.balance ?? 0;
 
     if (!userId || !historyName) {
         return (
@@ -229,7 +334,25 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
                 title={detailTitle}
                 description={detailDescription}
                 ownedQty={detailOwnedQty}
+                isFound={
+                    detailArtifact && story
+                        ? isArtifactFoundInStory(story.found, detailArtifact.code)
+                        : false
+                }
+                historyName={historyKey}
+                userBalance={userBalance}
+                onTradeSuccess={handleTradeSuccess}
             />
+
+            <ArtifactPurchaseSuccessModal
+                isOpen={purchaseSuccess != null}
+                artifact={purchaseSuccess?.artifact ?? null}
+                title={purchaseSuccess?.title ?? ''}
+                ownedQty={purchaseSuccess?.ownedQty ?? 0}
+                onClose={() => setPurchaseSuccess(null)}
+            />
+
+            <FlyingGemOverlay flyingGem={flyingGem} onFlyingGemComplete={onFlyingGemComplete} />
         </div>
     );
 });

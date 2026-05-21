@@ -161,6 +161,7 @@ const StageRewardModal: React.FC = observer(() => {
       chat.setPendingGemsOnLand(ra);
       const ok = startGemFlight();
       if (!ok) {
+        chat.onGemsLanded();
         handleClose();
         return;
       }
@@ -180,6 +181,7 @@ const StageRewardModal: React.FC = observer(() => {
       pendingAfterGemFlight.current = nm;
       const ok = startGemFlight();
       if (!ok) {
+        chat.onGemsLanded();
         void chat.startNextMissionAfterReward(nm);
         handleClose();
         return;
@@ -233,6 +235,7 @@ const StageRewardModal: React.FC = observer(() => {
         pendingArtifactsGateLevelAfterGems.current = gateLevel;
         const ok = startGemFlight();
         if (!ok) {
+          chat.onGemsLanded();
           chat.closeStageReward();
           chat.openNextLevelArtifactsGate(gateLevel);
           return;

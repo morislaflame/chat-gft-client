@@ -49,7 +49,7 @@ function formatStoryAriaSummary(
 ): string {
     return t('profileStorySummaryLine')
         .replace(/\{\{pct\}\}/g, String(stats.pctCollected))
-        .replace(/\{\{owned\}\}/g, String(stats.ownedDistinctInCatalog))
+        .replace(/\{\{owned\}\}/g, String(stats.foundDistinctInCatalog))
         .replace(/\{\{total\}\}/g, String(stats.catalogTotal))
         .replace(/\{\{lvDone\}\}/g, String(stats.levelsFullyComplete))
         .replace(/\{\{lvAll\}\}/g, String(stats.levelsTotal));
@@ -75,7 +75,7 @@ const ProfileStorySummaryCard: React.FC<ProfileStorySummaryCardProps> = ({ story
     const summaryAria = formatStoryAriaSummary(t, stats);
     const to = buildProfileStoryPath(story.historyName);
 
-    const artifactProgressLabel = `${stats.ownedDistinctInCatalog}/${stats.catalogTotal}`;
+    const artifactProgressLabel = `${stats.foundDistinctInCatalog}/${stats.catalogTotal}`;
     // const levelsProgressLabel = `${stats.levelsFullyComplete}/${stats.levelsTotal}`;
 
     const openStory = () => {

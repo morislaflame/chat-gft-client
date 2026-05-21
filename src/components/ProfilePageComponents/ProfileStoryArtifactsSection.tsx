@@ -20,8 +20,8 @@ const ProfileStoryArtifactsSection: React.FC<ProfileStoryArtifactsSectionProps> 
 }) => {
 
     const levelGroups = useMemo(
-        () => buildLevelGroups(story.artifacts, story.owned),
-        [story.artifacts, story.owned],
+        () => buildLevelGroups(story.artifacts, story.found),
+        [story.artifacts, story.found],
     );
 
     return (
@@ -48,6 +48,7 @@ const ProfileStoryArtifactsSection: React.FC<ProfileStoryArtifactsSectionProps> 
                                     isPrevComplete={isPrevComplete}
                                     hasNextLevel={groupIdx < levelGroups.length - 1}
                                     owned={story.owned}
+                                    found={story.found}
                                     onOpenDetail={onOpenArtifactDetail}
                                     artifactName={artifactName}
                                     t={t}

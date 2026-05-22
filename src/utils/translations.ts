@@ -1020,6 +1020,10 @@ type TranslationType = {
         ru: 'Купить за {price}',
         en: 'Buy for {price}'
     },
+    artifactNotPurchasable: {
+        ru: 'Этот артефакт сейчас нельзя купить',
+        en: 'This artifact cannot be purchased right now'
+    },
     artifactSellFor: {
         ru: 'Продать за {price}',
         en: 'Sell for {price}'

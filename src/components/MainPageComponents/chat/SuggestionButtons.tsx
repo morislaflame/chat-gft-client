@@ -5,11 +5,13 @@ import { Context, type IStoreContext } from '@/store/context';
 import { trackEvent } from '@/utils/analytics';
 import type { ChatSuggestion } from '@/types/types';
 
+import type { ArtifactUnavailableContext } from '@/components/modals/ArtifactUnavailableModal';
+
 const PAYABLE_EXTRA_ENERGY_COST = 5;
 
 interface SuggestionButtonsProps {
   suggestions: ChatSuggestion[];
-  onArtifactDisabledClick?: () => void;
+  onArtifactDisabledClick?: (context: ArtifactUnavailableContext) => void;
   onSelectSuggestion: (
     text: string,
     suggestionId?: string | null,
@@ -44,9 +46,14 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
     isArtifactAction: boolean,
     isArtifactUse: boolean,
     isArtifactDisabled: boolean,
+    artifactCode: string,
+    artifactMedia: ChatSuggestion['artifact_media'],
   ) => {
     if (isArtifactDisabled) {
-      onArtifactDisabledClick?.();
+      onArtifactDisabledClick?.({
+        artifactCode,
+        artifactMedia: artifactMedia ?? null,
+      });
       return;
     }
     if (payGemsForSuggestionId) {
@@ -103,6 +110,8 @@ const SuggestionButtons: React.FC<SuggestionButtonsProps> = memo(({
                 isArtifactAction,
                 isArtifactUse,
                 isArtifactDisabled,
+                artifactCode,
+                artifactMedia,
               )}
               className={[
                 "px-3 py-auto text-xs whitespace-normal h-full min-h-0 flex items-center text-center gap-2",

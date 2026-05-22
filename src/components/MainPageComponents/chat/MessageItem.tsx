@@ -6,6 +6,8 @@ import SuggestionButtons from './SuggestionButtons';
 import type { ChatRetryPayload, ChatSuggestion, ClientErrorReportPayload, Message } from '@/types/types';
 import { useTranslate } from '@/utils/useTranslate';
 
+import type { ArtifactUnavailableContext } from '@/components/modals/ArtifactUnavailableModal';
+
 interface MessageItemProps {
   message: Message;
   suggestions: ChatSuggestion[];
@@ -13,7 +15,7 @@ interface MessageItemProps {
   suggestionsFormatErrorReportContext?: ClientErrorReportPayload | null;
   showSuggestions: boolean;
   avatarUrl?: string;
-  onArtifactDisabledClick?: () => void;
+  onArtifactDisabledClick?: (context: ArtifactUnavailableContext) => void;
   onSelectSuggestion: (text: string, suggestionId?: string | null, payGemsForSuggestionId?: string | null) => void;
   onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
   onReloadApp?: () => void;

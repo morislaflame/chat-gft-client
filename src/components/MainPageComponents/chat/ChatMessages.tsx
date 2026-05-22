@@ -8,10 +8,12 @@ import TypingIndicator from './TypingIndicator';
 import type { ChatRetryPayload, ClientErrorReportPayload } from '@/types/types';
 import type { RefObject } from 'react';
 
+import type { ArtifactUnavailableContext } from '@/components/modals/ArtifactUnavailableModal';
+
 interface ChatMessagesProps {
   onStartMission: (missionId: number) => void;
   onOpenArtifactsExplainer?: () => void;
-  onArtifactDisabledClick?: () => void;
+  onArtifactDisabledClick?: (context: ArtifactUnavailableContext) => void;
   onSelectSuggestion: (
     text: string,
     suggestionId?: string | null,

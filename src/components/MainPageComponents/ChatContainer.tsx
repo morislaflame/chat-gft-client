@@ -6,7 +6,9 @@ import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
 import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
-import ArtifactUnavailableModal from '../modals/ArtifactUnavailableModal';
+import ArtifactUnavailableModal, {
+    type ArtifactUnavailableContext,
+} from '../modals/ArtifactUnavailableModal';
 import ArtifactsExplainerModal from '../modals/ArtifactsExplainerModal';
 import CompanionArtifactModal from '../modals/CompanionArtifactModal';
 import type { MediaFile } from '@/types/types';
@@ -33,7 +35,8 @@ const ChatContainer: React.FC = observer(() => {
         suggestionId: string | null;
         payGemsForSuggestionId: string | null;
     } | null>(null);
-    const [showArtifactUnavailableModal, setShowArtifactUnavailableModal] = useState(false);
+    const [artifactUnavailableContext, setArtifactUnavailableContext] =
+        useState<ArtifactUnavailableContext | null>(null);
     const [artifactsExplainerOpen, setArtifactsExplainerOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +220,10 @@ const ChatContainer: React.FC = observer(() => {
                             hapticImpact('soft');
                             setArtifactsExplainerOpen(true);
                         }}
-                        onArtifactDisabledClick={() => setShowArtifactUnavailableModal(true)}
+                        onArtifactDisabledClick={(context) => {
+                            hapticImpact('soft');
+                            setArtifactUnavailableContext(context);
+                        }}
                         onSelectSuggestion={handleSelectSuggestion}
                         onRetryLlmFormat={(payload) => {
                             hapticImpact('soft');
@@ -289,8 +295,9 @@ const ChatContainer: React.FC = observer(() => {
             />
 
             <ArtifactUnavailableModal
-                isOpen={showArtifactUnavailableModal}
-                onClose={() => setShowArtifactUnavailableModal(false)}
+                isOpen={artifactUnavailableContext != null}
+                context={artifactUnavailableContext}
+                onClose={() => setArtifactUnavailableContext(null)}
             />
 
             <ArtifactsExplainerModal

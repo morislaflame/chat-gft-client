@@ -20,6 +20,8 @@ export type ArtifactMarketActionsProps = {
     ownedQty: number;
     userBalance: number;
     layout?: 'card' | 'modal';
+    /** По умолчанию true; в чате при отсутствии артефакта — только покупка */
+    showSell?: boolean;
     onSuccess: (payload: ArtifactTradeSuccessPayload) => void;
 };
 
@@ -36,6 +38,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     ownedQty,
     userBalance,
     layout = 'card',
+    showSell = true,
     onSuccess,
 }) => {
     const { t } = useTranslate();
@@ -65,9 +68,9 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     })();
 
     const showBuy = buyPrice != null;
-    const showSell = sellPrice != null && !isCompanion;
+    const showSellButton = showSell && sellPrice != null && !isCompanion;
 
-    if (!showBuy && !showSell) return null;
+    if (!showBuy && !showSellButton) return null;
 
     const runTrade = async (action: 'buy' | 'sell') => {
         if (loadingAction) return;
@@ -128,7 +131,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
                     {t('artifactBuyFor').replace('{price}', String(buyPrice))} <i className="fa-solid fa-gem text-white"></i>
                 </Button>
             ) : null}
-            {showSell ? (
+            {showSellButton ? (
                 <Button
                     ref={sellButtonRef}
                     type="button"

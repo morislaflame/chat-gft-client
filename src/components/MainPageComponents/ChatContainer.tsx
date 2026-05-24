@@ -10,13 +10,13 @@ import ArtifactUnavailableModal, {
     type ArtifactUnavailableContext,
 } from '../modals/ArtifactUnavailableModal';
 import ArtifactsExplainerModal from '../modals/ArtifactsExplainerModal';
-import CompanionArtifactModal from '../modals/CompanionArtifactModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
 import MissionStepGoalBar from './chat/MissionStepGoalBar';
 import MissionDynamicProgress from './chat/MissionDynamicProgress';
+import SomethingWentWrongPage from '../CoreComponents/SomethingWentWrongPage';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
@@ -187,6 +187,17 @@ const ChatContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
+    if (chat.historyLoadFailed) {
+        return (
+            <SomethingWentWrongPage
+                onRetry={() => {
+                    chat.clearHistoryLoadError();
+                    void chat.loadChatHistory(true);
+                }}
+            />
+        );
+    }
+
     /** Реальные сообщения треда (не синтетическая карточка миссии); локальные user/ai могут без missionId */
     const hasMissionChatMessages = chat.messages.some((m) => !m.isMissionCard);
 
@@ -304,8 +315,6 @@ const ChatContainer: React.FC = observer(() => {
                 isOpen={artifactsExplainerOpen}
                 onClose={() => setArtifactsExplainerOpen(false)}
             />
-
-            <CompanionArtifactModal />
         </div>
     );
 });

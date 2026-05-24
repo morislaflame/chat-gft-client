@@ -9,6 +9,7 @@ import onboardingImageJpg from '@/assets/Onboarding.jpg';
 import WelcomeScreen from '@/components/OnboardingComponents/WelcomeScreen';
 import HistorySelectionScreen from '@/components/OnboardingComponents/HistorySelectionScreen';
 import MissionPathScreen from '@/components/OnboardingComponents/MissionPathScreen';
+import OpenStoryLevelModal from '@/components/modals/OpenStoryLevelModal';
 import AgentVideoModal from '@/components/modals/AgentVideoModal';
 import { getHistoryDisplayName, DEFAULT_ONBOARDING_HISTORY } from '@/components/OnboardingComponents/onboardingUtils';
 import type { MediaFile } from '@/types/types';
@@ -253,7 +254,15 @@ const Onboarding: React.FC<OnboardingProps> = observer(
 
         return (
             <>
-                {typeof document !== 'undefined' ? createPortal(onboardingContent, document.body) : null}
+                {typeof document !== 'undefined'
+                    ? createPortal(
+                          <>
+                              {onboardingContent}
+                              <OpenStoryLevelModal />
+                          </>,
+                          document.body,
+                      )
+                    : null}
                 <AgentVideoModal isOpen={showVideoModal} video={selectedVideo} onClose={handleVideoClose} />
             </>
         );

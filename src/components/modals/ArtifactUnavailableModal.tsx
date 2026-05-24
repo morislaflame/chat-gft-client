@@ -7,6 +7,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import { loadMergedProfileStories } from '@/components/ProfilePageComponents/profileInventoryMocks';
+import { isStoryLevelUnlocked } from '@/components/ProfilePageComponents/profileInventoryUtils';
 import ArtifactMarketActions, {
   type ArtifactTradeSuccessPayload,
 } from '@/components/ProfilePageComponents/ArtifactMarketActions';
@@ -29,6 +30,7 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
     const { t, language } = useTranslate();
     const { hapticImpact } = useHapticFeedback();
 
+    const [storyUnlockedLevels, setStoryUnlockedLevels] = useState<number[]>([1]);
     const [catalogArtifact, setCatalogArtifact] = useState<ProfileInventoryArtifact | null>(null);
     const [catalogLoading, setCatalogLoading] = useState(false);
     const [catalogError, setCatalogError] = useState(false);
@@ -44,6 +46,7 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
     useEffect(() => {
       if (!isOpen || !artifactCode || !historyName) {
         setCatalogArtifact(null);
+        setStoryUnlockedLevels([1]);
         setCatalogLoading(false);
         setCatalogError(false);
         return;
@@ -58,6 +61,9 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
         .then((stories) => {
           if (cancelled) return;
           const story = stories.find((s) => s.historyName === historyName);
+          if (story?.unlockedLevels?.length) {
+            setStoryUnlockedLevels(story.unlockedLevels);
+          }
           const found = story?.artifacts.find((a) => a.code === artifactCode) ?? null;
           if (!found) {
             setCatalogError(true);
@@ -97,11 +103,16 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
       user.user?.artifacts?.find((a) => a.code === artifactCode)?.quantity ?? 0;
     const userBalance = user.user?.balance ?? 0;
     const buyPrice = catalogArtifact?.buyPrice;
+    const levelUnlocked =
+      catalogArtifact != null
+        ? isStoryLevelUnlocked(storyUnlockedLevels, catalogArtifact.level ?? 1)
+        : false;
     const canShowBuy =
       catalogArtifact != null &&
       buyPrice != null &&
       Number.isFinite(Number(buyPrice)) &&
-      Number(buyPrice) > 0;
+      Number(buyPrice) > 0 &&
+      levelUnlocked;
 
     const handleClose = () => {
       hapticImpact('soft');
@@ -173,6 +184,7 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
                   historyName={historyName}
                   ownedQty={ownedQty}
                   userBalance={userBalance}
+                  levelUnlocked={levelUnlocked}
                   layout="modal"
                   showSell={false}
                   onSuccess={handleBuySuccess}
@@ -200,7 +212,10 @@ const ArtifactUnavailableModal: React.FC<ArtifactUnavailableModalProps> = observ
             {catalogError ? (
               <p className="text-sm text-amber-200/90 text-center">{t('artifactMarketError')}</p>
             ) : null}
-            {!catalogLoading && catalogArtifact && !canShowBuy ? (
+            {!catalogLoading && catalogArtifact && buyPrice != null && !levelUnlocked ? (
+              <p className="text-sm text-zinc-400 text-center">{t('artifactLevelNotUnlockedForBuy')}</p>
+            ) : null}
+            {!catalogLoading && catalogArtifact && !canShowBuy && levelUnlocked ? (
               <p className="text-sm text-zinc-400 text-center">{t('artifactNotPurchasable')}</p>
             ) : null}
           </div>

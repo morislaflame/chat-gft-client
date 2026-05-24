@@ -25,6 +25,8 @@ type MissionCardPickerProps = {
     isSelected?: boolean;
     /** История по этой миссии загружается (кнопка в состоянии loading) */
     isLoading?: boolean;
+    /** Без входной анимации (экран пути миссий + автоскролл) */
+    disableEntranceAnimation?: boolean;
     onSelect: () => void;
 };
 
@@ -106,7 +108,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
     const { t, language } = useTranslate();
 
     if (isPicker(props)) {
-        const { mission, progress, locked, isSelected, isLoading = false, onSelect } = props;
+        const { mission, progress, locked, isSelected, isLoading = false, disableEntranceAnimation = false, onSelect } = props;
         const missionTitle =
             language === 'en' ? mission.titleEn ?? mission.title : mission.title;
         const missionDescription =
@@ -135,7 +137,7 @@ const MissionCard: React.FC<MissionCardProps> = memo((props) => {
         return (
             <div className="flex justify-center w-full">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={disableEntranceAnimation ? false : { opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
                         'rounded-2xl border border-white/15 bg-black/40 backdrop-blur-md px-4 py-3 inline-block max-w-md w-full transition-[box-shadow] duration-300',

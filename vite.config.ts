@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: ['drus.ru.tuna.am'],
+    allowedHosts: ['drus.ru.tuna.am', 'z73zpz-132-243-254-202.ru.tuna.am'],
   },
   resolve: {
     alias: {

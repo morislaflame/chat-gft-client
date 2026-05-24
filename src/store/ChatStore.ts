@@ -25,6 +25,8 @@ import type CaseStore from "@/store/CaseStore";
 import type { UserCase } from "@/http/caseAPI";
 import { trackEvent } from "@/utils/analytics";
 import { compareMissionsByStoryOrder } from "@/utils/missionStoryOrder";
+import { isStoryLevelUnlocked } from "@/components/ProfilePageComponents/profileInventoryUtils";
+import type { OpenStoryLevelPrompt } from "@/components/modals/OpenStoryLevelModal";
 
 export default class ChatStore {
     _messages: Message[] = [];
@@ -39,10 +41,15 @@ export default class ChatStore {
     /** Миссия, для которой сейчас грузится история (список миссий / смена треда) */
     _switchingMissionId: number | null = null;
     _error = '';
+    _historyLoadFailed = false;
     _userStore: UserStore | null = null;
     _caseStore: CaseStore | null = null;
     _stageReward: StageRewardData | null = null;
-    _nextLevelArtifactsGate: { completedLevel: number } | null = null;
+    _openStoryLevelPrompt: OpenStoryLevelPrompt | null = null;
+    _unlockedLevels: number[] = [1];
+    _pendingOpenStoryLevel: number | null = null;
+    /** Уровень, к первой миссии которого нужно прокрутить MissionPathScreen */
+    _missionPathScrollToLevel: number | null = null;
     _stepReward: StepRewardData | null = null;
     _pendingCompanionArtifact: CompanionArtifactData | null = null;
     _balanceBeforeReward: number | null = null;
@@ -190,12 +197,33 @@ export default class ChatStore {
         }
     }
 
-    openNextLevelArtifactsGate(completedLevel: number) {
-        this._nextLevelArtifactsGate = { completedLevel };
+    openOpenStoryLevelPrompt(prompt: OpenStoryLevelPrompt) {
+        this._openStoryLevelPrompt = prompt;
     }
 
-    closeNextLevelArtifactsGate() {
-        this._nextLevelArtifactsGate = null;
+    closeOpenStoryLevelPrompt() {
+        this._openStoryLevelPrompt = null;
+    }
+
+    setUnlockedLevels(levels: number[]) {
+        const normalized = [...new Set(levels.filter((l) => Number.isFinite(l) && l >= 1))].sort(
+            (a, b) => a - b,
+        );
+        this._unlockedLevels = normalized.length > 0 ? normalized : [1];
+    }
+
+    setPendingOpenStoryLevel(level: number | null) {
+        this._pendingOpenStoryLevel =
+            level != null && Number.isFinite(Number(level)) && Number(level) >= 2
+                ? Number(level)
+                : null;
+    }
+
+    setMissionPathScrollToLevel(level: number | null) {
+        this._missionPathScrollToLevel =
+            level != null && Number.isFinite(Number(level)) && Number(level) >= 2
+                ? Number(level)
+                : null;
     }
 
     setPendingCompanionArtifact(artifact: Omit<CompanionArtifactData, 'isOpen'> | null) {
@@ -355,6 +383,77 @@ export default class ChatStore {
         this._missionsProgress = list;
     }
 
+    /** Реплей уже идёт (есть история чата) — не сбрасывать mainStep в 1. */
+    private patchMissionReplayActive(missionId: number, mainStep: number) {
+        const m = this._missions.find((x) => x.id === missionId);
+        if (!m) return;
+        const step = Math.max(1, Number(mainStep) || 1);
+
+        const applyProgress = (base: MissionProgress | undefined): MissionProgress => ({
+            ...(base ?? {
+                missionId,
+                orderIndex: m.orderIndex,
+                beatsCompleted: Math.max(0, step - 1),
+                artifactsFound: 0,
+                artifactsTotal: 0,
+            }),
+            missionId,
+            orderIndex: m.orderIndex,
+            status: "replay_in_progress",
+            mainStep: step,
+            beatsCompleted: Math.max(0, step - 1),
+        });
+
+        this._missions = this._missions.map((x) => {
+            if (x.id !== missionId) return x;
+            return { ...x, progress: applyProgress(x.progress ?? undefined) };
+        });
+
+        const list = [...this._missionsProgress];
+        const idx = list.findIndex((p) => p.missionId === missionId);
+        if (idx >= 0) {
+            list[idx] = applyProgress(list[idx]);
+        } else {
+            list.push(applyProgress(undefined));
+        }
+        this._missionsProgress = list;
+    }
+
+    /**
+     * После loadChatHistory: шаг 1 только у свежего реплея без сообщений.
+     */
+    private syncReplayProgressAfterLoad(
+        missionId: number | null,
+        missionsProgress: MissionProgress[],
+        historyLength: number,
+        lastMainStep: number | null = null,
+    ) {
+        if (missionId == null) return;
+        const entry = missionsProgress.find((p) => p.missionId === missionId);
+        if (!entry) return;
+
+        const hasMessages = historyLength > 0;
+        const restoredStep =
+            lastMainStep != null && lastMainStep >= 1
+                ? lastMainStep
+                : entry.mainStep != null && entry.mainStep >= 1
+                  ? entry.mainStep
+                  : null;
+
+        if (entry.status === "replay_in_progress") {
+            if (!hasMessages) {
+                this.patchMissionReplayStarted(missionId);
+            } else if (restoredStep != null) {
+                this.patchMissionReplayActive(missionId, restoredStep);
+            }
+            return;
+        }
+
+        if (entry.status === "completed" && hasMessages && restoredStep != null) {
+            this.patchMissionReplayActive(missionId, restoredStep);
+        }
+    }
+
     setSelectedMissionId(id: number | null) {
         this._selectedMissionId = id;
     }
@@ -382,7 +481,8 @@ export default class ChatStore {
         const inProgress = [...mp]
             .filter(
                 (p) =>
-                    p.status === "in_progress" || p.status === "replay_in_progress",
+                    (p.status === "in_progress" || p.status === "replay_in_progress") &&
+                    this.canSelectMission(p.missionId),
             )
             .sort((a, b) => {
                 const ma = sorted.find((m) => m.id === a.missionId);
@@ -392,6 +492,13 @@ export default class ChatStore {
             })[0];
         if (inProgress && sorted.some((m) => m.id === inProgress.missionId)) {
             return inProgress.missionId;
+        }
+        for (const m of [...sorted].reverse()) {
+            if (!this.canSelectMission(m.id)) continue;
+            const p = this.missionProgressFor(m.id);
+            if (p?.status === "completed" || p?.status === "replay_in_progress") {
+                return m.id;
+            }
         }
         for (const m of sorted) {
             if (this.canSelectMission(m.id)) {
@@ -484,20 +591,8 @@ export default class ChatStore {
             return false;
         }
         const missionLevel = m.level ?? 1;
-        if (missionLevel > 1) {
-            const previousLevel = missionLevel - 1;
-            const previousLevelMissions = sorted.filter((x) => (x.level ?? 1) === previousLevel);
-            const previousLevelArtifactsComplete = previousLevelMissions.every((pm) => {
-                const pp = this.missionProgressFor(pm.id);
-                if (!pp) return false;
-                const total = Number(pp.artifactsTotal ?? 0);
-                const found = Number(pp.artifactsFound ?? 0);
-                if (total <= 0) return true;
-                return found >= total;
-            });
-            if (!previousLevelArtifactsComplete) {
-                return false;
-            }
+        if (!isStoryLevelUnlocked(this._unlockedLevels, missionLevel)) {
+            return false;
         }
         return (
             p.status === "in_progress" ||
@@ -602,6 +697,15 @@ export default class ChatStore {
 
     setError(error: string) {
         this._error = error;
+    }
+
+    setHistoryLoadFailed(failed: boolean) {
+        this._historyLoadFailed = failed;
+    }
+
+    clearHistoryLoadError() {
+        this._historyLoadFailed = false;
+        this._error = '';
     }
 
     /** Повтор последнего пользовательского сообщения после ошибки формата ответа LLM. */
@@ -772,9 +876,26 @@ export default class ChatStore {
                         artifactsGate: response.artifactsGate ?? null,
                     });
 
-                    // Сохраняем компаньон-артефакт, если он был выдан (показ — после фейерверка)
-                    if (response?.companionArtifact !== undefined) {
+                    if (response?.companionArtifact) {
                         this.setPendingCompanionArtifact(response.companionArtifact);
+                        if (this._userStore?.user) {
+                            const prev = this._userStore.user.artifacts ?? [];
+                            const idx = prev.findIndex((a) => a.code === response.companionArtifact!.code);
+                            const next =
+                                idx >= 0
+                                    ? prev.map((a, i) =>
+                                          i === idx ? { ...a, quantity: Math.max(a.quantity, 1) } : a,
+                                      )
+                                    : [
+                                          ...prev,
+                                          {
+                                              code: response.companionArtifact!.code,
+                                              name: response.companionArtifact!.name,
+                                              quantity: 1,
+                                          },
+                                      ];
+                            this._userStore.setArtifacts(next);
+                        }
                     }
 
                     const createdCases: Array<
@@ -1062,6 +1183,7 @@ export default class ChatStore {
 
         this.setLoading(true);
         this.setError("");
+        this.setHistoryLoadFailed(false);
 
         try {
             const statusData = await getStatus();
@@ -1072,6 +1194,10 @@ export default class ChatStore {
             }
             const mp = statusData.missionsProgress ?? [];
             this.setMissionsProgress(mp);
+            if (statusData.unlockedLevels) {
+                this.setUnlockedLevels(statusData.unlockedLevels);
+            }
+            this.setPendingOpenStoryLevel(statusData.pendingOpenStoryLevel ?? null);
 
             if (this._userStore?.user) {
                 this._userStore.setSelectedChatMissionId(statusData.selectedChatMissionId ?? null);
@@ -1085,7 +1211,10 @@ export default class ChatStore {
                 this._selectedMissionId ??
                 statusData.selectedChatMissionId ??
                 null;
-            const valid = mid != null && missions.some((m) => m.id === mid);
+            const valid =
+                mid != null &&
+                missions.some((m) => m.id === mid) &&
+                this.canSelectMission(mid);
             if (!valid) {
                 mid = this.pickDefaultMissionId(missions, mp);
                 this.setSelectedMissionId(mid);
@@ -1137,6 +1266,13 @@ export default class ChatStore {
 
             this.setMessages(messages);
 
+            this.syncReplayProgressAfterLoad(
+                mid,
+                mp,
+                orderedHistory.length,
+                historyResponse.lastMainStep ?? null,
+            );
+
             if (historyResponse.video !== undefined) {
                 this.setVideo(historyResponse.video);
             }
@@ -1160,6 +1296,7 @@ export default class ChatStore {
         } catch (error) {
             console.error("Error loading chat history:", error);
             this.setError("Error loading chat history");
+            this.setHistoryLoadFailed(true);
         } finally {
             this.setLoading(false);
         }
@@ -1174,6 +1311,10 @@ export default class ChatStore {
                 this.setMissions(statusData.missions);
             }
             this.setMissionsProgress(statusData.missionsProgress ?? []);
+            if (statusData.unlockedLevels) {
+                this.setUnlockedLevels(statusData.unlockedLevels);
+            }
+            this.setPendingOpenStoryLevel(statusData.pendingOpenStoryLevel ?? null);
         } catch (error) {
             console.error('Error loading status:', error);
             // Устанавливаем дефолтные значения при ошибке
@@ -1193,6 +1334,12 @@ export default class ChatStore {
         this._loadedMissionId = null;
         this._selectedMissionId = null;
         this._missionsProgress = [];
+        this._unlockedLevels = [1];
+        this._pendingOpenStoryLevel = null;
+        this._openStoryLevelPrompt = null;
+        this._missionPathScrollToLevel = null;
+        this._pendingCompanionArtifact = null;
+        this._historyLoadFailed = false;
         this._trackedMissionViews.clear();
         this._missionStartTs.clear();
     }
@@ -1242,20 +1389,36 @@ export default class ChatStore {
         return this._error;
     }
 
+    get historyLoadFailed() {
+        return this._historyLoadFailed;
+    }
+
     get stageReward() {
         return this._stageReward;
     }
 
-    get nextLevelArtifactsGate() {
-        return this._nextLevelArtifactsGate;
+    get openStoryLevelPrompt() {
+        return this._openStoryLevelPrompt;
     }
 
-    get stepReward() {
-        return this._stepReward;
+    get unlockedLevels() {
+        return this._unlockedLevels;
+    }
+
+    get pendingOpenStoryLevel() {
+        return this._pendingOpenStoryLevel;
+    }
+
+    get missionPathScrollToLevel() {
+        return this._missionPathScrollToLevel;
     }
 
     get pendingCompanionArtifact() {
         return this._pendingCompanionArtifact;
+    }
+
+    get stepReward() {
+        return this._stepReward;
     }
 
     get pendingProgressAnimation() {

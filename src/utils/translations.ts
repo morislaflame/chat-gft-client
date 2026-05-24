@@ -458,6 +458,54 @@ type TranslationType = {
         ru: 'Открыть профиль',
         en: 'Open profile',
     },
+    openStoryLevelConfirmTitle: {
+        ru: 'Открыть уровень {level}?',
+        en: 'Open level {level}?',
+    },
+    openStoryLevelConfirmDescription: {
+        ru: 'Для доступа к миссиям уровня {level} будут использованы артефакты из предыдущего уровня',
+        en: 'To access level {level} missions, the artifacts from the previous level will be used',
+    },
+    openStoryLevelConfirmButton: {
+        ru: 'Открыть уровень {level}',
+        en: 'Open level {level}',
+    },
+    openStoryLevelMissingTitle: {
+        ru: 'Уровень {level} заблокирован',
+        en: 'Missing artifacts for level {level}',
+    },
+    openStoryLevelMissingDescription: {
+        ru: 'Сначала соберите все артефакты предыдущего уровня',
+        en: 'First collect all artifacts from the previous level',
+    },
+    openStoryLevelMissingDescriptionLine1: {
+        ru: 'Вы можете перепройти миссии предыдущего уровня и поискать упущенные артефакты',
+        en: 'You can replay the previous level missions and find the missing artifacts',
+    },
+    openStoryLevelMissingDescriptionLine2: {
+        ru: 'Или купить артефакт за гемы в профиле',
+        en: 'Or buy the artifact for gems in your profile',
+    },
+    openStoryLevelBurnHint: {
+        ru: 'Артефакты будут списаны из инвентаря',
+        en: 'Artifacts will be consumed from your inventory',
+    },
+    openStoryLevelMissingHint: {
+        ru: 'Покупка доступна только для артефактов уже открытых вами уровней.',
+        en: 'Purchases are only available for artifacts from levels you have already unlocked.',
+    },
+    openStoryLevelBuyButton: {
+        ru: 'Купить в профиле',
+        en: 'Buy in profile',
+    },
+    openStoryLevelError: {
+        ru: 'Не удалось открыть уровень',
+        en: 'Could not open level',
+    },
+    artifactsInInventory: {
+        ru: 'В инвентаре',
+        en: 'In inventory',
+    },
     missionsList: {
         ru: 'Все миссии',
         en: 'All missions'
@@ -825,16 +873,16 @@ type TranslationType = {
         en: 'Locked'
     },
     profileLevelUnlockHint: {
-        ru: 'Соберите все артефакты уровня {{level}}, чтобы открыть следующий',
-        en: 'Collect all Level {{level}} artifacts to unlock the next level'
+        ru: 'Соберите все артефакты уровня {{level}} и сможете открыть следующий уровень',
+        en: 'Collect all Level {{level}} artifacts and you will be able to open the next level'
     },
     missionLevel: {
         ru: 'Уровень',
         en: 'Level'
     },
     missionLevelLocked: {
-        ru: 'Уровень заблокирован — пройдите предыдущий и соберите все нужные артефакты',
-        en: 'Level locked — complete the previous level first'
+        ru: 'Уровень заблокирован — пройдите предыдущий и откройте его в списке миссий',
+        en: 'Level locked — complete the previous level and unlock it from the mission list'
     },
     profileNftArtifactsBannerTitle: {
         ru: 'NFT-Артефакты',
@@ -891,6 +939,18 @@ type TranslationType = {
     profileLoadError: {
         ru: 'Не удалось загрузить профиль',
         en: 'Could not load profile'
+    },
+    somethingWentWrongTitle: {
+        ru: 'Что-то пошло не так',
+        en: 'Something went wrong'
+    },
+    somethingWentWrongDescription: {
+        ru: 'Не удалось загрузить данные. Проверьте соединение и попробуйте ещё раз.',
+        en: 'Could not load data. Check your connection and try again.'
+    },
+    tryAgain: {
+        ru: 'Попробовать снова',
+        en: 'Try again'
     },
     profileNoArtifactsInStory: {
         ru: 'В этой истории пока нет артефактов в каталоге',
@@ -985,8 +1045,20 @@ type TranslationType = {
         en: 'This will cost'
     },
     artifactUseConfirmDescription: {
-        ru: 'Артефакт останется найденным в профиле, однако использовать его повторно нельзя',
-        en: 'This artifact will remain in your profile, but you cannot use it again'
+        ru: 'Это поможет вам быстрее выполнить цель',
+        en: 'This will help you complete the goal faster'
+    },
+    artifactUseConfirmDescriptionLine1: {
+        ru: 'Помните, что артефакты вам будут нужны для открытия нового уровня',
+        en: 'Remember, artifacts you will need for the next level'
+    },
+    artifactUseConfirmDescriptionLine2: {
+        ru: 'Повторно использовать их нельзя',
+        en: 'You cannot use them again'
+    },
+    artifactUseConfirmDescriptionLine3: {
+        ru: 'Вы всегда можете купить артефакт за гемы в профиле, или найти его в миссиях',
+        en: 'You can always buy the artifact for gems in your profile, or find it in missions'
     },
     artifactMissingTitle: {
         ru: 'Артефакт не найден',
@@ -1036,9 +1108,25 @@ type TranslationType = {
         ru: 'Нет артефакта для продажи',
         en: 'No artifact to sell'
     },
-    artifactCompanionNotSellable: {
-        ru: 'Компаньона нельзя продать',
-        en: 'Companion cannot be sold'
+    artifactSellDuplicatesOnly: {
+        ru: 'Продать можно только дубликат (нужно 2 и более)',
+        en: 'Only duplicates can be sold (need 2 or more)',
+    },
+    artifactSellDuplicatesHint: {
+        ru: 'Продать можно только дубликаты (нужно 2 и более)',
+        en: 'You can only sell duplicates (need 2 or more)',
+    },
+    artifactLevelNotUnlockedForBuy: {
+        ru: 'Покупка доступна только для открытых уровней',
+        en: 'Purchases are only available for unlocked levels',
+    },
+    artifactNotInInventorySubtitle: {
+        ru: 'Артефакт ещё не в инвентаре',
+        en: 'Artifact not in inventory yet',
+    },
+    artifactNotInInventoryBody: {
+        ru: 'Найдите артефакт в миссии или купите его за гемы',
+        en: 'Find it in a mission or buy it with gems',
     },
     artifactMarketError: {
         ru: 'Не удалось выполнить операцию',

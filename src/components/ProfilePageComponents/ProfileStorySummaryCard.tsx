@@ -48,10 +48,10 @@ function formatStoryAriaSummary(
     stats: ReturnType<typeof getStoryCollectionStats>,
 ): string {
     return t('profileStorySummaryLine')
-        .replace(/\{\{pct\}\}/g, String(stats.pctCollected))
-        .replace(/\{\{owned\}\}/g, String(stats.foundDistinctInCatalog))
+        .replace(/\{\{pct\}\}/g, String(stats.pctProgress))
+        .replace(/\{\{owned\}\}/g, String(stats.ownedDistinctInCatalog))
         .replace(/\{\{total\}\}/g, String(stats.catalogTotal))
-        .replace(/\{\{lvDone\}\}/g, String(stats.levelsFullyComplete))
+        .replace(/\{\{lvDone\}\}/g, String(stats.levelsFullyOwned))
         .replace(/\{\{lvAll\}\}/g, String(stats.levelsTotal));
 }
 
@@ -75,7 +75,7 @@ const ProfileStorySummaryCard: React.FC<ProfileStorySummaryCardProps> = ({ story
     const summaryAria = formatStoryAriaSummary(t, stats);
     const to = buildProfileStoryPath(story.historyName);
 
-    const artifactProgressLabel = `${stats.foundDistinctInCatalog}/${stats.catalogTotal}`;
+    const artifactProgressLabel = `${stats.ownedDistinctInCatalog}/${stats.catalogTotal}`;
     // const levelsProgressLabel = `${stats.levelsFullyComplete}/${stats.levelsTotal}`;
 
     const openStory = () => {
@@ -163,7 +163,7 @@ const ProfileStorySummaryCard: React.FC<ProfileStorySummaryCardProps> = ({ story
 
                 <div className="flex flex-col gap-2 text-xs">
                     <div className="flex items-center justify-between gap-3">
-                        <span className="min-w-0 shrink text-zinc-400">{t('artifactsFound')}:</span>
+                        <span className="min-w-0 shrink text-zinc-400">{t('artifactsInInventory')}:</span>
                         <span className="shrink-0 tabular-nums text-white font-semibold">{artifactProgressLabel}</span>
                     </div>
                     {/* <div className="flex items-center justify-between gap-3">
@@ -175,7 +175,7 @@ const ProfileStorySummaryCard: React.FC<ProfileStorySummaryCardProps> = ({ story
                             className="absolute inset-y-0 left-0 z-[1] rounded-full"
                             aria-hidden
                             initial={prefersReducedMotion ? false : { width: '0%' }}
-                            animate={{ width: `${stats.pctCollected}%` }}
+                            animate={{ width: `${stats.pctProgress}%` }}
                             transition={{
                                 duration: prefersReducedMotion ? 0 : 0.52,
                                 ease: [0.22, 1, 0.36, 1],
@@ -183,7 +183,7 @@ const ProfileStorySummaryCard: React.FC<ProfileStorySummaryCardProps> = ({ story
                             }}
                             style={{
                                 boxShadow:
-                                    stats.pctCollected > 0
+                                    stats.pctProgress > 0
                                         ? '0 0 16px hsl(var(--primary) / 0.45), 0 0 8px hsl(var(--primary) / 0.3)'
                                         : undefined,
                                 background: 'var(--gradient-accent-color)',

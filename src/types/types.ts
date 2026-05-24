@@ -71,8 +71,10 @@ export interface ProfileInventoryStory {
     artifacts: ProfileInventoryArtifact[];
     /** code → количество в инвентаре для данной истории */
     owned: Record<string, number>;
-    /** code → сколько раз артефакт был найден (не уменьшается при использовании) */
+    /** code → сколько раз артефакт был найден (история; не влияет на UI гейта) */
     found: Record<string, number>;
+    /** Открытые уровни миссий (1 всегда) */
+    unlockedLevels: number[];
 }
 
 export interface ProfileInventoryResponse {
@@ -174,6 +176,8 @@ export interface ApiMessageResponse {
     } | null;
     artifactsGate?: {
         completedLevel: number;
+        openLevel: number;
+        canOpen: boolean;
     } | null;
     stage?: number;
     completedStage?: number; // Номер завершенного этапа
@@ -284,6 +288,10 @@ export interface ApiStatusResponse {
     missionsProgress?: MissionProgress[];
     /** С сервера: последняя сохранённая миссия чата */
     selectedChatMissionId?: number | null;
+    /** Открытые уровни миссий для текущей истории (1 всегда) */
+    unlockedLevels?: number[];
+    /** След. закрытый уровень, готовый к открытию (без списка его миссий) */
+    pendingOpenStoryLevel?: number | null;
 }
 
 export interface ApiHistoryItem {
@@ -317,6 +325,8 @@ export interface StageRewardData {
     } | null;
     artifactsGate?: {
         completedLevel: number;
+        openLevel: number;
+        canOpen: boolean;
     } | null;
 }
 
@@ -356,6 +366,8 @@ export interface ApiHistoryResponse {
     history: ApiHistoryItem[];
     hasMore?: boolean;
     nextCursor?: number | null;
+    lastSuggestions?: ApiMessageResponse['suggestions'];
+    lastMainStep?: number | null;
     video?: MediaFile | null;
     avatar?: MediaFile | null;
     background?: MediaFile | null;

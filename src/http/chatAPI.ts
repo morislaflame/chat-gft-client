@@ -19,6 +19,8 @@ export interface ApiHistoryResponse {
     nextCursor?: number | null;
     /** Подсказки для последнего сообщения (с сервера, при перезагрузке) */
     lastSuggestions?: ApiMessageResponse['suggestions'];
+    /** main_step последнего ответа LLM — для восстановления прогрессбара при реплее */
+    lastMainStep?: number | null;
     video?: MediaFile | null;
     avatar?: MediaFile | null;
     background?: MediaFile | null;

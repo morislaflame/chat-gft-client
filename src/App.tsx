@@ -8,12 +8,14 @@ import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
-import NextLevelArtifactsGateModal from "./components/modals/NextLevelArtifactsGateModal";
+import OpenStoryLevelModal from "./components/modals/OpenStoryLevelModal";
+import CompanionArtifactModal from "./components/modals/CompanionArtifactModal";
 import StepRewardModal from "./components/modals/StepRewardModal";
 import ArtifactAcquireModal from "./components/modals/ArtifactAcquireModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
 import InsufficientGemsModal from "./components/modals/InsufficientGemsModal";
 import Onboarding from './components/modals/Onboarding';
+import SomethingWentWrongPage from './components/CoreComponents/SomethingWentWrongPage';
 import { ProgressiveBlur } from './components/ui/progressive-blur';
 import { initAnalytics, setUserId, setUserProperties, trackEvent, trackPageView } from '@/utils/analytics';
 
@@ -59,7 +61,8 @@ const AppContent = () => {
       <BottomNavigation />
       <DailyRewardModal />
       <StageRewardModal />
-      <NextLevelArtifactsGateModal />
+      <OpenStoryLevelModal />
+      <CompanionArtifactModal />
       <StepRewardModal />
       <ArtifactAcquireModal />
       <InsufficientEnergyModal />
@@ -292,7 +295,19 @@ const App = observer(() => {
     );
   }
 
-  // Если нужно показать онбординг, показываем только его (без Header и основного контента)
+  if (user.isServerError) {
+    return (
+      <div className="flex flex-col h-screen w-screen bg-[#050505]">
+        <SomethingWentWrongPage
+          onRetry={() => {
+            window.location.reload();
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Если нужно показать онбординг
   // Показываем онбординг если: обычный онбординг (shouldShowOnboarding) ИЛИ открыт из Header (showOnboarding)
   if ((user.shouldShowOnboarding && user.showOnboarding) || (user.showOnboarding && user.isHistorySelectionFromHeader)) {
     if (!onboardingShownRef.current) {

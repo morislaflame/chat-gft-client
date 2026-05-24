@@ -95,6 +95,7 @@ export const PROFILE_INVENTORY_MOCK_STORIES: ProfileInventoryStory[] = [
             NOIR_REVOLVER: 1,
         },
         found: {},
+        unlockedLevels: [1],
     },
     {
         historyName: 'preview_orbit_station',
@@ -188,6 +189,7 @@ export const PROFILE_INVENTORY_MOCK_STORIES: ProfileInventoryStory[] = [
             ORB_PLASMA_CUT: 1,
         },
         found: {},
+        unlockedLevels: [1, 2],
     },
 ];
 

@@ -10,6 +10,7 @@ import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { FireworksBackground } from '@/components/ui/backgrounds/fireworks-background';
 import FormattedText from '@/components/MainPageComponents/FormattedText';
+import type { OpenStoryLevelPrompt } from '@/components/modals/OpenStoryLevelModal';
 
 /** Порог «доскроллили до низа» (px) */
 const SCROLL_AT_BOTTOM_PX = 8;
@@ -119,7 +120,7 @@ const StageRewardModal: React.FC = observer(() => {
   const avatarUrl = chat.avatar?.url;
   const gemSourceRef = useRef<HTMLDivElement>(null);
   const pendingAfterGemFlight = useRef<NextMissionRef>(null);
-  const pendingArtifactsGateLevelAfterGems = useRef<number | null>(null);
+  const pendingOpenStoryLevelAfterGems = useRef<OpenStoryLevelPrompt | null>(null);
   const [flyingGem, setFlyingGem] = useState<FlyingGemCoords>(null);
   const [fireworksPlaying, setFireworksPlaying] = useState(false);
 
@@ -153,9 +154,26 @@ const StageRewardModal: React.FC = observer(() => {
     return true;
   }, []);
 
+  const buildOpenStoryLevelPrompt = (): OpenStoryLevelPrompt | null => {
+    const gate = stageReward?.artifactsGate;
+    if (gate?.completedLevel == null || !Number.isFinite(Number(gate.completedLevel))) {
+      return null;
+    }
+    const completedLevel = Number(gate.completedLevel);
+    const openLevel =
+      gate.openLevel != null && Number.isFinite(Number(gate.openLevel))
+        ? Number(gate.openLevel)
+        : completedLevel + 1;
+    return {
+      completedLevel,
+      openLevel,
+      canOpen: gate.canOpen === true,
+    };
+  };
+
   const handleContinueClick = () => {
     pendingAfterGemFlight.current = null;
-    pendingArtifactsGateLevelAfterGems.current = null;
+    pendingOpenStoryLevelAfterGems.current = null;
     const ra = stageReward?.rewardAmount;
     if (ra != null && ra > 0) {
       chat.setPendingGemsOnLand(ra);
@@ -172,7 +190,7 @@ const StageRewardModal: React.FC = observer(() => {
   };
 
   const handleNextMissionClick = () => {
-    pendingArtifactsGateLevelAfterGems.current = null;
+    pendingOpenStoryLevelAfterGems.current = null;
     const nm = stageReward?.nextMission;
     if (!nm) return;
     const ra = stageReward?.rewardAmount;
@@ -203,16 +221,15 @@ const StageRewardModal: React.FC = observer(() => {
     if (nm) {
       void chat.startNextMissionAfterReward(nm);
     }
-    const gateLv = pendingArtifactsGateLevelAfterGems.current;
-    pendingArtifactsGateLevelAfterGems.current = null;
-    if (gateLv != null && Number.isFinite(gateLv)) {
-      chat.openNextLevelArtifactsGate(gateLv);
+    const prompt = pendingOpenStoryLevelAfterGems.current;
+    pendingOpenStoryLevelAfterGems.current = null;
+    if (prompt) {
+      chat.openOpenStoryLevelPrompt(prompt);
     }
   };
 
   const onFireworksComplete = useCallback(() => {
     setFireworksPlaying(false);
-    // Открываем модалку компаньона после завершения фейерверка
     if (hasPendingCompanion()) {
       chat.openCompanionArtifact();
     }
@@ -220,31 +237,31 @@ const StageRewardModal: React.FC = observer(() => {
   }, [chat]);
 
   const hasNextMission = !!(stageReward?.nextMission && stageReward.nextMission.id);
-  const gateLevelRaw = stageReward?.artifactsGate?.completedLevel;
-  const hasArtifactsGate =
-    gateLevelRaw != null && Number.isFinite(Number(gateLevelRaw));
-  const gateLevel = hasArtifactsGate ? Number(gateLevelRaw) : null;
+  const hasArtifactsGate = buildOpenStoryLevelPrompt() != null;
+  const openStoryLevelOnly = hasArtifactsGate && !hasNextMission;
   const showAdvanceMissionButton = hasNextMission || hasArtifactsGate;
 
   const handleAdvanceMissionClick = () => {
-    if (hasArtifactsGate && gateLevel != null && !hasNextMission) {
+    if (openStoryLevelOnly) {
       pendingAfterGemFlight.current = null;
+      const prompt = buildOpenStoryLevelPrompt();
+      if (!prompt) return;
       const ra = stageReward?.rewardAmount;
       if (ra != null && ra > 0) {
         chat.setPendingGemsOnLand(ra);
-        pendingArtifactsGateLevelAfterGems.current = gateLevel;
+        pendingOpenStoryLevelAfterGems.current = prompt;
         const ok = startGemFlight();
         if (!ok) {
           chat.onGemsLanded();
           chat.closeStageReward();
-          chat.openNextLevelArtifactsGate(gateLevel);
+          chat.openOpenStoryLevelPrompt(prompt);
           return;
         }
         handleClose();
         return;
       }
       chat.closeStageReward();
-      chat.openNextLevelArtifactsGate(gateLevel);
+      chat.openOpenStoryLevelPrompt(prompt);
       return;
     }
     handleNextMissionClick();
@@ -274,9 +291,14 @@ const StageRewardModal: React.FC = observer(() => {
                 variant="gradient"
                 size="lg"
                 className="w-full"
-                icon="fa-solid fa-arrow-right"
+                icon={openStoryLevelOnly ? 'fa-solid fa-door-open' : 'fa-solid fa-arrow-right'}
               >
-                {t('nextMission')}
+                {openStoryLevelOnly
+                  ? t('openStoryLevelConfirmButton').replace(
+                      '{level}',
+                      String(buildOpenStoryLevelPrompt()?.openLevel ?? ''),
+                    )
+                  : t('nextMission')}
               </Button>
             ) : (
               <Button

@@ -19,14 +19,27 @@ type ArtifactDetailModalProps = {
     /** Локализованное описание (передаётся снаружи) */
     description: string;
     ownedQty: number;
-    isFound: boolean;
+    isOwned: boolean;
+    levelUnlocked: boolean;
     historyName: string;
     userBalance: number;
     onTradeSuccess: (payload: ArtifactTradeSuccessPayload) => void;
 };
 
 const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
-    ({ isOpen, onClose, artifact, title, description, ownedQty, isFound, historyName, userBalance, onTradeSuccess }) => {
+    ({
+        isOpen,
+        onClose,
+        artifact,
+        title,
+        description,
+        ownedQty,
+        isOwned,
+        levelUnlocked,
+        historyName,
+        userBalance,
+        onTradeSuccess,
+    }) => {
         const { t } = useTranslate();
         const { hapticImpact } = useHapticFeedback();
 
@@ -38,13 +51,12 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
         const previewUrl = artifact?.media?.url;
         const previewMime = artifact?.media?.mimeType ?? '';
         const isImage = Boolean(previewUrl && previewMime.startsWith('image/'));
-        const isDiscovered = isFound;
         const descriptionTrimmed = description.trim();
-        const modalDescription = isDiscovered
+        const modalDescription = isOwned
             ? descriptionTrimmed
                 ? descriptionTrimmed
                 : undefined
-            : t('artifactLockedMissionSubtitle');
+            : t('artifactNotInInventorySubtitle');
 
         return (
             <Modal
@@ -56,8 +68,6 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                 }
                 title={title}
                 description={modalDescription}
-                // headerIcon={<i className="fa-solid fa-gem text-white text-2xl" />}
-                // headerIconContainerClassName="bg-gradient-to-br from-amber-600 to-amber-900 border border-amber-500/30"
                 closeAriaLabel={t('close')}
                 contentClassName="max-h-[min(55vh,420px)] overflow-y-auto"
                 footer={
@@ -68,6 +78,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                 historyName={historyName}
                                 ownedQty={ownedQty}
                                 userBalance={userBalance}
+                                levelUnlocked={levelUnlocked}
                                 layout="modal"
                                 onSuccess={onTradeSuccess}
                             />
@@ -83,62 +94,39 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                         <div className="flex justify-center">
                             <div className="relative w-44 h-44 flex items-center justify-center rounded-xl border btn-default-silver-border overflow-hidden">
                                 {isImage ? (
-                                    <>
-                                        <img
-                                            src={previewUrl}
-                                            alt=""
-                                            className={`max-w-full max-h-full object-contain ${
-                                                isDiscovered ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
-                                            }`}
-                                        />
-                                        {!isDiscovered && (
-                                            <>
-                                                <div
-                                                    className="absolute inset-0 pointer-events-none"
-                                                    aria-hidden
-                                                />
-                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
-                                                        <i className="fa-solid fa-lock text-2xl" />
-                                                    </span>
-                                                </div>
-                                            </>
-                                        )}
-                                    </>
+                                    <img
+                                        src={previewUrl}
+                                        alt=""
+                                        className={`max-w-full max-h-full object-contain ${
+                                            isOwned ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
+                                        }`}
+                                    />
                                 ) : (
                                     <div className="relative flex h-full w-full items-center justify-center">
                                         <i
                                             className={`fa-solid fa-gem text-6xl ${
-                                                isDiscovered ? 'text-amber-400/90' : 'text-zinc-600 opacity-80 grayscale'
+                                                isOwned ? 'text-amber-400/90' : 'text-zinc-600 opacity-80 grayscale'
                                             }`}
                                         />
-                                        {!isDiscovered && (
-                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
-                                                    <i className="fa-solid fa-lock text-2xl" />
-                                                </span>
-                                            </div>
-                                        )}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {isDiscovered && !descriptionTrimmed ? (
+                        {isOwned && !descriptionTrimmed ? (
                             <p className="text-zinc-500 text-sm italic text-center">{t('artifactNoDescription')}</p>
                         ) : null}
 
-                        {!isDiscovered ? (
+                        {!isOwned ? (
                             <p className="text-zinc-300 text-sm text-center leading-relaxed">
-                                {t('artifactLockedMissionBody')}
+                                {t('artifactNotInInventoryBody')}
                             </p>
                         ) : null}
-
                     </div>
                 ) : null}
             </Modal>
         );
-    }
+    },
 );
 
 export default ArtifactDetailModal;

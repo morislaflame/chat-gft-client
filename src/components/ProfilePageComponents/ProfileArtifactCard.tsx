@@ -7,11 +7,13 @@ import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 
 const MotionCard = motion.create(Card);
 
+const unownedImageClass = 'grayscale brightness-[0.72] contrast-[0.92]';
+
 export type ProfileArtifactCardProps = {
     artifact: ProfileInventoryArtifact;
     displayName: string;
     ownedQty: number;
-    isFound: boolean;
+    isOwned: boolean;
     onOpenDetail: () => void;
 };
 
@@ -19,16 +21,15 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
     artifact,
     displayName,
     ownedQty,
-    isFound,
+    isOwned,
     onOpenDetail,
 }) => {
     const prefersReducedMotion = useReducedMotion();
     const previewUrl = artifact.media?.url;
     const previewMime = artifact.media?.mimeType ?? '';
     const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
-    const isDiscovered = isFound;
     const backdropSrc = getArtifactBackdropSrcByBoostType(artifact.boostType);
-    const showOwnedQty = ownedQty > 0 && artifact.boostType !== 'COMPANION';
+    const showOwnedQty = ownedQty > 1;
 
     const surfaceMotion = prefersReducedMotion
         ? {}
@@ -65,50 +66,26 @@ const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
                     src={backdropSrc}
                     alt=""
                     className={`absolute top-0 left-0 h-full w-full object-cover object-top ${
-                        isDiscovered ? 'opacity-20' : 'opacity-[0.12]'
+                        isOwned ? 'opacity-20' : `opacity-[0.12] ${unownedImageClass}`
                     }`}
                 />
             </div>
             <div className="mb-4 flex items-center justify-center relative w-28 h-28 z-[1]">
                 {isPreviewImage ? (
-                    <>
-                        <img
-                            src={previewUrl}
-                            alt=""
-                            className={`w-28 h-28 object-contain ${
-                                isDiscovered ? '' : 'grayscale brightness-[0.72] contrast-[0.92]'
-                            }`}
-                        />
-                        {!isDiscovered && (
-                            <>
-                                <div
-                                    className="absolute inset-0 rounded-lg pointer-events-none"
-                                    aria-hidden
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
-                                        <i className="fa-solid fa-lock text-2xl" />
-                                    </span>
-                                </div>
-                            </>
-                        )}
-                    </>
+                    <img
+                        src={previewUrl}
+                        alt=""
+                        className={`w-28 h-28 object-contain ${isOwned ? '' : unownedImageClass}`}
+                    />
                 ) : (
                     <div className="relative w-28 h-28 rounded-lg bg-primary-700/50 flex items-center justify-center">
                         <i
                             className={`fa-solid fa-gem text-2xl ${
-                                isDiscovered
+                                isOwned
                                     ? 'text-secondary-400/90'
                                     : 'text-zinc-600 opacity-40 grayscale'
                             }`}
                         />
-                        {!isDiscovered && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/45 text-white shadow-lg ring-1 ring-white/20">
-                                    <i className="fa-solid fa-lock text-2xl" />
-                                </span>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>

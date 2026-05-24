@@ -106,3 +106,36 @@ export const markVideoAsSeen = async (historyName: string): Promise<{ success: b
     const { data } = await $authHost.post('api/user/mark-video-seen', { historyName });
     return data;
 };
+
+export type OpenStoryLevelResponse = {
+    success: boolean;
+    openedLevel: number;
+    unlockedLevels: number[];
+    alreadyOpen?: boolean;
+    owned: Record<string, number>;
+};
+
+export const openStoryLevel = async (
+    historyName: string,
+    level: number,
+): Promise<OpenStoryLevelResponse> => {
+    const { data } = await $authHost.post('api/user/me/open-story-level', { historyName, level });
+    return data;
+};
+
+export type OpenStoryLevelReadiness = {
+    canOpen: boolean;
+    alreadyOpen: boolean;
+    openLevel: number;
+    completedLevel: number;
+};
+
+export const getOpenStoryLevelReadiness = async (
+    historyName: string,
+    level: number,
+): Promise<OpenStoryLevelReadiness> => {
+    const { data } = await $authHost.get('api/user/me/open-story-level/readiness', {
+        params: { historyName, level },
+    });
+    return data;
+};

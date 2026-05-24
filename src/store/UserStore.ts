@@ -82,6 +82,23 @@ export default class UserStore {
         }
     }
 
+    patchArtifactQuantities(updates: Record<string, number>) {
+        if (!this._user) return;
+        const map = new Map((this._user.artifacts ?? []).map((a) => [a.code, a]));
+        for (const [code, quantity] of Object.entries(updates)) {
+            const prev = map.get(code);
+            if (prev) {
+                map.set(code, { ...prev, quantity });
+            } else if (quantity > 0) {
+                map.set(code, { code, quantity });
+            }
+        }
+        this._user = {
+            ...this._user,
+            artifacts: [...map.values()],
+        };
+    }
+
     setArtifacts(artifacts: Array<{ code: string; quantity: number }>) {
         if (this._user) {
             this._user = { ...this._user, artifacts };

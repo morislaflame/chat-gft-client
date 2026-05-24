@@ -1,16 +1,14 @@
 import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import ProfileArtifactCard from './ProfileArtifactCard';
 import type { ArtifactLevelGroup } from './profileInventoryUtils';
-import { isArtifactFoundInStory } from './profileInventoryUtils';
-import { motion, useReducedMotion } from 'motion/react';
 
 export type ArtifactLevelSectionProps = {
     group: ArtifactLevelGroup;
-    isPrevComplete: boolean;
+    isLevelUnlocked: boolean;
     hasNextLevel: boolean;
     owned: Record<string, number>;
-    found: Record<string, number>;
     onOpenDetail: (art: ProfileInventoryArtifact, qty: number) => void;
     artifactName: (code: string, name: string, nameEn: string | null) => string;
     t: (key: string) => string;
@@ -18,15 +16,18 @@ export type ArtifactLevelSectionProps = {
 
 const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
     group,
-    isPrevComplete,
+    isLevelUnlocked,
     hasNextLevel,
     owned,
-    found,
     onOpenDetail,
     artifactName,
     t,
 }) => {
-    const pct = group.total > 0 ? Math.round((group.collected / group.total) * 100) : 0;
+    const pct = group.isComplete
+        ? 100
+        : group.total > 0
+          ? Math.round((group.collected / group.total) * 100)
+          : 0;
 
     const prefersReducedMotion = useReducedMotion();
 
@@ -42,16 +43,16 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                             ✓ {t('profileLevelComplete')}
                         </span>
                     )}
-                    {!isPrevComplete && (
+                    {!isLevelUnlocked && (
                         <span className="text-[10px] font-bold text-zinc-400 bg-zinc-700/60 rounded-full px-1.5 py-0.5 leading-none shrink-0">
                             <i className="fa-solid fa-lock text-[9px] mr-0.5" />
                             {t('profileLevelLocked')}
                         </span>
                     )}
                 </div>
-                {isPrevComplete && (
+                {isLevelUnlocked && (
                     <span className="text-xs text-zinc-500 shrink-0 ml-auto">
-                        {t('artifactsFound')}: {group.collected}/{group.total}
+                        {t('artifactsInInventory')}: {group.collected}/{group.total}
                     </span>
                 )}
             </div>
@@ -77,18 +78,18 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                         />
                     </div>
 
-            {isPrevComplete ? (
+            {isLevelUnlocked ? (
                 <p className="text-xs text-zinc-500 leading-relaxed">{t('artifactMarketTapHint')}</p>
             ) : null}
 
             <div
                 className={`flex gap-3 overflow-x-auto py-3 -mx-1 px-1 hide-scrollbar ios-scroll transition-opacity duration-300 ${
-                    isPrevComplete ? 'opacity-100' : 'opacity-40 pointer-events-none'
+                    isLevelUnlocked ? 'opacity-100' : 'opacity-40 pointer-events-none'
                 }`}
             >
                 {group.artifacts.map((art) => {
                     const qty = owned[art.code] ?? 0;
-                    const isFound = isArtifactFoundInStory(found, art.code);
+                    const isOwned = qty > 0;
                     const name = artifactName(art.code, art.name, art.nameEn);
                     return (
                         <ProfileArtifactCard
@@ -96,18 +97,17 @@ const ArtifactLevelSection: React.FC<ArtifactLevelSectionProps> = ({
                             artifact={art}
                             displayName={name}
                             ownedQty={qty}
-                            isFound={isFound}
+                            isOwned={isOwned}
                             onOpenDetail={() => onOpenDetail(art, qty)}
                         />
                     );
                 })}
             </div>
 
-            {!group.isComplete && hasNextLevel && isPrevComplete && (
+            {!group.isComplete && hasNextLevel && isLevelUnlocked && (
                 <motion.span
                 className=""
             >
-                <i className="fa-solid fa-gem text-artifact-gradient mr-2 text-[12px]" />
                 <p className="text-sm inline text-zinc-400">{t('profileLevelUnlockHint').replace('{{level}}', String(group.level))}</p>
                 </motion.span>
             )}

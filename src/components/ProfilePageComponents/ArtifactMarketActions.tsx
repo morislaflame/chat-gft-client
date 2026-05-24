@@ -19,6 +19,8 @@ export type ArtifactMarketActionsProps = {
     historyName: string;
     ownedQty: number;
     userBalance: number;
+    /** Уровень миссий открыт — иначе покупка недоступна */
+    levelUnlocked?: boolean;
     layout?: 'card' | 'modal';
     /** По умолчанию true; в чате при отсутствии артефакта — только покупка */
     showSell?: boolean;
@@ -37,6 +39,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     historyName,
     ownedQty,
     userBalance,
+    levelUnlocked = true,
     layout = 'card',
     showSell = true,
     onSuccess,
@@ -48,27 +51,25 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
 
     const buyPrice = tradablePrice(artifact.buyPrice);
     const sellPrice = tradablePrice(artifact.sellPrice);
-    const isCompanion = artifact.boostType === 'COMPANION';
 
-    const canBuy = buyPrice != null && userBalance >= buyPrice;
-    const canSell = sellPrice != null && ownedQty > 0 && !isCompanion;
+    const canBuy = buyPrice != null && levelUnlocked && userBalance >= buyPrice;
+    const canSell = sellPrice != null && ownedQty >= 2;
 
-    const buyDisabledReason =
-        buyPrice == null
-            ? undefined
-            : userBalance < buyPrice
-              ? t('artifactInsufficientBalance')
-              : undefined;
+    const buyDisabledReason = (() => {
+        if (buyPrice == null) return undefined;
+        if (!levelUnlocked) return t('artifactLevelNotUnlockedForBuy');
+        if (userBalance < buyPrice) return t('artifactInsufficientBalance');
+        return undefined;
+    })();
 
     const sellDisabledReason = (() => {
-        if (isCompanion) return t('artifactCompanionNotSellable');
         if (sellPrice == null) return undefined;
-        if (ownedQty < 1) return t('artifactNothingToSell');
+        if (ownedQty < 2) return t('artifactSellDuplicatesOnly');
         return undefined;
     })();
 
     const showBuy = buyPrice != null;
-    const showSellButton = showSell && sellPrice != null && !isCompanion;
+    const showSellButton = showSell && sellPrice != null;
 
     if (!showBuy && !showSellButton) return null;
 
@@ -112,11 +113,15 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
             className={
                 isCard
                     ? 'flex flex-col gap-1 w-full relative z-[2]'
-                    : 'flex flex-row gap-2 w-full'
+                    : 'flex flex-col gap-2 w-full'
             }
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
         >
+            {!isCard && showSellButton ? (
+                <p className="text-md text-zinc-400 text-center mb-2">{t('artifactSellDuplicatesHint')}</p>
+            ) : null}
+            <div className="flex flex-row gap-2 w-full">
             {showBuy ? (
                 <Button
                     type="button"
@@ -128,7 +133,8 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
                     onClick={() => void runTrade('buy')}
                     title={buyDisabledReason}
                 >
-                    {t('artifactBuyFor').replace('{price}', String(buyPrice))} <i className="fa-solid fa-gem text-white"></i>
+                    {t('artifactBuyFor').replace('{price}', String(buyPrice))}{' '}
+                    <i className="fa-solid fa-gem text-white"></i>
                 </Button>
             ) : null}
             {showSellButton ? (
@@ -143,9 +149,11 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
                     onClick={() => void runTrade('sell')}
                     title={sellDisabledReason}
                 >
-                    {t('artifactSellFor').replace('{price}', String(sellPrice))} <i className="fa-solid fa-gem text-white"></i>
+                    {t('artifactSellFor').replace('{price}', String(sellPrice))}{' '}
+                    <i className="fa-solid fa-gem text-white"></i>
                 </Button>
             ) : null}
+            </div>
         </div>
     );
 };

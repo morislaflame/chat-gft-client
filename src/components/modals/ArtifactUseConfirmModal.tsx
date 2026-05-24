@@ -66,7 +66,15 @@ const ArtifactUseConfirmModal: React.FC<ArtifactUseConfirmModalProps> = observer
             </div>
           </div>
         }
-      />
+        >
+        <div className="rounded-lg px-4">
+        <ul className="list-disc pl-5 space-y-2 text-md text-gray-200">
+          <li>{t('artifactUseConfirmDescriptionLine1')}</li>
+          <li>{t('artifactUseConfirmDescriptionLine2')}</li>
+          <li>{t('artifactUseConfirmDescriptionLine3')}</li>
+        </ul>
+      </div>
+      </Modal>
     );
   }
 );

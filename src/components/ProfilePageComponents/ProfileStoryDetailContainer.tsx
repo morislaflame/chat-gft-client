@@ -18,7 +18,7 @@ import {
 import Button from '@/components/ui/button';
 import { PROFILE_ROUTE } from '@/utils/consts';
 import { loadMergedProfileStories } from '@/components/ProfilePageComponents/profileInventoryMocks';
-import { isArtifactFoundInStory } from '@/components/ProfilePageComponents/profileInventoryUtils';
+import { isArtifactOwned, isStoryLevelUnlocked } from '@/components/ProfilePageComponents/profileInventoryUtils';
 import { motion, useReducedMotion } from 'motion/react';
 
 const ProfileStoryDetailContainer: React.FC = observer(() => {
@@ -334,9 +334,14 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
                 title={detailTitle}
                 description={detailDescription}
                 ownedQty={detailOwnedQty}
-                isFound={
+                isOwned={
                     detailArtifact && story
-                        ? isArtifactFoundInStory(story.found, detailArtifact.code)
+                        ? isArtifactOwned(story.owned, detailArtifact.code)
+                        : false
+                }
+                levelUnlocked={
+                    detailArtifact && story
+                        ? isStoryLevelUnlocked(story.unlockedLevels, detailArtifact.level ?? 1)
                         : false
                 }
                 historyName={historyKey}

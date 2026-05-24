@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import type { ProfileInventoryArtifact, ProfileInventoryStory } from '@/types/types';
 import ArtifactLevelSection from './ArtifactLevelSection';
-import { buildLevelGroups } from './profileInventoryUtils';
+import { buildLevelGroups, isStoryLevelUnlocked } from './profileInventoryUtils';
 import { motion } from 'motion/react';
 
 export type ProfileStoryArtifactsSectionProps = {
@@ -20,8 +20,8 @@ const ProfileStoryArtifactsSection: React.FC<ProfileStoryArtifactsSectionProps> 
 }) => {
 
     const levelGroups = useMemo(
-        () => buildLevelGroups(story.artifacts, story.found),
-        [story.artifacts, story.found],
+        () => buildLevelGroups(story.artifacts, story.owned, story.unlockedLevels),
+        [story.artifacts, story.owned, story.unlockedLevels],
     );
 
     return (
@@ -39,22 +39,18 @@ const ProfileStoryArtifactsSection: React.FC<ProfileStoryArtifactsSectionProps> 
                     <p className="text-sm leading-relaxed text-zinc-500">{t('profileNoArtifactsInStory')}</p>
                 ) : (
                     <div className="flex flex-col gap-5">
-                        {levelGroups.map((group, groupIdx) => {
-                            const isPrevComplete = groupIdx === 0 || levelGroups[groupIdx - 1].isComplete;
-                            return (
-                                <ArtifactLevelSection
-                                    key={group.level}
-                                    group={group}
-                                    isPrevComplete={isPrevComplete}
-                                    hasNextLevel={groupIdx < levelGroups.length - 1}
-                                    owned={story.owned}
-                                    found={story.found}
-                                    onOpenDetail={onOpenArtifactDetail}
-                                    artifactName={artifactName}
-                                    t={t}
-                                />
-                            );
-                        })}
+                        {levelGroups.map((group, groupIdx) => (
+                            <ArtifactLevelSection
+                                key={group.level}
+                                group={group}
+                                isLevelUnlocked={isStoryLevelUnlocked(story.unlockedLevels, group.level)}
+                                hasNextLevel={groupIdx < levelGroups.length - 1}
+                                owned={story.owned}
+                                onOpenDetail={onOpenArtifactDetail}
+                                artifactName={artifactName}
+                                t={t}
+                            />
+                        ))}
                     </div>
                 )}
             </Card>

@@ -2,6 +2,7 @@ import React, { useRef, useLayoutEffect, useCallback, useEffect, useState, useCo
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
 import MissionCard from '@/components/MainPageComponents/chat/MissionCard';
+import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type ChatStore from '@/store/ChatStore';
@@ -10,7 +11,8 @@ import { compareMissionsByStoryOrder } from '@/utils/missionStoryOrder';
 import { ProgressiveBlur } from '../ui/progressive-blur';
 import { Context, type IStoreContext } from '@/store/context';
 import { loadMergedProfileStories } from '@/components/ProfilePageComponents/profileInventoryMocks';
-import { isArtifactCatalogLevelComplete } from '@/components/ProfilePageComponents/profileInventoryUtils';
+import { isStoryLevelUnlocked } from '@/components/ProfilePageComponents/profileInventoryUtils';
+import { getOpenStoryLevelReadiness } from '@/http/userAPI';
 
 interface LevelGroup {
     level: number;
@@ -27,6 +29,10 @@ function buildLevelGroups(sorted: Mission[]): LevelGroup[] {
     return [...byLevel.entries()].sort(([a], [b]) => a - b).map(([level, missions]) => ({ level, missions }));
 }
 
+function isMissionCompleted(p: MissionProgress | undefined): boolean {
+    return p?.status === 'completed' || p?.status === 'replay_in_progress';
+}
+
 type MissionPathScreenProps = {
     chat: ChatStore;
     onChooseHistory: () => void;
@@ -39,10 +45,11 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
     ({ chat, onChooseHistory, onMissionChosen, isFromHeader = false, onClose }) => {
         const { user } = useContext(Context) as IStoreContext;
         const historyName = user.user?.selectedHistoryName ?? null;
-        /** `undefined` — инвентарь ещё грузится (не открываем следующий уровень до проверки артефактов). */
         const [inventoryStory, setInventoryStory] = useState<
             ProfileInventoryStory | null | undefined
         >(undefined);
+        const [openLevelLoading, setOpenLevelLoading] = useState<number | null>(null);
+        const [isMissionListVisible, setIsMissionListVisible] = useState(false);
 
         useEffect(() => {
             if (!historyName) {
@@ -53,51 +60,98 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             setInventoryStory(undefined);
             void loadMergedProfileStories().then((list) => {
                 if (cancelled) return;
-                setInventoryStory(list.find((s) => s.historyName === historyName) ?? null);
+                const story = list.find((s) => s.historyName === historyName) ?? null;
+                setInventoryStory(story);
+                if (story?.unlockedLevels?.length) {
+                    chat.setUnlockedLevels(story.unlockedLevels);
+                }
             });
             return () => {
                 cancelled = true;
             };
-        }, [historyName]);
+        }, [historyName, chat]);
 
         const { hapticImpact } = useHapticFeedback();
+        const scrollContainerRef = useRef<HTMLDivElement>(null);
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLCanvasElement>(null);
         const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+        const missionCardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+        const lastScrolledToMissionIdRef = useRef<number | null>(null);
+
+        useEffect(() => {
+            lastScrolledToMissionIdRef.current = null;
+            setIsMissionListVisible(false);
+        }, []);
+
+        useEffect(() => {
+            if (chat.missionPathScrollToLevel == null) return;
+            lastScrolledToMissionIdRef.current = null;
+            setIsMissionListVisible(false);
+        }, [chat.missionPathScrollToLevel]);
 
         const { t } = useTranslate();
         const sorted = [...chat.missions].sort(compareMissionsByStoryOrder);
         const levelGroups = buildLevelGroups(sorted);
-
-        const inventoryReady = inventoryStory !== undefined;
-
-        // Determine which levels are accessible (previous level fully completed + артефакты уровня в каталоге)
-        const levelAccessible = new Map<number, boolean>();
-        for (let i = 0; i < levelGroups.length; i++) {
-            if (i === 0) {
-                levelAccessible.set(levelGroups[i].level, true);
-                continue;
-            }
-            const prevGroup = levelGroups[i - 1];
-            const allDone = prevGroup.missions.every((m) => {
-                const p = chat.missionsProgress.find((x) => x.missionId === m.id);
-                return (
-                    p?.status === 'completed' || p?.status === 'replay_in_progress'
-                );
-            });
-            const prevLevel = prevGroup.level;
-            const artifactsOk =
-                !historyName ||
-                !inventoryReady ||
-                inventoryStory === null ||
-                isArtifactCatalogLevelComplete(inventoryStory, prevLevel);
-            levelAccessible.set(levelGroups[i].level, allDone && artifactsOk);
+        if (
+            chat.pendingOpenStoryLevel != null &&
+            !levelGroups.some((g) => g.level === chat.pendingOpenStoryLevel)
+        ) {
+            levelGroups.push({ level: chat.pendingOpenStoryLevel, missions: [] });
+            levelGroups.sort((a, b) => a.level - b.level);
         }
 
-        // Flat list of visible (accessible) missions for canvas path
+        const unlockedLevels =
+            chat.unlockedLevels.length > 0
+                ? chat.unlockedLevels
+                : (inventoryStory?.unlockedLevels ?? [1]);
+
+        const levelAccessible = new Map<number, boolean>();
+        for (const group of levelGroups) {
+            levelAccessible.set(group.level, isStoryLevelUnlocked(unlockedLevels, group.level));
+        }
+
         const visibleMissions = levelGroups
             .filter((g) => levelAccessible.get(g.level))
             .flatMap((g) => g.missions);
+
+        const scrollTargetMissionId = (() => {
+            const scrollLevel = chat.missionPathScrollToLevel;
+            if (scrollLevel != null) {
+                const firstOfLevel = sorted.find((m) => (m.level ?? 1) === scrollLevel);
+                if (firstOfLevel) return firstOfLevel.id;
+                return null;
+            }
+            if (chat.selectedMissionId != null) {
+                const selected = sorted.find((m) => m.id === chat.selectedMissionId);
+                if (selected && isStoryLevelUnlocked(unlockedLevels, selected.level ?? 1)) {
+                    return chat.selectedMissionId;
+                }
+            }
+            for (const m of visibleMissions) {
+                if (chat.canSelectMission(m.id)) return m.id;
+            }
+            return visibleMissions[0]?.id ?? null;
+        })();
+
+        const isMissionDataReady =
+            sorted.length > 0 && !chat.loading && inventoryStory !== undefined;
+
+        const scrollToMissionCard = useCallback((missionId: number) => {
+            const el = missionCardRefs.current.get(missionId);
+            const container = scrollContainerRef.current;
+            if (!el || !container) return false;
+
+            const containerRect = container.getBoundingClientRect();
+            const elRect = el.getBoundingClientRect();
+            const top =
+                elRect.top -
+                containerRect.top +
+                container.scrollTop -
+                (containerRect.height - elRect.height) / 2;
+            container.scrollTop = Math.max(0, top);
+            return true;
+        }, []);
 
         const redrawPath = useCallback(() => {
             const canvas = canvasRef.current;
@@ -131,7 +185,6 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
 
             if (points.length < 2) return;
 
-            /** Плавная S-образная «тропа» между центрами карточек: два quadraticCurveTo на сегмент */
             const buildWindingPath = () => {
                 ctx.beginPath();
                 ctx.moveTo(points[0].x, points[0].y);
@@ -158,7 +211,6 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
-            // Мягкая «подложка» под тропой (объём)
             ctx.save();
             ctx.strokeStyle = 'rgba(40, 28, 18, 0.5)';
             ctx.lineWidth = 18;
@@ -179,19 +231,40 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             ctx.setLineDash([]);
         }, [visibleMissions.length]);
 
-        // Держим всегда актуальную ссылку на redrawPath, чтобы observer/resize
-        // подписывались один раз и не пересоздавались на каждом изменении observable.
         const redrawPathRef = useRef(redrawPath);
         useLayoutEffect(() => {
             redrawPathRef.current = redrawPath;
         }, [redrawPath]);
 
-        // Перерисовываем при значимых изменениях, не трогая обзёрверы.
         useLayoutEffect(() => {
             redrawPathRef.current();
-        }, [redrawPath, chat.missions.length, chat.missionsProgress.length, inventoryStory]);
+        }, [redrawPath, chat.missions.length, chat.missionsProgress.length, unlockedLevels.join(',')]);
 
-        // ResizeObserver и window 'resize' вешаем один раз.
+        useLayoutEffect(() => {
+            if (
+                !isMissionDataReady ||
+                scrollTargetMissionId == null ||
+                lastScrolledToMissionIdRef.current === scrollTargetMissionId
+            ) {
+                return;
+            }
+
+            if (scrollToMissionCard(scrollTargetMissionId)) {
+                lastScrolledToMissionIdRef.current = scrollTargetMissionId;
+                if (chat.missionPathScrollToLevel != null) {
+                    chat.setMissionPathScrollToLevel(null);
+                }
+                redrawPathRef.current();
+                setIsMissionListVisible(true);
+            }
+        }, [
+            isMissionDataReady,
+            scrollTargetMissionId,
+            unlockedLevels.join(','),
+            chat.missionPathScrollToLevel,
+            scrollToMissionCard,
+        ]);
+
         useLayoutEffect(() => {
             const handler = () => redrawPathRef.current();
             const ro = new ResizeObserver(handler);
@@ -221,6 +294,25 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
             onMissionChosen();
         };
 
+        const handleOpenNextLevel = async (openLevel: number) => {
+            if (!historyName || openLevelLoading != null) return;
+            hapticImpact('soft');
+            setOpenLevelLoading(openLevel);
+            try {
+                const readiness = await getOpenStoryLevelReadiness(historyName, openLevel);
+                chat.openOpenStoryLevelPrompt({
+                    completedLevel: readiness.completedLevel,
+                    openLevel: readiness.openLevel,
+                    canOpen: readiness.canOpen,
+                    scrollMissionPathOnSuccess: true,
+                });
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setOpenLevelLoading(null);
+            }
+        };
+
         const isMobile = document.body.classList.contains('telegram-mobile');
         const blurHeight = isMobile ? 124 : 56;
 
@@ -240,7 +332,6 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                         className="absolute left-4 top-3 z-10 w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                     >
                         <i className="fas fa-arrow-left text-xl shrink-0" aria-hidden />
-                        {/* <span className="leading-tight truncate">{t('selectHistory')}</span> */}
                     </button>
                     <motion.h2
                         initial={{ opacity: 0 }}
@@ -261,25 +352,42 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                     ) : null}
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-y-auto ios-scroll hide-scrollbar p-4 pt-16">
-                    {sorted.length === 0 ? (
+                <div
+                    ref={scrollContainerRef}
+                    className={`flex-1 min-h-0 overflow-y-auto ios-scroll hide-scrollbar p-4 pt-16${
+                        isMissionDataReady && !isMissionListVisible ? ' invisible' : ''
+                    }`}
+                >
+                    {sorted.length === 0 || !isMissionDataReady ? (
                         <p className="text-center text-zinc-400 text-sm py-8">{t('missionsLoadingOrEmpty')}</p>
                     ) : (
-                        <div ref={containerRef} className="relative flex flex-col items-center pt-2 pb-6 min-h-[200px]">
-                            <motion.canvas
+                        <div ref={containerRef} className="relative flex flex-col items-center pt-12 pb-6 min-h-[200px]">
+                            <canvas
                                 ref={canvasRef}
                                 className="absolute inset-0 w-full h-full pointer-events-none z-0"
                                 aria-hidden
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
                             />
                             {(() => {
                                 let missionIdx = 0;
-                                return levelGroups.map((group) => {
+                                return levelGroups.map((group, groupIdx) => {
                                     const accessible = levelAccessible.get(group.level) ?? false;
+                                    const prevGroup = groupIdx > 0 ? levelGroups[groupIdx - 1] : null;
+                                    const prevLevelMissionsDone =
+                                        prevGroup != null &&
+                                        prevGroup.missions.every((m) =>
+                                            isMissionCompleted(
+                                                chat.missionsProgress.find((x) => x.missionId === m.id) ||
+                                                    m.progress ||
+                                                    undefined,
+                                            ),
+                                        );
+                                    const showOpenLevelHere =
+                                        !accessible &&
+                                        prevLevelMissionsDone &&
+                                        group.level >= 2;
+
                                     return (
                                         <React.Fragment key={group.level}>
-                                            {/* Level banner */}
                                             <div className="relative z-10 w-full flex items-center gap-3 px-4 mb-6">
                                                 <div className="flex-1 h-px bg-gradient-to-r from-transparent to-zinc-700/60" />
                                                 <div
@@ -297,39 +405,69 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                                                 <div className="flex-1 h-px bg-gradient-to-l from-transparent to-zinc-700/60" />
                                             </div>
 
-                                            {/* Mission cards — hidden if level locked */}
                                             {accessible ? (
-                                                group.missions.map((m) => {
-                                                    const idx = missionIdx++;
-                                                    const p: MissionProgress | undefined =
-                                                        chat.missionsProgress.find((x) => x.missionId === m.id) ||
-                                                        m.progress ||
-                                                        undefined;
-                                                    const locked = !chat.canSelectMission(m.id);
-                                                    const isSelected = chat.selectedMissionId === m.id;
-                                                    const isLoadingMission = chat.switchingMissionId === m.id;
-                                                    return (
-                                                        <div
-                                                            key={m.id}
-                                                            ref={(el) => {
-                                                                cardRefs.current[idx] = el;
-                                                            }}
-                                                            className="relative z-10 w-full flex justify-center mb-10 last:mb-4"
-                                                        >
-                                                            <MissionCard
-                                                                mode="picker"
-                                                                mission={m}
-                                                                progress={p}
-                                                                locked={locked}
-                                                                isSelected={isSelected}
-                                                                isLoading={isLoadingMission}
-                                                                onSelect={() => void handleMissionClick(m.id)}
-                                                            />
-                                                        </div>
-                                                    );
-                                                })
+                                                <>
+                                                    {group.missions.map((m) => {
+                                                        const idx = missionIdx++;
+                                                        const p: MissionProgress | undefined =
+                                                            chat.missionsProgress.find(
+                                                                (x) => x.missionId === m.id,
+                                                            ) || m.progress || undefined;
+                                                        const locked = !chat.canSelectMission(m.id);
+                                                        const isSelected = chat.selectedMissionId === m.id;
+                                                        const isLoadingMission =
+                                                            chat.switchingMissionId === m.id;
+                                                        return (
+                                                            <div
+                                                                key={m.id}
+                                                                ref={(el) => {
+                                                                    cardRefs.current[idx] = el;
+                                                                    if (el) {
+                                                                        missionCardRefs.current.set(m.id, el);
+                                                                    } else {
+                                                                        missionCardRefs.current.delete(m.id);
+                                                                    }
+                                                                }}
+                                                                className="relative z-10 w-full flex justify-center mb-10 last:mb-4"
+                                                            >
+                                                                <MissionCard
+                                                                    mode="picker"
+                                                                    mission={m}
+                                                                    progress={p}
+                                                                    locked={locked}
+                                                                    isSelected={isSelected}
+                                                                    isLoading={isLoadingMission}
+                                                                    disableEntranceAnimation
+                                                                    onSelect={() =>
+                                                                        void handleMissionClick(m.id)
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </>
+                                            ) : showOpenLevelHere ? (
+                                                <div className="relative z-10 w-full flex justify-center mb-10 px-4">
+                                                    <Button
+                                                        variant="gradient"
+                                                        size="lg"
+                                                        className="w-full max-w-md"
+                                                        icon="fa-solid fa-door-open"
+                                                        disabled={openLevelLoading === group.level}
+                                                        state={
+                                                            openLevelLoading === group.level
+                                                                ? 'loading'
+                                                                : 'default'
+                                                        }
+                                                        onClick={() => void handleOpenNextLevel(group.level)}
+                                                    >
+                                                        {t('openStoryLevelConfirmButton').replace(
+                                                            '{level}',
+                                                            String(group.level),
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             ) : (
-                                                /* Locked level placeholder */
                                                 <motion.div
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
@@ -360,7 +498,7 @@ const MissionPathScreen: React.FC<MissionPathScreenProps> = observer(
                 />
             </div>
         );
-    }
+    },
 );
 
 export default MissionPathScreen;

@@ -56,7 +56,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
             ? descriptionTrimmed
                 ? descriptionTrimmed
                 : undefined
-            : t('artifactNotInInventorySubtitle');
+            : t('artifactNotInInventoryBody');
 
         return (
             <Modal
@@ -81,6 +81,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                 levelUnlocked={levelUnlocked}
                                 layout="modal"
                                 onSuccess={onTradeSuccess}
+                                isOwned={isOwned}
                             />
                         ) : null}
                         <Button onClick={handleClose} variant="default" size="lg" className="w-full">
@@ -115,12 +116,6 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
 
                         {isOwned && !descriptionTrimmed ? (
                             <p className="text-zinc-500 text-sm italic text-center">{t('artifactNoDescription')}</p>
-                        ) : null}
-
-                        {!isOwned ? (
-                            <p className="text-zinc-300 text-sm text-center leading-relaxed">
-                                {t('artifactNotInInventoryBody')}
-                            </p>
                         ) : null}
                     </div>
                 ) : null}

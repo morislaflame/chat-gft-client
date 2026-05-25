@@ -993,8 +993,8 @@ type TranslationType = {
         en: 'Collect all artifacts on the level missions to open the next level'
     },
     progressExplainer2: {
-        ru: 'Найденные артефакты засчитываются в прогресс. Когда вы их тратите в миссиях - прогресс не пропадает.',
-        en: 'Found artifacts count towards progress. When you use them in missions - progress does not disappear.'
+        ru: 'Найденные артефакты засчитываются в прогресс. Вы можете использовать их в миссиях для более быстрого прохождения, или продать за гемы',
+        en: 'Found artifacts count towards progress. You can use them in missions for faster progress, or sell them for gems'
     },
     gemsModalEnergyPacks: {
         ru: 'Энергия за звёзды',
@@ -1155,6 +1155,30 @@ type TranslationType = {
     lookWhatIWon: {
         ru: 'Смотри, что я выиграл!',
         en: 'Look what I won!'
+    },
+    profileCompanionTitle: {
+        ru: 'Компаньон',
+        en: 'Companion',
+    },
+    profileCompanionOwned: {
+        ru: 'С тобой',
+        en: 'With you',
+    },
+    profileCompanionLocked: {
+        ru: 'Ещё не получен',
+        en: 'Not yet obtained',
+    },
+    firstMissionArtifactReceived: {
+        ru: 'Артефакт получен!',
+        en: 'Artifact received!',
+    },
+    firstMissionArtifactReceivedSubtitle: {
+        ru: 'Награда за прохождение первой миссии',
+        en: 'Reward for completing the first mission',
+    },
+    firstMissionArtifactContinue: {
+        ru: 'Продолжить',
+        en: 'Continue',
     },
     companionReceived: {
         ru: 'Компаньон получен!',

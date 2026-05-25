@@ -24,6 +24,8 @@ export type ArtifactMarketActionsProps = {
     layout?: 'card' | 'modal';
     /** По умолчанию true; в чате при отсутствии артефакта — только покупка */
     showSell?: boolean;
+    /** По умолчанию true; в чате при отсутствии артефакта — только покупка */
+    isOwned?: boolean;
     onSuccess: (payload: ArtifactTradeSuccessPayload) => void;
 };
 
@@ -42,6 +44,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     levelUnlocked = true,
     layout = 'card',
     showSell = true,
+    isOwned = true,
     onSuccess,
 }) => {
     const { t } = useTranslate();
@@ -68,8 +71,9 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
         return undefined;
     })();
 
+    const ownsArtifact = isOwned && ownedQty > 0;
     const showBuy = buyPrice != null;
-    const showSellButton = showSell && sellPrice != null;
+    const showSellButton = showSell && sellPrice != null && ownsArtifact;
 
     if (!showBuy && !showSellButton) return null;
 
@@ -118,7 +122,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
         >
-            {!isCard && showSellButton ? (
+            {!isCard && showSell && sellPrice != null && ownsArtifact && ownedQty < 2 ? (
                 <p className="text-md text-zinc-400 text-center mb-2">{t('artifactSellDuplicatesHint')}</p>
             ) : null}
             <div className="flex flex-row gap-2 w-full">

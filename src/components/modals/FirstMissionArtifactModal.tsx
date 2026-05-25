@@ -2,20 +2,18 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { useNavigate } from 'react-router-dom';
 import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
 import { FireworksBackground } from '@/components/ui/backgrounds/fireworks-background';
-import { PROFILE_ROUTE } from '@/utils/consts';
+import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
 
-const CompanionArtifactModal: React.FC = observer(() => {
+const FirstMissionArtifactModal: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
     const { t } = useTranslate();
-    const navigate = useNavigate();
-    const companion = chat.pendingCompanion;
-    const isOpen = companion?.isOpen ?? false;
+    const artifact = chat.pendingFirstMissionArtifact;
+    const isOpen = artifact?.isOpen ?? false;
     const language = user.user?.language || 'ru';
 
     const [fireworksPlaying, setFireworksPlaying] = useState(false);
@@ -34,64 +32,49 @@ const CompanionArtifactModal: React.FC = observer(() => {
         setFireworksPlaying(false);
     }, []);
 
-    const handleClose = () => {
-        chat.closeCompanion();
+    const handleContinue = () => {
+        chat.closeFirstMissionArtifact();
     };
 
-    const handleGoToProfile = () => {
-        chat.closeCompanion();
-        navigate(PROFILE_ROUTE);
-    };
+    if (!artifact) return null;
 
-    if (!companion) return null;
-
-    const name = language === 'en' ? (companion.nameEn || companion.name) : companion.name;
+    const name = language === 'en' ? (artifact.nameEn || artifact.name) : artifact.name;
     const description =
-        (language === 'en' ? companion.descriptionEn : companion.description) || null;
-    const mediaUrl = companion.media?.url;
-    const mimeType = companion.media?.mimeType ?? '';
+        (language === 'en' ? artifact.descriptionEn : artifact.description) || null;
+    const mediaUrl = artifact.media?.url;
+    const mimeType = artifact.media?.mimeType ?? '';
     const isImage = Boolean(mediaUrl && mimeType.startsWith('image/'));
 
     return (
         <>
             <Modal
                 isOpen={isOpen}
-                onClose={handleClose}
+                onClose={handleContinue}
                 closeOnOverlayClick={false}
                 swipeToClose={false}
                 hideCloseButton
-                title={t('companionReceived')}
-                description={t('companionReceivedSubtitle')}
-                headerIcon={<i className="fa-solid fa-paw text-white text-2xl" />}
-                headerIconContainerClassName="bg-user-message"
+                backdropImageSrc={getArtifactBackdropSrcByBoostType(artifact.boostType)}
+                title={t('firstMissionArtifactReceived')}
+                description={t('firstMissionArtifactReceivedSubtitle')}
+                headerIcon={<i className="fa-solid fa-gem text-white text-2xl" />}
+                headerIconContainerClassName="bg-gradient-to-br from-amber-600 to-amber-900 border border-amber-500/30"
                 footer={
-                    <div className="flex flex-col gap-2 w-full">
-                        <Button
-                            onClick={handleGoToProfile}
-                            variant="gradient"
-                            size="lg"
-                            className="w-full"
-                            icon="fa-solid fa-user"
-                        >
-                            {t('companionGoToProfile')}
-                        </Button>
-                        <Button
-                            onClick={handleClose}
-                            variant="default"
-                            size="lg"
-                            className="w-full"
-                        >
-                            {t('companionContinue')}
-                        </Button>
-                    </div>
+                    <Button
+                        onClick={handleContinue}
+                        variant="gradient"
+                        size="lg"
+                        className="w-full"
+                        icon="fa-solid fa-check"
+                    >
+                        {t('firstMissionArtifactContinue')}
+                    </Button>
                 }
             >
                 <div className="flex flex-col items-center gap-5 px-4 pb-2">
-                    {/* Artifact image */}
                     <AnimatePresence>
                         {entered && (
                             <motion.div
-                                key="companion-art"
+                                key="first-mission-artifact"
                                 initial={{ scale: 0.5, opacity: 0, y: 20 }}
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 transition={{ type: 'spring', stiffness: 280, damping: 20, delay: 0.1 }}
@@ -105,18 +88,17 @@ const CompanionArtifactModal: React.FC = observer(() => {
                                             className="w-full h-full object-contain"
                                         />
                                     ) : (
-                                        <i className="fa-solid fa-paw text-6xl text-secondary-gradient" />
+                                        <i className="fa-solid fa-gem text-6xl text-amber-400/90" />
                                     )}
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* Name */}
                     <AnimatePresence>
                         {entered && (
                             <motion.div
-                                key="companion-name"
+                                key="first-mission-artifact-name"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.25 }}
@@ -152,4 +134,4 @@ const CompanionArtifactModal: React.FC = observer(() => {
     );
 });
 
-export default CompanionArtifactModal;
+export default FirstMissionArtifactModal;

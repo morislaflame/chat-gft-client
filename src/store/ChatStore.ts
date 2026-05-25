@@ -15,7 +15,8 @@ import type {
     ApiMessageResponse,
     StageRewardData,
     StepRewardData,
-    CompanionArtifactData,
+    CompanionData,
+    FirstMissionArtifactData,
     MediaFile,
     Mission,
     MissionProgress,
@@ -51,7 +52,8 @@ export default class ChatStore {
     /** Уровень, к первой миссии которого нужно прокрутить MissionPathScreen */
     _missionPathScrollToLevel: number | null = null;
     _stepReward: StepRewardData | null = null;
-    _pendingCompanionArtifact: CompanionArtifactData | null = null;
+    _pendingCompanion: CompanionData | null = null;
+    _pendingFirstMissionArtifact: FirstMissionArtifactData | null = null;
     _balanceBeforeReward: number | null = null;
     _pendingGemsOnLand: number | null = null;
     _pendingProgressAnimation: { from: number; to: number } | null = null;
@@ -226,19 +228,46 @@ export default class ChatStore {
                 : null;
     }
 
-    setPendingCompanionArtifact(artifact: Omit<CompanionArtifactData, 'isOpen'> | null) {
-        this._pendingCompanionArtifact = artifact ? { ...artifact, isOpen: false } : null;
+    setPendingCompanion(companion: Omit<CompanionData, 'isOpen'> | null) {
+        this._pendingCompanion = companion ? { ...companion, isOpen: false } : null;
     }
 
-    openCompanionArtifact() {
-        if (this._pendingCompanionArtifact) {
-            this._pendingCompanionArtifact = { ...this._pendingCompanionArtifact, isOpen: true };
+    openCompanion() {
+        if (this._pendingCompanion) {
+            this._pendingCompanion = { ...this._pendingCompanion, isOpen: true };
         }
     }
 
-    closeCompanionArtifact() {
-        if (this._pendingCompanionArtifact) {
-            this._pendingCompanionArtifact = { ...this._pendingCompanionArtifact, isOpen: false };
+    closeCompanion() {
+        if (this._pendingCompanion) {
+            this._pendingCompanion = { ...this._pendingCompanion, isOpen: false };
+        }
+    }
+
+    /** @deprecated */
+    setPendingCompanionArtifact = this.setPendingCompanion.bind(this);
+    /** @deprecated */
+    openCompanionArtifact = this.openCompanion.bind(this);
+    /** @deprecated */
+    closeCompanionArtifact = this.closeCompanion.bind(this);
+
+    setPendingFirstMissionArtifact(artifact: Omit<FirstMissionArtifactData, 'isOpen'> | null) {
+        this._pendingFirstMissionArtifact = artifact ? { ...artifact, isOpen: false } : null;
+    }
+
+    openFirstMissionArtifact() {
+        if (this._pendingFirstMissionArtifact) {
+            this._pendingFirstMissionArtifact = {
+                ...this._pendingFirstMissionArtifact,
+                isOpen: true,
+            };
+        }
+    }
+
+    closeFirstMissionArtifact() {
+        this._pendingFirstMissionArtifact = null;
+        if (this._pendingCompanion) {
+            this.openCompanion();
         }
     }
 
@@ -876,26 +905,13 @@ export default class ChatStore {
                         artifactsGate: response.artifactsGate ?? null,
                     });
 
-                    if (response?.companionArtifact) {
-                        this.setPendingCompanionArtifact(response.companionArtifact);
-                        if (this._userStore?.user) {
-                            const prev = this._userStore.user.artifacts ?? [];
-                            const idx = prev.findIndex((a) => a.code === response.companionArtifact!.code);
-                            const next =
-                                idx >= 0
-                                    ? prev.map((a, i) =>
-                                          i === idx ? { ...a, quantity: Math.max(a.quantity, 1) } : a,
-                                      )
-                                    : [
-                                          ...prev,
-                                          {
-                                              code: response.companionArtifact!.code,
-                                              name: response.companionArtifact!.name,
-                                              quantity: 1,
-                                          },
-                                      ];
-                            this._userStore.setArtifacts(next);
-                        }
+                    const grantedCompanion = response?.companion ?? response?.companionArtifact;
+                    if (grantedCompanion) {
+                        this.setPendingCompanion(grantedCompanion);
+                    }
+
+                    if (response?.firstMissionArtifact) {
+                        this.setPendingFirstMissionArtifact(response.firstMissionArtifact);
                     }
 
                     const createdCases: Array<
@@ -1338,7 +1354,8 @@ export default class ChatStore {
         this._pendingOpenStoryLevel = null;
         this._openStoryLevelPrompt = null;
         this._missionPathScrollToLevel = null;
-        this._pendingCompanionArtifact = null;
+        this._pendingCompanion = null;
+        this._pendingFirstMissionArtifact = null;
         this._historyLoadFailed = false;
         this._trackedMissionViews.clear();
         this._missionStartTs.clear();
@@ -1413,8 +1430,17 @@ export default class ChatStore {
         return this._missionPathScrollToLevel;
     }
 
+    get pendingCompanion() {
+        return this._pendingCompanion;
+    }
+
+    /** @deprecated */
     get pendingCompanionArtifact() {
-        return this._pendingCompanionArtifact;
+        return this._pendingCompanion;
+    }
+
+    get pendingFirstMissionArtifact() {
+        return this._pendingFirstMissionArtifact;
     }
 
     get stepReward() {

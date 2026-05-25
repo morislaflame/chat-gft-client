@@ -53,7 +53,7 @@ export interface ProfileInventoryArtifact {
     name: string;
     nameEn: string | null;
     level: number;
-    /** COMPANION | KEY | WEAPON | ARMOR | TRINKET — для градиента карточки */
+    /** HELPER | KEY | WEAPON | ARMOR | TRINKET — для градиента карточки */
     boostType?: string;
     description?: string | null;
     descriptionEn?: string | null;
@@ -64,11 +64,24 @@ export interface ProfileInventoryArtifact {
     sellPrice?: number | null;
 }
 
+export interface ProfileInventoryCompanion {
+    id: number;
+    code: string;
+    name: string;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionEn?: string | null;
+    media?: { id: number; url: string; mimeType: string } | null;
+    owned: boolean;
+}
+
 export interface ProfileInventoryStory {
     historyName: string;
     displayName: string | null;
     displayNameEn: string | null;
     artifacts: ProfileInventoryArtifact[];
+    /** Компаньон истории (отдельно от артефактов) */
+    companion?: ProfileInventoryCompanion | null;
     /** code → количество в инвентаре для данной истории */
     owned: Record<string, number>;
     /** code → сколько раз артефакт был найден (история; не влияет на UI гейта) */
@@ -240,7 +253,11 @@ export interface ApiMessageResponse {
         media?: { id: number; url: string; mimeType: string } | null;
     } | null;
     /** Выданный компаньон за первую миссию (если есть) */
-    companionArtifact?: Omit<CompanionArtifactData, 'isOpen'> | null;
+    companion?: Omit<CompanionData, 'isOpen'> | null;
+    /** @deprecated use companion */
+    companionArtifact?: Omit<CompanionData, 'isOpen'> | null;
+    /** Случайный артефакт level 1 за первую миссию (если есть) */
+    firstMissionArtifact?: Omit<FirstMissionArtifactData, 'isOpen'> | null;
     timestamp: string;
 }
 
@@ -336,14 +353,29 @@ export interface StepRewardData {
     isOpen: boolean;
 }
 
-export interface CompanionArtifactData {
+export interface CompanionData {
     id: number;
     code: string;
     name: string;
     nameEn?: string | null;
     description?: string | null;
     descriptionEn?: string | null;
-    boostType: string;
+    media?: { id: number; url: string; mimeType: string } | null;
+    isOpen: boolean;
+}
+
+/** @deprecated use CompanionData */
+export type CompanionArtifactData = CompanionData;
+
+export interface FirstMissionArtifactData {
+    id: number;
+    code: string;
+    name: string;
+    nameEn?: string | null;
+    description?: string | null;
+    descriptionEn?: string | null;
+    boostType?: string;
+    ownedQty: number;
     media?: { id: number; url: string; mimeType: string } | null;
     isOpen: boolean;
 }

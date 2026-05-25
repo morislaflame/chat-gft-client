@@ -10,6 +10,7 @@ import ArtifactPurchaseSuccessModal from '@/components/modals/ArtifactPurchaseSu
 import type { ProfileInventoryArtifact, ProfileInventoryStory } from '@/types/types';
 import type { ArtifactTradeSuccessPayload } from '@/components/ProfilePageComponents/ArtifactMarketActions';
 import ProfileStoryArtifactsSection from '@/components/ProfilePageComponents/ProfileStoryArtifactsSection';
+import ProfileStoryCompanionSection from '@/components/ProfilePageComponents/ProfileStoryCompanionSection';
 import {
     FlyingGemOverlay,
     startGemFlightFromRect,
@@ -318,6 +319,24 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
                             <span className="text-sm font-medium text-user-message-gradient">{t('missionsList')}</span>
                         </motion.button>
                     </div>
+                    {story.companion ? (
+                        <ProfileStoryCompanionSection
+                            companion={story.companion}
+                            title={t('profileCompanionTitle')}
+                            ownedLabel={t('profileCompanionOwned')}
+                            lockedLabel={t('profileCompanionLocked')}
+                            name={
+                                language === 'en'
+                                    ? story.companion.nameEn || story.companion.name
+                                    : story.companion.name
+                            }
+                            description={
+                                language === 'en'
+                                    ? story.companion.descriptionEn || story.companion.description
+                                    : story.companion.description || story.companion.descriptionEn
+                            }
+                        />
+                    ) : null}
                     <ProfileStoryArtifactsSection
                         story={story}
                         onOpenArtifactDetail={openArtifactDetail}

@@ -112,7 +112,16 @@ type NextMissionRef = {
 
 const StageRewardModal: React.FC = observer(() => {
   const { chat, user } = useContext(Context) as IStoreContext;
-  const hasPendingCompanion = () => chat.pendingCompanionArtifact !== null;
+  const hasPendingCompanion = () => chat.pendingCompanion !== null;
+  const hasPendingFirstMissionArtifact = () => chat.pendingFirstMissionArtifact !== null;
+
+  const openPendingMissionRewardModals = () => {
+    if (hasPendingFirstMissionArtifact()) {
+      chat.openFirstMissionArtifact();
+    } else if (hasPendingCompanion()) {
+      chat.openCompanion();
+    }
+  };
   const { t } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
@@ -181,12 +190,14 @@ const StageRewardModal: React.FC = observer(() => {
       if (!ok) {
         chat.onGemsLanded();
         handleClose();
+        openPendingMissionRewardModals();
         return;
       }
       handleClose();
       return;
     }
     handleClose();
+    openPendingMissionRewardModals();
   };
 
   const handleNextMissionClick = () => {
@@ -230,9 +241,7 @@ const StageRewardModal: React.FC = observer(() => {
 
   const onFireworksComplete = useCallback(() => {
     setFireworksPlaying(false);
-    if (hasPendingCompanion()) {
-      chat.openCompanionArtifact();
-    }
+    openPendingMissionRewardModals();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat]);
 

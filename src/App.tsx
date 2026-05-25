@@ -10,6 +10,7 @@ import DailyRewardModal from "./components/modals/DailyRewardModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import OpenStoryLevelModal from "./components/modals/OpenStoryLevelModal";
 import CompanionArtifactModal from "./components/modals/CompanionArtifactModal";
+import FirstMissionArtifactModal from "./components/modals/FirstMissionArtifactModal";
 import StepRewardModal from "./components/modals/StepRewardModal";
 import ArtifactAcquireModal from "./components/modals/ArtifactAcquireModal";
 import InsufficientEnergyModal from "./components/modals/InsufficientEnergyModal";
@@ -63,6 +64,7 @@ const AppContent = () => {
       <StageRewardModal />
       <OpenStoryLevelModal />
       <CompanionArtifactModal />
+      <FirstMissionArtifactModal />
       <StepRewardModal />
       <ArtifactAcquireModal />
       <InsufficientEnergyModal />

@@ -21,7 +21,7 @@ export function getArtifactBackdropSrcByBoostType(boostType: string | undefined)
       return '/gp.webp';
     case 'KEY':
       return '/gold.webp';
-    case 'COMPANION':
+    case 'HELPER':
       return '/rarep.webp';
     default:
       return '/lp.webp';

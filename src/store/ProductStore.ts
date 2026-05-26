@@ -2,7 +2,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type { Product } from "@/types/types";
 import { getProducts, generateInvoice } from "@/http/productAPI";
-import { getStore } from "./StoreProvider";
+import { getStore } from "@/store/storeSingleton";
 import { trackEvent } from "@/utils/analytics";
 
 const tg = window.Telegram?.WebApp;

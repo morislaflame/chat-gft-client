@@ -2,6 +2,7 @@ import * as React from "react";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { motionInteractiveSurfaceProps } from "@/components/ui/motionInteractiveSurface";
 import { useHapticFeedback } from "@/utils/useHapticFeedback";
 
 type ButtonVariant =
@@ -31,7 +32,7 @@ export interface ButtonProps
 }
 
 const base =
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold overflow-hidden h-fit cursor-pointer " +
+  "relative inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap text-sm overflow-hidden h-fit cursor-pointer " +
   "transition-[box-shadow,color,background-color,border-color,outline-color,transform,opacity] duration-400 ease-out select-none " +
   "outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 " +
   "disabled:pointer-events-none disabled:opacity-50 " +
@@ -77,17 +78,17 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  default: "px-4 py-2 rounded-lg",
-  sm: "px-3 py-3 text-xs rounded-lg",
+  default: "px-4 py-2 rounded-xl",
+  sm: "px-3 py-3 text-xs rounded-xl",
   lg: "px-5 py-3 text-base rounded-xl",
   icon: "h-9 w-9 px-0 py-2 rounded-xl",
 };
 
 const iconSizeClasses: Record<ButtonSize, string> = {
   default: "text-sm",
-  sm: "text-xs",
-  lg: "text-base",
-  icon: "text-base",
+  sm: "text-xs font-semibold",
+  lg: "text-lg font-semibold",
+  icon: "text-lg font-semibold",
 };
 
 const rippleClasses: Record<ButtonVariant, string> = {
@@ -101,17 +102,6 @@ const rippleClasses: Record<ButtonVariant, string> = {
   glass: "bg-white/40",
   nav: "bg-black/80",
 };
-
-const SCALE_ANIMATION = {
-  whileHover: {
-    scale: 1.05,
-    transition: { type: "spring", stiffness: 350, damping: 22, mass: 0.8 },
-  },
-  whileTap: {
-    scale: 0.95,
-    transition: { duration: 1, ease: "easeInOut" },
-  },
-} as const;
 
 const stateOverlayClasses: Record<Exclude<ButtonState, "default">, string> = {
   success: "bg-green-500",
@@ -222,7 +212,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled}
         onPointerDown={handlePointerDown}
         onClick={handleClick}
-        {...SCALE_ANIMATION}
+        {...motionInteractiveSurfaceProps}
         {...props}
       >
         {ripple && (

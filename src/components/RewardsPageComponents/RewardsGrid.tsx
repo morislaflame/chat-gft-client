@@ -28,6 +28,8 @@ type RewardsGridProps = {
     getPurchaseState: (rewardItem: Reward) => { isPurchasing: boolean; canAfford: boolean };
     getBoxPurchaseState: (box: CaseBox) => { isPurchasing: boolean; isDisabled: boolean; canAfford: boolean };
     getWithdrawalState: (userReward: UserReward) => { status: string | null; isCreating: boolean };
+    /** Справка про Telegram Gifts рядом с заголовком «Мои награды» */
+    onTelegramGiftsInfo?: () => void;
     t: TranslateFn;
     language: 'ru' | 'en';
 };
@@ -44,6 +46,7 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
     getPurchaseState,
     getBoxPurchaseState,
     getWithdrawalState,
+    onTelegramGiftsInfo,
     t,
     language,
     cases = [],
@@ -116,8 +119,21 @@ const RewardsGrid: React.FC<RewardsGridProps> = ({
             )}
 
             {showRewards && (
-                <div className="flex items-center justify-between mb-2">
-                    <div className="text-lg text-gray-300 font-semibold">{rewardsTitle}</div>
+                <div className="mb-2 flex items-center gap-1">
+                    <div className="text-lg font-semibold text-gray-300">{rewardsTitle}</div>
+                    { onTelegramGiftsInfo ? (
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onTelegramGiftsInfo();
+                            }}
+                            aria-label={t('telegramGiftsHelpAria')}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-full text-[16px] text-zinc-400 transition-colors hover:text-zinc-200 cursor-pointer hover:scale-105 active:scale-[0.96]"
+                        >
+                            <i className="fa-solid fa-circle-question" aria-hidden />
+                        </button>
+                    ) : null}
                 </div>
             )}
 

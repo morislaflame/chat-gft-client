@@ -12,10 +12,54 @@ type TranslationType = {
       ru: 'Баланс',
       en: 'Balance'
     },
+    artifactsFound: {
+      ru: 'Найдено артефактов',
+      en: 'Artifacts found'
+    },
+    missionProgress: {
+      ru: 'Прогресс миссии',
+      en: 'Mission progress'
+    },
     // ChatContainer
     greeting: {
       ru: 'Свой вариант истории',
       en: 'Your version of the story'
+    },
+    chatLlmCouldNotProcess: {
+      ru: '(кажется, модель не смогла обработать сообщение)',
+      en: '(It seems the model could not process the message)',
+    },
+    chatSendMessageAgain: {
+      ru: 'Отправить сообщение ещё раз',
+      en: 'Send the message again',
+    },
+    chatReloadAppHint: {
+      ru: 'Произошла ошибка. Пожалуйста, перезагрузите приложение.',
+      en: 'Something went wrong. Please reload the app.',
+    },
+    chatReloadApp: {
+      ru: 'Перезагрузить',
+      en: 'Reload',
+    },
+    chatErrorReportHint: {
+      ru: 'Если перезагрузка не помогла, отправьте репорт об ошибке — мы с вами свяжемся.',
+      en: 'If reloading does not help, send an error report and we will get in touch.',
+    },
+    chatSendErrorReport: {
+      ru: 'Отправить репорт',
+      en: 'Send report',
+    },
+    chatErrorReportThanks: {
+      ru: 'Репорт отправлен. Спасибо!',
+      en: 'Report sent. Thank you!',
+    },
+    chatErrorReportSuccessful: {
+      ru: 'Успешно',
+      en: 'Successful',
+    },
+    chatErrorReportSending: {
+      ru: 'Отправка…',
+      en: 'Sending…',
     },
     mission: {
       ru: 'Миссия',
@@ -121,8 +165,8 @@ type TranslationType = {
         en: 'No Tasks Yet'
     },
     noTasksYetDesc: {
-        ru: 'У вас пока нет заданий. Заполните профиль или подождите появления новых заданий!',
-        en: "You don't have any tasks yet. Complete your profile or wait for new tasks to appear!"
+        ru: 'Задания временно отсутствуют. Скоро появятся новые!',
+        en: "Tasks are temporarily unavailable. New tasks will be available soon!"
     },
     reward: {
         ru: 'Награда',
@@ -231,6 +275,30 @@ type TranslationType = {
         ru: 'Мои награды',
         en: 'My Rewards'
     },
+    telegramGiftsHelpAria: {
+        ru: 'Что такое Telegram Gifts и где их смотреть',
+        en: 'What Telegram Gifts are and where to browse them'
+    },
+    telegramGiftsModalTitle: {
+        ru: 'Telegram Gifts',
+        en: 'Telegram Gifts'
+    },
+    telegramGiftsModalSubtitle: {
+        ru: 'Цифровые подарки и площадки, где можно посмотреть предложения',
+        en: 'Digital gifts and marketplaces where you can browse listings'
+    },
+    telegramGiftsModalP1: {
+        ru: 'Telegram Gifts — это цифровые активы в Telegram: торгуются на площадках внутри экосистемы Ton и Telegram',
+        en: 'Telegram Gifts are digital assets in Telegram: traded on platforms within the Ton and Telegram ecosystems'
+    },
+    telegramGiftsModalP2: {
+        ru: 'Когда вы покупаете награду за гемы, вы можете получить ее на свой аккаунт Telegram в качестве подарка, запросив вывод в разделе "Мои награды"',
+        en: 'When you purchase a reward for gems, you can receive it on your Telegram account as a gift, by requesting a withdrawal in the "My Rewards" section'
+    },
+    telegramGiftsMarketplacesHeading: {
+        ru: 'Площадки в Telegram',
+        en: 'Telegram marketplaces'
+    },
     boxes: {
         ru: 'Боксы',
         en: 'Boxes'
@@ -260,8 +328,8 @@ type TranslationType = {
         en: 'Spend them in “Loot” on gifts and unique NFTs'
     },
     energyInfoTitle: {
-        ru: 'Зачем нужна энергия',
-        en: 'What energy is for'
+        ru: 'Пополнить энергию',
+        en: 'Top up energy'
     },
     energyInfoP1: {
         ru: 'Энергия — это действия в игре',
@@ -284,12 +352,12 @@ type TranslationType = {
         en: 'There are no rewards available for purchase at the moment.'
     },
     noPurchasesYet: {
-        ru: 'Пока нет покупок',
-        en: 'No Purchases Yet'
+        ru: 'У вас пока нет наград',
+        en: 'No Rewards Yet'
     },
     noPurchasesYetDesc: {
-        ru: 'Вы еще не покупали награды. Посмотрите доступные награды!',
-        en: "You haven't purchased any rewards yet. Check out the available rewards!"
+        ru: 'Покупайте награды за гемы, или выигрывайте в боксах',
+        en: "Purchase rewards with gems, or win in boxes!"
     },
     withdrawn: {
         ru: 'Выведен',
@@ -362,6 +430,130 @@ type TranslationType = {
         ru: 'Gems тратятся в “Луте” — на подарки и коробки с шансом NFT',
         en: 'Gems are spent in “Rewards” — on gifts and boxes with a chance for an NFT'
     },
+    stageRewardLastReply: {
+        ru: 'Последний ответ',
+        en: 'Last reply'
+    },
+    nextMission: {
+        ru: 'Следующая миссия',
+        en: 'Next mission'
+    },
+    stageReplayRewardHint: {
+        ru: 'При перепрохождении гемы не начисляются; можно перейти к следующей миссии.',
+        en: 'No gems on replay; you can continue to the next mission.',
+    },
+    nextLevelArtifactsGateTitle: {
+        ru: 'Артефакты не собраны!',
+        en: 'Artifacts not collected!',
+    },
+    nextLevelArtifactsGateBody: {
+        ru: 'Чтобы перейти на следующий уровень, соберите все артефакты уровня {level}',
+        en: 'To unlock the next level, collect all artifacts from level {level}',
+    },
+    nextLevelArtifactsGateBody2: {
+        ru: 'Отслеживайте прогресс в профиле',
+        en: 'Track progress in your profile',
+    },
+    openProfileForArtifacts: {
+        ru: 'Открыть профиль',
+        en: 'Open profile',
+    },
+    openStoryLevelConfirmTitle: {
+        ru: 'Открыть уровень {level}?',
+        en: 'Open level {level}?',
+    },
+    openStoryLevelConfirmDescription: {
+        ru: 'Для доступа к миссиям уровня {level} будут использованы артефакты из предыдущего уровня',
+        en: 'To access level {level} missions, the artifacts from the previous level will be used',
+    },
+    openStoryLevelConfirmButton: {
+        ru: 'Открыть уровень {level}',
+        en: 'Open level {level}',
+    },
+    openStoryLevelMissingTitle: {
+        ru: 'Уровень {level} заблокирован',
+        en: 'Missing artifacts for level {level}',
+    },
+    openStoryLevelMissingDescription: {
+        ru: 'Сначала соберите все артефакты предыдущего уровня',
+        en: 'First collect all artifacts from the previous level',
+    },
+    openStoryLevelMissingDescriptionLine1: {
+        ru: 'Вы можете перепройти миссии предыдущего уровня и поискать упущенные артефакты',
+        en: 'You can replay the previous level missions and find the missing artifacts',
+    },
+    openStoryLevelMissingDescriptionLine2: {
+        ru: 'Или купить артефакт за гемы в профиле',
+        en: 'Or buy the artifact for gems in your profile',
+    },
+    openStoryLevelBurnHint: {
+        ru: 'Артефакты будут списаны из инвентаря',
+        en: 'Artifacts will be consumed from your inventory',
+    },
+    openStoryLevelMissingHint: {
+        ru: 'Покупка доступна только для артефактов уже открытых вами уровней.',
+        en: 'Purchases are only available for artifacts from levels you have already unlocked.',
+    },
+    openStoryLevelBuyButton: {
+        ru: 'Купить в профиле',
+        en: 'Buy in profile',
+    },
+    openStoryLevelError: {
+        ru: 'Не удалось открыть уровень',
+        en: 'Could not open level',
+    },
+    artifactsInInventory: {
+        ru: 'В инвентаре',
+        en: 'In inventory',
+    },
+    missionsList: {
+        ru: 'Все миссии',
+        en: 'All missions'
+    },
+    missionsLoadingOrEmpty: {
+        ru: 'Загрузка миссий…',
+        en: 'Loading missions…'
+    },
+    backToMissions: {
+        ru: 'К миссиям',
+        en: 'Back to missions'
+    },
+    missionReplay: {
+        ru: 'Перепройти',
+        en: 'Replay'
+    },
+    missionReplayContinue: {
+        ru: 'Продолжить перепрохождение',
+        en: 'Continue replay'
+    },
+    missionCompletedBadge: {
+        ru: 'Пройдена',
+        en: 'Completed'
+    },
+    missionLocked: {
+        ru: 'Недоступно',
+        en: 'Locked'
+    },
+    chooseStoryButton: {
+        ru: 'Выбрать историю',
+        en: 'Choose story'
+    },
+    missionsPickTitle: {
+        ru: 'Миссии',
+        en: 'Missions'
+    },
+    noMissionsForStory: {
+        ru: 'Для этой истории пока нет миссий',
+        en: 'No missions for this story yet'
+    },
+    missionBeatsShort: {
+        ru: 'Шаги',
+        en: 'Steps'
+    },
+    missionArtifactsShort: {
+        ru: 'Предметы',
+        en: 'Items'
+    },
     stepRewardTitle: {
         ru: 'Верный шаг!',
         en: 'Right step!'
@@ -402,6 +594,19 @@ type TranslationType = {
     insufficientEnergyTasksNote: {
         ru: 'или получите бесплатную энергию за выполнение заданий',
         en: 'or get free energy by completing quests'
+    },
+    // InsufficientGemsModal
+    insufficientGems: {
+        ru: 'Недостаточно гемов',
+        en: 'Insufficient Gems'
+    },
+    insufficientGemsDesc: {
+        ru: 'У вас недостаточно гемов для покупки этого варианта. Вы можете приобрести гемы в магазине или получить их за выполнение заданий.',
+        en: "You don't have enough gems to purchase this option. You can buy gems in the store or earn them by completing quests."
+    },
+    insufficientGemsTasksNote: {
+        ru: 'или получите бесплатные гемы за выполнение заданий',
+        en: 'or get free gems by completing quests'
     },
     goToQuests: {
         ru: 'Перейти к заданиям',
@@ -581,6 +786,10 @@ type TranslationType = {
         ru: 'Истории недоступны',
         en: 'No histories available'
     },
+    storiesComingSoon: {
+        ru: 'Новые истории скоро добавятся!',
+        en: 'New stories coming soon!'
+    },
     startYourAdventure: {
         ru: 'Начните свое приключение в этой удивительной истории!',
         en: 'Start your adventure in this amazing story!'
@@ -622,6 +831,10 @@ type TranslationType = {
         ru: 'Энергию дают активные друзья и квесты',
         en: 'Active friends and quests give energy'
     },
+    gameExplanation5: {
+        ru: 'Ищите артефакты в миссиях и прокачивайте свой уровень!',
+        en: 'Find artifacts in missions and level up!'
+    },
     // Navigation
     chat: {
         ru: 'Чат',
@@ -639,6 +852,298 @@ type TranslationType = {
         ru: 'Магазин',
         en: 'Store'
     },
+    profile: {
+        ru: 'Профиль',
+        en: 'Profile'
+    },
+    profileCollections: {
+        ru: 'Коллекции Артефактов',
+        en: 'Artifact Collections'
+    },
+    profileLevel: {
+        ru: 'Уровень',
+        en: 'Level'
+    },
+    profileLevelComplete: {
+        ru: 'Завершён',
+        en: 'Complete'
+    },
+    profileLevelLocked: {
+        ru: 'Заблокирован',
+        en: 'Locked'
+    },
+    profileLevelUnlockHint: {
+        ru: 'Соберите все артефакты уровня {{level}} и сможете открыть следующий уровень',
+        en: 'Collect all Level {{level}} artifacts and you will be able to open the next level'
+    },
+    missionLevel: {
+        ru: 'Уровень',
+        en: 'Level'
+    },
+    missionLevelLocked: {
+        ru: 'Уровень заблокирован — пройдите предыдущий и откройте его в списке миссий',
+        en: 'Level locked — complete the previous level and unlock it from the mission list'
+    },
+    profileNftArtifactsBannerTitle: {
+        ru: 'NFT-Артефакты',
+        en: 'NFT-Artifacts'
+    },
+    profileNftArtifactsBanner: {
+        ru: 'Артефакты скоро будут в качестве NFT! Успевай собирать их уже сейчас — проходи миссии!',
+        en: 'Artifacts will soon become NFTs! Start collecting now — play missions!'
+    },
+    profileNftInfoModalSubtitle: {
+        ru: 'Скоро ваши находки смогут стать NFT',
+        en: 'Your finds will soon be able to become NFTs'
+    },
+    profileNftInfoModalP1: {
+        ru: 'Ищите артефакты в миссиях: проходите сюжет в чате, выполняйте задачи миссии — часть наград появится в коллекции в профиле.',
+        en: 'Find artifacts in missions: play the story in chat, complete mission tasks — rewards will appear in your profile collections.'
+    },
+    profileNftInfoModalP2: {
+        ru: 'В профиле по каждой истории видна коллекция: сколько предметов собрано, по уровням и общий прогресс.',
+        en: 'In your profile each story shows a collection: how many pieces you’ve collected, by level, and overall progress.'
+    },
+    profileNftInfoModalP3: {
+        ru: 'Мы готовим вывод найденных артефактов в виде NFT и обмен с другими игроками — собирайте заранее, чтобы ничего не упустить.',
+        en: 'We’re preparing on-chain NFT minting and trading with other players — collect early so you don’t miss out.'
+    },
+    artifactsExplainerTitle: {
+        ru: 'Сюжет',
+        en: 'Story'
+    },
+    artifactsExplainerSubtitle: {
+        ru: 'Проходите миссии и получайте награды!',
+        en: 'Complete missions and get rewards!'
+    },
+    artifactsExplainerP1BeforeGems: {
+        ru: 'В каждой миссии у вас есть главная задача, достигнув которой вы получите ',
+        en: 'Each mission has a main task, completing which you will receive '
+    },
+    artifactsExplainerP1AfterGems: {
+        ru: '.',
+        en: '.'
+    },
+    artifactsExplainerP2: {
+        ru: ' Но полезно не забывать и про артефакты: это ценные предметы, которые можно найти в сюжете',
+        en: 'But it is also useful to keep an eye out for artifacts: valuable items you can find in the story'
+    },
+    artifactsExplainerP3: {
+        ru: 'Собранные артефакты помогают быстрее проходить миссии и получать Гемы. Скоро они станут NFT — ими можно будет торговать с другими игроками',
+        en: 'Collected artifacts help you get through missions faster and earn Gems. Soon they will become NFTs you can trade with other players'
+    },
+    missionGoalBarOpenExplainerAria: {
+        ru: 'Подробнее об артефактах в миссиях',
+        en: 'Learn more about artifacts in missions'
+    },
+    profileLoadError: {
+        ru: 'Не удалось загрузить профиль',
+        en: 'Could not load profile'
+    },
+    somethingWentWrongTitle: {
+        ru: 'Что-то пошло не так',
+        en: 'Something went wrong'
+    },
+    somethingWentWrongDescription: {
+        ru: 'Не удалось загрузить данные. Проверьте соединение и попробуйте ещё раз.',
+        en: 'Could not load data. Check your connection and try again.'
+    },
+    tryAgain: {
+        ru: 'Попробовать снова',
+        en: 'Try again'
+    },
+    profileNoArtifactsInStory: {
+        ru: 'В этой истории пока нет артефактов в каталоге',
+        en: 'No catalog artifacts for this story yet'
+    },
+    profileNoName: {
+        ru: 'Игрок',
+        en: 'Player'
+    },
+    profileStoryLevelsCompleteLabel: {
+        ru: 'Уровней пройдено',
+        en: 'Levels completed'
+    },
+    profileStoryOverallProgress: {
+        ru: 'Общий прогресс',
+        en: 'Overall progress'
+    },
+    profileStorySummaryLine: {
+        ru: '{{pct}}% · {{owned}}/{{total}} · ур. {{lvDone}}/{{lvAll}}',
+        en: '{{pct}}% · {{owned}}/{{total}} · lv. {{lvDone}}/{{lvAll}}'
+    },
+    profileStoryOpenCollection: {
+        ru: 'Открыть коллекцию',
+        en: 'Open collection'
+    },
+    profileStoryNotFound: {
+        ru: 'Сюжет не найден',
+        en: 'Story not found'
+    },
+    profileBackToProfile: {
+        ru: 'К профилю',
+        en: 'Back to profile'
+    },
+    profileBackToProfileAria: {
+        ru: 'Назад к профилю',
+        en: 'Back to profile'
+    },
+    progressExplainer: {
+        ru: 'Соберите все артефакты на миссиях уровня, чтобы открыть следующий.',
+        en: 'Collect all artifacts on the level missions to open the next level'
+    },
+    progressExplainer2: {
+        ru: 'Найденные артефакты засчитываются в прогресс. Вы можете использовать их в миссиях для более быстрого прохождения, или продать за гемы',
+        en: 'Found artifacts count towards progress. You can use them in missions for faster progress, or sell them for gems'
+    },
+    gemsModalEnergyPacks: {
+        ru: 'Энергия за звёзды',
+        en: 'Energy for Stars'
+    },
+    artifactCode: {
+        ru: 'Код',
+        en: 'Code'
+    },
+    artifactNoDescription: {
+        ru: 'Описание пока не добавлено.',
+        en: 'No description yet.'
+    },
+    artifactInInventory: {
+        ru: 'В инвентаре',
+        en: 'In inventory'
+    },
+    artifactNotInInventory: {
+        ru: 'Ещё не получено в этой истории',
+        en: 'Not obtained in this story yet'
+    },
+    artifactLockedMissionSubtitle: {
+        ru: 'Найдите в миссиях этой истории',
+        en: 'Find it in this story\'s missions'
+    },
+    artifactLockedMissionBody: {
+        ru: 'Такие артефакты можно получить, проходя миссии: исследуйте сюжет и локации — предметы встречаются по ходу прохождения.',
+        en: 'You can obtain artifacts like this by playing missions — explore the story and locations; items appear as you progress.'
+    },
+    artifactAcquiredTitle: {
+        ru: 'Артефакт найден!',
+        en: 'Artifact found!'
+    },
+    artifactAcquiredContinue: {
+        ru: 'Продолжить',
+        en: 'Continue'
+    },
+    artifactUseConfirmTitle: {
+        ru: 'Применить артефакт?',
+        en: 'Use this artifact?'
+    },
+    artifactUseConfirmAction: {
+        ru: 'Применить',
+        en: 'Use'
+    },
+    artifactUseConfirmPayNote: {
+        ru: 'Будет списано',
+        en: 'This will cost'
+    },
+    artifactUseConfirmDescription: {
+        ru: 'Это поможет вам быстрее выполнить цель',
+        en: 'This will help you complete the goal faster'
+    },
+    artifactUseConfirmDescriptionLine1: {
+        ru: 'Помните, что артефакты вам будут нужны для открытия нового уровня',
+        en: 'Remember, artifacts you will need for the next level'
+    },
+    artifactUseConfirmDescriptionLine2: {
+        ru: 'Повторно использовать их нельзя',
+        en: 'You cannot use them again'
+    },
+    artifactUseConfirmDescriptionLine3: {
+        ru: 'Вы всегда можете купить артефакт за гемы в профиле, или найти его в миссиях',
+        en: 'You can always buy the artifact for gems in your profile, or find it in missions'
+    },
+    artifactMissingTitle: {
+        ru: 'Артефакт не найден',
+        en: 'Artifact not found'
+    },
+    artifactMissingDescription: {
+        ru: 'Ищите артефакты в миссиях',
+        en: 'Find artifacts in missions'
+    },
+    artifactMissingHintLine1: {
+        ru: 'Исследуйте локации внимательнее: артефакты можно найти где угодно.',
+        en: 'Explore locations carefully: artifacts can be found anywhere.'
+    },
+    artifactMissingHintLine2: {
+        ru: 'Пробуйте разные шаги и развилки — нужный артефакт может быть в другом месте.',
+        en: 'Try different steps and branches — the required artifact may be in another place.'
+    },
+    artifactMissingBuyOnProfile: {
+        ru: 'Вы можете купить артефакт за',
+        en: 'You can buy the artifact for'
+    },
+    artifactBuy: {
+        ru: 'Купить',
+        en: 'Buy'
+    },
+    artifactSell: {
+        ru: 'Продать',
+        en: 'Sell'
+    },
+    artifactBuyFor: {
+        ru: 'Купить за {price}',
+        en: 'Buy for {price}'
+    },
+    artifactNotPurchasable: {
+        ru: 'Этот артефакт сейчас нельзя купить',
+        en: 'This artifact cannot be purchased right now'
+    },
+    artifactSellFor: {
+        ru: 'Продать за {price}',
+        en: 'Sell for {price}'
+    },
+    artifactInsufficientBalance: {
+        ru: 'Недостаточно gems',
+        en: 'Not enough gems'
+    },
+    artifactNothingToSell: {
+        ru: 'Нет артефакта для продажи',
+        en: 'No artifact to sell'
+    },
+    artifactSellDuplicatesOnly: {
+        ru: 'Продать можно только дубликат (нужно 2 и более)',
+        en: 'Only duplicates can be sold (need 2 or more)',
+    },
+    artifactSellDuplicatesHint: {
+        ru: 'Продать можно только дубликаты (нужно 2 и более)',
+        en: 'You can only sell duplicates (need 2 or more)',
+    },
+    artifactLevelNotUnlockedForBuy: {
+        ru: 'Покупка доступна только для открытых уровней',
+        en: 'Purchases are only available for unlocked levels',
+    },
+    artifactNotInInventorySubtitle: {
+        ru: 'Артефакт ещё не в инвентаре',
+        en: 'Artifact not in inventory yet',
+    },
+    artifactNotInInventoryBody: {
+        ru: 'Найдите артефакт в миссии или купите его за гемы',
+        en: 'Find it in a mission or buy it with gems',
+    },
+    artifactMarketError: {
+        ru: 'Не удалось выполнить операцию',
+        en: 'Could not complete the transaction'
+    },
+    artifactMarketTapHint: {
+        ru: 'Нажмите на артефакт, чтобы купить или продать его',
+        en: 'Tap an artifact to buy or sell it'
+    },
+    artifactPurchaseSuccessTitle: {
+        ru: 'Артефакт куплен!',
+        en: 'Artifact purchased!'
+    },
+    artifactPurchaseSuccessSubtitle: {
+        ru: 'Предмет добавлен в ваш инвентарь',
+        en: 'The item has been added to your inventory'
+    },
     loot: {
         ru: 'Лут',
         en: 'Rewards'
@@ -650,6 +1155,46 @@ type TranslationType = {
     lookWhatIWon: {
         ru: 'Смотри, что я выиграл!',
         en: 'Look what I won!'
+    },
+    profileCompanionTitle: {
+        ru: 'Компаньон',
+        en: 'Companion',
+    },
+    profileCompanionOwned: {
+        ru: 'С тобой',
+        en: 'With you',
+    },
+    profileCompanionLocked: {
+        ru: 'Ещё не получен',
+        en: 'Not yet obtained',
+    },
+    firstMissionArtifactReceived: {
+        ru: 'Артефакт получен!',
+        en: 'Artifact received!',
+    },
+    firstMissionArtifactReceivedSubtitle: {
+        ru: 'Награда за прохождение первой миссии',
+        en: 'Reward for completing the first mission',
+    },
+    firstMissionArtifactContinue: {
+        ru: 'Продолжить',
+        en: 'Continue',
+    },
+    companionReceived: {
+        ru: 'Компаньон получен!',
+        en: 'Companion received!'
+    },
+    companionReceivedSubtitle: {
+        ru: 'Теперь он будет сопровождать тебя в приключениях',
+        en: 'They will now accompany you on your adventures'
+    },
+    companionGoToProfile: {
+        ru: 'Посмотреть в профиле',
+        en: 'View in profile'
+    },
+    companionContinue: {
+        ru: 'Продолжить',
+        en: 'Continue'
     }
   };
   

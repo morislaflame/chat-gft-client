@@ -27,17 +27,29 @@ export const AgentPreview: React.FC<AgentPreviewProps> = ({
 
   // Загружаем JSON анимацию если это JSON файл
   useEffect(() => {
-    if (preview?.mimeType === 'application/json' && preview.url) {
-      fetch(preview.url)
-        .then(response => response.json())
-        .then(data => setAnimationData(data))
-        .catch(error => {
-          console.error('Error loading animation:', error);
-          setAnimationData(null);
-        });
-    } else {
+    if (!(preview?.mimeType === 'application/json' && preview.url)) {
       setAnimationData(null);
+      return;
     }
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    fetch(preview.url, { signal: controller.signal })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setAnimationData(data);
+      })
+      .catch((error: { name?: string }) => {
+        if (cancelled || error?.name === 'AbortError') return;
+        console.error('Error loading animation:', error);
+        setAnimationData(null);
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [preview]);
 
   if (!preview || !preview.url) {

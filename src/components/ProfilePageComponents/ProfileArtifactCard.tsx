@@ -1,0 +1,99 @@
+import React from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Card } from '@/components/ui/card';
+import { motionInteractiveSurfaceProps } from '@/components/ui/motionInteractiveSurface';
+import type { ProfileInventoryArtifact } from '@/types/types';
+import { getArtifactBackdropSrcByBoostType } from '@/utils/rewardBackdrop';
+
+const MotionCard = motion.create(Card);
+
+const unownedImageClass = 'grayscale brightness-[0.72] contrast-[0.92]';
+
+export type ProfileArtifactCardProps = {
+    artifact: ProfileInventoryArtifact;
+    displayName: string;
+    ownedQty: number;
+    isOwned: boolean;
+    onOpenDetail: () => void;
+};
+
+const ProfileArtifactCard: React.FC<ProfileArtifactCardProps> = ({
+    artifact,
+    displayName,
+    ownedQty,
+    isOwned,
+    onOpenDetail,
+}) => {
+    const prefersReducedMotion = useReducedMotion();
+    const previewUrl = artifact.media?.url;
+    const previewMime = artifact.media?.mimeType ?? '';
+    const isPreviewImage = Boolean(previewUrl && previewMime.startsWith('image/'));
+    const backdropSrc = getArtifactBackdropSrcByBoostType(artifact.boostType);
+    const showOwnedQty = ownedQty > 1;
+
+    const surfaceMotion = prefersReducedMotion
+        ? {}
+        : {
+              whileHover: {
+                  y: -1,
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  ...motionInteractiveSurfaceProps.whileHover,
+              },
+              whileTap: motionInteractiveSurfaceProps.whileTap,
+          };
+
+    return (
+        <MotionCard
+            role="button"
+            tabIndex={0}
+            onClick={onOpenDetail}
+            onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenDetail();
+                }
+            }}
+            {...surfaceMotion}
+            className="relative flex-shrink-0 w-[140px] h-fit p-4 flex flex-col items-center overflow-hidden cursor-pointer hover:bg-primary-700/50 transition-[background-color,box-shadow,color] duration-400 ease-out"
+        >
+            {showOwnedQty ? (
+                <div className="absolute top-2 right-2 z-[2] rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-semibold leading-none ring-1 ring-white/20">
+                    <span className="text-secondary-gradient">{`x${ownedQty}`}</span>
+                </div>
+            ) : null}
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+                <img
+                    src={backdropSrc}
+                    alt=""
+                    className={`absolute top-0 left-0 h-full w-full object-cover object-top ${
+                        isOwned ? 'opacity-20' : `opacity-[0.12] ${unownedImageClass}`
+                    }`}
+                />
+            </div>
+            <div className="mb-4 flex items-center justify-center relative w-28 h-28 z-[1]">
+                {isPreviewImage ? (
+                    <img
+                        src={previewUrl}
+                        alt=""
+                        className={`w-28 h-28 object-contain ${isOwned ? '' : unownedImageClass}`}
+                    />
+                ) : (
+                    <div className="relative w-28 h-28 rounded-lg bg-primary-700/50 flex items-center justify-center">
+                        <i
+                            className={`fa-solid fa-gem text-2xl ${
+                                isOwned
+                                    ? 'text-secondary-400/90'
+                                    : 'text-zinc-600 opacity-40 grayscale'
+                            }`}
+                        />
+                    </div>
+                )}
+            </div>
+            <div className="text-center flex-1 relative z-[1] w-full px-0.5">
+                <div className="text-xs font-semibold line-clamp-3 leading-tight text-zinc-100">{displayName}</div>
+            </div>
+        </MotionCard>
+    );
+};
+
+export default ProfileArtifactCard;

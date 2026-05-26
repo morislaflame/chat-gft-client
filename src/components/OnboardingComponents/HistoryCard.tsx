@@ -33,7 +33,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({
 }) => {
     return (
         <motion.div
-            className="flex flex-col gap-4 p-4 rounded-[40px] backdrop-blur-sm select-none w-full items-center justify-center"
+            className="flex flex-col gap-4 p-6 rounded-[30px] border border-white/15 bg-black/40 backdrop-blur-md select-none w-full items-center justify-center"
             style={{
                 userSelect: 'none',
                 WebkitUserSelect: 'none',

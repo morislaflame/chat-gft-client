@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction } from "mobx";
-import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode } from "@/http/userAPI";
+import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode, setLanguage as setLanguageApi } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 import { trackEvent } from "@/utils/analytics";
 
@@ -17,7 +17,7 @@ export default class UserStore {
     serverErrorMessage = '';
     _language: 'ru' | 'en' = 'ru';
     _showOnboarding = false;
-    _onboardingInitialStep: 'welcome' | 'select' = 'welcome';
+    _onboardingInitialStep: 'welcome' | 'select' | 'missions' = 'welcome';
     _isHistorySelectionFromHeader = false;
 
     constructor() {
@@ -76,6 +76,35 @@ export default class UserStore {
         }
     }
 
+    setSelectedChatMissionId(missionId: number | null) {
+        if (this._user) {
+            this._user = { ...this._user, selectedChatMissionId: missionId };
+        }
+    }
+
+    patchArtifactQuantities(updates: Record<string, number>) {
+        if (!this._user) return;
+        const map = new Map((this._user.artifacts ?? []).map((a) => [a.code, a]));
+        for (const [code, quantity] of Object.entries(updates)) {
+            const prev = map.get(code);
+            if (prev) {
+                map.set(code, { ...prev, quantity });
+            } else if (quantity > 0) {
+                map.set(code, { code, quantity });
+            }
+        }
+        this._user = {
+            ...this._user,
+            artifacts: [...map.values()],
+        };
+    }
+
+    setArtifacts(artifacts: Array<{ code: string; quantity: number }>) {
+        if (this._user) {
+            this._user = { ...this._user, artifacts };
+        }
+    }
+
     setReferrals(referrals: Referral[]) {
         this._referrals = referrals;
     }
@@ -98,13 +127,18 @@ export default class UserStore {
     }
 
     async changeLanguage(lang: 'ru' | 'en') {
+        const prevLanguage = this._language;
         try {
             runInAction(() => {
                 this.setLanguage(lang);
             });
+            setLanguageApi(lang);
             trackEvent("language_change", { language: lang });
         } catch (error) {
             console.error("Error changing language:", error);
+            runInAction(() => {
+                this.setLanguage(prevLanguage);
+            });
         }
     }
 
@@ -182,11 +216,16 @@ export default class UserStore {
             const referralInfo = await getReferralInfo();
             
             // Используем язык из данных пользователя или из localStorage
-            const userLanguage = (data as UserInfo).language || this._language;
+            const apiUser = data as UserInfo;
             const savedLanguage = localStorage.getItem('language') as 'ru' | 'en' | null;
-            const finalLanguage = savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en') 
-                ? savedLanguage 
-                : this.normalizeLanguage(userLanguage);
+            // Язык из БД — источник истины; localStorage мог быть записан ошибочно на первом логине (JWT без language).
+            const serverHasLanguage =
+                apiUser.language != null && String(apiUser.language).trim() !== '';
+            const finalLanguage = serverHasLanguage
+                ? this.normalizeLanguage(apiUser.language)
+                : savedLanguage && (savedLanguage === 'ru' || savedLanguage === 'en')
+                  ? savedLanguage
+                  : this.normalizeLanguage(this._language);
             
             runInAction(() => {
                 this.setLanguage(finalLanguage);
@@ -347,17 +386,27 @@ export default class UserStore {
         this._showOnboarding = show;
     }
 
-    setOnboardingInitialStep(step: 'welcome' | 'select') {
+    setOnboardingInitialStep(step: 'welcome' | 'select' | 'missions') {
         this._onboardingInitialStep = step;
     }
 
     openHistorySelection() {
         runInAction(() => {
-            this._onboardingInitialStep = 'select';
+            this._onboardingInitialStep = 'missions';
             this._showOnboarding = true;
             this._isHistorySelectionFromHeader = true;
         });
         trackEvent("history_selection_opened", { source: "header" });
+    }
+
+    /** Профиль: после выбора истории — тот же полноэкранный MissionPath, что из шапки */
+    openMissionPathFromProfile() {
+        runInAction(() => {
+            this._onboardingInitialStep = 'missions';
+            this._showOnboarding = true;
+            this._isHistorySelectionFromHeader = true;
+        });
+        trackEvent("history_selection_opened", { source: "profile" });
     }
 
     get isHistorySelectionFromHeader() {

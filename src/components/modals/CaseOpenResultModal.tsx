@@ -6,7 +6,7 @@ import Button from '@/components/ui/button';
 import { useTranslate } from '@/utils/useTranslate';
 import type { OpenCaseResponse } from '@/http/caseAPI';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 
 interface CaseOpenResultModalProps {
   isOpen: boolean;
@@ -100,7 +100,7 @@ const CaseOpenResultModal: React.FC<CaseOpenResultModalProps> = observer(({
           <>
             <Button
               onClick={onClose}
-              variant="default"
+              variant={isReward ? "default" : "gradient"}
               size="lg"
               className="w-full"
               icon="fas fa-check"

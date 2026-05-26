@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
 import type { Reward, UserReward } from '@/http/rewardAPI';
@@ -11,6 +11,7 @@ import RewardDetailModal from '../modals/RewardDetailModal';
 import WithdrawalResultModal from '../modals/WithdrawalResultModal';
 import CaseDetailModal from '../modals/CaseDetailModal';
 import CasePurchaseModal from '../modals/CasePurchaseModal';
+import TelegramGiftsInfoModal from '../modals/TelegramGiftsInfoModal';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
@@ -38,6 +39,7 @@ const RewardsContainer: React.FC = observer(() => {
     const [caseDetailOpen, setCaseDetailOpen] = useState(false);
     const [purchasedBox, setPurchasedBox] = useState<CaseBox | null>(null);
     const [purchasingBoxId, setPurchasingBoxId] = useState<number | null>(null);
+    const [telegramGiftsModalOpen, setTelegramGiftsModalOpen] = useState(false);
 
     useEffect(() => {
         // Loot screen view (custom product event)
@@ -79,6 +81,8 @@ const RewardsContainer: React.FC = observer(() => {
             ? reward.availableRewards.map((rewardItem) => ({ rewardItem, userReward: null as UserReward | null }))
             : reward.myPurchases.map((userReward) => ({ rewardItem: userReward.reward, userReward }));
     }, [activeTab, reward.availableRewards, reward.myPurchases]);
+
+    
 
     const casesData: CaseBox[] = useMemo(() => cases.activeCases, [cases.activeCases]);
     const myUnopenedCases = useMemo(() => cases.myUnopenedCases, [cases.myUnopenedCases]);
@@ -304,6 +308,10 @@ const RewardsContainer: React.FC = observer(() => {
                     onOwnedCaseOpen={navigateToCase}
                     onPurchase={handlePurchase}
                     onWithdrawClick={handleWithdrawClickForModal}
+                    onTelegramGiftsInfo={() => {
+                        hapticImpact('soft');
+                        setTelegramGiftsModalOpen(true);
+                    }}
                     getPurchaseState={(rewardItem: Reward) => ({
                         isPurchasing: reward.isRewardPurchasing(rewardItem.id),
                         canAfford: (user.user?.balance || 0) >= rewardItem.price
@@ -401,6 +409,11 @@ const RewardsContainer: React.FC = observer(() => {
                 status={withdrawResult?.status || null}
                 message={withdrawResult?.message}
                 onClose={() => setWithdrawResult(null)}
+            />
+
+            <TelegramGiftsInfoModal
+                isOpen={telegramGiftsModalOpen}
+                onClose={() => setTelegramGiftsModalOpen(false)}
             />
         </div>
     );

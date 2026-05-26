@@ -4,7 +4,7 @@ import 'react-roulette-pro/dist/index.css';
 import { observer } from 'mobx-react-lite';
 
 import type { CaseBox, CaseItem, OpenCaseResponse } from '@/http/caseAPI';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 

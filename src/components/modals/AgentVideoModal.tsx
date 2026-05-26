@@ -16,6 +16,7 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
     const { t } = useTranslate();
     const [videoEnded, setVideoEnded] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         if (isOpen && videoRef.current && video?.url) {
@@ -25,18 +26,39 @@ const AgentVideoModal: React.FC<AgentVideoModalProps> = observer(({ isOpen, vide
                 console.error('Error playing video:', error);
             });
         }
+        // При закрытии паузим, остальное освободится при размонтировании
+        // через AnimatePresence exit.
+        if (!isOpen && videoRef.current) {
+            try {
+                videoRef.current.pause();
+            } catch {
+                // ignore
+            }
+        }
     }, [isOpen, video]);
 
-    const handleVideoEnd = async () => {
+    useEffect(() => {
+        return () => {
+            if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        };
+    }, []);
+
+    const handleVideoEnd = () => {
         setVideoEnded(true);
 
         // Закрываем модальное окно через небольшую задержку после окончания видео
-        setTimeout(() => {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = setTimeout(() => {
+            closeTimeoutRef.current = null;
             onClose();
         }, 100);
     };
 
-    const handleSkip = async () => {
+    const handleSkip = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
         onClose();
     };
 

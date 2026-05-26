@@ -1,3 +1,5 @@
+export const DEFAULT_ONBOARDING_HISTORY = 'starwars';
+
 export const getOnboardingTexts = (language: 'en' | 'ru') => {
     const texts = {
         en: {

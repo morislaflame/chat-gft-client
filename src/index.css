@@ -51,10 +51,10 @@
     --radius: 0.75rem;
 
     /* Reusable gradient borders (use with background + background-origin/clip) */
-    --gradient-border-silver: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+    --gradient-border-silver: linear-gradient(135deg, rgba(255, 255, 255, 0.256), rgba(255,255,255,0.1), rgba(255,255,255,0.1), rgba(255, 255, 255, 0.272));
     --gradient-border-silver-transparent: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0), rgba(255,255,255,0.1));
     
-    --gradient-border-silver-hover: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.25), rgba(255,255,255,0.4));
+    --gradient-border-silver-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.333), rgba(255,255,255,0.1), rgba(255,255,255,0.1), rgba(255, 255, 255, 0.328));
     --gradient-border-silver-muted: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12), rgba(255,255,255,0.25));
     --gradient-border-silver-ghost: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04), rgba(255,255,255,0.08));
     --gradient-border-silver-ghost-hover: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1), rgba(255,255,255,0.2));
@@ -71,6 +71,9 @@
 
     --gradient-accent-color: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
     --gradient-secondary-color: linear-gradient(to right, #eab308, #f97316); 
+    --gradient-artifact-text-color: linear-gradient(135deg, #fbbf24, #f97316, #ec4899);
+    --gradient-artifact-color: linear-gradient(to right bottom, #f97416be, transparent, transparent); 
+
   } 
 
   .dark {
@@ -124,6 +127,10 @@
     background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
   }
 
+  .bg-artifact-gradient {
+    background: var(--gradient-artifact-color);
+  }
+
   .bg-secondary-gradient {
     background: linear-gradient(to right, #eab308, #f97316);
   }
@@ -136,8 +143,26 @@
     -webkit-text-fill-color: transparent;
   }
 
+  /* Artifact-specific text gradient (labels, values, icons) */
+  .text-artifact-gradient {
+    background: var(--gradient-artifact-text-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
   /* Same gradient as bg-user-message, applied to text/icon color (for headers, icons) */
   .text-user-message-gradient {
+    background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ring-user-message-gradient {
+    border: 1px solid #b249f8;
     background: linear-gradient(135deg, #ff1cf7, #b249f8, #b249f8);
     -webkit-background-clip: text;
     background-clip: text;
@@ -347,6 +372,16 @@
     );
     pointer-events: none;
   }
+
+  .agent-message-gradient-2 { 
+    background: linear-gradient(
+      to bottom left,
+      transparent 0%,
+      hsl(0, 0%, 12%) 60%,
+      var(--color-primary-700) 100%
+    );
+    pointer-events: none;
+  }
 }
 
 @keyframes swipeHintLeft {
@@ -389,6 +424,15 @@ body.telegram-mobile .header {
 
 body.telegram-mobile .telegram-padding {
     padding-top: calc(var(--tg-safe-area-inset-top, 45px) + var(--tg-content-safe-area-inset-top, 45px));
+}
+
+/*
+ * Vaul рисует ::after под жест свайпа (background: inherit у панели).
+ * При прозрачном корне и отдельных слоях с фоном в части WebView псевдоэлемент может
+ * закрыть весь контент — при фото-фоне отключаем.
+ */
+[data-vaul-drawer][data-gft-drawer-has-backdrop]::after {
+    display: none;
 }
 
 /* Quest item hover effects */

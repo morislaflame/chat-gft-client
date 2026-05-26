@@ -1,0 +1,74 @@
+import React, { useContext } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Context, type IStoreContext } from '@/store/context';
+import { useTranslate } from '@/utils/useTranslate';
+import { useHapticFeedback } from '@/utils/useHapticFeedback';
+import Modal from '@/components/CoreComponents/Modal';
+import Button from '@/components/ui/button';
+
+const ArtifactAcquireModal: React.FC = observer(() => {
+  const { chat } = useContext(Context) as IStoreContext;
+  const { t, language } = useTranslate();
+  const { hapticImpact, hapticNotification } = useHapticFeedback();
+
+  const action = chat.artifactAction;
+  const isOpen = Boolean(action?.action === 'RECEIVE');
+
+  const name = action?.artifact_name?.trim() || action?.artifact_code || '';
+
+  const descriptionRaw =
+    language === 'en'
+      ? action?.artifact_description_en || action?.artifact_description
+      : action?.artifact_description || action?.artifact_description_en;
+  const description =
+    (descriptionRaw && String(descriptionRaw).trim()) || t('artifactNoDescription');
+
+  const handleClose = () => {
+    hapticImpact('soft');
+    chat.closeArtifactAcquireModal();
+  };
+
+  const handleContinue = () => {
+    hapticNotification('success');
+    chat.closeArtifactAcquireModal();
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      closeAriaLabel={t('close')}
+      title={t('artifactAcquiredTitle')}
+      description={
+        <span className="text-zinc-300">
+          {name ? <span className="font-semibold text-white block mb-1">{name}</span> : null}
+        </span>
+      }
+      footer={
+        <Button
+          onClick={handleContinue}
+          variant="gradient"
+          size="lg"
+          className="w-full"
+          icon="fas fa-check"
+        >
+          {t('artifactAcquiredContinue')}
+        </Button>
+      }
+      contentClassName="pt-2"
+    >
+      {action?.media?.url ? (
+        <div className="rounded-xl overflow-hidden btn-default-silver-border aspect-square max-h-[min(48vh,240px)] mx-auto flex items-center justify-center">
+          <img
+            src={action.media.url}
+            alt=""
+            className="w-full h-full object-contain"
+          />
+        </div>
+      ) : null}
+      <p className="text-zinc-400 text-sm leading-relaxed text-center mt-3">{description}</p>
+    </Modal>
+  );
+});
+
+export default ArtifactAcquireModal;

@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '@/components/ui/button';
 import type { Reward, UserReward } from '@/http/rewardAPI';
+import { getRewardBackdropSrcByPrice } from '@/utils/rewardBackdrop';
 import { Card } from '../ui/card';
 
 type TranslateFn = (key: string) => string;
@@ -78,14 +79,6 @@ const WithdrawalButton: React.FC<WithdrawalButtonProps> = ({ status, isCreating,
     );
 };
 
-function getGradientClassByPrice(price: number): string {
-    if (price < 300) return 'bg-gradient-to-b from-red-500 to-transparent';
-    if (price < 1000) return 'bg-gradient-to-b from-pink-500 to-transparent';
-    if (price < 10000) return 'bg-gradient-to-b from-purple-500 to-transparent';
-    if (price < 50000) return 'bg-gradient-to-b from-blue-500 to-transparent';
-    return 'bg-gradient-to-b from-white to-transparent';
-}
-
 const RewardCard: React.FC<RewardCardProps> = ({
     rewardItem,
     userReward,
@@ -106,7 +99,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
     const previewMimeType = rewardItem.preview?.mimeType ?? '';
     const isPreviewImage = previewUrl && previewMimeType.startsWith('image/');
     const price = rewardItem.price ?? 0;
-    const gradientClass = getGradientClassByPrice(price);
+    const backdropSrc = getRewardBackdropSrcByPrice(price);
 
     return (
         <Card
@@ -114,9 +107,11 @@ const RewardCard: React.FC<RewardCardProps> = ({
             onClick={handleCardClick}
             className="p-4 flex flex-col items-center quest-item hover:bg-primary-700/50 transition cursor-pointer relative overflow-hidden"
         >
-            <div aria-hidden className="pointer-events-none absolute w-full inset-0 rounded-lg">
-                <div
-                    className={`absolute -top-0 -left-0 h-[50%] w-full opacity-20 ${gradientClass}`}
+            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+                <img
+                    src={backdropSrc}
+                    alt=""
+                    className="absolute top-0 left-0 h-[100%] w-full object-cover object-top opacity-20"
                 />
             </div>
             <div className="mb-2 flex items-center justify-center relative w-26 h-26">

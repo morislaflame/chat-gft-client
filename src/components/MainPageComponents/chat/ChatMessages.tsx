@@ -1,21 +1,38 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import MissionCard from './MissionCard';
 import MessageItem from './MessageItem';
 import TypingIndicator from './TypingIndicator';
+import type { ChatRetryPayload, ClientErrorReportPayload } from '@/types/types';
 import type { RefObject } from 'react';
 
+import type { ArtifactUnavailableContext } from '@/components/modals/ArtifactUnavailableModal';
+
 interface ChatMessagesProps {
-  onStartMission: (orderIndex: number) => void;
-  onSelectSuggestion: (text: string) => void;
+  onStartMission: (missionId: number) => void;
+  onOpenArtifactsExplainer?: () => void;
+  onArtifactDisabledClick?: (context: ArtifactUnavailableContext) => void;
+  onSelectSuggestion: (
+    text: string,
+    suggestionId?: string | null,
+    payGemsForSuggestionId?: string | null,
+  ) => void;
+  onRetryLlmFormat?: (payload: ChatRetryPayload) => void;
+  onReloadApp?: () => void;
+  onSubmitErrorReport?: (payload: ClientErrorReportPayload) => Promise<void>;
   messageEndRef: RefObject<HTMLDivElement | null>;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   onStartMission,
+  onOpenArtifactsExplainer,
+  onArtifactDisabledClick,
   onSelectSuggestion,
+  onRetryLlmFormat,
+  onReloadApp,
+  onSubmitErrorReport,
   messageEndRef,
 }) => {
   const { chat } = React.useContext(Context) as IStoreContext;
@@ -25,9 +42,13 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
   const suggestions = chat.suggestions ?? [];
   const avatarUrl = chat.avatar?.url;
 
-  const handleSelectSuggestion = (text: string) => {
+  const handleSelectSuggestion = (
+    text: string,
+    suggestionId?: string | null,
+    payGemsForSuggestionId?: string | null,
+  ) => {
     hapticImpact('soft');
-    onSelectSuggestion(text);
+    onSelectSuggestion(text, suggestionId ?? null, payGemsForSuggestionId ?? null);
   };
 
   const isMobile = document.body.classList.contains('telegram-mobile');
@@ -41,21 +62,32 @@ const ChatMessages: React.FC<ChatMessagesProps> = observer(({
               key={message.id}
               message={message}
               onStartMission={onStartMission}
+              onOpenArtifactsExplainer={onOpenArtifactsExplainer}
             />
           );
         }
 
         const isLastAIMessage = !message.isUser && index === messages.length - 1;
-        const showSuggestions = isLastAIMessage && suggestions.length > 0 && !chat.isTyping;
+        const showSuggestions =
+          isLastAIMessage &&
+          !message.chatErrorKind &&
+          suggestions.length > 0 &&
+          !chat.isTyping;
 
         return (
           <MessageItem
             key={message.id}
             message={message}
             suggestions={suggestions}
+            suggestionsFormatError={chat.suggestionsFormatError}
+            suggestionsFormatErrorReportContext={chat.suggestionsFormatErrorReportContext}
             showSuggestions={showSuggestions}
             avatarUrl={avatarUrl}
+            onArtifactDisabledClick={onArtifactDisabledClick}
             onSelectSuggestion={handleSelectSuggestion}
+            onRetryLlmFormat={onRetryLlmFormat}
+            onReloadApp={onReloadApp}
+            onSubmitErrorReport={onSubmitErrorReport}
           />
         );
       })}

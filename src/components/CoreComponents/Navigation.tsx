@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslate } from '@/utils/useTranslate';
-import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, STORE_ROUTE } from '@/utils/consts';
+import { MAIN_ROUTE, QUESTS_ROUTE, FRIENDS_ROUTE, REWARDS_ROUTE, PROFILE_ROUTE } from '@/utils/consts';
 import { observer } from 'mobx-react-lite';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import Button from '@/components/ui/button';
@@ -19,7 +19,7 @@ const Navigation: React.FC<NavigationProps> = observer(({ activeTab, onTabChange
         { id: 'quests', icon: 'fas fa-tasks', label: t('quests'), route: QUESTS_ROUTE },
         { id: 'friends', icon: 'fas fa-user-friends', label: t('friends'), route: FRIENDS_ROUTE },
         { id: 'rewards', icon: 'fas fa-gift', label: t('loot'), route: REWARDS_ROUTE },
-        { id: 'store', icon: 'fas fa-store', label: t('store'), route: STORE_ROUTE }
+        { id: 'profile', icon: 'fas fa-user', label: t('profile'), route: PROFILE_ROUTE }
     ];
 
     const handleTabClick = (tabId: string) => {

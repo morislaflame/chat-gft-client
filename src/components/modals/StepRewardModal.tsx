@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
@@ -45,6 +45,10 @@ const StepRewardModal: React.FC = observer(() => {
     const sourceEl = gemSourceRef.current;
     const targetEl = document.querySelector('[data-gems-target]');
     if (!sourceEl || !targetEl) {
+      if (stepReward?.rewardGems != null && stepReward.rewardGems > 0) {
+        chat.setPendingGemsOnLand(stepReward.rewardGems);
+        chat.onGemsLanded();
+      }
       handleClose();
       return;
     }

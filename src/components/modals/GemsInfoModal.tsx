@@ -62,4 +62,3 @@ const GemsInfoModal: React.FC<GemsInfoModalProps> = observer(({ isOpen, onClose 
 });
 
 export default GemsInfoModal;
-

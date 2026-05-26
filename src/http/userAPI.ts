@@ -1,6 +1,6 @@
 import { $authHost, $host } from "./index";
 import { jwtDecode } from "jwt-decode";
-import type { Reward } from '@/types/types';
+import type { Reward, ProfileInventoryResponse } from '@/types/types';
 
 export const telegramAuth = async (initData: string) => {
     const { data } = await $host.post('api/user/auth/telegram', { initData });
@@ -36,6 +36,11 @@ export const check = async () => {
 
 export const fetchMyInfo = async () => {
     const { data } = await $authHost.get('api/user/me');
+    return data;
+};
+
+export const getProfileInventory = async (): Promise<ProfileInventoryResponse> => {
+    const { data } = await $authHost.get('api/user/me/profile-inventory');
     return data;
 };
 
@@ -83,12 +88,54 @@ export const setOnboarding = async (completed: boolean): Promise<void> => {
     await $authHost.post('api/user/me/onboarding', { seen: completed });
 };
 
-export const setSelectedHistoryName = async (historyName: string): Promise<{ success: boolean; selectedHistoryName: string }> => {
+export const setSelectedHistoryName = async (
+    historyName: string,
+): Promise<{ success: boolean; selectedHistoryName: string; selectedChatMissionId?: number | null }> => {
     const { data } = await $authHost.post('api/user/me/history', { historyName });
+    return data;
+};
+
+export const setSelectedChatMission = async (
+    missionId: number | null,
+): Promise<{ success: boolean; selectedChatMissionId: number | null }> => {
+    const { data } = await $authHost.post('api/user/me/selected-chat-mission', { missionId });
     return data;
 };
 
 export const markVideoAsSeen = async (historyName: string): Promise<{ success: boolean; hasVideoSeen: boolean }> => {
     const { data } = await $authHost.post('api/user/mark-video-seen', { historyName });
+    return data;
+};
+
+export type OpenStoryLevelResponse = {
+    success: boolean;
+    openedLevel: number;
+    unlockedLevels: number[];
+    alreadyOpen?: boolean;
+    owned: Record<string, number>;
+};
+
+export const openStoryLevel = async (
+    historyName: string,
+    level: number,
+): Promise<OpenStoryLevelResponse> => {
+    const { data } = await $authHost.post('api/user/me/open-story-level', { historyName, level });
+    return data;
+};
+
+export type OpenStoryLevelReadiness = {
+    canOpen: boolean;
+    alreadyOpen: boolean;
+    openLevel: number;
+    completedLevel: number;
+};
+
+export const getOpenStoryLevelReadiness = async (
+    historyName: string,
+    level: number,
+): Promise<OpenStoryLevelReadiness> => {
+    const { data } = await $authHost.get('api/user/me/open-story-level/readiness', {
+        params: { historyName, level },
+    });
     return data;
 };

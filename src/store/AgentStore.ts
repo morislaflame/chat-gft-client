@@ -85,6 +85,9 @@ export default class AgentStore {
             if (this._userStore && response.selectedHistoryName) {
                 runInAction(() => {
                     this._userStore!.setSelectedHistoryName(response.selectedHistoryName);
+                    this._userStore!.setSelectedChatMissionId(
+                        response.selectedChatMissionId ?? null,
+                    );
                 });
                 setUserProperties({ selected_history: response.selectedHistoryName });
                 trackEvent("history_selected", { history_name: response.selectedHistoryName });

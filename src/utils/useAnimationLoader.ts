@@ -34,6 +34,7 @@ export const useAnimationLoader = <T>(
     .join('|');
 
   useEffect(() => {
+    const controller = new AbortController();
     let isCancelled = false;
 
     const loadAnimations = async () => {
@@ -47,14 +48,13 @@ export const useAnimationLoader = <T>(
         const mediaFile = getMediaFile(item);
         if (mediaFile && mediaFile.mimeType === 'application/json' && !loadedUrls.current.has(mediaFile.url)) {
           try {
-            const response = await fetch(mediaFile.url);
+            const response = await fetch(mediaFile.url, { signal: controller.signal });
             const data = await response.json();
+            if (isCancelled) return;
             loadedUrls.current.add(mediaFile.url);
-            // Обновляем состояние сразу после загрузки каждой анимации
-            if (!isCancelled) {
-              setAnimations(prev => ({ ...prev, [mediaFile.url]: data }));
-            }
+            setAnimations(prev => ({ ...prev, [mediaFile.url]: data }));
           } catch (error) {
+            if ((error as { name?: string })?.name === 'AbortError') return;
             console.error(`Error loading animation for ${mediaFile.url}:`, error);
           }
         }
@@ -71,6 +71,7 @@ export const useAnimationLoader = <T>(
 
     return () => {
       isCancelled = true;
+      controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlsKey, ...deps]);

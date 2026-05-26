@@ -7,6 +7,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { CaseBox } from '@/http/caseAPI';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
+import { getCaseBoxBackdropSrc } from '@/utils/caseBoxBackdrop';
 
 type CaseDetailModalProps = {
   isOpen: boolean;
@@ -46,6 +47,7 @@ const CaseDetailModal: React.FC<CaseDetailModalProps> = observer(({
       isOpen={isOpen}
       onClose={handleClose}
       closeOnOverlayClick={true}
+      backdropImageSrc={box ? getCaseBoxBackdropSrc(title || box.name || '') : undefined}
       title={title}
       description={description}
       // headerIcon={<i className="fa-solid fa-box text-white text-2xl"></i>}

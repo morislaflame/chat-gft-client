@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Button from '@/components/ui/button';
 import { TransitionPanel } from '@/components/ui/transitionPanel';
@@ -23,7 +23,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     const { hapticImpact } = useHapticFeedback();
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(1);
-    const [ref, bounds] = useMeasure();
+    const [panelRef, bounds] = useMeasure();
     
     // Получаем имя пользователя: username, firstName или "Странник"/"Wanderer"
     const getUserName = () => {
@@ -61,8 +61,11 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
     });
 
     const cards = [
-        // Первая карточка - приветствие (прозрачный фон)
-        <div key="welcome" ref={ref} className="flex flex-col justify-between h-full w-full overflow-visible">
+        // Первая карточка - приветствие
+        <div
+            key="welcome"
+            className="flex self-center flex-col justify-between h-fit w-full overflow-visible rounded-[30px] border border-white/15 bg-black/40 backdrop-blur-md p-6"
+        >
             <div className="flex-1 flex justify-center items-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -97,9 +100,17 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
             </motion.div>
         </div>,
         
-        // Вторая карточка - объяснение игры (с блюром)
-        <div key="explanation" ref={ref} className="flex flex-col justify-between gap-4">
-            <div className="flex-1 flex flex-col justify-center backdrop-blur-sm bg-white/5h-full w-full backdrop-blur-sm bg-white/5 rounded-2xl p-6">
+        // Вторая карточка - объяснение игры
+        <div
+            key="explanation"
+            className="flex flex-col justify-between gap-4 h-fit w-full rounded-[30px] border border-white/15 bg-black/40 backdrop-blur-md p-6"
+        >
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex-1 flex flex-col justify-center"
+            >
                 <h2 className="text-2xl font-bold text-white mb-4 text-center">
                     {t('gameExplanationTitle')}
                 </h2>
@@ -120,8 +131,12 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                         <span className="font-bold text-lg">4.</span>
                         <p className="text-white/90 text-md">{t('gameExplanation4')}</p>
                     </div>
+                    <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg">5.</span>
+                        <p className="text-white/90 text-md">{t('gameExplanation5')}</p>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Join Adventure Button - показывается только на второй карточке */}
             <motion.div
@@ -146,7 +161,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
         <div className="flex flex-col justify-center h-full p-6 pb-8">
             <div className="relative flex flex-col justify-center h-full">
                 <div
-                    className="relative overflow-hidden select-none flex-1 flex items-center h-full justify-center"
+                    ref={panelRef}
+                    className="relative overflow-hidden select-none flex-1 flex h-full w-full items-center justify-center"
                     style={{
                         userSelect: 'none',
                         WebkitUserSelect: 'none',
@@ -159,19 +175,26 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = observer(({
                     onMouseUp={swipeHandlers.onMouseUp}
                 >
                     <TransitionPanel
+                        className="w-full h-full"
                         activeIndex={activeIndex}
                         variants={{
                             enter: (direction) => ({
                                 x: direction > 0 ? 300 : -300,
                                 opacity: 0,
+                                width: '100%',
                                 height: bounds.height > 0 ? bounds.height : 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
                                 position: 'initial',
                             }),
                             center: {
                                 zIndex: 1,
                                 x: 0,
                                 opacity: 1,
+                                width: '100%',
                                 height: bounds.height > 0 ? bounds.height : 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
                             },
                             exit: (direction) => ({
                                 zIndex: 0,

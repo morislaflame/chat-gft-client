@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useNavigate } from 'react-router-dom';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import { QUESTS_ROUTE, STORE_ROUTE } from '@/utils/consts';

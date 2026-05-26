@@ -1,14 +1,87 @@
-import React, { useContext, useRef, useState, useCallback } from 'react';
+import React, { useContext, useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
 import LazyMediaRenderer from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import { FireworksBackground } from '@/components/ui/backgrounds/fireworks-background';
+import FormattedText from '@/components/MainPageComponents/FormattedText';
+import type { OpenStoryLevelPrompt } from '@/components/modals/OpenStoryLevelModal';
+
+/** Порог «доскроллили до низа» (px) */
+const SCROLL_AT_BOTTOM_PX = 8;
+
+type ScrollableFormattedTextProps = {
+  text: string;
+};
+
+/**
+ * Текст с ограничением высоты; внизу — плавающая стрелка, если есть скролл и не до конца.
+ */
+function ScrollableFormattedText({ text }: ScrollableFormattedTextProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  const syncScrollHint = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      setMoreBelow(false);
+      return;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const hasOverflow = scrollHeight > clientHeight + 1;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_AT_BOTTOM_PX;
+    setMoreBelow(hasOverflow && !atBottom);
+  }, []);
+
+  useLayoutEffect(() => {
+    syncScrollHint();
+  }, [text, syncScrollHint]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      syncScrollHint();
+    });
+    ro.observe(el);
+    window.addEventListener('resize', syncScrollHint);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', syncScrollHint);
+    };
+  }, [syncScrollHint]);
+
+  return (
+    <div className="relative text-md">
+      <div
+        ref={scrollRef}
+        onScroll={syncScrollHint}
+        className="max-h-[min(40vh,14rem)] overflow-y-auto hide-scrollbar ios-scroll"
+      >
+        <FormattedText text={text} />
+      </div>
+      {moreBelow ? (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center rounded-b-xl pb-1.5 pt-10"
+          aria-hidden
+        >
+          <motion.span
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur-md text-zinc-100 shadow-md ring-1 ring-white/15"
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.25, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <i className="fa-solid fa-chevron-down text-xs opacity-90" />
+          </motion.span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 const GEM_POP_DURATION = 0.45;
 const GEM_FLY_DURATION = 1;
@@ -30,13 +103,33 @@ function bezier2(A: number, P: number, B: number, t: number): number {
 
 type FlyingGemCoords = { fromX: number; fromY: number; toX: number; toY: number } | null;
 
+type NextMissionRef = {
+  id: number;
+  title: string;
+  titleEn?: string | null;
+  orderIndex: number;
+} | null;
+
 const StageRewardModal: React.FC = observer(() => {
   const { chat, user } = useContext(Context) as IStoreContext;
+  const hasPendingCompanion = () => chat.pendingCompanion !== null;
+  const hasPendingFirstMissionArtifact = () => chat.pendingFirstMissionArtifact !== null;
+
+  const openPendingMissionRewardModals = () => {
+    if (hasPendingFirstMissionArtifact()) {
+      chat.openFirstMissionArtifact();
+    } else if (hasPendingCompanion()) {
+      chat.openCompanion();
+    }
+  };
   const { t } = useTranslate();
   const stageReward = chat.stageReward;
   const isOpen = stageReward?.isOpen || false;
   const language = user.user?.language || 'ru';
+  const avatarUrl = chat.avatar?.url;
   const gemSourceRef = useRef<HTMLDivElement>(null);
+  const pendingAfterGemFlight = useRef<NextMissionRef>(null);
+  const pendingOpenStoryLevelAfterGems = useRef<OpenStoryLevelPrompt | null>(null);
   const [flyingGem, setFlyingGem] = useState<FlyingGemCoords>(null);
   const [fireworksPlaying, setFireworksPlaying] = useState(false);
 
@@ -53,15 +146,11 @@ const StageRewardModal: React.FC = observer(() => {
     chat.closeStageReward();
   };
 
-  const handleContinueClick = () => {
+  const startGemFlight = useCallback(() => {
     const sourceEl = gemSourceRef.current;
     const targetEl = document.querySelector('[data-gems-target]');
     if (!sourceEl || !targetEl) {
-      handleClose();
-      return;
-    }
-    if (stageReward?.rewardAmount != null) {
-      chat.setPendingGemsOnLand(stageReward.rewardAmount);
+      return false;
     }
     const fromRect = sourceEl.getBoundingClientRect();
     const toRect = targetEl.getBoundingClientRect();
@@ -71,7 +160,65 @@ const StageRewardModal: React.FC = observer(() => {
     const toY = toRect.top + toRect.height / 2;
     setFlyingGem({ fromX, fromY, toX, toY });
     setFireworksPlaying(true);
-    // Close modal immediately so drawer overlay (dark bg) is removed during fly
+    return true;
+  }, []);
+
+  const buildOpenStoryLevelPrompt = (): OpenStoryLevelPrompt | null => {
+    const gate = stageReward?.artifactsGate;
+    if (gate?.completedLevel == null || !Number.isFinite(Number(gate.completedLevel))) {
+      return null;
+    }
+    const completedLevel = Number(gate.completedLevel);
+    const openLevel =
+      gate.openLevel != null && Number.isFinite(Number(gate.openLevel))
+        ? Number(gate.openLevel)
+        : completedLevel + 1;
+    return {
+      completedLevel,
+      openLevel,
+      canOpen: gate.canOpen === true,
+    };
+  };
+
+  const handleContinueClick = () => {
+    pendingAfterGemFlight.current = null;
+    pendingOpenStoryLevelAfterGems.current = null;
+    const ra = stageReward?.rewardAmount;
+    if (ra != null && ra > 0) {
+      chat.setPendingGemsOnLand(ra);
+      const ok = startGemFlight();
+      if (!ok) {
+        chat.onGemsLanded();
+        handleClose();
+        openPendingMissionRewardModals();
+        return;
+      }
+      handleClose();
+      return;
+    }
+    handleClose();
+    openPendingMissionRewardModals();
+  };
+
+  const handleNextMissionClick = () => {
+    pendingOpenStoryLevelAfterGems.current = null;
+    const nm = stageReward?.nextMission;
+    if (!nm) return;
+    const ra = stageReward?.rewardAmount;
+    if (ra != null && ra > 0) {
+      chat.setPendingGemsOnLand(ra);
+      pendingAfterGemFlight.current = nm;
+      const ok = startGemFlight();
+      if (!ok) {
+        chat.onGemsLanded();
+        void chat.startNextMissionAfterReward(nm);
+        handleClose();
+        return;
+      }
+      handleClose();
+      return;
+    }
+    void chat.startNextMissionAfterReward(nm);
     handleClose();
   };
 
@@ -80,13 +227,57 @@ const StageRewardModal: React.FC = observer(() => {
       document.dispatchEvent(new CustomEvent('gems-button-land'));
     }
     setFlyingGem(null);
+    const nm = pendingAfterGemFlight.current;
+    pendingAfterGemFlight.current = null;
+    if (nm) {
+      void chat.startNextMissionAfterReward(nm);
+    }
+    const prompt = pendingOpenStoryLevelAfterGems.current;
+    pendingOpenStoryLevelAfterGems.current = null;
+    if (prompt) {
+      chat.openOpenStoryLevelPrompt(prompt);
+    }
   };
 
   const onFireworksComplete = useCallback(() => {
     setFireworksPlaying(false);
-  }, []);
+    openPendingMissionRewardModals();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat]);
 
-  // const missionNumberText = stageReward ? `${t('stageCompletedMissionPrefix')} ${stageReward.stageNumber}` : '';
+  const hasNextMission = !!(stageReward?.nextMission && stageReward.nextMission.id);
+  const hasArtifactsGate = buildOpenStoryLevelPrompt() != null;
+  const openStoryLevelOnly = hasArtifactsGate && !hasNextMission;
+  const showAdvanceMissionButton = hasNextMission || hasArtifactsGate;
+
+  const handleAdvanceMissionClick = () => {
+    if (openStoryLevelOnly) {
+      pendingAfterGemFlight.current = null;
+      const prompt = buildOpenStoryLevelPrompt();
+      if (!prompt) return;
+      const ra = stageReward?.rewardAmount;
+      if (ra != null && ra > 0) {
+        chat.setPendingGemsOnLand(ra);
+        pendingOpenStoryLevelAfterGems.current = prompt;
+        const ok = startGemFlight();
+        if (!ok) {
+          chat.onGemsLanded();
+          chat.closeStageReward();
+          chat.openOpenStoryLevelPrompt(prompt);
+          return;
+        }
+        handleClose();
+        return;
+      }
+      chat.closeStageReward();
+      chat.openOpenStoryLevelPrompt(prompt);
+      return;
+    }
+    handleNextMissionClick();
+  };
+
+  const showGems =
+    stageReward?.rewardAmount != null && Number(stageReward.rewardAmount) > 0;
 
   return (
     <>
@@ -97,27 +288,76 @@ const StageRewardModal: React.FC = observer(() => {
       swipeToClose={false}
       hideCloseButton
       title={t('stageCompleted')}
-      description={t('stageRewardGemsHint')}
+      description={showGems ? t('stageRewardGemsHint') : t('stageReplayRewardHint')}
       headerIcon={<i className="fa-solid fa-trophy text-white text-2xl"></i>}
       headerIconContainerClassName="bg-user-message"
       footer={
         stageReward ? (
-          <Button
-            onClick={handleContinueClick}
-            variant="gradient"
-            size="lg"
-            className="w-full"
-            icon="fa-solid fa-check"
-          >
-            {t('continue')}
-          </Button>
+          <div className="flex flex-col gap-2 w-full">
+            {showAdvanceMissionButton ? (
+              <Button
+                onClick={handleAdvanceMissionClick}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                icon={openStoryLevelOnly ? 'fa-solid fa-door-open' : 'fa-solid fa-arrow-right'}
+              >
+                {openStoryLevelOnly
+                  ? t('openStoryLevelConfirmButton').replace(
+                      '{level}',
+                      String(buildOpenStoryLevelPrompt()?.openLevel ?? ''),
+                    )
+                  : t('nextMission')}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleContinueClick}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                icon="fa-solid fa-check"
+              >
+                {t('continue')}
+              </Button>
+            )}
+          </div>
         ) : null
       }
     >
       {stageReward ? (
-        <div className="px-4">
+        <div className="px-4 flex flex-col gap-4">
+          {stageReward.lastLlmReply ? (
+            <div className="message-container flex items-start">
+              <div className="flex-1">
+                <div className="only-silver-border rounded-xl rounded-tl-none overflow-hidden px-4 py-3 min-h-[4rem] relative">
+                  <div
+                    className="absolute inset-0 bg-no-repeat bg-[length:20rem_20rem] bg-[position:top_-5rem_right_-5rem] rounded-xl rounded-tl-none opacity-20"
+                    style={{
+                      backgroundImage: avatarUrl ? `url(${avatarUrl})` : undefined,
+                    }}
+                    aria-hidden
+                  />
+                  {!avatarUrl && (
+                    <div
+                      className="absolute top-3 right-3 w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center opacity-20"
+                      aria-hidden
+                    >
+                      <i className="fas fa-mask text-lg" />
+                    </div>
+                  )}
+                  <div
+                    className="absolute inset-0 rounded-xl rounded-tl-none agent-message-gradient-2"
+                    aria-hidden
+                  />
+                  <div className="float-right w-20 h-20 shrink-0 ml-2 mb-1" aria-hidden />
+                  <ScrollableFormattedText text={stageReward.lastLlmReply} />
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           {stageReward.rewardCase ? (
-            <div className="flex flex-col items-center gap-3 mb-3">
+            <div className="flex flex-col items-center gap-3">
               {(() => {
                 const c = stageReward.rewardCase;
                 const title = language === 'en' ? (c.nameEn || c.name) : c.name;
@@ -145,15 +385,19 @@ const StageRewardModal: React.FC = observer(() => {
             </div>
           ) : null}
 
-          <div
-            ref={gemSourceRef}
-            className="flex items-center justify-center gap-2"
-          >
-            <span className="text-4xl font-bold text-white">
-              +{stageReward.rewardAmount}
-            </span>
-            <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
-          </div>
+          {showGems ? (
+            <div
+              ref={gemSourceRef}
+              className="flex items-center justify-center gap-2 mt-4"
+            >
+              <span className="text-4xl font-bold text-white">
+                +{stageReward.rewardAmount}
+              </span>
+              <i className="fa-solid fa-gem text-secondary-gradient text-4xl"></i>
+            </div>
+          ) : (
+            <div ref={gemSourceRef} className="h-1 w-1 opacity-0" aria-hidden />
+          )}
         </div>
       ) : null}
     </Modal>
@@ -258,4 +502,3 @@ const StageRewardModal: React.FC = observer(() => {
 });
 
 export default StageRewardModal;
-

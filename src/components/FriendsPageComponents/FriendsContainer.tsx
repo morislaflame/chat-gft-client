@@ -1,6 +1,6 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTelegramApp } from '@/utils/useTelegramApp';
 import { useTranslate } from '@/utils/useTranslate';
 import type { Bonus } from '@/types/types';
@@ -23,6 +23,12 @@ const FriendsContainer: React.FC = observer(() => {
     const { t } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [isCopied, setIsCopied] = useState(false);
+    const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => {
+        return () => {
+            if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+        };
+    }, []);
     const [isEditingRefCode, setIsEditingRefCode] = useState(false);
     const [refCodeDraft, setRefCodeDraft] = useState('');
     const [refCodeError, setRefCodeError] = useState<string | null>(null);
@@ -46,8 +52,10 @@ const FriendsContainer: React.FC = observer(() => {
             hapticNotification('success');
             setIsCopied(true);
             // Возвращаем к исходному состоянию через 2 секунды
-            setTimeout(() => {
+            if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+            copyTimeoutRef.current = setTimeout(() => {
                 setIsCopied(false);
+                copyTimeoutRef.current = null;
             }, 2000);
         } catch (error) {
             console.error('Failed to copy:', error);

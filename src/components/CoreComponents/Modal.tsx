@@ -37,6 +37,11 @@ interface ModalProps {
   hideCloseButton?: boolean;
   closeDisabled?: boolean;
   closeAriaLabel?: string;
+
+  /** Фон внутри панели модалки (под заголовком/контентом), поверх полупрозрачного blur-подложки панели */
+  backdropImageSrc?: string;
+  backdropImageAlt?: string;
+  backdropImageClassName?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -57,6 +62,9 @@ const Modal: React.FC<ModalProps> = ({
   hideCloseButton = false,
   closeDisabled = false,
   closeAriaLabel = 'Close',
+  backdropImageSrc,
+  backdropImageAlt = '',
+  backdropImageClassName,
 }) => {
   if (typeof document === 'undefined') return null;
 
@@ -71,6 +79,8 @@ const Modal: React.FC<ModalProps> = ({
     : { style: { pointerEvents: 'none' as const } };
 
   const hasHeader = !!(title || description || headerIcon || (!hideCloseButton && !closeDisabled) || (!hideCloseButton && closeDisabled));
+
+  const isMobile = document.body.classList.contains('telegram-mobile');
 
   return (
     <Drawer
@@ -87,6 +97,9 @@ const Modal: React.FC<ModalProps> = ({
       <DrawerContent
         overlayClassName={overlayClassName}
         overlayProps={overlayProps}
+        backdropImageSrc={backdropImageSrc}
+        backdropImageAlt={backdropImageAlt}
+        backdropImageClassName={backdropImageClassName}
         className={cn('max-h-[100vh] overflow-hidden', className)}
       >
         {!hideCloseButton ? (
@@ -94,7 +107,7 @@ const Modal: React.FC<ModalProps> = ({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="w-8 h-8 min-w-8 rounded-full absolute top-0 right-0"
+                      className="w-8 h-8 min-w-8 rounded-full absolute top-4 right-4"
                       aria-label={closeAriaLabel}
                       disabled
                       icon="fas fa-times"
@@ -104,14 +117,14 @@ const Modal: React.FC<ModalProps> = ({
                       <Button
                         variant="nav"
                         size="icon"
-                        className="w-8 h-8 min-w-8 rounded-full absolute top-2 right-2 text-white/50"
+                        className="w-8 h-8 min-w-8 rounded-full absolute top-4 right-4 text-white/50"
                         aria-label={closeAriaLabel}
                         icon="fas fa-times"
                       />
                     </DrawerClose>
                   )
                 ) : null}
-        <div className="mx-auto w-full max-w-md h-full flex flex-col">
+        <div className="mx-auto flex w-full max-w-md min-h-0 flex-col">
           {hasHeader ? (
             <motion.div
               className="px-4 pb-4"
@@ -151,7 +164,7 @@ const Modal: React.FC<ModalProps> = ({
 
           {children && 
           <motion.div
-            className={cn('flex-1 overflow-y-auto px-4 pb-4 pt-4 ios-scroll', contentClassName)}
+            className={cn('flex-1 overflow-y-auto px-4 pb-4 pt-4 ios-scroll ', contentClassName)}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: 0.3 }}
@@ -166,7 +179,7 @@ const Modal: React.FC<ModalProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.4 }}
             >
-              <DrawerFooter className={cn('pb-4', footerClassName)}>
+              <DrawerFooter className={cn('pb-4', isMobile ? 'pb-8 pt-4' : 'pb-4 pt-4', footerClassName)}>
                 {footer}
               </DrawerFooter>
             </motion.div>

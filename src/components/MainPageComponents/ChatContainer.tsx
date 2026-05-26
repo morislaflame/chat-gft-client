@@ -1,50 +1,70 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Context, type IStoreContext } from '@/store/StoreProvider';
+import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import LoadingIndicator from '../CoreComponents/LoadingIndicator';
-import Button from '@/components/ui/button';
 import AgentVideoModal from '../modals/AgentVideoModal';
 import MissionVideoModal from '../modals/MissionVideoModal';
+import ArtifactUseConfirmModal from '../modals/ArtifactUseConfirmModal';
+import ArtifactUnavailableModal, {
+    type ArtifactUnavailableContext,
+} from '../modals/ArtifactUnavailableModal';
+import ArtifactsExplainerModal from '../modals/ArtifactsExplainerModal';
 import type { MediaFile } from '@/types/types';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import { trackEvent } from '@/utils/analytics';
 import ChatMessages from './chat/ChatMessages';
-import GemsCaseProgress from './chat/GemsCaseProgress';
+import MissionStepGoalBar from './chat/MissionStepGoalBar';
+import MissionDynamicProgress from './chat/MissionDynamicProgress';
+import SomethingWentWrongPage from '../CoreComponents/SomethingWentWrongPage';
 
 const ChatContainer: React.FC = observer(() => {
     const { chat, user } = useContext(Context) as IStoreContext;
-    const { t, language } = useTranslate();
+    const { language } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
-    const [inputValue, setInputValue] = useState('');
-    // state for mission expansion is now managed inside MissionProgress
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [showMissionVideoModal, setShowMissionVideoModal] = useState(false);
-    const [currentMissionVideo, setCurrentMissionVideo] = useState<{ video: MediaFile; mission: string | null } | null>(null);
+    const [currentMissionVideo, setCurrentMissionVideo] = useState<{
+        video: MediaFile;
+        mission: string | null;
+        beginReplay?: boolean;
+    } | null>(null);
     const [lastMissionCompleted, setLastMissionCompleted] = useState<{ mission: string; stage: number } | null>(null);
+    const [artifactUsePending, setArtifactUsePending] = useState<{
+        text: string;
+        suggestionId: string | null;
+        payGemsForSuggestionId: string | null;
+    } | null>(null);
+    const [artifactUnavailableContext, setArtifactUnavailableContext] =
+        useState<ArtifactUnavailableContext | null>(null);
+    const [artifactsExplainerOpen, setArtifactsExplainerOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const hasScrolledToBottomRef = useRef(false);
 
-    // Загружаем историю только при монтировании или при изменении выбранной истории
+    // Загружаем историю при смене выбранной истории (смена миссии — через loadChatHistory в store)
     useEffect(() => {
         chat.loadChatHistory();
     }, [chat, user.user?.selectedHistoryName]);
 
-    // Когда гем прилетает в хедер — обновляем баланс (temp) и запускаем анимацию прогресс-бара
-    useEffect(() => {
-        const onGemsLand = () => chat.onGemsLanded();
-        document.addEventListener('gems-button-land', onGemsLand);
-        return () => document.removeEventListener('gems-button-land', onGemsLand);
-    }, [chat]);
-
-    const handleSendMessage = async (message: string): Promise<boolean> => {
+    const handleSendMessage = async (
+        message: string,
+        suggestionId?: string | null,
+        payGemsForSuggestionId?: string | null,
+        beginReplay?: boolean,
+    ): Promise<boolean> => {
         if (user.energy <= 0) {
             chat.setInsufficientEnergy(true);
             return false;
         }
 
-        const response = await chat.sendMessage(message);
+        const response = await chat.sendMessage(
+            message,
+            undefined,
+            suggestionId ?? null,
+            payGemsForSuggestionId ?? null,
+            beginReplay ? { beginReplay: true } : undefined,
+        );
         // Проверяем, завершена ли миссия
         if (response && response.missionCompleted && response.mission) {
             setLastMissionCompleted({
@@ -55,30 +75,39 @@ const ChatContainer: React.FC = observer(() => {
         return true;
     };
 
-    const handleStartMission = (orderIndex: number) => {
+    const handleStartMission = (missionId: number) => {
         hapticImpact('soft');
         const storyId = user.user?.selectedHistoryName || 'unknown';
-        const mission = chat.missions.find((m) => m.orderIndex === orderIndex) || null;
-        const missionId = mission?.id ?? null;
+        const mission = chat.missions.find((m) => m.id === missionId) || null;
+        const progress = chat.missionProgressFor(missionId);
+        const beginReplay = progress?.status === 'completed';
+        const orderIndex = mission?.orderIndex ?? null;
 
-        trackEvent('mission_start_click', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
+        trackEvent('mission_start_click', {
+            order_index: orderIndex,
+            mission_id: missionId,
+            story_id: storyId,
+        });
         trackEvent('mission_start', { story_id: storyId, mission_id: missionId });
-        if (missionId !== null) {
-            chat.setMissionStart(missionId);
+        if (!chat.canSelectMission(missionId)) {
+            return;
         }
-        chat.markMissionHasMessagesByOrder(orderIndex);
-        const missionVideo = chat.getMissionVideoByOrderIndex(orderIndex);
+        chat.primeMissionThread(missionId);
+        chat.setMissionStart(missionId);
+
+        chat.markMissionHasMessagesByMissionId(missionId);
+        const missionVideo = chat.getMissionVideoByMissionId(missionId);
         
         if (missionVideo) {
             trackEvent('mission_video_open', { order_index: orderIndex, mission_id: missionId, story_id: storyId });
             setCurrentMissionVideo({
                 video: missionVideo,
-                mission: chat.mission
+                mission: chat.mission,
+                beginReplay,
             });
             setShowMissionVideoModal(true);
         } else {
-            console.log('No mission video found, sending start message directly');
-            void handleSendMessage(language === 'en' ? 'start' : 'старт');
+            void handleSendMessage(language === 'en' ? 'start' : 'старт', null, null, beginReplay);
         }
     };
 
@@ -87,7 +116,12 @@ const ChatContainer: React.FC = observer(() => {
         trackEvent('mission_video_close', { video_id: currentMissionVideo?.video?.id ?? null });
         setShowMissionVideoModal(false);
         if (currentMissionVideo) {
-            void handleSendMessage(language === 'en' ? 'start' : 'старт');
+            void handleSendMessage(
+                language === 'en' ? 'start' : 'старт',
+                null,
+                null,
+                currentMissionVideo.beginReplay === true,
+            );
             setCurrentMissionVideo(null);
         }
         // Очищаем lastMissionCompleted после показа видео новой миссии
@@ -111,25 +145,37 @@ const ChatContainer: React.FC = observer(() => {
         }
     }, [chat.loading, chat.messages.length]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const trimmed = inputValue.trim();
-        if (!trimmed) return;
-
-        handleSendMessage(trimmed).then((sent) => {
-            if (sent) {
-                hapticImpact('soft');
-                setInputValue('');
-            }
-        });
-    };
-
-    const handleSelectSuggestion = (text: string) => {
+    const handleSelectSuggestion = (
+        text: string,
+        suggestionId?: string | null,
+        payGemsForSuggestionId?: string | null,
+    ) => {
         const trimmed = text.trim();
         if (!trimmed) return;
 
-        trackEvent('chat_suggestion_click', { length: trimmed.length });
-        handleSendMessage(trimmed).then((sent) => {
+        const sid = suggestionId ?? '';
+        const meta = chat.suggestions?.find((m) => m.id === sid);
+        if (
+            meta?.artifact_action === true &&
+            meta?.artifact_action_type === 'USE'
+        ) {
+            setArtifactUsePending({
+                text: trimmed,
+                suggestionId: sid || null,
+                payGemsForSuggestionId: payGemsForSuggestionId ?? null,
+            });
+            return;
+        }
+
+        trackEvent('chat_suggestion_click', {
+            length: trimmed.length,
+            payGems: !!payGemsForSuggestionId,
+        });
+        handleSendMessage(
+            trimmed,
+            suggestionId ?? null,
+            payGemsForSuggestionId ?? null,
+        ).then((sent) => {
             if (sent) {
                 hapticImpact('soft');
             }
@@ -141,7 +187,20 @@ const ChatContainer: React.FC = observer(() => {
         return <LoadingIndicator />;
     }
 
-    
+    if (chat.historyLoadFailed) {
+        return (
+            <SomethingWentWrongPage
+                onRetry={() => {
+                    chat.clearHistoryLoadError();
+                    void chat.loadChatHistory(true);
+                }}
+            />
+        );
+    }
+
+    /** Реальные сообщения треда (не синтетическая карточка миссии); локальные user/ai могут без missionId */
+    const hasMissionChatMessages = chat.messages.some((m) => !m.isMissionCard);
+
     const backgroundUrl = chat.background?.url;
 
     return (
@@ -165,30 +224,41 @@ const ChatContainer: React.FC = observer(() => {
                 ref={chatContainerRef}
                 className="flex-1 flex flex-col min-h-0 h-full w-full overflow-y-auto hide-scrollbar ios-scroll overflow-x-hidden relative z-10"
             >
-                <div className="flex-1 px-4 pb-[150px]">
+                <div className="flex-1 px-4 pb-[164px]">
                     <ChatMessages
                         onStartMission={handleStartMission}
+                        onOpenArtifactsExplainer={() => {
+                            hapticImpact('soft');
+                            setArtifactsExplainerOpen(true);
+                        }}
+                        onArtifactDisabledClick={(context) => {
+                            hapticImpact('soft');
+                            setArtifactUnavailableContext(context);
+                        }}
                         onSelectSuggestion={handleSelectSuggestion}
+                        onRetryLlmFormat={(payload) => {
+                            hapticImpact('soft');
+                            chat.retryAfterLlmFormatError(payload);
+                        }}
+                        onReloadApp={() => {
+                            window.location.reload();
+                        }}
+                        onSubmitErrorReport={(payload) => chat.submitClientErrorReport(payload)}
                         messageEndRef={messagesEndRef}
                     />
                     <div className="w-full p-4 pt-0 flex flex-col gap-3 -mt-2 fixed bottom-22 left-0 right-0 z-20">
-                        <GemsCaseProgress />
-                        <form onSubmit={handleSubmit} className="flex space-x-2">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                placeholder={t('greeting')}
-                                className="flex-1 backdrop-blur-sm btn-default-silver-border-transparent rounded-full border border-primary-600 px-3 py-2 text-sm focus:outline-none focus:border-secondary-500"
-                            />
-                            <Button
-                                type="submit"
-                                variant="gradient"
-                                size="icon"
-                                icon="fas fa-paper-plane"
-                                className="shrink-0 h-10 w-10"
-                            />
-                        </form>
+                        {hasMissionChatMessages ? (
+                            <>
+                                <MissionStepGoalBar
+                                    onGoalBarClick={() => {
+                                        hapticImpact('soft');
+                                        setArtifactsExplainerOpen(true);
+                                    }}
+                                />
+                                <MissionDynamicProgress />
+                            </>
+                        ) : null}
+                        {/* <GemsCaseProgress /> */}
                     </div>
                 </div>
             </div>
@@ -208,6 +278,42 @@ const ChatContainer: React.FC = observer(() => {
                 isOpen={showMissionVideoModal}
                 video={currentMissionVideo?.video || null}
                 onClose={handleMissionVideoClose}
+            />
+
+            <ArtifactUseConfirmModal
+                isOpen={artifactUsePending != null}
+                willPayGems={Boolean(artifactUsePending?.payGemsForSuggestionId)}
+                onClose={() => setArtifactUsePending(null)}
+                onConfirm={() => {
+                    const p = artifactUsePending;
+                    setArtifactUsePending(null);
+                    if (!p) return;
+                    trackEvent('chat_suggestion_click', {
+                        length: p.text.length,
+                        payGems: !!p.payGemsForSuggestionId,
+                        artifact_use_confirmed: true,
+                    });
+                    void handleSendMessage(
+                        p.text,
+                        p.suggestionId,
+                        p.payGemsForSuggestionId,
+                    ).then((sent) => {
+                        if (sent) {
+                            hapticImpact('soft');
+                        }
+                    });
+                }}
+            />
+
+            <ArtifactUnavailableModal
+                isOpen={artifactUnavailableContext != null}
+                context={artifactUnavailableContext}
+                onClose={() => setArtifactUnavailableContext(null)}
+            />
+
+            <ArtifactsExplainerModal
+                isOpen={artifactsExplainerOpen}
+                onClose={() => setArtifactsExplainerOpen(false)}
             />
         </div>
     );

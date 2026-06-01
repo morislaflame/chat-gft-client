@@ -463,8 +463,8 @@ type TranslationType = {
         en: 'Open level {level}?',
     },
     openStoryLevelConfirmDescription: {
-        ru: 'Для доступа к миссиям уровня {level} будут использованы артефакты из предыдущего уровня',
-        en: 'To access level {level} missions, the artifacts from the previous level will be used',
+        ru: 'Для доступа к миссиям уровня {level} будет списано по одному экземпляру каждого артефакта из предыдущего уровня',
+        en: 'To access level {level} missions, one instance of each artifact from the previous level will be consumed',
     },
     openStoryLevelConfirmButton: {
         ru: 'Открыть уровень {level}',

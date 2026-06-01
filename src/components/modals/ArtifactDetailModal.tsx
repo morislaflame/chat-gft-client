@@ -21,6 +21,7 @@ type ArtifactDetailModalProps = {
     ownedQty: number;
     isOwned: boolean;
     levelUnlocked: boolean;
+    unlockedLevels?: number[];
     historyName: string;
     userBalance: number;
     onTradeSuccess: (payload: ArtifactTradeSuccessPayload) => void;
@@ -36,6 +37,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
         ownedQty,
         isOwned,
         levelUnlocked,
+        unlockedLevels,
         historyName,
         userBalance,
         onTradeSuccess,
@@ -79,6 +81,7 @@ const ArtifactDetailModal: React.FC<ArtifactDetailModalProps> = observer(
                                 ownedQty={ownedQty}
                                 userBalance={userBalance}
                                 levelUnlocked={levelUnlocked}
+                                unlockedLevels={unlockedLevels}
                                 layout="modal"
                                 onSuccess={onTradeSuccess}
                                 isOwned={isOwned}

@@ -67,6 +67,19 @@ export function isProfileLevelStoryComplete(
     return isStoryLevelUnlocked(unlockedLevels, level + 1);
 }
 
+/** Продажа на рынке: дубли на активном уровне; после открытия следующего уровня — и одиночная копия. */
+export function canSellArtifactInMarket(
+    ownedQty: number,
+    artifactLevel: number,
+    unlockedLevels?: number[],
+): boolean {
+    const q = Number(ownedQty) || 0;
+    if (q < 1) return false;
+    const lv = artifactLevel ?? 1;
+    if (isProfileLevelStoryComplete(lv, unlockedLevels)) return true;
+    return q >= 2;
+}
+
 /** Уровень пройден в сюжете (открыт следующий уровень). */
 export function isArtifactCatalogLevelOwned(
     story:

@@ -4,6 +4,7 @@ import { useTranslate } from '@/utils/useTranslate';
 import { useHapticFeedback } from '@/utils/useHapticFeedback';
 import type { ProfileInventoryArtifact } from '@/types/types';
 import { buyArtifact, sellArtifact } from '@/http/artifactMarketAPI';
+import { canSellArtifactInMarket } from '@/components/ProfilePageComponents/profileInventoryUtils';
 
 export type ArtifactTradeSuccessPayload = {
     action: 'buy' | 'sell';
@@ -21,6 +22,8 @@ export type ArtifactMarketActionsProps = {
     userBalance: number;
     /** Уровень миссий открыт — иначе покупка недоступна */
     levelUnlocked?: boolean;
+    /** Открытые уровни сюжета — для правила продажи дублей / одиночных после сдачи уровня */
+    unlockedLevels?: number[];
     layout?: 'card' | 'modal';
     /** По умолчанию true; в чате при отсутствии артефакта — только покупка */
     showSell?: boolean;
@@ -42,6 +45,7 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     ownedQty,
     userBalance,
     levelUnlocked = true,
+    unlockedLevels,
     layout = 'card',
     showSell = true,
     isOwned = true,
@@ -55,8 +59,11 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
     const buyPrice = tradablePrice(artifact.buyPrice);
     const sellPrice = tradablePrice(artifact.sellPrice);
 
+    const artifactLevel = artifact.level ?? 1;
     const canBuy = buyPrice != null && levelUnlocked && userBalance >= buyPrice;
-    const canSell = sellPrice != null && ownedQty >= 2;
+    const canSell =
+        sellPrice != null &&
+        canSellArtifactInMarket(ownedQty, artifactLevel, unlockedLevels);
 
     const buyDisabledReason = (() => {
         if (buyPrice == null) return undefined;
@@ -67,7 +74,9 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
 
     const sellDisabledReason = (() => {
         if (sellPrice == null) return undefined;
-        if (ownedQty < 2) return t('artifactSellDuplicatesOnly');
+        if (!canSellArtifactInMarket(ownedQty, artifactLevel, unlockedLevels)) {
+            return t('artifactSellDuplicatesOnly');
+        }
         return undefined;
     })();
 
@@ -122,7 +131,11 @@ const ArtifactMarketActions: React.FC<ArtifactMarketActionsProps> = ({
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
         >
-            {!isCard && showSell && sellPrice != null && ownsArtifact && ownedQty < 2 ? (
+            {!isCard &&
+            showSell &&
+            sellPrice != null &&
+            ownsArtifact &&
+            !canSellArtifactInMarket(ownedQty, artifactLevel, unlockedLevels) ? (
                 <p className="text-md text-zinc-400 text-center mb-2">{t('artifactSellDuplicatesHint')}</p>
             ) : null}
             <div className="flex flex-row gap-2 w-full">

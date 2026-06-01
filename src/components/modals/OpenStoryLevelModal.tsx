@@ -93,7 +93,7 @@ const OpenStoryLevelModal: React.FC = observer(() => {
         : t('openStoryLevelMissingTitle').replace('{level}', String(openLevel));
 
     const description = canOpen
-        ? t('openStoryLevelConfirmDescription').replace('{level}', String(completedLevel))
+        ? t('openStoryLevelConfirmDescription').replace('{level}', String(openLevel))
         : t('openStoryLevelMissingDescription');
 
     return (

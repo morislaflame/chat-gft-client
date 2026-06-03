@@ -239,9 +239,9 @@ export default class ChatStore {
     }
 
     closeCompanion() {
-        if (this._pendingCompanion) {
-            this._pendingCompanion = { ...this._pendingCompanion, isOpen: false };
-        }
+        // Сбрасываем полностью: иначе pending остаётся после 1-й миссии и
+        // openPendingMissionRewardModals() снова открывает модалку на 2-й, 3-й…
+        this._pendingCompanion = null;
     }
 
     /** @deprecated */

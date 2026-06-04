@@ -289,7 +289,7 @@ const FriendsContainer: React.FC = observer(() => {
                                 {t('referralRewardDependsOnPackage')}
                         </div>
                         <div className="text-xs text-gray-400">
-                                {t('referralMaxPerFriend')} <span className="font-semibold">+30 <i className="fa-solid fa-bolt text-user-message-gradient text-md"></i> + 20 <i className="fa-solid fa-gem text-secondary-gradient text-md"></i></span>
+                                {t('referralMaxPerFriend')} <span className="font-semibold">+175 <i className="fa-solid fa-bolt text-user-message-gradient text-md"></i> + 120 <i className="fa-solid fa-gem text-secondary-gradient text-md"></i></span>
                         </div>
                     </div>
 

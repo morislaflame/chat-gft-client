@@ -291,6 +291,7 @@ export interface Mission {
     video?: MediaFile | null;
     /** С бэкенда (getStatus): цели шагов для нижней плашки в чате */
     uiStepGoals?: MissionUiStepGoals | null;
+    uiStepGoalsEn?: MissionUiStepGoals | null;
     progress?: MissionProgress | null;
 }
 

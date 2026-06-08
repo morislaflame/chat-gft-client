@@ -24,3 +24,16 @@ export function listMissionUiStepGoals(raw: MissionUiStepGoals | string | null |
     out.sort((a, b) => a.index - b.index);
     return out;
 }
+
+/** Выбирает локализованные UI step goals (EN с fallback на RU). */
+export function pickMissionUiStepGoalsForLanguage(
+    mission: { uiStepGoals?: MissionUiStepGoals | string | null; uiStepGoalsEn?: MissionUiStepGoals | string | null } | null | undefined,
+    language: 'ru' | 'en',
+): Array<{ index: number; text: string }> {
+    if (!mission) return [];
+    if (language === 'en') {
+        const enSteps = listMissionUiStepGoals(mission.uiStepGoalsEn ?? null);
+        if (enSteps.length) return enSteps;
+    }
+    return listMissionUiStepGoals(mission.uiStepGoals ?? null);
+}

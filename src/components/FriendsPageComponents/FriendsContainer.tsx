@@ -171,7 +171,7 @@ const FriendsContainer: React.FC = observer(() => {
         style={{ marginTop: isMobile ? '158px' : '58px' }}>
             <div className="max-w-xl mx-auto w-full space-y-4">
                 {/* Referral Stats */}
-                <Card>
+                <Card className="p-2">
                     
                     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
                         <div
@@ -196,7 +196,7 @@ const FriendsContainer: React.FC = observer(() => {
                     </div>
 
                     {/* Referral Code */}
-                    <div className="mt-4 space-y-2 overflow-hidden p-2">
+                    <div className="mt-2 space-y-2 overflow-hidden p-2">
                         <div className="text-xs text-gray-400">{t('yourReferralCode')}</div>
                         <div className="flex space-x-2">
                             <input
@@ -289,12 +289,13 @@ const FriendsContainer: React.FC = observer(() => {
                                 {t('referralRewardDependsOnPackage')}
                         </div>
                         <div className="text-xs text-gray-400">
-                                {t('referralMaxPerFriend')} <span className="font-semibold">+30 <i className="fa-solid fa-bolt text-user-message-gradient text-md"></i> + 20 <i className="fa-solid fa-gem text-secondary-gradient text-md"></i></span>
+                                {t('referralMaxPerFriend')} <span className="font-semibold">+175 <i className="fa-solid fa-bolt text-user-message-gradient text-md"></i> + 120 <i className="fa-solid fa-gem text-secondary-gradient text-md"></i></span>
                         </div>
                     </div>
 
                     {/* Referral bonuses */}
-                    <div className="mt-4 bg-primary-900 border border-primary-700 rounded-xl p-3 mr-2">
+                    <div className="p-2">
+                    <div className="bg-primary-900 border border-primary-700 rounded-xl p-3">
                         <div className="text-xs font-semibold text-gray-400 mb-2">{t('referralBonuses')}</div>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto hide-scrollbar">
                             {user.user.lastBonuses && user.user.lastBonuses.length > 0 ? (
@@ -364,6 +365,7 @@ const FriendsContainer: React.FC = observer(() => {
                                 <div className="text-xs text-gray-500">{t('noBonusesYetReferralDesc')}</div>
                             )}
                         </div>
+                    </div>
                     </div>
                 </Card>
             </div>

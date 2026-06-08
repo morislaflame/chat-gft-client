@@ -363,6 +363,7 @@ const ProfileStoryDetailContainer: React.FC = observer(() => {
                         ? isStoryLevelUnlocked(story.unlockedLevels, detailArtifact.level ?? 1)
                         : false
                 }
+                unlockedLevels={story?.unlockedLevels}
                 historyName={historyKey}
                 userBalance={userBalance}
                 onTradeSuccess={handleTradeSuccess}

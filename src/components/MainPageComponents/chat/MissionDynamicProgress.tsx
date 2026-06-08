@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/context';
-import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
+import { pickMissionUiStepGoalsForLanguage } from '@/utils/missionUiStepGoals';
+import { useTranslate } from '@/utils/useTranslate';
 
 const SEGMENT_FILL_MS = 620;
 const CIRCLE_FILL_MS = 420;
@@ -16,13 +17,14 @@ const UNFILLED_AFTER_LAST_CIRCLE_GROW = UNFILLED_BEFORE_CIRCLE_GROW / 5;
 
 const MissionDynamicProgressBase: React.FC = () => {
     const { chat } = useContext(Context) as IStoreContext;
+    const { language } = useTranslate();
     const mid = chat.selectedMissionId;
     const mission = mid != null ? chat.missions.find((m) => m.id === mid) : null;
     const progress = mid != null ? chat.missionProgressFor(mid) : null;
 
     const stepGoals = useMemo(
-        () => listMissionUiStepGoals(mission?.uiStepGoals ?? null),
-        [mission?.uiStepGoals],
+        () => pickMissionUiStepGoalsForLanguage(mission ?? null, language),
+        [mission, language],
     );
 
     const totalSteps = Math.max(

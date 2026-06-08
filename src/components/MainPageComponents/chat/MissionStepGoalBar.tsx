@@ -2,7 +2,7 @@ import React, { useContext, useLayoutEffect, useMemo, useRef, useState } from 'r
 import { observer } from 'mobx-react-lite';
 import { AnimatePresence, motion } from 'motion/react';
 import { Context, type IStoreContext } from '@/store/context';
-import { listMissionUiStepGoals } from '@/utils/missionUiStepGoals';
+import { pickMissionUiStepGoalsForLanguage } from '@/utils/missionUiStepGoals';
 import { useTranslate } from '@/utils/useTranslate';
 import { PressableRippleSurface } from '@/components/ui/pressable-ripple-surface';
 import { cn } from '@/lib/utils';
@@ -18,13 +18,16 @@ export type MissionStepGoalBarProps = {
  */
 const MissionStepGoalBar: React.FC<MissionStepGoalBarProps> = observer(({ onGoalBarClick }) => {
     const { chat } = useContext(Context) as IStoreContext;
-    const { t } = useTranslate();
+    const { t, language } = useTranslate();
     const mid = chat.selectedMissionId;
     const mission = mid != null ? chat.missions.find((m) => m.id === mid) : null;
     const progress = mid != null ? chat.missionProgressFor(mid) : null;
     const mainStep = progress?.mainStep ?? null;
 
-    const steps = useMemo(() => listMissionUiStepGoals(mission?.uiStepGoals ?? null), [mission?.uiStepGoals]);
+    const steps = useMemo(
+        () => pickMissionUiStepGoalsForLanguage(mission, language),
+        [mission, language],
+    );
 
     const [celebrate, setCelebrate] = useState<{ text: string } | null>(null);
     const lastMidRef = useRef<number | null>(null);

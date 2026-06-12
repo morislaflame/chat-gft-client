@@ -7,6 +7,7 @@ import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
+import FirstArcIntroModal from "./components/modals/FirstArcIntroModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import OpenStoryLevelModal from "./components/modals/OpenStoryLevelModal";
 import CompanionArtifactModal from "./components/modals/CompanionArtifactModal";
@@ -60,6 +61,7 @@ const AppContent = () => {
         direction="bottom"
       />
       <BottomNavigation />
+      <FirstArcIntroModal />
       <DailyRewardModal />
       <StageRewardModal />
       <OpenStoryLevelModal />

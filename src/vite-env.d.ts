@@ -45,6 +45,8 @@ interface TelegramWebApp {
          name: string;
         }
      }) => void;
+      /** Bot API 6.9+ — shows a native popup requesting permission to send messages. */
+      requestWriteAccess: (callback?: (granted: boolean) => void) => void;
     };
   }
   

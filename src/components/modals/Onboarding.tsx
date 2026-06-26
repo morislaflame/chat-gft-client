@@ -31,7 +31,7 @@ interface OnboardingProps {
 
 const Onboarding: React.FC<OnboardingProps> = observer(
     ({ onComplete, initialStep = 'welcome', isFromHeader = false, onClose }) => {
-        const { agent, chat } = useContext(Context) as IStoreContext;
+        const { agent, chat, cases, reward } = useContext(Context) as IStoreContext;
         const navigate = useNavigate();
         const { t, language } = useTranslate();
         const [step, setStep] = useState<Step>(() =>
@@ -50,6 +50,12 @@ const Onboarding: React.FC<OnboardingProps> = observer(
         useEffect(() => {
             agent.fetchPublicAgents();
         }, [agent]);
+
+        useEffect(() => {
+            if (isFromHeader) return;
+            void cases.fetchActiveCases();
+            void reward.fetchAvailableRewards();
+        }, [cases, reward, isFromHeader]);
 
         useEffect(() => {
             if (step === 'missions') {

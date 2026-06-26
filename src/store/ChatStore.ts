@@ -773,6 +773,12 @@ export default class ChatStore {
         payGemsForSuggestionId?: string | null,
         extra?: { beginReplay?: boolean; skipUserBubble?: boolean },
     ) {
+        const isStartMessage = ['старт', 'start'].includes(messageText.trim().toLowerCase());
+        if (isStartMessage && this._selectedMissionId != null) {
+            this.setMissionStart(this._selectedMissionId);
+            this.markMissionHasMessagesByMissionId(this._selectedMissionId);
+        }
+
         const userMessage: Message = {
             id: Date.now().toString(),
             text: messageText,

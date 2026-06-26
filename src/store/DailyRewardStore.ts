@@ -119,6 +119,7 @@ export default class DailyRewardStore {
         if (data.user.energy !== undefined) {
           this._userStore.setEnergy(data.user.energy);
         }
+        this._userStore.openFirstArcIntroModalIfNeeded();
       }
 
       trackEvent("daily_reward_claim", {

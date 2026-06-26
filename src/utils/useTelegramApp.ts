@@ -99,6 +99,21 @@ export const useTelegramApp = () => {
     }
   }, [tg]);
 
+  /**
+   * Bot API 6.9+ — shows a native popup requesting permission for the bot to
+   * send messages to the user. The callback receives `true` if access was
+   * granted, `false` otherwise.
+   */
+  const requestWriteAccess = useCallback((callback?: (granted: boolean) => void) => {
+    if (tg && tg.requestWriteAccess) {
+      tg.requestWriteAccess(callback);
+    } else {
+      // Older clients that do not support the method — treat as granted so we
+      // do not block push delivery for existing users.
+      callback?.(true);
+    }
+  }, [tg]);
+
   return {
     disableVerticalSwipes,
     enableVerticalSwipes,
@@ -113,6 +128,7 @@ export const useTelegramApp = () => {
     shareMessage,
     shareUrl,
     openTelegramLink,
+    requestWriteAccess,
     isAvailable: !!tg
   };
 };

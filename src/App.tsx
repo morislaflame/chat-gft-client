@@ -7,6 +7,7 @@ import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
 import Header from './components/CoreComponents/Header';
 import BottomNavigation from './components/CoreComponents/BottomNavigation';
 import DailyRewardModal from "./components/modals/DailyRewardModal";
+import FirstArcIntroModal from "./components/modals/FirstArcIntroModal";
 import StageRewardModal from "./components/modals/StageRewardModal";
 import OpenStoryLevelModal from "./components/modals/OpenStoryLevelModal";
 import CompanionArtifactModal from "./components/modals/CompanionArtifactModal";
@@ -19,6 +20,7 @@ import Onboarding from './components/modals/Onboarding';
 import SomethingWentWrongPage from './components/CoreComponents/SomethingWentWrongPage';
 import { ProgressiveBlur } from './components/ui/progressive-blur';
 import { initAnalytics, setUserId, setUserProperties, trackEvent, trackPageView } from '@/utils/analytics';
+import { setPushWriteAccess } from '@/http/userAPI';
 
 const AppRouter = lazy(() => import("@/router/AppRouter"));
 
@@ -60,6 +62,7 @@ const AppContent = () => {
         direction="bottom"
       />
       <BottomNavigation />
+      <FirstArcIntroModal />
       <DailyRewardModal />
       <StageRewardModal />
       <OpenStoryLevelModal />
@@ -78,6 +81,7 @@ const App = observer(() => {
   const [loading, setLoading] = useState(true);
   const analyticsBootstrappedRef = useRef(false);
   const lastAuthTrackedRef = useRef(false);
+  const pushWriteAccessRequestedRef = useRef(false);
   const onboardingShownRef = useRef(false);
   const onboardingStartRef = useRef<number | null>(null);
   const sessionStartRef = useRef<number>(Date.now());
@@ -93,7 +97,8 @@ const App = observer(() => {
     ready,
     isAvailable,
     setHeaderColor,
-    setBackgroundColor
+    setBackgroundColor,
+    requestWriteAccess,
   } = useTelegramApp();
 
   useEffect(() => {
@@ -259,6 +264,22 @@ const App = observer(() => {
       checkDailyRewardFn();
     }
   }, [loading, user.isAuth, dailyReward]);
+
+  // Request Telegram write access once after auth (Bot API 6.9+).
+  // Shows a native popup asking the user to allow the bot to send messages.
+  // For users who have already responded, Telegram skips the popup silently.
+  useEffect(() => {
+    if (!loading && user.isAuth && !pushWriteAccessRequestedRef.current && isAvailable) {
+      pushWriteAccessRequestedRef.current = true;
+      requestWriteAccess(async (granted) => {
+        try {
+          await setPushWriteAccess(granted);
+        } catch (e) {
+          console.error("Error saving push write access:", e);
+        }
+      });
+    }
+  }, [loading, user.isAuth, isAvailable, requestWriteAccess]);
 
   const handleOnboardingComplete = async () => {
     const startedAt = onboardingStartRef.current;

@@ -1180,6 +1180,30 @@ type TranslationType = {
         ru: 'Продолжить',
         en: 'Continue',
     },
+    firstArcIntroTitle: {
+        ru: 'Твои награды на первой арке',
+        en: 'Your rewards on the first arc',
+    },
+    firstArcIntroDescription: {
+        ru: 'Пройди первую арку и заработай gems, чтобы открыть кейсы и получить призы',
+        en: 'Complete the first arc to earn gems, open cases, and win prizes',
+    },
+    firstArcIntroRewards: {
+        ru: 'Призы за активность',
+        en: 'Prizes for activity',
+    },
+    firstArcIntroGems: {
+        ru: 'Вы найдете на первой арке',
+        en: 'You will find on the first arc',
+    },
+    firstArcIntroCases: {
+        ru: 'Кейсов можно открыть',
+        en: 'Cases you can open',
+    },
+    firstArcIntroPlay: {
+        ru: 'Играть и зарабатывать',
+        en: 'Play and earn',
+    },
     companionReceived: {
         ru: 'Компаньон получен!',
         en: 'Companion received!'

@@ -3,6 +3,12 @@ import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferr
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 import { trackEvent } from "@/utils/analytics";
 
+const FIRST_ARC_INTRO_SEEN_STORAGE_KEY = 'first_arc_intro_seen';
+
+function firstArcIntroSeenStorageKey(userId: number) {
+    return `${FIRST_ARC_INTRO_SEEN_STORAGE_KEY}_${userId}`;
+}
+
 export default class UserStore {
     _user: UserInfo | null = null;
     _isAuth = false;
@@ -19,6 +25,7 @@ export default class UserStore {
     _showOnboarding = false;
     _onboardingInitialStep: 'welcome' | 'select' | 'missions' = 'welcome';
     _isHistorySelectionFromHeader = false;
+    _showFirstArcIntroModal = false;
 
     constructor() {
         // Инициализируем язык из localStorage при создании store
@@ -413,6 +420,31 @@ export default class UserStore {
         return this._isHistorySelectionFromHeader;
     }
 
+    get firstArcIntroSeen() {
+        if (!this._user?.id) return false;
+        return localStorage.getItem(firstArcIntroSeenStorageKey(this._user.id)) === '1';
+    }
+
+    get showFirstArcIntroModal() {
+        return this._showFirstArcIntroModal && !this.firstArcIntroSeen;
+    }
+
+    openFirstArcIntroModalIfNeeded() {
+        if (this.firstArcIntroSeen) return;
+        this._showFirstArcIntroModal = true;
+    }
+
+    dismissFirstArcIntroModal() {
+        this._showFirstArcIntroModal = false;
+    }
+
+    completeFirstArcIntroModal() {
+        if (this._user?.id) {
+            localStorage.setItem(firstArcIntroSeenStorageKey(this._user.id), '1');
+        }
+        this._showFirstArcIntroModal = false;
+    }
+
     closeHistorySelection() {
         runInAction(() => {
             this._showOnboarding = false;
@@ -422,13 +454,14 @@ export default class UserStore {
     }
 
     async completeOnboarding() {
+        const isFirstTime = this.user?.onboardingSeen === false;
         try {
             runInAction(() => {
                 this._showOnboarding = false;
                 // this._onboardingInitialStep = 'welcome';
                 this._isHistorySelectionFromHeader = false;
             });
-            if (this.user?.onboardingSeen === false) {
+            if (isFirstTime) {
                 this.updateOnboarding(true);
             };
             

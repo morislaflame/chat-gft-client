@@ -139,3 +139,11 @@ export const getOpenStoryLevelReadiness = async (
     });
     return data;
 };
+
+/**
+ * Records the result of the Telegram requestWriteAccess popup.
+ * Should be called once after auth and after the user responds to the popup.
+ */
+export const setPushWriteAccess = async (granted: boolean): Promise<void> => {
+    await $authHost.post('api/user/me/push-write-access', { granted });
+};

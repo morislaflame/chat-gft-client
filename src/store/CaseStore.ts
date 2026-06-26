@@ -16,6 +16,10 @@ class CaseStore {
   private _userStore: UserStore | null = null;
   private _rewardStore: RewardStore | null = null;
 
+  get hasLoadedActiveCases() {
+    return this._activeLoaded;
+  }
+
   constructor() {
     makeAutoObservable(this);
   }

@@ -16,6 +16,10 @@ class RewardStore {
   _purchasesLoaded = false; // Флаг для отслеживания загрузки покупок
   _withdrawalsLoaded = false; // Флаг для отслеживания загрузки запросов на вывод
 
+  get hasLoadedAvailableRewards() {
+    return this._rewardsLoaded;
+  }
+
   constructor() {
     makeAutoObservable(this);
   }

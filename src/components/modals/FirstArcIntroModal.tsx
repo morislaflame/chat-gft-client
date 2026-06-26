@@ -4,7 +4,7 @@ import { Context, type IStoreContext } from '@/store/context';
 import { useTranslate } from '@/utils/useTranslate';
 import Modal from '@/components/CoreComponents/Modal';
 import Button from '@/components/ui/button';
-import LoadingIndicator from '@/components/CoreComponents/LoadingIndicator';
+import { LoadingIndicatorContent } from '@/components/CoreComponents/LoadingIndicator';
 import { LazyMediaRenderer } from '@/utils/lazy-media-renderer';
 import { useAnimationLoader } from '@/utils/useAnimationLoader';
 import type { CaseBox } from '@/http/caseAPI';
@@ -22,6 +22,8 @@ const FirstArcIntroModal: React.FC = observer(() => {
     const { t, language } = useTranslate();
     const { hapticImpact, hapticNotification } = useHapticFeedback();
     const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+    const [rewardsFetchPending, setRewardsFetchPending] = useState(false);
+    const [casesFetchPending, setCasesFetchPending] = useState(false);
     const sliderRef = useRef<HTMLDivElement>(null);
     const playClickedRef = useRef(false);
 
@@ -37,6 +39,38 @@ const FirstArcIntroModal: React.FC = observer(() => {
             }
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setRewardsFetchPending(false);
+            setCasesFetchPending(false);
+            return;
+        }
+
+        let cancelled = false;
+
+        if (reward.hasLoadedAvailableRewards) {
+            setRewardsFetchPending(false);
+        } else {
+            setRewardsFetchPending(true);
+            void reward.fetchAvailableRewards().finally(() => {
+                if (!cancelled) setRewardsFetchPending(false);
+            });
+        }
+
+        if (cases.hasLoadedActiveCases) {
+            setCasesFetchPending(false);
+        } else {
+            setCasesFetchPending(true);
+            void cases.fetchActiveCases().finally(() => {
+                if (!cancelled) setCasesFetchPending(false);
+            });
+        }
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen, reward, cases]);
 
     const sliderRewards = useMemo(
         () =>
@@ -63,9 +97,7 @@ const FirstArcIntroModal: React.FC = observer(() => {
         [sortedCases.length],
     );
 
-    const isLoading =
-        (reward.loading && sliderRewards.length === 0) ||
-        (cases.loading && sortedCases.length === 0);
+    const isLoading = rewardsFetchPending || casesFetchPending;
 
     const slideCount = sliderRewards.length;
     const showLeftArrow = slideCount > 1 && activeSlideIndex > 0;
@@ -143,8 +175,8 @@ const FirstArcIntroModal: React.FC = observer(() => {
             }
         >
             {isLoading ? (
-                <div className="py-10">
-                    <LoadingIndicator />
+                <div className="relative py-10 min-h-[200px]">
+                    <LoadingIndicatorContent layout="contained" />
                 </div>
             ) : (
                 <div className="flex flex-col gap-5">

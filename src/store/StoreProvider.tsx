@@ -73,6 +73,7 @@ const StoreProvider = ({ children }: StoreProviderProps) => {
     if (!stores) return;
     stores.chat.setUserStore(stores.user);
     stores.chat.setCaseStore(stores.cases);
+    stores.user.setChatStore(stores.chat);
     stores.dailyReward.setUserStore(stores.user);
     stores.agent.setUserStore(stores.user);
     stores.agent.setChatStore(stores.chat);

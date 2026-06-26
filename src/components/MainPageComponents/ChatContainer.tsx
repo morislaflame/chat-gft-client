@@ -182,8 +182,12 @@ const ChatContainer: React.FC = observer(() => {
         });
     };
 
-    // Показываем лоадинг пока загружается история чата
-    if (chat.loading) {
+    // Полноэкранный лоадер только при первичной загрузке пустой истории.
+    // После отправки «старт» (isTyping / сообщения в чате) остаётся TypingIndicator в ленте.
+    const showInitialHistoryLoader =
+        chat.loading && chat.messages.length === 0 && !chat.isTyping;
+
+    if (showInitialHistoryLoader) {
         return <LoadingIndicator />;
     }
 

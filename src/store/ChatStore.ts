@@ -1192,6 +1192,10 @@ export default class ChatStore {
     }
 
     async loadChatHistory(forceReload = false) {
+        if (this._isTyping) {
+            return;
+        }
+
         const currentHistoryName = this._userStore?.user?.selectedHistoryName || null;
         if (
             !forceReload &&
@@ -1369,6 +1373,11 @@ export default class ChatStore {
 
     get messages() {
         return this._messages;
+    }
+
+    /** Any real chat messages in the loaded history (not the synthetic mission card). */
+    get hasHistoryMessages(): boolean {
+        return this._messages.some((m) => !m.isMissionCard);
     }
 
     get isTyping() {

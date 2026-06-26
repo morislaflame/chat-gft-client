@@ -2,6 +2,7 @@ import {makeAutoObservable, runInAction } from "mobx";
 import { fetchMyInfo, telegramAuth, check, getEnergy, getReferralInfo, getReferralLink, getRewards, getOnboarding, setOnboarding, setMyReferralCode, setLanguage as setLanguageApi } from "@/http/userAPI";
 import { type Referral, type Reward, type UserInfo } from "@/types/types";
 import { trackEvent } from "@/utils/analytics";
+import type ChatStore from "@/store/ChatStore";
 
 const FIRST_ARC_INTRO_SEEN_STORAGE_KEY = 'first_arc_intro_seen';
 
@@ -26,6 +27,7 @@ export default class UserStore {
     _onboardingInitialStep: 'welcome' | 'select' | 'missions' = 'welcome';
     _isHistorySelectionFromHeader = false;
     _showFirstArcIntroModal = false;
+    _chatStore: ChatStore | null = null;
 
     constructor() {
         // Инициализируем язык из localStorage при создании store
@@ -34,6 +36,10 @@ export default class UserStore {
             this._language = savedLanguage;
         }
         makeAutoObservable(this);
+    }
+
+    setChatStore(chatStore: ChatStore) {
+        this._chatStore = chatStore;
     }
 
     setIsAuth(bool: boolean) {
@@ -431,6 +437,7 @@ export default class UserStore {
 
     openFirstArcIntroModalIfNeeded() {
         if (this.firstArcIntroSeen) return;
+        if (this._chatStore?.hasHistoryMessages) return;
         this._showFirstArcIntroModal = true;
     }
 
